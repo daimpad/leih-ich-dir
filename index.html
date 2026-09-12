@@ -16,6 +16,8 @@
 <link rel="stylesheet" href="assets/fonts/fonts.css">
 <link rel="stylesheet" href="vendor/nozilla-ci/design-system.css">
 <link rel="stylesheet" href="style.css">
+<!-- Ohne defer und vor dem Koerper: verhindert ein Aufblitzen des falschen Erscheinungsbilds. -->
+<script src="theme.js"></script>
 </head>
 <body>
 
@@ -105,6 +107,20 @@
     <path d="M7 28 L14 17 L21 28 Z" fill="#00FF9C"/>
     <use href="#g-sign"/>
   </symbol>
+  <!-- Mond und Sonne gibt es im Erscheinungsbild noch nicht. Nach dessen
+       Regeln gezeichnet: Kanten, eine gruene Stelle, die Signatur bei 54,54.
+       Gehoeren bei naechster Gelegenheit in daimpad/nozilla-ci nachgetragen. -->
+  <symbol id="i-moon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M38 8 L22 18 L18 32 L22 46 L38 56 L30 45 L28 32 L30 19 Z" fill="currentColor" stroke="none"/>
+    <rect x="44" y="20" width="7" height="7" fill="#00FF9C" stroke="none"/>
+    <use href="#g-sign"/>
+  </symbol>
+  <symbol id="i-sun" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <circle cx="32" cy="32" r="11" fill="#00FF9C" stroke="none"/>
+    <path d="M32 6 L32 14"/><path d="M32 50 L32 58"/><path d="M6 32 L14 32"/><path d="M50 32 L58 32"/>
+    <path d="M14 14 L20 20"/><path d="M44 44 L50 50"/><path d="M50 14 L44 20"/><path d="M20 44 L14 50"/>
+    <use href="#g-sign"/>
+  </symbol>
   <symbol id="i-clock" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
     <circle cx="32" cy="32" r="21"/>
     <path d="M32 32 L32 19"/>
@@ -127,6 +143,10 @@
       <!-- Regel 19: Bedienelement der Kopfleiste als Quadrat, weiße Fläche,
            durchgezogene Linie, harter Schatten. Es zeigt das Ziel, nicht den Zustand. -->
       <button type="button" id="btnLang" class="ctl-square">EN</button>
+      <!-- Regel 19: zeigt das Ziel, nicht den Zustand, und traegt kein Wort. -->
+      <button type="button" id="btnTheme" class="ctl-square" data-theme-toggle>
+        <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-moon" id="themeIconUse"/></svg>
+      </button>
     </div>
   </div>
 </header>
@@ -188,6 +208,7 @@
   <!-- ==================================================================== -->
   <section id="viewList" class="view" hidden>
 
+    <!-- 1 · Titel der Liste -->
     <div class="titleblock">
       <h1 id="listTitleRead" hidden></h1>
       <label class="title-edit" hidden id="listTitleEditWrap">
@@ -201,30 +222,7 @@
       </p>
     </div>
 
-    <!-- Teilen, nur im Bearbeitenmodus -->
-    <section class="nz-card nz-card--raised" id="shareBox" hidden>
-      <h2 class="nz-card__title" data-i18n="share.headline">Links</h2>
-      <div class="nz-field">
-        <label class="nz-field__label" for="linkView" data-i18n="share.viewLabel">Ansehen-Link für Freunde</label>
-        <div class="linkrow">
-          <input type="text" id="linkView" class="nz-input mono" readonly>
-          <button type="button" class="nz-btn nz-btn--sm" data-copy="linkView" data-i18n="share.copy">Kopieren</button>
-        </div>
-      </div>
-      <div class="nz-field">
-        <label class="nz-field__label" for="linkEdit" data-i18n="share.editLabel">Bearbeiten-Link, geheim</label>
-        <div class="linkrow">
-          <input type="password" id="linkEdit" class="nz-input mono" readonly>
-          <button type="button" class="nz-btn nz-btn--sm" id="btnRevealEdit" data-i18n="share.reveal">Zeigen</button>
-          <button type="button" class="nz-btn nz-btn--sm" data-copy="linkEdit" data-i18n="share.copy">Kopieren</button>
-        </div>
-      </div>
-      <p class="nz-field__hint" data-i18n="share.hint">
-        Der Schlüssel steht hinter dem Rautezeichen und wird technisch nie an den Server übertragen.
-      </p>
-    </section>
-
-    <!-- Gegenstand hinzufügen, nur im Bearbeitenmodus -->
+    <!-- 2 · Gegenstand hinzufügen, nur im Bearbeitenmodus -->
     <form class="nz-card nz-card--raised" id="addForm" hidden autocomplete="off">
       <h2 class="nz-card__title" data-i18n="add.headline">Gegenstand hinzufügen</h2>
       <div class="addrow">
@@ -262,7 +260,7 @@
       </div>
     </form>
 
-    <!-- Inventar -->
+    <!-- 3 · Inventar -->
     <section class="nz-card nz-card--raised">
       <div class="items-head">
         <h2 class="nz-card__title" data-i18n="items.headline">Inventar</h2>
@@ -278,14 +276,33 @@
       </div>
     </section>
 
-    <!-- Einstellungen, nur im Bearbeitenmodus -->
-    <details class="nz-card settings" id="settingsBox" hidden>
-      <summary>
-        <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gear"/></svg>
-        <span data-i18n="settings.headline">Einstellungen und Kontakt</span>
-      </summary>
+    <!-- 4 · Link teilen, nur im Bearbeitenmodus -->
+    <section class="nz-card nz-card--raised" id="shareBox" hidden>
+      <h2 class="nz-card__title" data-i18n="share.headline">Link teilen</h2>
+      <div class="nz-field">
+        <label class="nz-field__label" for="linkView" data-i18n="share.viewLabel">Ansehen-Link für Freunde</label>
+        <div class="linkrow">
+          <input type="text" id="linkView" class="nz-input mono" readonly>
+          <button type="button" class="nz-btn nz-btn--sm" data-copy="linkView" data-i18n="share.copy">Kopieren</button>
+        </div>
+      </div>
+      <div class="nz-field">
+        <label class="nz-field__label" for="linkEdit" data-i18n="share.editLabel">Bearbeiten-Link, geheim</label>
+        <div class="linkrow">
+          <input type="password" id="linkEdit" class="nz-input mono" readonly>
+          <button type="button" class="nz-btn nz-btn--sm" id="btnRevealEdit" data-i18n="share.reveal">Zeigen</button>
+          <button type="button" class="nz-btn nz-btn--sm" data-copy="linkEdit" data-i18n="share.copy">Kopieren</button>
+        </div>
+      </div>
+      <p class="nz-field__hint" data-i18n="share.hint">
+        Der Schlüssel steht hinter dem Rautezeichen und wird technisch nie an den Server übertragen.
+      </p>
+    </section>
 
-      <p class="nz-field__hint" data-i18n="settings.hint">
+    <!-- 5 · Kontakt, nur im Bearbeitenmodus -->
+    <section class="nz-card nz-card--raised" id="contactBox" hidden>
+      <h2 class="nz-card__title" data-i18n="contact.headline">Kontakt</h2>
+      <p class="nz-field__hint" data-i18n="contact.hint">
         Diese Angaben werden mitverschlüsselt und nur für die Anfrage-Schaltflächen deiner Freunde genutzt.
       </p>
       <div class="nz-field">
@@ -303,6 +320,51 @@
           <span class="nz-check__box" aria-hidden="true"></span>
           <span data-i18n="settings.showBorrower">Namen der Ausleihenden auch im Ansehen-Link zeigen</span>
         </label>
+      </div>
+    </section>
+
+    <!-- 6 · Einstellungen, zugeklappt, nur im Bearbeitenmodus -->
+    <details class="nz-card settings" id="settingsBox" hidden>
+      <summary>
+        <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gear"/></svg>
+        <span data-i18n="settings.headline">Einstellungen</span>
+      </summary>
+
+      <h3 class="settings-sub" data-i18n="settings.themeHeadline">Erscheinungsbild</h3>
+      <p class="nz-field__hint" data-i18n="settings.themeHint">
+        Gilt für diesen Browser, nicht für die Liste.
+      </p>
+      <div class="nz-field themechoice">
+        <label class="nz-check nz-check--radio">
+          <input type="radio" name="cfgTheme" value="system" checked>
+          <span class="nz-check__box" aria-hidden="true"></span>
+          <span data-i18n="settings.themeSystem">Wie das System</span>
+        </label>
+        <label class="nz-check nz-check--radio">
+          <input type="radio" name="cfgTheme" value="light">
+          <span class="nz-check__box" aria-hidden="true"></span>
+          <span data-i18n="settings.themeLight">Hell</span>
+        </label>
+        <label class="nz-check nz-check--radio">
+          <input type="radio" name="cfgTheme" value="dark">
+          <span class="nz-check__box" aria-hidden="true"></span>
+          <span data-i18n="settings.themeDark">Dunkel</span>
+        </label>
+      </div>
+
+      <hr>
+
+      <h3 class="settings-sub" data-i18n="settings.cacheHeadline">Zwischenspeicher</h3>
+      <p class="nz-field__hint" data-i18n="settings.cacheHint">
+        Entfernt alles, was diese Anwendung in diesem Browser ablegt: Sprache,
+        Erscheinungsbild, KI-Schlüssel und im Vorschaumodus die lokal gehaltenen Listen.
+        Deine Liste auf dem Server und deine Links bleiben unberührt.
+      </p>
+      <div class="nz-field">
+        <button type="button" id="btnClearCache" class="nz-btn">
+          <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-refresh"/></svg>
+          <span data-i18n="settings.cacheClear">Zwischenspeicher löschen</span>
+        </button>
       </div>
 
       <hr>
@@ -325,6 +387,10 @@
 
       <hr>
 
+      <h3 class="settings-sub" data-i18n="settings.dangerHeadline">Liste löschen</h3>
+      <p class="nz-field__hint" data-i18n="settings.dangerHint">
+        Die Liste wird unwiderruflich vom Server entfernt. Beide Links laufen danach ins Leere.
+      </p>
       <div class="nz-field">
         <button type="button" id="btnDeleteList" class="nz-btn nz-btn--danger">
           <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-trash"/></svg>
@@ -352,7 +418,13 @@
 
 <footer class="site-footer">
   <div class="shell">
-    <p class="nz-small">
+    <nav class="footer-nav" aria-label="Rechtliches">
+      <a href="impressum.html" data-i18n="footer.imprint">Impressum</a>
+      <a href="datenschutz.html" data-i18n="footer.privacy">Datenschutz</a>
+      <a href="ueber.html" data-i18n="footer.about">Über</a>
+      <a href="https://nozilla.de" rel="noopener">nozilla<span class="footer-claim">Gute digitale Dienste.</span></a>
+    </nav>
+    <p class="nz-small nz-muted">
       <span data-i18n="footer.text">Freie Software, MIT-Lizenz, Ende-zu-Ende-verschlüsselt.</span>
       <a href="https://github.com/daimpad/leih-ich-dir" rel="noopener">GitHub</a>
     </p>

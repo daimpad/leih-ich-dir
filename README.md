@@ -20,6 +20,7 @@ oder Kontaktdaten.
 | **Zwei Linkarten** | ein geheimer Bearbeiten-Link, ein konstanter Ansehen-Link für Freunde |
 | **Live-Daten** | der Ansehen-Link lädt den aktuellen Stand und aktualisiert sich selbsttätig |
 | **Zweisprachig** | Deutsch und Englisch, automatische Erkennung plus manuelle Umschaltung |
+| **Hell und dunkel** | folgt dem System, lässt sich in der Kopfleiste und in den Einstellungen übersteuern |
 | **Autovervollständigung** | 29 typische Leih-Gegenstände über ein natives `<datalist>`-Element |
 | **Anfragen** | `mailto:`- und `wa.me`-Links mit vorformuliertem Text in der aktiven Sprache |
 | **Spracheingabe** | Gegenstände unterwegs einsprechen, Zerlegung im Browser oder wahlweise per Gemini |
@@ -213,6 +214,10 @@ unterbindet das ohnehin.
 .
 ├── index.html                    Oberfläche und Symbolsatz, ohne Inline-Skripte
 ├── check.html · check.js         Abnahme im Browser, nach dem Deployment löschbar
+├── theme.js                      Wahl zwischen hell, dunkel und der Systemeinstellung
+├── impressum.html                Entwurf, Angaben müssen ergänzt werden
+├── datenschutz.html              Entwurf, juristisch prüfen lassen
+├── ueber.html                    Beschreibung des Projekts
 ├── app.js                        Verschlüsselung · i18n · Rendering · Sprache · Speicher
 ├── style.css                     Anwendungsschicht über dem Erscheinungsbild
 ├── api.php                       Flat-File-Backend, optional mit KI-Proxy

@@ -132,6 +132,7 @@
   cursor: pointer;
 }
 .ctl-square:hover { box-shadow: var(--nz-shadow-md); }
+.ctl-square .ico { width: 1.4rem; height: 1.4rem; vertical-align: middle; }
 .ctl-square:focus-visible { outline: var(--nz-stroke-strong) solid var(--nz-focus); outline-offset: 3px; }
 
 .site-footer {
@@ -139,6 +140,34 @@
   color: var(--nz-text-muted);
 }
 .site-footer p { margin: 0; }
+
+/* Waagerechte Leiste. Regel 16 laesst nur zwei Linien zu, deshalb trennt hier
+   der Abstand und nicht ein Strich. */
+.footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--nz-space-3) var(--nz-space-5);
+  align-items: baseline;
+  margin-bottom: var(--nz-space-3);
+  font-family: var(--nz-font-mono);
+  font-weight: 700;
+  font-size: var(--nz-text-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.footer-nav a { color: var(--nz-text); text-decoration: none; }
+.footer-nav a:hover { text-decoration: underline; text-decoration-color: var(--nz-signal); text-decoration-thickness: 2px; }
+.footer-claim {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+  color: var(--nz-text-muted);
+}
+.footer-claim::before { content: " · "; }
+
+/* Auswahl des Erscheinungsbilds: die drei Moeglichkeiten stehen nebeneinander,
+   solange der Platz reicht. */
+.themechoice { display: flex; flex-wrap: wrap; gap: var(--nz-space-3) var(--nz-space-5); }
 
 /* == 3 · Titelblock ====================================================== */
 
@@ -317,9 +346,18 @@
   .shell { padding-inline: var(--nz-space-3); }
 
   /* Auf schmalen Geraeten teilen sich Marke und Bedienelemente die Zeile.
-     Das Zeichen wird kleiner, bevor irgendetwas umbricht. */
+     Mit dem zweiten Quadrat wird es eng, deshalb weicht zuerst das Abzeichen:
+     Es sagt nur, wo gespeichert wird, und der Hinweisstreifen sagt das ohnehin.
+     Die Quadrate bleiben 44 Pixel gross, das ist die Grenze fuer Fingerbedienung. */
   .brand-logo { height: 1.5rem; }
   .brand-word { font-size: var(--nz-text-base); }
+  #storageBadge { display: none; }
+
+  /* Unter 336 Pixeln reicht auch das nicht, dann wird die Marke kleiner. */
+  @media (max-width: 21rem) {
+    .brand-logo { height: 1.25rem; }
+    .brand-word { font-size: var(--nz-text-sm); }
+  }
 
   /* Regel 20: automatische Silbentrennung greift nur auf schmalen Bildschirmen. */
   .titleblock h1 { hyphens: auto; }
