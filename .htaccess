@@ -1,0 +1,46 @@
+# Leih-Katalog · leih-ich-dir.de
+# Apache-Konfiguration für das Web-Root. Ergänzt die Meta-CSP in index.html.
+
+# Verzeichnislisten abschalten
+Options -Indexes
+
+# Standarddokument
+DirectoryIndex index.html
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "DENY"
+    Header always set Referrer-Policy "no-referrer"
+    Header always set Permissions-Policy "geolocation=(), camera=(), microphone=(), payment=()"
+    Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+    # HSTS erst aktivieren, wenn HTTPS dauerhaft eingerichtet ist:
+    # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</IfModule>
+
+# Punktdateien (.git, .env, .htaccess …) nie ausliefern
+<FilesMatch "^\.">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Projektinterne Dateien und Verzeichnisse aus dem Repository sperren
+RedirectMatch 404 (?i)/(\.git|\.github|tools|tests|CONTRIBUTING\.md|README\.md|LICENSE)(/|$)
+
+# HTTPS erzwingen (aktivieren, sobald ein Zertifikat vorliegt)
+# <IfModule mod_rewrite.c>
+#     RewriteEngine On
+#     RewriteCond %{HTTPS} !=on
+#     RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+# </IfModule>
+
+# Keine Zwischenspeicherung der Anwendungsdateien, damit Aktualisierungen greifen
+<IfModule mod_headers.c>
+    <FilesMatch "\.(html|js|css)$">
+        Header set Cache-Control "no-cache, must-revalidate"
+    </FilesMatch>
+</IfModule>
