@@ -296,7 +296,22 @@
 .voicestate .nz-dot { margin-right: var(--nz-space-2); animation: blink 1s steps(1, end) infinite; }
 @keyframes blink { 50% { opacity: 0; } }
 
-/* == 7 · Schmal ========================================================== */
+/* == 7 · Abnahmeseite ==================================================== */
+
+.check-group {
+  font-family: var(--nz-font-mono);
+  font-weight: 700;
+  font-size: var(--nz-text-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--nz-text-muted);
+  margin: var(--nz-space-5) 0 var(--nz-space-2);
+}
+#results > .check-group:first-child { margin-top: 0; }
+.check-state { white-space: nowrap; }
+.check-state.savestate-error { color: var(--nz-c-danger); }
+
+/* == 8 · Schmal ========================================================== */
 
 @media (max-width: 34rem) {
   .shell { padding-inline: var(--nz-space-3); }

@@ -158,8 +158,13 @@ printf '%s' 'DEIN-GEMINI-SCHLUESSEL' > data/.ai-key
 chmod 600 data/.ai-key && chown www-data data/.ai-key
 ```
 
-Alternativ über die Umgebung, etwa `SetEnv LEIH_AI_KEY …` im Virtual Host. Der
-Schlüssel gehört nicht ins Repository; `data/` steht in `.gitignore`.
+**Ohne Konsolenzugriff** tut es eine Textdatei mit dem Schlüssel als einzigem
+Inhalt, hochgeladen als `data/ai-key.txt`. Viele Dateiverwaltungen von
+Webhostern können keine Punktdateien anlegen, deshalb wird dieser zweite Name
+ebenfalls gelesen. Beide liegen in `data/` und sind über HTTP gleich gesperrt.
+
+Ein dritter Weg ist die Umgebung, etwa `SetEnv LEIH_AI_KEY …` im Virtual Host.
+Der Schlüssel gehört nicht ins Repository; `data/` steht in `.gitignore`.
 
 Der Text wird weitergereicht und danach verworfen: kein Protokoll, keine
 Ablage, keine Zuordnung zu einer Liste. Die Ratenbegrenzung liegt bei 60
@@ -207,6 +212,7 @@ unterbindet das ohnehin.
 ```
 .
 ├── index.html                    Oberfläche und Symbolsatz, ohne Inline-Skripte
+├── check.html · check.js         Abnahme im Browser, nach dem Deployment löschbar
 ├── app.js                        Verschlüsselung · i18n · Rendering · Sprache · Speicher
 ├── style.css                     Anwendungsschicht über dem Erscheinungsbild
 ├── api.php                       Flat-File-Backend, optional mit KI-Proxy
@@ -310,7 +316,20 @@ location ~ /\.     { deny all; return 404; }
 
 **5. Abnahme**
 
-Eine Installation lässt sich von außen prüfen, so wie ein Browser sie sieht:
+Eine Installation lässt sich auf zwei Wegen prüfen. **Ohne Konsolenzugriff**
+genügt der Browser:
+
+```
+https://leihichdir.de/check.html
+```
+
+Die Seite prüft aus dem Browser heraus, was von der eigenen Herkunft aus
+sichtbar ist, und das ist fast alles: Kopfzeilen, Auslieferung samt Typen,
+Abschottung, Schnittstelle, Schreibrechte, Schriften. Sie fasst das Ergebnis
+zusammen und bietet an, es in die Zwischenablage zu legen. Nach der Abnahme
+können `check.html` und `check.js` gelöscht werden.
+
+**Mit Konsolenzugriff** dasselbe von außen:
 
 ```bash
 php tools/check-deployment.php https://leihichdir.de
@@ -321,10 +340,14 @@ Auslieferung samt Typen, die Abschottung von `data/`, `.git/`, `tests/` und
 `tools/`, und legt zur Prüfung der Schreibrechte eine leere Liste an, die es
 sofort wieder löscht. Zum Schluss sagt es, ob der KI-Proxy scharf ist.
 
-`MUSS` verletzt heißt: so nicht in Betrieb nehmen. Der häufigste Fund nach
-einem frischen Deployment ist ein erreichbares `/.git/config`. Dann greift
-`.htaccess` nicht, meist weil `AllowOverride All` fehlt, und damit liegt die
-gesamte Repository-Historie offen.
+Beide Wege trennen `MUSS` von `SOLL`. `MUSS` verletzt heißt: so nicht in
+Betrieb nehmen. Der häufigste Fund nach einem frischen Deployment ist ein
+erreichbares `/.git/config`. Dann greift `.htaccess` nicht, meist weil
+`AllowOverride All` fehlt, und damit liegt die gesamte Repository-Historie
+offen.
+
+Der Unterschied zwischen beiden: Nur das Skript sieht die Umleitung von `http`
+auf `https`, weil eine Seite unter `https` keine `http`-Anfrage stellen darf.
 
 **6. Aktualisieren**
 
