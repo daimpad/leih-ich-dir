@@ -1,0 +1,12 @@
+# Der Datenordner darf über den Webserver niemals erreichbar sein.
+# api.php greift serverseitig per Dateisystem zu und braucht keinen HTTP-Zugang.
+
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>
+
+Options -Indexes

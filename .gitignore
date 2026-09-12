@@ -1,0 +1,15 @@
+# Laufzeitdaten des Flat-File-Speichers
+data/*
+!data/.htaccess
+!data/README.md
+
+# Editoren und Betriebssysteme
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
+
+# Lokale Konfiguration
+*.local

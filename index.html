@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Kein Referrer: verhindert, dass URLs (und damit Link-Kontext) nach außen gelangen. -->
+<meta name="referrer" content="no-referrer">
+<!-- Strikte CSP: ausschließlich eigene Ressourcen, keine Inline-Skripte, kein CDN. -->
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Leih-Katalog · leih-ich-dir.de</title>
+<meta name="description" content="Verleihe dein Inventar an Freunde. Ende-zu-Ende-verschlüsselt, ohne Konto. / Lend your inventory to friends. End-to-end encrypted, no account.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#129520;</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skiplink" href="#main" data-i18n="a11y.skip">Zum Inhalt springen</a>
+
+<header class="site-header">
+  <div class="wrap header-bar">
+    <a class="brand" href="./">
+      <span class="brand-mark" aria-hidden="true">&#129520;</span>
+      <span class="brand-text">leih-ich-dir</span>
+    </a>
+    <div class="header-actions">
+      <span id="storageBadge" class="badge badge--muted" hidden></span>
+      <div class="langswitch" role="group" aria-label="Sprache / Language">
+        <button type="button" class="langbtn" data-lang="de" aria-pressed="false">DE</button>
+        <button type="button" class="langbtn" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="wrap">
+
+  <!-- Hinweis, wenn kein PHP-Backend erreichbar ist (z. B. GitHub-Pages-Vorschau). -->
+  <p id="previewBanner" class="banner" hidden data-i18n="banner.preview"></p>
+
+  <!-- ------------------------------------------------------------------ -->
+  <!-- Startansicht                                                        -->
+  <!-- ------------------------------------------------------------------ -->
+  <section id="viewStart" class="view" hidden>
+    <div class="card hero">
+      <h1 data-i18n="start.headline">Dein Leih-Katalog</h1>
+      <p class="lead" data-i18n="start.lead">
+        Eine Liste deiner Gegenstände, die du an Freunde verleihst. Ohne Konto,
+        ohne Tracking &ndash; und nur du und deine Freunde können die Inhalte lesen.
+      </p>
+      <ul class="checklist">
+        <li data-i18n="start.point1">Inhalte werden im Browser verschlüsselt; der Server speichert nur unlesbare Zeichenketten.</li>
+        <li data-i18n="start.point2">Ein geheimer Bearbeiten-Link für dich, ein Ansehen-Link für deine Freunde.</li>
+        <li data-i18n="start.point3">Freunde sehen immer den aktuellen Stand und fragen per E-Mail oder WhatsApp an.</li>
+      </ul>
+      <p class="actions">
+        <button type="button" id="btnCreate" class="btn btn--primary" data-i18n="start.create">Neue Liste anlegen</button>
+      </p>
+      <p class="hint" data-i18n="start.hint">
+        Wichtig: Der Bearbeiten-Link ist dein einziger Zugang. Speichere ihn als Lesezeichen &ndash;
+        er lässt sich nicht wiederherstellen.
+      </p>
+    </div>
+  </section>
+
+  <!-- ------------------------------------------------------------------ -->
+  <!-- Listenansicht (Bearbeiten- und Lesemodus teilen sich das Markup)    -->
+  <!-- ------------------------------------------------------------------ -->
+  <section id="viewList" class="view" hidden>
+
+    <div class="card listhead">
+      <div class="listhead-top">
+        <h1 id="listTitleRead" class="listtitle" hidden></h1>
+        <label class="listtitle-edit" hidden id="listTitleEditWrap">
+          <span class="visually-hidden" data-i18n="list.titleLabel">Titel der Liste</span>
+          <input type="text" id="listTitleInput" class="input input--title" maxlength="80"
+                 data-i18n-placeholder="list.titlePlaceholder" placeholder="Titel der Liste">
+        </label>
+        <span id="saveState" class="savestate" role="status" aria-live="polite"></span>
+      </div>
+      <p id="listMeta" class="meta"></p>
+    </div>
+
+    <!-- Teilen (nur im Bearbeitenmodus) -->
+    <div class="card sharebox" id="shareBox" hidden>
+      <h2 data-i18n="share.headline">Links</h2>
+      <div class="linkrow">
+        <label for="linkView" data-i18n="share.viewLabel">Ansehen-Link für Freunde</label>
+        <div class="linkrow-input">
+          <input type="text" id="linkView" class="input" readonly>
+          <button type="button" class="btn btn--ghost" data-copy="linkView" data-i18n="share.copy">Kopieren</button>
+        </div>
+      </div>
+      <div class="linkrow">
+        <label for="linkEdit" data-i18n="share.editLabel">Bearbeiten-Link (geheim)</label>
+        <div class="linkrow-input">
+          <input type="password" id="linkEdit" class="input" readonly>
+          <button type="button" class="btn btn--ghost" id="btnRevealEdit" data-i18n="share.reveal">Zeigen</button>
+          <button type="button" class="btn btn--ghost" data-copy="linkEdit" data-i18n="share.copy">Kopieren</button>
+        </div>
+      </div>
+      <p class="hint" data-i18n="share.hint">
+        Der Schlüssel steht hinter dem #-Zeichen und wird technisch nie an den Server übertragen.
+      </p>
+    </div>
+
+    <!-- Gegenstand hinzufügen (nur im Bearbeitenmodus) -->
+    <form class="card addform" id="addForm" hidden autocomplete="off">
+      <h2 data-i18n="add.headline">Gegenstand hinzufügen</h2>
+      <div class="addform-row">
+        <label class="visually-hidden" for="addName" data-i18n="add.nameLabel">Gegenstand</label>
+        <input type="text" id="addName" class="input" list="itemSuggestions" required maxlength="80"
+               data-i18n-placeholder="add.namePlaceholder" placeholder="z. B. Bohrmaschine">
+        <label class="visually-hidden" for="addNote" data-i18n="add.noteLabel">Notiz</label>
+        <input type="text" id="addNote" class="input input--note" maxlength="120"
+               data-i18n-placeholder="add.notePlaceholder" placeholder="Notiz (optional)">
+        <button type="submit" class="btn btn--primary" data-i18n="add.submit">Hinzufügen</button>
+      </div>
+      <!-- Native Autovervollständigung: schont Ressourcen, kein JS-Dropdown nötig. -->
+      <datalist id="itemSuggestions"></datalist>
+    </form>
+
+    <!-- Inventar -->
+    <div class="card">
+      <div class="items-head">
+        <h2 data-i18n="items.headline">Inventar</h2>
+        <span id="itemsCount" class="badge badge--muted"></span>
+        <button type="button" id="btnRefresh" class="btn btn--ghost btn--small" hidden data-i18n="items.refresh">Aktualisieren</button>
+      </div>
+      <ul id="itemList" class="items"></ul>
+      <p id="itemsEmpty" class="empty" hidden></p>
+    </div>
+
+    <!-- Einstellungen (nur im Bearbeitenmodus) -->
+    <details class="card settings" id="settingsBox" hidden>
+      <summary data-i18n="settings.headline">Einstellungen &amp; Kontakt</summary>
+      <p class="hint" data-i18n="settings.hint">
+        Diese Angaben werden mitverschlüsselt und nur für die Anfrage-Buttons deiner Freunde genutzt.
+      </p>
+      <div class="field">
+        <label for="cfgEmail" data-i18n="settings.email">E-Mail für Anfragen</label>
+        <input type="email" id="cfgEmail" class="input" maxlength="120" placeholder="name@example.org">
+      </div>
+      <div class="field">
+        <label for="cfgPhone" data-i18n="settings.phone">WhatsApp-Nummer</label>
+        <input type="tel" id="cfgPhone" class="input" maxlength="32" placeholder="+49 170 1234567">
+        <small class="hint" data-i18n="settings.phoneHint">Internationales Format, z. B. +49&nbsp;…</small>
+      </div>
+      <div class="field field--check">
+        <input type="checkbox" id="cfgShowBorrower">
+        <label for="cfgShowBorrower" data-i18n="settings.showBorrower">Namen der Ausleihenden auch im Ansehen-Link zeigen</label>
+      </div>
+      <hr>
+      <div class="field">
+        <button type="button" id="btnDeleteList" class="btn btn--danger" data-i18n="settings.delete">Liste endgültig löschen</button>
+      </div>
+    </details>
+
+  </section>
+
+  <!-- ------------------------------------------------------------------ -->
+  <!-- Fehleransicht                                                       -->
+  <!-- ------------------------------------------------------------------ -->
+  <section id="viewError" class="view" hidden>
+    <div class="card">
+      <h1 data-i18n="error.headline">Das hat nicht geklappt</h1>
+      <p id="errorText" class="lead"></p>
+      <p class="actions">
+        <a class="btn btn--ghost" href="./" data-i18n="error.back">Zur Startseite</a>
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p>
+      <span data-i18n="footer.text">Freie Software, MIT-Lizenz &ndash; Ende-zu-Ende-verschlüsselt.</span>
+      <a href="https://github.com/daimpad/leih-ich-dir" rel="noopener">GitHub</a>
+    </p>
+  </div>
+</footer>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="app.js" defer></script>
+</body>
+</html>
