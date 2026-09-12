@@ -96,7 +96,7 @@ verfügbar ist:
 | Weg | Voraussetzung | Wohin der Text geht |
 |---|---|---|
 | **Gemini, eigener Schlüssel** | Schlüssel in den Einstellungen hinterlegt | vom Gerät direkt zu Google |
-| **Gemini über den Server** | `AI_PROXY_ENABLED` in `api.php` eingeschaltet | über diesen Server zu Google |
+| **Gemini über den Server** | Schlüssel in `data/.ai-key` hinterlegt | über diesen Server zu Google |
 | **Zerlegung im Browser** | immer | nirgendwohin |
 
 Die KI bekommt eine Systemanweisung, die ausschließlich ein JSON-Array
@@ -144,15 +144,14 @@ nicht prüfen, weil die Anmeldung vor der Modellauflösung greift. Wer sie
 des eigenen Projekts; die Zahlen, die Drittseiten dazu nennen, widersprechen
 einander.
 
-### Server-Proxy einschalten
+### Server-Proxy
 
-Nur sinnvoll, wenn Gäste ohne eigenen Schlüssel die KI nutzen sollen. Der
-Server sieht dabei den gesprochenen Text.
+`AI_PROXY_ENABLED` steht in `api.php` auf `true`, damit auch Gäste ohne eigenen
+Schlüssel die KI-Strukturierung nutzen können.
 
-```php
-// api.php
-const AI_PROXY_ENABLED = true;
-```
+**Der Schalter allein gibt nichts frei.** Ohne hinterlegten Schlüssel meldet
+`?a=ping` weiterhin `aiProxy: false`, die Aktion antwortet mit 404, und der
+Browser zerlegt den Text selbst. Scharf wird der Proxy erst mit dem Schlüssel:
 
 ```bash
 printf '%s' 'DEIN-GEMINI-SCHLUESSEL' > data/.ai-key
@@ -160,10 +159,21 @@ chmod 600 data/.ai-key && chown www-data data/.ai-key
 ```
 
 Alternativ über die Umgebung, etwa `SetEnv LEIH_AI_KEY …` im Virtual Host. Der
-Text wird weitergereicht und danach verworfen: kein Protokoll, keine Ablage,
-keine Zuordnung zu einer Liste. Die Ratenbegrenzung liegt bei 60 Anfragen je
-Stunde und IP-Adresse. Wer den Proxy einschaltet, gehört mit dieser
-Übermittlung in die eigene Datenschutzerklärung.
+Schlüssel gehört nicht ins Repository; `data/` steht in `.gitignore`.
+
+Der Text wird weitergereicht und danach verworfen: kein Protokoll, keine
+Ablage, keine Zuordnung zu einer Liste. Die Ratenbegrenzung liegt bei 60
+Anfragen je Stunde und IP-Adresse.
+
+Zwei Dinge, die zum eingeschalteten Proxy gehören:
+
+* Die Übermittlung an Google gehört in die Datenschutzerklärung des Betriebs.
+* Das Kontingent läuft auf den hinterlegten Schlüssel. Bei einem öffentlichen
+  Dienst ist die Ratenbegrenzung die einzige Schranke davor; wer sie enger
+  will, setzt `AI_LIMIT` herunter.
+
+Wer das nicht will, setzt `AI_PROXY_ENABLED` zurück auf `false` oder entfernt
+schlicht `data/.ai-key`. Beides wirkt sofort.
 
 ## Erscheinungsbild
 
@@ -204,7 +214,9 @@ unterbindet das ohnehin.
 ├── vendor/nozilla-ci/
 │   ├── design-system.css         unveränderte Kopie des Erscheinungsbilds
 │   └── README.md                 Herkunft, Stand, Abgleich
-├── assets/fonts/                 WOFF2-Teilmengen und ihre @font-face-Regeln
+├── assets/
+│   ├── fonts/                    WOFF2-Teilmengen und ihre @font-face-Regeln
+│   └── pics/logo.svg             Wortmarke
 ├── data/                         Laufzeitdaten, nicht im Repository
 │   ├── .htaccess                 verbietet jeden HTTP-Zugriff
 │   ├── .ai-key                   optionaler Schlüssel für den KI-Proxy
@@ -212,7 +224,8 @@ unterbindet das ohnehin.
 │   └── throttle/                 Ratenbegrenzung, gehashte IP-Adressen
 ├── tools/
 │   ├── purge.php                 Wartungsskript für alte Listen
-│   └── build-fonts.py            erzeugt die Schriftteilmengen
+│   ├── build-fonts.py            erzeugt die Schriftteilmengen
+│   └── check-deployment.php      prüft eine laufende Installation von außen
 ├── tests/api-test.php            Funktionstest des Backends, ohne Abhängigkeiten
 ├── .github/workflows/ci.yml      Syntaxprüfung und Funktionstest
 ├── CONTRIBUTING.md
@@ -295,7 +308,25 @@ location ^~ /data/ { deny all; return 404; }
 location ~ /\.     { deny all; return 404; }
 ```
 
-**5. Aktualisieren**
+**5. Abnahme**
+
+Eine Installation lässt sich von außen prüfen, so wie ein Browser sie sieht:
+
+```bash
+php tools/check-deployment.php https://leihichdir.de
+```
+
+Das Skript prüft Erreichbarkeit, HTTPS, Sicherheitskopfzeilen, die
+Auslieferung samt Typen, die Abschottung von `data/`, `.git/`, `tests/` und
+`tools/`, und legt zur Prüfung der Schreibrechte eine leere Liste an, die es
+sofort wieder löscht. Zum Schluss sagt es, ob der KI-Proxy scharf ist.
+
+`MUSS` verletzt heißt: so nicht in Betrieb nehmen. Der häufigste Fund nach
+einem frischen Deployment ist ein erreichbares `/.git/config`. Dann greift
+`.htaccess` nicht, meist weil `AllowOverride All` fehlt, und damit liegt die
+gesamte Repository-Historie offen.
+
+**6. Aktualisieren**
 
 ```bash
 cd /var/www/leih-ich-dir && git pull --ff-only
@@ -303,7 +334,7 @@ cd /var/www/leih-ich-dir && git pull --ff-only
 
 `data/` steht in `.gitignore` und bleibt dabei unberührt.
 
-**6. Optional: alte Listen abräumen**
+**7. Optional: alte Listen abräumen**
 
 ```cron
 15 4 * * * /usr/bin/php /var/www/leih-ich-dir/tools/purge.php --days=365

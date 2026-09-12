@@ -1,8 +1,17 @@
 # Leih-Katalog · leihichdir.de
 # Apache-Konfiguration für das Web-Root. Ergänzt die Meta-CSP in index.html.
 
-# Verzeichnislisten abschalten
+# Verzeichnislisten abschalten.
+# Scheitert der Aufruf nach dem Deployment mit Statuscode 500, fehlt meist
+# AllowOverride All im Virtual Host: Ohne das darf .htaccess kein Options setzen.
 Options -Indexes
+
+# Auslieferungstypen sicherstellen. Aeltere Installationen kennen woff2 nicht
+# und liefern es als Binaerstrom aus; die Schrift laedt dann je nach Browser nicht.
+<IfModule mod_mime.c>
+    AddType font/woff2 .woff2
+    AddType image/svg+xml .svg
+</IfModule>
 
 # Standarddokument
 DirectoryIndex index.html

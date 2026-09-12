@@ -52,7 +52,7 @@ const CREATE_WINDOW    = 3600;     // Sekunden
 const THROTTLE_GC_PROB = 50;       // 1 von n Anfragen räumt alte Zählerdateien auf
 
 /* -- KI-Proxy ---------------------------------------------------------------
- * Standardmäßig abgeschaltet, und das ist die Voreinstellung mit Absicht.
+ * Für leihichdir.de eingeschaltet. Die Entscheidung ist bewusst gefallen.
  *
  * Der Rest dieser Anwendung ist so gebaut, dass der Server keinen Klartext
  * sehen kann. Der Proxy durchbricht das für genau eine Angabe: den Satz, den
@@ -63,14 +63,17 @@ const THROTTLE_GC_PROB = 50;       // 1 von n Anfragen räumt alte Zählerdateie
  * keinen eigenen Schlüssel) und gegen die Reinheit der Zusage. Das gehört in
  * die Datenschutzerklärung des Betriebs, nicht in eine Fußnote.
  *
- * Einschalten:
- *   1. AI_PROXY_ENABLED auf true setzen
- *   2. Schlüssel hinterlegen, entweder in data/.ai-key oder in der
- *      Umgebungsvariable LEIH_AI_KEY (SetEnv im Virtual Host)
+ * Der Schalter allein tut nichts. Ohne hinterlegten Schlüssel meldet ping
+ * aiProxy: false, die Aktion antwortet mit 404, und der Browser zerlegt den
+ * Text weiterhin selbst. Erst der Schlüssel macht den Proxy scharf:
  *
+ *   printf '%s' 'SCHLUESSEL' > data/.ai-key && chmod 600 data/.ai-key
+ *   oder SetEnv LEIH_AI_KEY … im Virtual Host
+ *
+ * Der Schlüssel gehört nicht ins Repository; data/ steht in .gitignore.
  * Der Text wird nicht protokolliert und nicht gespeichert.
  * -------------------------------------------------------------------------- */
-const AI_PROXY_ENABLED = false;
+const AI_PROXY_ENABLED = true;
 const AI_ENDPOINT      = 'https://generativelanguage.googleapis.com/v1beta/models/';
 /* Am besten belegte Kennung. Eine geänderte Kennung vorher mit einem gültigen
    Schlüssel über GET /v1beta/models prüfen, unangemeldet geht das nicht. */
