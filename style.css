@@ -1,393 +1,311 @@
 /*!
- * Leih-Katalog · leih-ich-dir.de
- * Minimalistisches Stylesheet ohne Framework und ohne externe Ressourcen.
- * Aufbau: 1 Variablen · 2 Grundlagen · 3 Layout · 4 Komponenten · 5 Responsiv
+ * Leih-Katalog · leihichdir.de
+ * -----------------------------------------------------------------------------
+ * Anwendungsschicht über dem Erscheinungsbild von nozilla.
+ *
+ * Grundlage ist vendor/nozilla-ci/design-system.css. Diese Datei erfindet keine
+ * Farben, Schriftgrößen oder Abstände, sondern greift ausschließlich auf die
+ * Marken --nz-* zu. Wer hier einen Zahlenwert einträgt, der nicht aus dem
+ * Erscheinungsbild stammt, hebt die Abgleichbarkeit auf.
+ *
+ * Die Hausregeln, die hier tragen:
+ *   Regel 1   Fließtext steht auf weißer Fläche, nie auf dem Papierton
+ *   Regel 2   auf dem Papierton stehen Überschriften, Labels, Navigation
+ *   Regel 3   Signalgrün ist Aktionsfarbe, keine Flächen
+ *   Regel 12  unter dem Titel steht eine Subline auf dem Papierton
+ *   Regel 16  es gibt genau zwei Linien, durchgezogen und gestrichelt, je 2px
+ *   Regel 19  Bedienelemente der Kopfleiste sind gleiche Quadrate
+ *   Regel 29  beim Zeigen reagiert nur, was ein Ziel ist
+ *
+ * Aufbau: 1 Gerüst · 2 Kopf und Fuß · 3 Titelblock · 4 Bausteine · 5 Inventar
+ *         6 Spracheingabe · 7 Schmal
  */
 
-/* == 1 · Variablen ======================================================= */
+/* == 1 · Gerüst ========================================================== */
 
-:root {
-  --bg: #f6f4f0;
-  --surface: #ffffff;
-  --surface-alt: #f0ede7;
-  --border: #ded8ce;
-  --text: #1d1c1a;
-  --text-muted: #6b665e;
-  --accent: #2f6f4e;          /* ruhiges Grün: verfügbar, primäre Aktion */
-  --accent-strong: #24573d;
-  --accent-soft: #e3efe8;
-  --warn: #9a5b17;            /* verliehen */
-  --warn-soft: #f6ecdd;
-  --danger: #9b2c2c;
-  --focus: #1f5fbf;
+/* Mehrere Bausteine des Erscheinungsbilds setzen display (inline-flex, flex).
+   Das überstimmt die Voreinstellung des Browsers für das Attribut hidden.
+   Die Anwendung schaltet ihre Ansichten aber genau darüber, deshalb bekommt
+   hidden hier wieder Vorrang. */
+[hidden] { display: none !important; }
 
-  --radius: 10px;
-  --radius-sm: 7px;
-  --gap: 1rem;
-  --maxw: 46rem;
-  --shadow: 0 1px 2px rgba(0, 0, 0, .05), 0 6px 18px rgba(0, 0, 0, .04);
-  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+/* Der Symbolsatz wird nie gezeigt, nur über <use> herangezogen. */
+.sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #171917;
-    --surface: #20231f;
-    --surface-alt: #272b26;
-    --border: #383d36;
-    --text: #ece9e3;
-    --text-muted: #a7a29a;
-    --accent: #74b894;
-    --accent-strong: #8ecdab;
-    --accent-soft: #23342b;
-    --warn: #d9a463;
-    --warn-soft: #342a1e;
-    --danger: #e08181;
-    --focus: #7fb0ff;
-    --shadow: 0 1px 2px rgba(0, 0, 0, .35);
-  }
+/* Schmaler als der Container des Erscheinungsbilds: Diese Anwendung ist eine
+   einspaltige Liste, und eine Zeile Fließtext soll lesbar bleiben. */
+.shell {
+  width: 100%;
+  max-width: 46rem;
+  margin-inline: auto;
+  padding-inline: var(--nz-space-4);
 }
 
-/* == 2 · Grundlagen ====================================================== */
-
-*, *::before, *::after { box-sizing: border-box; }
-
-html { -webkit-text-size-adjust: 100%; }
-
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font);
-  font-size: 17px;
-  line-height: 1.55;
+.page {
+  padding-top: var(--nz-space-6);
+  padding-bottom: var(--nz-space-9);
 }
 
-h1, h2, h3 { line-height: 1.25; margin: 0 0 .5em; font-weight: 650; }
-h1 { font-size: 1.6rem; }
-h2 { font-size: 1.1rem; }
-p { margin: 0 0 .8em; }
-a { color: var(--accent-strong); }
-
-:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-.visually-hidden, .offscreen {
-  position: absolute !important;
-  width: 1px; height: 1px;
-  padding: 0; margin: -1px;
-  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%);
-  white-space: nowrap; border: 0;
-}
+/* Abstand zwischen den Bausteinen einer Ansicht. */
+.view > * + * { margin-top: var(--nz-space-5); }
 
 .skiplink {
-  position: absolute; left: -9999px; top: 0;
-  background: var(--surface); padding: .6rem 1rem; z-index: 10;
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 70;
+  background: var(--nz-surface);
+  border: var(--nz-stroke-rule) solid var(--nz-line);
+  padding: var(--nz-space-3) var(--nz-space-4);
 }
-.skiplink:focus { left: .5rem; top: .5rem; }
+.skiplink:focus { left: var(--nz-space-3); top: var(--nz-space-3); }
 
-/* == 3 · Layout ========================================================== */
-
-.wrap {
-  width: 100%;
-  max-width: var(--maxw);
-  margin: 0 auto;
-  padding: 0 1rem;
+/* Zeichen des Hauses. Die Strichfarbe folgt dem Text, die grüne Stelle bleibt. */
+.ico {
+  width: 1.35em;
+  height: 1.35em;
+  flex: none;
+  display: inline-block;
+  vertical-align: -0.25em;
 }
+.ico-brand { width: 1.9rem; height: 1.9rem; }
 
-.site-header {
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-}
+.mono { font-family: var(--nz-font-mono); font-size: var(--nz-text-sm); }
 
-.header-bar {
+/* == 2 · Kopf und Fuß ==================================================== */
+
+/* Regel 2: die Kopfleiste steht auf dem Papierton, ohne eigene Fläche. */
+.site { padding-block: var(--nz-space-4); }
+
+.bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--gap);
-  min-height: 3.4rem;
+  gap: var(--nz-space-4);
 }
 
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: .5rem;
-  font-weight: 650;
+  gap: var(--nz-space-3);
   text-decoration: none;
-  color: var(--text);
 }
-.brand-mark { font-size: 1.2rem; }
+.brand-word {
+  font-family: var(--nz-font-display);
+  font-weight: 700;
+  font-size: var(--nz-text-lg);
+  letter-spacing: -0.02em;
+}
+.brand:hover { text-decoration: underline; text-decoration-color: var(--nz-signal); }
 
-.header-actions { display: flex; align-items: center; gap: .6rem; }
+.bar-controls { display: flex; align-items: center; gap: var(--nz-space-3); }
 
-main { padding: 1.5rem 1rem 3rem; }
-main.wrap { padding-left: 1rem; padding-right: 1rem; }
+/* Regel 19: Quadrat in Höhe der Leiste, weiße Fläche, durchgezogene Linie,
+   harter Schatten. Es zeigt das Ziel, nicht den Zustand. */
+.ctl-square {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  font-family: var(--nz-font-mono);
+  font-weight: 700;
+  font-size: var(--nz-text-xs);
+  letter-spacing: 0.12em;
+  background: var(--nz-surface);
+  color: var(--nz-text);
+  border: var(--nz-stroke-rule) solid var(--nz-line);
+  box-shadow: var(--nz-shadow-sm);
+  cursor: pointer;
+}
+.ctl-square:hover { box-shadow: var(--nz-shadow-md); }
+.ctl-square:focus-visible { outline: var(--nz-stroke-strong) solid var(--nz-focus); outline-offset: 3px; }
 
 .site-footer {
-  border-top: 1px solid var(--border);
-  padding: 1rem 0 2rem;
-  color: var(--text-muted);
-  font-size: .85rem;
+  padding-block: var(--nz-space-5) var(--nz-space-6);
+  color: var(--nz-text-muted);
 }
 .site-footer p { margin: 0; }
 
-/* == 4 · Komponenten ===================================================== */
+/* == 3 · Titelblock ====================================================== */
 
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 1.1rem 1.2rem;
-  margin-bottom: 1rem;
-}
+/* Regel 10: keine Trennlinie unter der Überschrift.
+   Regel 12: die Subline steht auf dem Papierton, mit Abstand nach unten. */
+.titleblock { margin-bottom: var(--nz-space-6); }
+.titleblock h1 { margin-bottom: var(--nz-space-4); }
+.titleblock .nz-lead { max-width: 34ch; color: var(--nz-text); margin: 0; }
 
-.hero .lead { font-size: 1.02rem; color: var(--text-muted); }
-
-.checklist { list-style: none; margin: 0 0 1.2rem; padding: 0; }
-.checklist li {
-  position: relative;
-  padding-left: 1.6rem;
-  margin-bottom: .45rem;
-  color: var(--text-muted);
-}
-.checklist li::before {
-  content: "✓";
-  position: absolute; left: 0; top: 0;
-  color: var(--accent);
+.title-edit { display: block; }
+.title-input {
+  font-family: var(--nz-font-display);
   font-weight: 700;
+  font-size: var(--nz-text-xl);
+  letter-spacing: -0.02em;
 }
 
-.hint { color: var(--text-muted); font-size: .85rem; }
-.meta { color: var(--text-muted); font-size: .85rem; margin: 0; }
-.actions { margin: 1rem 0 .4rem; }
-
-.banner {
-  background: var(--warn-soft);
-  border: 1px solid var(--border);
-  border-left: 4px solid var(--warn);
-  border-radius: var(--radius-sm);
-  padding: .7rem .9rem;
-  font-size: .9rem;
-  margin: 0 0 1rem;
+.titlemeta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--nz-space-3);
+  flex-wrap: wrap;
+  margin: var(--nz-space-3) 0 0;
 }
+.savestate-error { color: var(--nz-c-danger); }
 
-/* -- Buttons ------------------------------------------------------------ */
+/* == 4 · Bausteine ======================================================= */
 
-.btn {
-  display: inline-block;
-  font: inherit;
-  font-size: .95rem;
-  line-height: 1.2;
-  padding: .6rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface-alt);
-  color: var(--text);
-  text-decoration: none;
-  cursor: pointer;
-  transition: background-color .12s ease, border-color .12s ease;
+.actions { margin: 0; }
+
+/* Hinweisfeld. Die breite Kante links gehört nach Regel 24 nur Hinweisen. */
+.note .ico { margin-top: 2px; }
+.note p { margin: 0; }
+
+.points { list-style: none; margin: 0 0 var(--nz-space-5); padding: 0; }
+.points li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--nz-space-3);
+  margin-bottom: var(--nz-space-3);
 }
-.btn:hover { border-color: var(--text-muted); }
-.btn:disabled { opacity: .55; cursor: default; }
+.points li:last-child { margin-bottom: 0; }
+.points .ico { margin-top: 3px; }
 
-.btn--primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
-  font-weight: 600;
-}
-.btn--primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+.linkrow { display: flex; gap: var(--nz-space-2); flex-wrap: wrap; }
+.linkrow .nz-input { flex: 1 1 16rem; min-width: 0; }
 
-@media (prefers-color-scheme: dark) {
-  .btn--primary { color: #10231a; }
-}
+.addrow { display: flex; gap: var(--nz-space-2); flex-wrap: wrap; }
+.addrow #addName { flex: 2 1 13rem; }
+.addrow #addNote { flex: 1 1 9rem; }
 
-.btn--ghost { background: transparent; }
-.btn--small { padding: .35rem .7rem; font-size: .85rem; }
-.btn--danger { color: var(--danger); border-color: var(--danger); background: transparent; }
-
-.iconbtn {
-  font: inherit;
-  background: none;
-  border: 0;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: .25rem .45rem;
-  border-radius: var(--radius-sm);
-  line-height: 1;
-}
-.iconbtn:hover { background: var(--surface-alt); }
-.iconbtn--danger:hover { color: var(--danger); }
-
-.langswitch { display: inline-flex; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
-.langbtn {
-  font: inherit;
-  font-size: .8rem;
-  font-weight: 600;
-  padding: .3rem .55rem;
-  border: 0;
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-}
-.langbtn.is-active { background: var(--accent-soft); color: var(--accent-strong); }
-
-/* -- Formulare ---------------------------------------------------------- */
-
-.input {
-  font: inherit;
-  width: 100%;
-  padding: .55rem .7rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--text);
-}
-.input--title { font-size: 1.35rem; font-weight: 650; padding: .4rem .55rem; }
-.input--inline { padding: .3rem .45rem; font-size: .85rem; }
-.input--note { flex: 1 1 12rem; }
-
-.field { margin-bottom: .9rem; }
-.field label { display: block; font-size: .9rem; margin-bottom: .25rem; }
-.field--check { display: flex; align-items: flex-start; gap: .5rem; }
-.field--check label { margin: 0; }
-.field--check input { margin-top: .35rem; }
-
-.addform-row { display: flex; flex-wrap: wrap; gap: .5rem; }
-.addform-row #addName { flex: 2 1 14rem; }
-
-/* -- Kopfbereich der Liste ---------------------------------------------- */
-
-.listhead-top {
+/* Aufklapper der Einstellungen. Der Baustein bleibt der des Hauses. */
+.settings summary {
   display: flex;
   align-items: center;
-  gap: .75rem;
-  flex-wrap: wrap;
+  gap: var(--nz-space-3);
+  cursor: pointer;
+  font-family: var(--nz-font-display);
+  font-weight: 700;
+  font-size: var(--nz-text-lg);
+  letter-spacing: -0.015em;
 }
-.listtitle { margin: 0; flex: 1 1 auto; }
-.listtitle-edit { flex: 1 1 60%; }
-.listtitle-edit .input { margin: 0; }
+.settings[open] summary { margin-bottom: var(--nz-space-4); }
+.settings-sub {
+  font-family: var(--nz-font-display);
+  font-weight: 700;
+  font-size: var(--nz-text-lg);
+  margin: 0 0 var(--nz-space-2);
+}
 
-.savestate { font-size: .8rem; color: var(--text-muted); white-space: nowrap; }
-.savestate--saved { color: var(--accent); }
-.savestate--error { color: var(--danger); }
+/* == 5 · Inventar ======================================================== */
 
-/* -- Teilen-Box --------------------------------------------------------- */
-
-.linkrow { margin-bottom: .9rem; }
-.linkrow label { display: block; font-size: .85rem; color: var(--text-muted); margin-bottom: .25rem; }
-.linkrow-input { display: flex; gap: .4rem; flex-wrap: wrap; }
-.linkrow-input .input { flex: 1 1 14rem; font-size: .85rem; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-
-/* -- Inventar ----------------------------------------------------------- */
-
-.items-head { display: flex; align-items: center; gap: .6rem; margin-bottom: .6rem; }
-.items-head h2 { margin: 0; }
-.items-head .btn { margin-left: auto; }
+.items-head {
+  display: flex;
+  align-items: center;
+  gap: var(--nz-space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--nz-space-4);
+}
+.items-head .nz-card__title { margin: 0; }
+.items-head .nz-btn { margin-left: auto; }
 
 .items { list-style: none; margin: 0; padding: 0; }
 
+/* Regel 16: gestrichelt 2px in der Textfarbe, wo eine Grenze angedeutet wird. */
 .item {
   display: flex;
   align-items: flex-start;
-  gap: .75rem;
-  padding: .7rem 0;
-  border-top: 1px solid var(--border);
+  gap: var(--nz-space-3);
+  padding-block: var(--nz-space-4);
+  border-top: var(--nz-stroke-rule) dashed var(--nz-line);
 }
-.item:first-child { border-top: 0; }
+.item:first-child { border-top: 0; padding-top: 0; }
 
-.item-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: .15rem; }
-.item-name { font-weight: 600; overflow-wrap: anywhere; }
-.item-note, .item-lentinfo { font-size: .85rem; color: var(--text-muted); overflow-wrap: anywhere; }
-
-.item-lentmeta { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .3rem; }
-.inline-label { font-size: .75rem; color: var(--text-muted); display: inline-flex; align-items: center; gap: .35rem; }
-
-.item-actions { display: flex; gap: .4rem; flex-wrap: wrap; justify-content: flex-end; }
-
-.statusbtn {
-  font: inherit;
-  font-size: .78rem;
-  font-weight: 600;
-  letter-spacing: .01em;
-  padding: .3rem .6rem;
-  border-radius: 999px;
-  border: 1px solid transparent;
-  cursor: pointer;
-  white-space: nowrap;
-  min-width: 6.6rem;
+.item-main { flex: 1 1 8rem; min-width: 0; }
+.item-name { font-weight: 600; overflow-wrap: anywhere; display: block; }
+.item-note,
+.item-lentinfo {
+  display: block;
+  font-size: var(--nz-text-sm);
+  color: var(--nz-text-muted);
+  overflow-wrap: anywhere;
 }
-.statusbtn--available { background: var(--accent-soft); color: var(--accent-strong); border-color: var(--accent-soft); }
-.statusbtn--lent { background: var(--warn-soft); color: var(--warn); border-color: var(--warn-soft); }
-.statusbtn:hover { border-color: currentColor; }
+.item-lentinfo { margin-top: var(--nz-space-1); }
 
-.badge {
-  display: inline-block;
-  font-size: .75rem;
-  font-weight: 600;
-  padding: .25rem .55rem;
-  border-radius: 999px;
-  background: var(--surface-alt);
-  color: var(--text-muted);
-  white-space: nowrap;
+.item-lentmeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--nz-space-2);
+  margin-top: var(--nz-space-3);
 }
-.badge--available { background: var(--accent-soft); color: var(--accent-strong); }
-.badge--lent { background: var(--warn-soft); color: var(--warn); }
-.badge--muted { font-weight: 500; }
-
-/* Im Inventar bekommen Abzeichen dieselbe Breite wie die Statusschalter,
-   damit die Bezeichnungen sauber untereinander stehen. */
-.item > .badge { min-width: 6.6rem; text-align: center; padding-top: .3rem; padding-bottom: .3rem; }
-
-.empty { color: var(--text-muted); font-size: .9rem; margin: .4rem 0 0; }
-
-/* -- Einstellungen ------------------------------------------------------ */
-
-.settings summary { cursor: pointer; font-weight: 650; }
-.settings[open] summary { margin-bottom: .8rem; }
-.settings hr { border: 0; border-top: 1px solid var(--border); margin: 1rem 0; }
-
-/* -- Toast -------------------------------------------------------------- */
-
-.toast {
-  position: fixed;
-  left: 50%;
-  bottom: 1.2rem;
-  transform: translate(-50%, .6rem);
-  background: var(--text);
-  color: var(--bg);
-  padding: .6rem 1rem;
-  border-radius: var(--radius-sm);
-  font-size: .88rem;
-  max-width: min(28rem, calc(100vw - 2rem));
-  box-shadow: var(--shadow);
-  opacity: 0;
-  transition: opacity .2s ease, transform .2s ease;
-  z-index: 20;
+.item-lentmeta label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--nz-space-2);
+  font-family: var(--nz-font-mono);
+  font-weight: 700;
+  font-size: var(--nz-text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--nz-text-muted);
 }
-.toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
+.item-lentmeta .nz-input { width: auto; padding: 6px 8px; font-size: var(--nz-text-sm); }
 
-/* == 5 · Responsiv ======================================================= */
+.item-actions { display: flex; gap: var(--nz-space-2); flex-wrap: wrap; justify-content: flex-end; }
+
+/* Der Statusschalter ist eine Schaltfläche, der Punkt darin trägt den Zustand.
+   Damit bleibt Grün nach Regel 3 die Farbe des Anklickbaren, nicht des Status. */
+.statusbtn { min-width: 9.5rem; justify-content: flex-start; }
+
+/* == 6 · Spracheingabe =================================================== */
+
+.voicebox {
+  margin-top: var(--nz-space-5);
+  padding-top: var(--nz-space-5);
+  border-top: var(--nz-stroke-rule) dashed var(--nz-line);
+}
+.voicerow {
+  display: flex;
+  align-items: center;
+  gap: var(--nz-space-3);
+  flex-wrap: wrap;
+}
+.voicerow + .voice-text { margin-top: var(--nz-space-3); }
+.voice-text + .voicerow { margin-top: var(--nz-space-3); }
+.voice-text { min-height: 4.5rem; font-size: var(--nz-text-sm); }
+.voicerow .nz-field__hint { flex: 1 1 14rem; margin: 0; }
+
+.voicestate { color: var(--nz-text-muted); }
+.voicestate-error { color: var(--nz-c-danger); }
+
+/* Aufnahme läuft: die Schaltfläche wird zur lauten, grünen Fassung, und ein
+   hartes Quadrat blinkt. Kein Schein, kein Weichzeichner, Regel des Hauses. */
+.is-listening { background: var(--nz-signal); color: var(--nz-on-signal); }
+.voicestate .nz-dot { margin-right: var(--nz-space-2); animation: blink 1s steps(1, end) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* == 7 · Schmal ========================================================== */
 
 @media (max-width: 34rem) {
-  body { font-size: 16px; }
-  .card { padding: .9rem 1rem; }
-  .addform-row .btn { width: 100%; }
+  .shell { padding-inline: var(--nz-space-3); }
 
-  /* Eingabefeld auf eine eigene Zeile, Schaltflächen darunter nebeneinander */
-  .linkrow-input .input { flex: 1 1 100%; }
+  /* Regel 20: automatische Silbentrennung greift nur auf schmalen Bildschirmen. */
+  .titleblock h1 { hyphens: auto; }
 
-  /* Der Gegenstand bleibt neben dem Status; nur die Anfrage-Buttons umbrechen */
+  .addrow .nz-btn,
+  .voicerow > .nz-btn { width: 100%; }
+
   .item { flex-wrap: wrap; }
-  .item-main { flex: 1 1 8rem; }
   .item-actions { width: 100%; justify-content: flex-start; }
-  .item-lentmeta { width: 100%; }
+  .statusbtn { width: 100%; }
+
+  .nz-toast-region { left: var(--nz-space-3); right: var(--nz-space-3); bottom: var(--nz-space-3); max-width: none; }
+  .nz-toast { min-width: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * { transition: none !important; }
+  .voicestate .nz-dot { animation: none; }
 }

@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 /**
- * Leih-Katalog · leih-ich-dir.de
+ * Leih-Katalog · leihichdir.de
  * -----------------------------------------------------------------------------
  * Flat-File-Backend. Bewusst "dumm": Der Server kennt ausschließlich Chiffrat.
  *
@@ -27,17 +27,55 @@ declare(strict_types=1);
 
 /* == Konfiguration ========================================================= */
 
-const API_VERSION      = '1.0.0';
-const DATA_DIR         = __DIR__ . '/data';
-const LISTS_DIR        = DATA_DIR . '/lists';
-const THROTTLE_DIR     = DATA_DIR . '/throttle';
-const SALT_FILE        = DATA_DIR . '/.salt';
+const API_VERSION      = '1.1.0';
+
+/**
+ * Ablageort der Daten. Die Umgebungsvariable LEIH_DATA_DIR verlegt ihn, etwa
+ * nach außerhalb des DocumentRoot; das ist die robustere Absicherung, weil sie
+ * nicht von .htaccess abhängt. Im Virtual Host: SetEnv LEIH_DATA_DIR /var/lib/…
+ */
+function data_dir(): string
+{
+    $env = getenv('LEIH_DATA_DIR');
+    return (is_string($env) && $env !== '') ? rtrim($env, '/') : __DIR__ . '/data';
+}
+
+function lists_dir(): string { return data_dir() . '/lists'; }
+function throttle_dir(): string { return data_dir() . '/throttle'; }
+function salt_file(): string { return data_dir() . '/.salt'; }
+function ai_key_file(): string { return data_dir() . '/.ai-key'; }
 
 const MAX_REQUEST_SIZE = 1048576;  // 1 MiB Rohanfrage
 const MAX_CT_CHARS     = 524288;   // 512 KiB Chiffrat (base64url)
 const CREATE_LIMIT     = 20;       // neue Listen pro Fenster und IP
 const CREATE_WINDOW    = 3600;     // Sekunden
 const THROTTLE_GC_PROB = 50;       // 1 von n Anfragen räumt alte Zählerdateien auf
+
+/* -- KI-Proxy ---------------------------------------------------------------
+ * Standardmäßig abgeschaltet, und das ist die Voreinstellung mit Absicht.
+ *
+ * Der Rest dieser Anwendung ist so gebaut, dass der Server keinen Klartext
+ * sehen kann. Der Proxy durchbricht das für genau eine Angabe: den Satz, den
+ * jemand ins Mikrofon gesprochen hat. Dieser Satz läuft dann über diesen
+ * Server und weiter zu Google, statt vom Gerät aus direkt dorthin.
+ *
+ * Wer ihn einschaltet, entscheidet sich für Bequemlichkeit (Gäste brauchen
+ * keinen eigenen Schlüssel) und gegen die Reinheit der Zusage. Das gehört in
+ * die Datenschutzerklärung des Betriebs, nicht in eine Fußnote.
+ *
+ * Einschalten:
+ *   1. AI_PROXY_ENABLED auf true setzen
+ *   2. Schlüssel hinterlegen, entweder in data/.ai-key oder in der
+ *      Umgebungsvariable LEIH_AI_KEY (SetEnv im Virtual Host)
+ *
+ * Der Text wird nicht protokolliert und nicht gespeichert.
+ * -------------------------------------------------------------------------- */
+const AI_PROXY_ENABLED = false;
+const AI_ENDPOINT      = 'https://generativelanguage.googleapis.com/v1beta/models/';
+const AI_MODEL         = 'gemini-2.5-flash';
+const AI_MAX_TEXT      = 1500;     // Zeichen je Anfrage
+const AI_LIMIT         = 60;       // Anfragen pro Fenster und IP
+const AI_WINDOW        = 3600;
 
 /* == Antworten ============================================================= */
 
@@ -73,12 +111,12 @@ function fail(int $code, string $error): never
  */
 function ensure_dirs(): void
 {
-    foreach ([DATA_DIR, LISTS_DIR, THROTTLE_DIR] as $dir) {
+    foreach ([data_dir(), lists_dir(), throttle_dir()] as $dir) {
         if (!is_dir($dir) && !@mkdir($dir, 0770, true) && !is_dir($dir)) {
             fail(500, 'storage');
         }
     }
-    $guard = DATA_DIR . '/.htaccess';
+    $guard = data_dir() . '/.htaccess';
     if (!file_exists($guard)) {
         @file_put_contents(
             $guard,
@@ -92,19 +130,19 @@ function ensure_dirs(): void
 /** Dateipfad einer Liste; die ersten zwei Zeichen bilden ein Unterverzeichnis. */
 function list_path(string $id): string
 {
-    return LISTS_DIR . '/' . substr($id, 0, 2) . '/' . $id . '.json';
+    return lists_dir() . '/' . substr($id, 0, 2) . '/' . $id . '.json';
 }
 
 /** Installationsspezifisches Salz für Ratenbegrenzungs-Hashes. */
 function install_salt(): string
 {
-    $salt = @file_get_contents(SALT_FILE);
+    $salt = @file_get_contents(salt_file());
     if (is_string($salt) && strlen($salt) >= 32) {
         return $salt;
     }
     $salt = bin2hex(random_bytes(32));
-    @file_put_contents(SALT_FILE, $salt, LOCK_EX);
-    @chmod(SALT_FILE, 0600);
+    @file_put_contents(salt_file(), $salt, LOCK_EX);
+    @chmod(salt_file(), 0600);
     return $salt;
 }
 
@@ -172,13 +210,15 @@ function valid_payload(mixed $payload): array
 /* == Ratenbegrenzung ======================================================= */
 
 /**
- * Begrenzt das Anlegen neuer Listen pro IP und Zeitfenster.
+ * Begrenzt Anfragen pro IP und Zeitfenster.
  * Gespeichert wird nur ein gesalzener Hash der Adresse, nie die Adresse selbst.
+ *
+ * @param string $bucket Name des Zählers, trennt Anlegen und KI-Anfragen
  */
-function throttle_create(): void
+function throttle(string $bucket, int $limit, int $window): void
 {
     $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-    $file = THROTTLE_DIR . '/' . hash('sha256', $ip . '|' . install_salt()) . '.json';
+    $file = throttle_dir() . '/' . hash('sha256', $bucket . '|' . $ip . '|' . install_salt()) . '.json';
 
     $fh = @fopen($file, 'c+');
     if ($fh === false) {
@@ -189,7 +229,7 @@ function throttle_create(): void
     $rec = json_decode((string) $raw, true);
     $now = time();
 
-    if (!is_array($rec) || ($rec['w'] ?? 0) + CREATE_WINDOW < $now) {
+    if (!is_array($rec) || ($rec['w'] ?? 0) + $window < $now) {
         $rec = ['w' => $now, 'n' => 0];
     }
     $rec['n'] = (int) $rec['n'] + 1;
@@ -201,7 +241,7 @@ function throttle_create(): void
     flock($fh, LOCK_UN);
     fclose($fh);
 
-    if ($rec['n'] > CREATE_LIMIT) {
+    if ($rec['n'] > $limit) {
         fail(429, 'ratelimit');
     }
 }
@@ -213,7 +253,7 @@ function throttle_gc(): void
         return;
     }
     $cutoff = time() - (CREATE_WINDOW * 2);
-    foreach (glob(THROTTLE_DIR . '/*.json') ?: [] as $file) {
+    foreach (glob(throttle_dir() . '/*.json') ?: [] as $file) {
         if (@filemtime($file) < $cutoff) {
             @unlink($file);
         }
@@ -230,6 +270,7 @@ function action_ping(): never
         'service'    => 'leih-katalog',
         'version'    => API_VERSION,
         'maxPayload' => MAX_CT_CHARS,
+        'aiProxy'    => ai_available(),
     ]);
 }
 
@@ -274,7 +315,7 @@ function action_create(array $in): never
     }
     $payload = valid_payload($in['payload'] ?? null);
 
-    throttle_create();
+    throttle('create', CREATE_LIMIT, CREATE_WINDOW);
     throttle_gc();
 
     $path = list_path($id);
@@ -376,6 +417,154 @@ function action_delete(array $in): never
     respond(200, ['ok' => true]);
 }
 
+/* == KI-Proxy ============================================================== */
+
+/** Liest den Schlüssel aus der Umgebung oder aus data/.ai-key. */
+function ai_key(): string
+{
+    $env = getenv('LEIH_AI_KEY');
+    if (is_string($env) && $env !== '') {
+        return trim($env);
+    }
+    $file = @file_get_contents(ai_key_file());
+    return is_string($file) ? trim($file) : '';
+}
+
+function ai_available(): bool
+{
+    return AI_PROXY_ENABLED && ai_key() !== '';
+}
+
+/**
+ * Dieselbe Anweisung wie im Browser: ausschließlich ein JSON-Array,
+ * kein Markdown, keine Erklärung.
+ */
+function ai_system_prompt(): string
+{
+    return implode("\n", [
+        'You convert a spoken inventory description into structured data.',
+        'Return ONLY a valid JSON array. No markdown, no code fences, no commentary, no other keys.',
+        'Format: [{"item": "Gegenstandsname", "status": "available"}]',
+        'Rules:',
+        '- "status" is exactly "available" or "lent". Use "lent" only when the speaker states the thing is currently lent out, borrowed or otherwise unavailable.',
+        '- Keep "item" in the language the speaker used. Use a short, singular, capitalised noun phrase without articles, numerals or filler words.',
+        '- Split enumerations into separate entries. If a count is stated, repeat the entry that many times, at most ten.',
+        '- Ignore anything that is not a lendable object.',
+        '- If nothing usable is present, return [].',
+    ]);
+}
+
+/**
+ * Sendet eine Anfrage an die KI. Nutzt cURL, wo vorhanden, sonst Streams,
+ * damit auch einfaches Shared Hosting bedient wird.
+ *
+ * @return string|null Antwortkörper oder null bei einem Fehlschlag
+ */
+function ai_post(string $url, string $body, string $key): ?string
+{
+    $headers = ['Content-Type: application/json', 'x-goog-api-key: ' . $key];
+
+    if (function_exists('curl_init')) {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => $body,
+            CURLOPT_HTTPHEADER     => $headers,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => 20,
+        ]);
+        $response = curl_exec($ch);
+        $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        return ($status === 200 && is_string($response)) ? $response : null;
+    }
+
+    $context = stream_context_create(['http' => [
+        'method'        => 'POST',
+        'header'        => implode("\r\n", $headers),
+        'content'       => $body,
+        'timeout'       => 20,
+        'ignore_errors' => true,
+    ]]);
+    $response = @file_get_contents($url, false, $context);
+    return is_string($response) && $response !== '' ? $response : null;
+}
+
+/**
+ * Wandelt gesprochenen Freitext in Einträge. Der Text wird weitergereicht und
+ * danach verworfen: kein Protokoll, keine Ablage, keine Zuordnung zu einer Liste.
+ *
+ * @param array<string, mixed> $in
+ */
+function action_ai(array $in): never
+{
+    if (!ai_available()) {
+        fail(404, 'disabled');
+    }
+    $text = $in['text'] ?? '';
+    if (!is_string($text) || trim($text) === '') {
+        fail(400, 'malformed');
+    }
+    $text = mb_substr(trim($text), 0, AI_MAX_TEXT);
+
+    throttle('ai', AI_LIMIT, AI_WINDOW);
+    throttle_gc();
+
+    $request = json_encode([
+        'systemInstruction' => ['parts' => [['text' => ai_system_prompt()]]],
+        'contents'          => [['role' => 'user', 'parts' => [['text' => $text]]]],
+        'generationConfig'  => [
+            'temperature'      => 0,
+            'responseMimeType' => 'application/json',
+            'responseSchema'   => [
+                'type'  => 'ARRAY',
+                'items' => [
+                    'type'       => 'OBJECT',
+                    'properties' => [
+                        'item'   => ['type' => 'STRING'],
+                        'status' => ['type' => 'STRING', 'enum' => ['available', 'lent']],
+                    ],
+                    'required' => ['item', 'status'],
+                ],
+            ],
+        ],
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+    $raw = ai_post(AI_ENDPOINT . rawurlencode(AI_MODEL) . ':generateContent', (string) $request, ai_key());
+    if ($raw === null) {
+        fail(502, 'upstream');
+    }
+
+    $data = json_decode($raw, true);
+    $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? null;
+    if (!is_string($text)) {
+        fail(502, 'upstream');
+    }
+
+    $items = json_decode($text, true);
+    if (!is_array($items)) {
+        fail(502, 'upstream');
+    }
+
+    /* Nur bekannte Felder weiterreichen, in begrenzter Menge und Länge. */
+    $clean = [];
+    foreach (array_slice($items, 0, 50) as $entry) {
+        if (!is_array($entry) || !isset($entry['item']) || !is_string($entry['item'])) {
+            continue;
+        }
+        $name = trim($entry['item']);
+        if (mb_strlen($name) < 2) {
+            continue;
+        }
+        $clean[] = [
+            'item'   => mb_substr($name, 0, 80),
+            'status' => (($entry['status'] ?? '') === 'lent') ? 'lent' : 'available',
+        ];
+    }
+
+    respond(200, ['items' => $clean]);
+}
+
 /* == Einstiegspunkt ======================================================== */
 
 ensure_dirs();
@@ -404,6 +593,9 @@ if ($method === 'POST') {
     }
     if ($action === 'delete') {
         action_delete($in);
+    }
+    if ($action === 'ai') {
+        action_ai($in);
     }
     fail(400, 'unknown_action');
 }
