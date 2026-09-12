@@ -69,11 +69,24 @@
     <path d="M8 16 L30 34 L52 16 Z" fill="#00FF9C"/>
     <use href="#g-sign"/>
   </symbol>
-  <symbol id="i-chat" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
-    <path d="M10 12 L50 12 L50 37 L25 37 L16 46 L16 37 L10 37 Z" fill="#00FF9C"/>
-    <circle cx="24" cy="24" r="2.4" fill="currentColor" stroke="none"/>
-    <circle cx="31" cy="24" r="2.4" fill="currentColor" stroke="none"/>
-    <circle cx="38" cy="24" r="2.4" fill="currentColor" stroke="none"/>
+  <symbol id="i-check" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M12 34 L26 48 L52 16"/>
+    <use href="#g-sign"/>
+  </symbol>
+  <symbol id="i-user" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <circle cx="31" cy="21" r="10" fill="#00FF9C"/>
+    <path d="M13 50 L17 40 L31 36 L45 40 L49 50"/>
+    <use href="#g-sign"/>
+  </symbol>
+  <symbol id="i-share" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M10 22 L10 50 L40 50 L40 32"/>
+    <path d="M28 32 L45 15"/>
+    <path d="M34 10 L50 10 L50 26 Z" fill="#00FF9C"/>
+    <use href="#g-sign"/>
+  </symbol>
+  <symbol id="i-close" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M14 14 L50 50"/>
+    <path d="M50 14 L14 50"/>
     <use href="#g-sign"/>
   </symbol>
   <symbol id="i-trash" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
@@ -185,7 +198,7 @@
         </li>
         <li>
           <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-handover"/></svg>
-          <span data-i18n="start.point3">Freunde sehen immer den aktuellen Stand und fragen per E-Mail oder WhatsApp an.</span>
+          <span data-i18n="start.point3">Freunde sehen immer den aktuellen Stand und fragen mit einem Klick an, über welchen Weg sie mögen.</span>
         </li>
       </ul>
       <p class="actions">
@@ -222,46 +235,8 @@
       </p>
     </div>
 
-    <!-- 2 · Gegenstand hinzufügen, nur im Bearbeitenmodus -->
-    <form class="nz-card nz-card--raised" id="addForm" hidden autocomplete="off">
-      <h2 class="nz-card__title" data-i18n="add.headline">Gegenstand hinzufügen</h2>
-      <div class="addrow">
-        <label class="nz-sr-only" for="addName" data-i18n="add.nameLabel">Gegenstand</label>
-        <input type="text" id="addName" class="nz-input" list="itemSuggestions" required maxlength="80"
-               data-i18n-placeholder="add.namePlaceholder" placeholder="zum Beispiel Bohrmaschine">
-        <label class="nz-sr-only" for="addNote" data-i18n="add.noteLabel">Notiz</label>
-        <input type="text" id="addNote" class="nz-input" maxlength="120"
-               data-i18n-placeholder="add.notePlaceholder" placeholder="Notiz, optional">
-        <button type="submit" class="nz-btn nz-btn--primary">
-          <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-plus"/></svg>
-          <span data-i18n="add.submit">Hinzufügen</span>
-        </button>
-      </div>
-      <!-- Native Autovervollständigung, kein eigenes Dropdown-Widget. -->
-      <datalist id="itemSuggestions"></datalist>
-
-      <!-- Spracheingabe -->
-      <div class="voicebox" id="voiceBox" hidden>
-        <div class="voicerow">
-          <button type="button" id="btnMic" class="nz-btn" aria-pressed="false">
-            <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-voice"/></svg>
-            <span class="micbtn-label" data-i18n="voice.start">Einsprechen</span>
-          </button>
-          <span id="voiceState" class="nz-label voicestate" role="status" aria-live="polite"></span>
-        </div>
-        <label class="nz-sr-only" for="voiceText" data-i18n="voice.textLabel">Erkannter Text</label>
-        <textarea id="voiceText" class="nz-textarea voice-text" rows="2" maxlength="1500"
-                  data-i18n-placeholder="voice.placeholder"
-                  placeholder="Mehrere Gegenstände am Stück sprechen oder eintippen"></textarea>
-        <div class="voicerow">
-          <button type="button" id="btnVoiceApply" class="nz-btn nz-btn--sm" data-i18n="voice.apply">Übernehmen</button>
-          <small class="nz-field__hint" id="voiceHint"></small>
-        </div>
-      </div>
-    </form>
-
-    <!-- 3 · Inventar -->
-    <section class="nz-card nz-card--raised">
+    <!-- 2 · Inventar, mit dem Hinzufügen darin -->
+    <section class="nz-card nz-card--raised" id="inventoryBox">
       <div class="items-head">
         <h2 class="nz-card__title" data-i18n="items.headline">Inventar</h2>
         <span id="itemsCount" class="nz-badge"></span>
@@ -270,19 +245,59 @@
           <span data-i18n="items.refresh">Aktualisieren</span>
         </button>
       </div>
+
+      <!-- Hinzufügen steht in der Liste, nicht daneben. Nur der Name, alles
+           Weitere steht im Fenster hinter dem Eintrag. -->
+      <form class="addbox" id="addForm" hidden autocomplete="off">
+        <div class="addrow">
+          <label class="nz-sr-only" for="addName" data-i18n="add.nameLabel">Gegenstand</label>
+          <input type="text" id="addName" class="nz-input" list="itemSuggestions" required maxlength="80"
+                 data-i18n-placeholder="add.namePlaceholder" placeholder="zum Beispiel Bohrmaschine">
+          <button type="submit" class="nz-btn nz-btn--primary">
+            <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-plus"/></svg>
+            <span data-i18n="add.submit">Hinzufügen</span>
+          </button>
+        </div>
+        <!-- Native Autovervollständigung, kein eigenes Dropdown-Widget. -->
+        <datalist id="itemSuggestions"></datalist>
+
+        <!-- Spracheingabe -->
+        <div class="voicebox" id="voiceBox" hidden>
+          <div class="voicerow">
+            <button type="button" id="btnMic" class="nz-btn" aria-pressed="false">
+              <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-voice"/></svg>
+              <span class="micbtn-label" data-i18n="voice.start">Einsprechen</span>
+            </button>
+            <span id="voiceState" class="nz-label voicestate" role="status" aria-live="polite"></span>
+          </div>
+          <label class="nz-sr-only" for="voiceText" data-i18n="voice.textLabel">Erkannter Text</label>
+          <textarea id="voiceText" class="nz-textarea voice-text" rows="2" maxlength="1500"
+                    data-i18n-placeholder="voice.placeholder"
+                    placeholder="Mehrere Gegenstände am Stück sprechen oder eintippen"></textarea>
+          <div class="voicerow">
+            <button type="button" id="btnVoiceApply" class="nz-btn nz-btn--sm" data-i18n="voice.apply">Übernehmen</button>
+            <small class="nz-field__hint" id="voiceHint"></small>
+          </div>
+        </div>
+      </form>
+
       <ul id="itemList" class="items"></ul>
       <div id="itemsEmpty" class="nz-empty" hidden>
         <p class="nz-empty__body" id="itemsEmptyText"></p>
       </div>
     </section>
 
-    <!-- 4 · Link teilen, nur im Bearbeitenmodus -->
+    <!-- 3 · Link teilen, nur im Bearbeitenmodus -->
     <section class="nz-card nz-card--raised" id="shareBox" hidden>
       <h2 class="nz-card__title" data-i18n="share.headline">Link teilen</h2>
       <div class="nz-field">
         <label class="nz-field__label" for="linkView" data-i18n="share.viewLabel">Ansehen-Link für Freunde</label>
         <div class="linkrow">
           <input type="text" id="linkView" class="nz-input mono" readonly>
+          <button type="button" class="nz-btn nz-btn--sm nz-btn--primary" id="btnShareView" hidden>
+            <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-share"/></svg>
+            <span data-i18n="share.send">Teilen</span>
+          </button>
           <button type="button" class="nz-btn nz-btn--sm" data-copy="linkView" data-i18n="share.copy">Kopieren</button>
         </div>
       </div>
@@ -299,7 +314,7 @@
       </p>
     </section>
 
-    <!-- 5 · Kontakt, nur im Bearbeitenmodus -->
+    <!-- 4 · Kontakt, nur im Bearbeitenmodus -->
     <section class="nz-card nz-card--raised" id="contactBox" hidden>
       <h2 class="nz-card__title" data-i18n="contact.headline">Kontakt</h2>
       <p class="nz-field__hint" data-i18n="contact.hint">
@@ -310,11 +325,6 @@
         <input type="email" id="cfgEmail" class="nz-input" maxlength="120" placeholder="name@example.org">
       </div>
       <div class="nz-field">
-        <label class="nz-field__label" for="cfgPhone" data-i18n="settings.phone">WhatsApp-Nummer</label>
-        <input type="tel" id="cfgPhone" class="nz-input" maxlength="32" placeholder="+49 170 1234567">
-        <small class="nz-field__hint" data-i18n="settings.phoneHint">Internationales Format</small>
-      </div>
-      <div class="nz-field">
         <label class="nz-check">
           <input type="checkbox" id="cfgShowBorrower">
           <span class="nz-check__box" aria-hidden="true"></span>
@@ -323,7 +333,7 @@
       </div>
     </section>
 
-    <!-- 6 · Einstellungen, zugeklappt, nur im Bearbeitenmodus -->
+    <!-- 5 · Einstellungen, zugeklappt, nur im Bearbeitenmodus -->
     <details class="nz-card settings" id="settingsBox" hidden>
       <summary>
         <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gear"/></svg>
@@ -430,6 +440,27 @@
     </p>
   </div>
 </footer>
+
+<!-- Schwebende Schaltflaeche zum Hinzufuegen. Nach Regel 15 gehoert sie unten
+     rechts; sie fuehrt zum Eingabefeld im Inventar und setzt den Fokus dorthin. -->
+<button type="button" id="fabAdd" class="fab" hidden>
+  <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-plus"/></svg>
+  <span class="nz-sr-only" data-i18n="add.submit">Hinzufügen</span>
+</button>
+
+<!-- Fenster zu einem Gegenstand. Inhalt und Fussleiste baut app.js, je nachdem
+     ob bearbeitet oder nur gelesen wird. -->
+<dialog class="nz-modal" id="itemModal" aria-labelledby="modalTitle">
+  <div class="nz-modal__head">
+    <h2 class="nz-modal__title" id="modalTitle"></h2>
+    <button type="button" class="nz-modal__x" id="modalClose">
+      <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-close"/></svg>
+      <span class="nz-sr-only" data-i18n="modal.close">Schließen</span>
+    </button>
+  </div>
+  <div class="nz-modal__body" id="modalBody"></div>
+  <div class="nz-modal__foot" id="modalFoot"></div>
+</dialog>
 
 <div class="nz-toast-region" id="toastRegion" aria-live="polite">
   <div class="nz-toast nz-toast--signal" id="toast" hidden>

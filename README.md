@@ -2,7 +2,7 @@
 
 Ein minimalistischer **Leih-Katalog**: Du pflegst eine Liste deiner Gegenstände,
 deine Freunde sehen über einen Link, was gerade verfügbar ist, und fragen mit
-einem Klick per E-Mail oder WhatsApp an.
+einem Klick an, über welchen Weg sie mögen.
 
 Die Inhalte werden **im Browser ver- und entschlüsselt**. Der Server speichert
 ausschließlich unlesbare Zeichenketten und kennt weder Gegenstände noch Namen
@@ -22,7 +22,8 @@ oder Kontaktdaten.
 | **Zweisprachig** | Deutsch und Englisch, automatische Erkennung plus manuelle Umschaltung |
 | **Hell und dunkel** | folgt dem System, lässt sich in der Kopfleiste und in den Einstellungen übersteuern |
 | **Autovervollständigung** | 29 typische Leih-Gegenstände über ein natives `<datalist>`-Element |
-| **Anfragen** | `mailto:`- und `wa.me`-Links mit vorformuliertem Text in der aktiven Sprache |
+| **Ein Eintrag, ein Fenster** | die Liste zeigt Name und Verfügbarkeit, alles Weitere steht hinter dem Eintrag |
+| **Anfragen** | vorformulierter Text in der aktiven Sprache, weitergegeben über das Gerät an jede App oder per `mailto:` |
 | **Spracheingabe** | Gegenstände unterwegs einsprechen, Zerlegung im Browser oder wahlweise per Gemini |
 | **Erscheinungsbild** | das Corporate Design von nozilla, mitgeliefert und ohne fremde Server |
 | **Ohne Abhängigkeiten** | pures PHP, HTML, CSS, Vanilla JS, kein Framework, kein Bauschritt, keine Datenbank |
@@ -418,7 +419,7 @@ bleiben unberührt. Alle drei Prüfungen laufen auch in der GitHub-Action `CI`.
 
 **leih-ich-dir** is a minimalist lending catalogue: you keep a list of the
 things you lend out, friends open a view link to see what is available and ask
-for an item via e-mail or WhatsApp.
+for an item through whichever channel they prefer.
 
 All contents are encrypted in the browser with AES-GCM-256 (Web Crypto API).
 The key travels in the URL fragment (`#`) and is therefore never transmitted to
