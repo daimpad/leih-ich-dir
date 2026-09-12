@@ -175,36 +175,59 @@
   <!-- ==================================================================== -->
   <!-- Startansicht                                                         -->
   <!-- ==================================================================== -->
-  <section id="viewStart" class="view" hidden>
+  <section id="viewStart" class="view view--start" hidden>
 
-    <div class="titleblock">
-      <h1 data-i18n="start.headline">Dein Leih-Katalog</h1>
-      <!-- Regel 12: unter dem Titel steht eine Subline auf dem Papierton. -->
-      <p class="nz-lead" data-i18n="start.lead">
+    <!-- Hero. Der grüne Marker sitzt nach Vorgabe des Hauses auf einem Wort,
+         nicht auf einem Satz. -->
+    <div class="hero">
+      <h1 class="nz-display"><span data-i18n="hero.a">Leih</span> <mark data-i18n="hero.b">ich</mark> <span data-i18n="hero.c">dir.</span></h1>
+      <p class="nz-lead" data-i18n="hero.lead">
         Eine Liste deiner Gegenstände, die du an Freunde verleihst. Ohne Konto,
         ohne Tracking, und lesen können sie nur du und deine Freunde.
       </p>
     </div>
 
-    <div class="nz-card nz-card--raised">
-      <ul class="points">
+    <!-- Vertrauensanker. Keine Zeichen: Jedes Zeichen des Hauses steht für
+         genau eine Sache, und für diese fünf gibt es keine. -->
+    <ul class="trust" aria-label="Eigenschaften">
+      <li class="nz-badge" data-i18n="trust.tracking">Kein Tracking</li>
+      <li class="nz-badge" data-i18n="trust.account">Ohne Konto</li>
+      <li class="nz-badge" data-i18n="trust.ads">Keine Werbung</li>
+      <li class="nz-badge" data-i18n="trust.crypto">Verschlüsselt</li>
+      <li class="nz-badge" data-i18n="trust.source">Open Source</li>
+    </ul>
+
+    <!-- Drei Schritte. Die Zahlen stehen nach Regel 27 schwarz mit weißer
+         Schrift: Grün sagt „hier kann man klicken", eine Schrittzahl nicht. -->
+    <section class="nz-card nz-card--raised">
+      <h2 class="nz-card__title" data-i18n="steps.headline">In drei Schritten</h2>
+      <ol class="steps">
         <li>
-          <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-encrypt"/></svg>
-          <span data-i18n="start.point1">Inhalte werden im Browser verschlüsselt. Der Server speichert nur unlesbare Zeichenketten.</span>
+          <span class="step-no" aria-hidden="true">1</span>
+          <div>
+            <h3 data-i18n="steps.one">Liste anlegen</h3>
+            <p data-i18n="steps.oneText">Ein Klick, und du hast zwei Links: einen geheimen zum Bearbeiten und einen zum Weitergeben.</p>
+          </div>
         </li>
         <li>
-          <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-key"/></svg>
-          <span data-i18n="start.point2">Ein geheimer Bearbeiten-Link für dich, ein Ansehen-Link für deine Freunde.</span>
+          <span class="step-no" aria-hidden="true">2</span>
+          <div>
+            <h3 data-i18n="steps.two">Gegenstände eintragen</h3>
+            <p data-i18n="steps.twoText">Tippen oder einsprechen. Erst nur den Namen, alles Weitere steht hinter dem Eintrag.</p>
+          </div>
         </li>
         <li>
-          <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-handover"/></svg>
-          <span data-i18n="start.point3">Freunde sehen immer den aktuellen Stand und fragen mit einem Klick an, über welchen Weg sie mögen.</span>
+          <span class="step-no" aria-hidden="true">3</span>
+          <div>
+            <h3 data-i18n="steps.three">Link weitergeben</h3>
+            <p data-i18n="steps.threeText">Freunde sehen, was gerade frei ist, und fragen mit einem Klick an.</p>
+          </div>
         </li>
-      </ul>
+      </ol>
       <p class="actions">
         <button type="button" id="btnCreate" class="nz-btn nz-btn--primary nz-btn--lg" data-i18n="start.create">Neue Liste anlegen</button>
       </p>
-    </div>
+    </section>
 
     <div class="nz-alert note">
       <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-key"/></svg>
@@ -253,23 +276,26 @@
           <label class="nz-sr-only" for="addName" data-i18n="add.nameLabel">Gegenstand</label>
           <input type="text" id="addName" class="nz-input" list="itemSuggestions" required maxlength="80"
                  data-i18n-placeholder="add.namePlaceholder" placeholder="zum Beispiel Bohrmaschine">
+          <!-- Das Mikrofon steht neben der Schaltfläche und erscheint nur,
+               wenn der Browser Spracherkennung mitbringt. -->
+          <button type="button" id="btnMic" class="nz-btn nz-btn--icon" aria-pressed="false" hidden>
+            <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-voice"/></svg>
+            <span class="nz-sr-only micbtn-label" data-i18n="voice.start">Einsprechen</span>
+          </button>
           <button type="submit" class="nz-btn nz-btn--primary">
             <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-plus"/></svg>
             <span data-i18n="add.submit">Hinzufügen</span>
           </button>
         </div>
+        <p class="addhint">
+          <button type="button" id="btnBulk" class="linkbtn" data-i18n="voice.bulk">Mehrere auf einmal</button>
+          <span id="voiceState" class="nz-label voicestate" role="status" aria-live="polite"></span>
+        </p>
         <!-- Native Autovervollständigung, kein eigenes Dropdown-Widget. -->
         <datalist id="itemSuggestions"></datalist>
 
         <!-- Spracheingabe -->
         <div class="voicebox" id="voiceBox" hidden>
-          <div class="voicerow">
-            <button type="button" id="btnMic" class="nz-btn" aria-pressed="false">
-              <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-voice"/></svg>
-              <span class="micbtn-label" data-i18n="voice.start">Einsprechen</span>
-            </button>
-            <span id="voiceState" class="nz-label voicestate" role="status" aria-live="polite"></span>
-          </div>
           <label class="nz-sr-only" for="voiceText" data-i18n="voice.textLabel">Erkannter Text</label>
           <textarea id="voiceText" class="nz-textarea voice-text" rows="2" maxlength="1500"
                     data-i18n-placeholder="voice.placeholder"
@@ -290,9 +316,22 @@
     <!-- 3 · Link teilen, nur im Bearbeitenmodus -->
     <section class="nz-card nz-card--raised" id="shareBox" hidden>
       <h2 class="nz-card__title" data-i18n="share.headline">Link teilen</h2>
-      <div class="nz-field">
-        <label class="nz-field__label" for="linkView" data-i18n="share.viewLabel">Ansehen-Link für Freunde</label>
+
+      <div class="nz-tabs" role="tablist">
+        <button type="button" class="nz-tab" role="tab" id="tabBtnView"
+                aria-selected="true" aria-controls="tabView" data-tab="View"
+                data-i18n="share.tabView">Ansehen</button>
+        <button type="button" class="nz-tab" role="tab" id="tabBtnEdit"
+                aria-selected="false" aria-controls="tabEdit" data-tab="Edit"
+                data-i18n="share.tabEdit">Bearbeiten</button>
+      </div>
+
+      <div class="tabpanel" id="tabView" role="tabpanel" aria-labelledby="tabBtnView">
+        <p class="nz-field__hint" data-i18n="share.viewHint">
+          Diesen Link geben deine Freunde weiter. Er zeigt die Liste, ändern lässt sich damit nichts.
+        </p>
         <div class="linkrow">
+          <label class="nz-sr-only" for="linkView" data-i18n="share.viewLabel">Ansehen-Link für Freunde</label>
           <input type="text" id="linkView" class="nz-input mono" readonly>
           <button type="button" class="nz-btn nz-btn--sm nz-btn--primary" id="btnShareView" hidden>
             <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-share"/></svg>
@@ -301,14 +340,19 @@
           <button type="button" class="nz-btn nz-btn--sm" data-copy="linkView" data-i18n="share.copy">Kopieren</button>
         </div>
       </div>
-      <div class="nz-field">
-        <label class="nz-field__label" for="linkEdit" data-i18n="share.editLabel">Bearbeiten-Link, geheim</label>
+
+      <div class="tabpanel" id="tabEdit" role="tabpanel" aria-labelledby="tabBtnEdit" hidden>
+        <p class="nz-field__hint" data-i18n="share.editHint">
+          Dieser Link ist dein Zugang. Gib ihn niemandem und speichere ihn als Lesezeichen.
+        </p>
         <div class="linkrow">
+          <label class="nz-sr-only" for="linkEdit" data-i18n="share.editLabel">Bearbeiten-Link, geheim</label>
           <input type="password" id="linkEdit" class="nz-input mono" readonly>
           <button type="button" class="nz-btn nz-btn--sm" id="btnRevealEdit" data-i18n="share.reveal">Zeigen</button>
           <button type="button" class="nz-btn nz-btn--sm" data-copy="linkEdit" data-i18n="share.copy">Kopieren</button>
         </div>
       </div>
+
       <p class="nz-field__hint" data-i18n="share.hint">
         Der Schlüssel steht hinter dem Rautezeichen und wird technisch nie an den Server übertragen.
       </p>
@@ -320,6 +364,14 @@
       <p class="nz-field__hint" data-i18n="contact.hint">
         Diese Angaben werden mitverschlüsselt und nur für die Anfrage-Schaltflächen deiner Freunde genutzt.
       </p>
+      <div class="nz-field">
+        <label class="nz-field__label" for="cfgName" data-i18n="contact.name">Dein Name</label>
+        <input type="text" id="cfgName" class="nz-input" maxlength="60" autocomplete="name"
+               data-i18n-placeholder="contact.namePlaceholder" placeholder="zum Beispiel Damian">
+        <small class="nz-field__hint" data-i18n="contact.nameHint">
+          Steht über der Liste und in der Anrede, wenn jemand anfragt.
+        </small>
+      </div>
       <div class="nz-field">
         <label class="nz-field__label" for="cfgEmail" data-i18n="settings.email">E-Mail für Anfragen</label>
         <input type="email" id="cfgEmail" class="nz-input" maxlength="120" placeholder="name@example.org">
