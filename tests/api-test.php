@@ -27,6 +27,27 @@ $root = dirname(__DIR__);
 $base = 'http://' . HOST . ':' . PORT . '/api.php';
 $failures = 0;
 
+/* Eigenes Datenverzeichnis über LEIH_DATA_DIR. Der Test läuft damit auf einem
+   leeren Stand, rührt vorhandene Listen nicht an und bekommt eine unverbrauchte
+   Ratenbegrenzung. Es wird am Ende wieder entfernt. */
+$dataDir = sys_get_temp_dir() . '/leih-test-' . bin2hex(random_bytes(6));
+mkdir($dataDir, 0770, true);
+
+function rmtree(string $path): void
+{
+    if (!is_dir($path)) {
+        @unlink($path);
+        return;
+    }
+    foreach (scandir($path) ?: [] as $entry) {
+        if ($entry !== '.' && $entry !== '..') {
+            rmtree($path . '/' . $entry);
+        }
+    }
+    @rmdir($path);
+}
+register_shutdown_function(static function () use ($dataDir): void { rmtree($dataDir); });
+
 /* -- Hilfsfunktionen ------------------------------------------------------ */
 
 function b64u(string $bin): string
@@ -54,11 +75,14 @@ function http_json(string $url, ?array $post = null): array
     return [$code, json_decode((string) $body, true)];
 }
 
-function check(string $name, bool $ok): void
+function check(string $name, bool $ok, mixed $actual = null): void
 {
     global $failures;
     if (!$ok) {
         $failures++;
+        if ($actual !== null) {
+            printf("    ist: %s\n", var_export($actual, true));
+        }
     }
     printf("  %-48s %s\n", $name, $ok ? 'ok' : 'FEHLGESCHLAGEN');
 }
@@ -69,7 +93,9 @@ $descriptors = [1 => ['file', '/dev/null', 'w'], 2 => ['file', '/dev/null', 'w']
 $server = proc_open(
     sprintf('exec php -S %s:%d -t %s', HOST, PORT, escapeshellarg($root)),
     $descriptors,
-    $pipes
+    $pipes,
+    null,
+    array_merge(is_array(getenv()) ? getenv() : [], ['LEIH_DATA_DIR' => $dataDir])
 );
 if (!is_resource($server)) {
     exit("Der eingebaute PHP-Server ließ sich nicht starten.\n");
@@ -148,13 +174,39 @@ check('read nach delete → 404', $code === 404);
 [$code] = http_json($base, ['a' => 'frei-erfunden']);
 check('unbekannte Aktion → 400', $code === 400);
 
+/* Der KI-Proxy ist ab Werk abgeschaltet und meldet das auch. */
+[$code, $body] = http_json($base . '?a=ping');
+check('ping meldet den KI-Proxy als abgeschaltet', ($body['aiProxy'] ?? true) === false);
+
+[$code] = http_json($base, ['a' => 'ai', 'text' => 'Bohrmaschine und Zelt']);
+check('KI-Anfrage bei abgeschaltetem Proxy → 404', $code === 404);
+
 /* Der Server darf zu keinem Zeitpunkt Klartext ablegen. */
 $plainId = bin2hex(random_bytes(16));
 http_json($base, ['a' => 'create', 'id' => $plainId, 'proof' => $proof, 'payload' => $payload('Bohrmaschine')]);
-$stored = (string) @file_get_contents($root . '/data/lists/' . substr($plainId, 0, 2) . '/' . $plainId . '.json');
+$stored = (string) @file_get_contents($dataDir . '/lists/' . substr($plainId, 0, 2) . '/' . $plainId . '.json');
 check('Ablage enthält keinen Klartext', $stored !== '' && !str_contains($stored, 'Bohrmaschine'));
 check('Ablage speichert nur den Hash des Nachweises', str_contains($stored, '"verifier"') && !str_contains($stored, $proof));
 http_json($base, ['a' => 'delete', 'id' => $plainId, 'proof' => $proof]);
+
+/* Ratenbegrenzung: irgendwann verweigert der Server neue Listen. Die genaue
+   Grenze steht in api.php; geprüft wird, dass sie überhaupt greift und nicht
+   schon nach wenigen Anfragen zuschlägt. */
+$created = 0;
+$blocked = false;
+for ($attempt = 0; $attempt < 40; $attempt++) {
+    $spamId = bin2hex(random_bytes(16));
+    [$code] = http_json($base, ['a' => 'create', 'id' => $spamId, 'proof' => $proof, 'payload' => $payload('x')]);
+    if ($code === 429) {
+        $blocked = true;
+        break;
+    }
+    if ($code === 200) {
+        $created++;
+    }
+}
+check('Ratenbegrenzung greift beim Anlegen', $blocked);
+check('Ratenbegrenzung lässt genug Listen zu', $created >= 10, $created);
 
 echo $failures === 0
     ? "\nAlle Prüfungen bestanden.\n"

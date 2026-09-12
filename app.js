@@ -1,5 +1,5 @@
 /*!
- * Leih-Katalog · leih-ich-dir.de
+ * Leih-Katalog · leihichdir.de
  * ---------------------------------------------------------------------------
  * Vollständige Client-Logik: Ende-zu-Ende-Verschlüsselung (Web Crypto API),
  * Zweisprachigkeit, Rendering und Zugriff auf den Flat-File-Speicher (api.php).
@@ -39,6 +39,25 @@
   }
 
   function nowSec() { return Math.floor(Date.now() / 1000); }
+
+  var SVG_NS = 'http://www.w3.org/2000/svg';
+
+  /** Zeichen des Hauses aus dem eingebetteten Symbolsatz (siehe index.html). */
+  function icon(name) {
+    var svg = document.createElementNS(SVG_NS, 'svg');
+    svg.setAttribute('class', 'ico');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
+    var use = document.createElementNS(SVG_NS, 'use');
+    use.setAttribute('href', '#i-' + name);
+    svg.appendChild(use);
+    return svg;
+  }
+
+  /** Statuspunkt: grün für verfügbar, orange für verliehen. */
+  function statusDot(status) {
+    return el('span', 'nz-dot' + (status === 'lent' ? ' nz-dot--warn' : ''));
+  }
 
   /** Fehler mit maschinenlesbarem Code (siehe I18N-Schlüssel error.*). */
   function AppError(code) { this.code = code; this.message = code; }
@@ -138,18 +157,19 @@
   var I18N = {
     de: {
       'a11y.skip': 'Zum Inhalt springen',
-      'banner.preview': 'Vorschaumodus: Es ist kein PHP-Backend erreichbar. Listen werden nur lokal in diesem Browser gespeichert – ideal zum Ausprobieren der Oberfläche.',
+      'a11y.lang': 'Switch to English',
+      'banner.preview': 'Vorschaumodus: Es ist kein PHP-Backend erreichbar. Listen werden nur lokal in diesem Browser gespeichert. Das ist ideal, um die Oberfläche auszuprobieren.',
       'badge.local': 'lokal',
       'badge.cloud': 'Server',
 
       'start.headline': 'Dein Leih-Katalog',
-      'start.lead': 'Eine Liste deiner Gegenstände, die du an Freunde verleihst. Ohne Konto, ohne Tracking – und nur du und deine Freunde können die Inhalte lesen.',
-      'start.point1': 'Inhalte werden im Browser verschlüsselt; der Server speichert nur unlesbare Zeichenketten.',
+      'start.lead': 'Eine Liste deiner Gegenstände, die du an Freunde verleihst. Ohne Konto, ohne Tracking, und lesen können sie nur du und deine Freunde.',
+      'start.point1': 'Inhalte werden im Browser verschlüsselt. Der Server speichert nur unlesbare Zeichenketten.',
       'start.point2': 'Ein geheimer Bearbeiten-Link für dich, ein Ansehen-Link für deine Freunde.',
       'start.point3': 'Freunde sehen immer den aktuellen Stand und fragen per E-Mail oder WhatsApp an.',
       'start.create': 'Neue Liste anlegen',
       'start.creating': 'Liste wird angelegt …',
-      'start.hint': 'Wichtig: Der Bearbeiten-Link ist dein einziger Zugang. Speichere ihn als Lesezeichen – er lässt sich nicht wiederherstellen.',
+      'start.hint': 'Der Bearbeiten-Link ist dein einziger Zugang. Speichere ihn als Lesezeichen, er lässt sich nicht wiederherstellen.',
 
       'list.titleLabel': 'Titel der Liste',
       'list.titlePlaceholder': 'Titel der Liste',
@@ -159,19 +179,19 @@
 
       'share.headline': 'Links',
       'share.viewLabel': 'Ansehen-Link für Freunde',
-      'share.editLabel': 'Bearbeiten-Link (geheim)',
+      'share.editLabel': 'Bearbeiten-Link, geheim',
       'share.copy': 'Kopieren',
       'share.copied': 'Link kopiert.',
-      'share.copyfail': 'Kopieren nicht möglich – bitte den Link manuell markieren.',
+      'share.copyfail': 'Kopieren nicht möglich. Bitte den Link von Hand markieren.',
       'share.reveal': 'Zeigen',
       'share.hide': 'Verbergen',
-      'share.hint': 'Der Schlüssel steht hinter dem #-Zeichen und wird technisch nie an den Server übertragen.',
+      'share.hint': 'Der Schlüssel steht hinter dem Rautezeichen und wird technisch nie an den Server übertragen.',
 
       'add.headline': 'Gegenstand hinzufügen',
       'add.nameLabel': 'Gegenstand',
-      'add.namePlaceholder': 'z. B. Bohrmaschine',
+      'add.namePlaceholder': 'zum Beispiel Bohrmaschine',
       'add.noteLabel': 'Notiz',
-      'add.notePlaceholder': 'Notiz (optional)',
+      'add.notePlaceholder': 'Notiz, optional',
       'add.submit': 'Hinzufügen',
 
       'items.headline': 'Inventar',
@@ -188,7 +208,7 @@
       'item.delete': 'Löschen',
       'item.deleteConfirm': '„{name}“ wirklich aus der Liste entfernen?',
       'item.borrower': 'Verliehen an',
-      'item.borrowerPlaceholder': 'Name (optional)',
+      'item.borrowerPlaceholder': 'Name, optional',
       'item.since': 'seit',
       'item.lentTo': 'Verliehen an {name} seit {date}',
       'item.lentSince': 'Verliehen seit {date}',
@@ -198,23 +218,50 @@
       'request.copy': 'Anfragetext kopieren',
       'request.copied': 'Anfragetext kopiert.',
       'request.subject': 'Leihanfrage: {item}',
-      'request.body': 'Hallo! Ich möchte {item} ausleihen. Passt das bei dir?',
+      'request.body': 'Hallo, ich möchte {item} ausleihen. Passt das bei dir?',
 
-      'settings.headline': 'Einstellungen & Kontakt',
-      'settings.hint': 'Diese Angaben werden mitverschlüsselt und nur für die Anfrage-Buttons deiner Freunde genutzt.',
+      'settings.headline': 'Einstellungen und Kontakt',
+      'settings.hint': 'Diese Angaben werden mitverschlüsselt und nur für die Anfrage-Schaltflächen deiner Freunde genutzt.',
       'settings.email': 'E-Mail für Anfragen',
       'settings.phone': 'WhatsApp-Nummer',
-      'settings.phoneHint': 'Internationales Format, z. B. +49 …',
+      'settings.phoneHint': 'Internationales Format, zum Beispiel +49',
       'settings.showBorrower': 'Namen der Ausleihenden auch im Ansehen-Link zeigen',
       'settings.delete': 'Liste endgültig löschen',
       'settings.deleteConfirm': 'Die gesamte Liste wird unwiderruflich vom Server gelöscht. Fortfahren?',
       'settings.deleted': 'Liste gelöscht.',
+      'settings.aiHeadline': 'Sprache und KI-Strukturierung',
+      'settings.aiHint': 'Ohne Schlüssel zerlegt der Browser den gesprochenen Text selbst. Mit einem eigenen Gemini-Schlüssel übernimmt das die KI, dann verlässt der gesprochene Text dein Gerät.',
+      'settings.aiKey': 'Gemini-API-Schlüssel, optional',
+      'settings.aiKeyHint': 'Bleibt ausschließlich in diesem Browser. Er wird weder auf den Server übertragen noch in die Liste aufgenommen und gilt daher nicht für deine Freunde.',
+      'settings.aiProxy': 'Dieser Server bietet eine KI-Strukturierung an. Ohne eigenen Schlüssel wird der gesprochene Text dorthin übertragen.',
+      'settings.aiKeySaved': 'Schlüssel im Browser gespeichert.',
+      'settings.aiKeyCleared': 'Schlüssel aus dem Browser entfernt.',
+
+      'voice.start': 'Einsprechen',
+      'voice.stop': 'Aufnahme beenden',
+      'voice.textLabel': 'Erkannter Text',
+      'voice.placeholder': 'Mehrere Gegenstände am Stück sprechen oder eintippen',
+      'voice.apply': 'Übernehmen',
+      'voice.listening': 'Hört zu …',
+      'voice.processing': 'Wird ausgewertet …',
+      'voice.hintLocal': 'Zerlegung findet im Browser statt. Ein Gemini-Schlüssel in den Einstellungen liefert bessere Ergebnisse.',
+      'voice.hintAi': 'Gemini strukturiert den Text. Er wird dazu an Google übertragen.',
+      'voice.hintProxy': 'Die Strukturierung übernimmt der Server dieser Anwendung.',
+      'voice.hintNoSpeech': 'Dieser Browser kennt keine Spracherkennung. Eintippen und Übernehmen funktioniert trotzdem.',
+      'voice.added': '{n} Gegenstände übernommen.',
+      'voice.added_1': 'Ein Gegenstand übernommen.',
+      'voice.none': 'Daraus ließ sich kein Gegenstand ableiten.',
+      'voice.denied': 'Zugriff auf das Mikrofon wurde abgelehnt.',
+      'voice.noSpeechHeard': 'Nichts verstanden. Bitte noch einmal.',
+      'voice.errorMic': 'Die Spracherkennung ist fehlgeschlagen.',
+      'voice.errorAi': 'Die KI war nicht erreichbar; der Text wurde im Browser zerlegt.',
+      'voice.insecure': 'Spracheingabe benötigt eine HTTPS-Verbindung.',
 
       'status.saved': 'Gespeichert',
       'status.saving': 'Speichere …',
       'status.unsaved': 'Nicht gespeichert',
       'status.error': 'Speichern fehlgeschlagen',
-      'status.overwritten': 'Die Liste wurde parallel geändert; dein Stand wurde übernommen.',
+      'status.overwritten': 'Die Liste wurde parallel geändert. Dein Stand wurde übernommen.',
       'status.refreshed': 'Aktualisiert.',
 
       'error.headline': 'Das hat nicht geklappt',
@@ -229,23 +276,24 @@
       'error.ratelimit': 'Zu viele neue Listen in kurzer Zeit. Bitte später erneut versuchen.',
       'error.exists': 'Diese Listen-Kennung ist bereits vergeben. Bitte erneut versuchen.',
 
-      'footer.text': 'Freie Software, MIT-Lizenz – Ende-zu-Ende-verschlüsselt.'
+      'footer.text': 'Freie Software, MIT-Lizenz, Ende-zu-Ende-verschlüsselt.'
     },
 
     en: {
       'a11y.skip': 'Skip to content',
-      'banner.preview': 'Preview mode: no PHP backend reachable. Lists are stored locally in this browser only – handy for trying out the interface.',
+      'a11y.lang': 'Auf Deutsch umschalten',
+      'banner.preview': 'Preview mode: no PHP backend reachable. Lists are stored locally in this browser only. Handy for trying out the interface.',
       'badge.local': 'local',
       'badge.cloud': 'server',
 
       'start.headline': 'Your lending catalogue',
-      'start.lead': 'A list of the things you lend to friends. No account, no tracking – and only you and your friends can read the contents.',
-      'start.point1': 'Contents are encrypted in the browser; the server only stores unreadable strings.',
+      'start.lead': 'A list of the things you lend to friends. No account, no tracking, and only you and your friends can read the contents.',
+      'start.point1': 'Contents are encrypted in the browser. The server only stores unreadable strings.',
       'start.point2': 'One secret edit link for you, one view link for your friends.',
       'start.point3': 'Friends always see the current state and ask via e-mail or WhatsApp.',
       'start.create': 'Create a new list',
       'start.creating': 'Creating list …',
-      'start.hint': 'Important: the edit link is your only way back in. Bookmark it – it cannot be recovered.',
+      'start.hint': 'The edit link is your only way back in. Bookmark it, it cannot be recovered.',
 
       'list.titleLabel': 'List title',
       'list.titlePlaceholder': 'List title',
@@ -255,10 +303,10 @@
 
       'share.headline': 'Links',
       'share.viewLabel': 'View link for friends',
-      'share.editLabel': 'Edit link (secret)',
+      'share.editLabel': 'Edit link, secret',
       'share.copy': 'Copy',
       'share.copied': 'Link copied.',
-      'share.copyfail': 'Copying failed – please select the link manually.',
+      'share.copyfail': 'Copying failed. Please select the link by hand.',
       'share.reveal': 'Show',
       'share.hide': 'Hide',
       'share.hint': 'The key lives behind the # sign and is technically never sent to the server.',
@@ -267,7 +315,7 @@
       'add.nameLabel': 'Item',
       'add.namePlaceholder': 'e.g. cordless drill',
       'add.noteLabel': 'Note',
-      'add.notePlaceholder': 'Note (optional)',
+      'add.notePlaceholder': 'Note, optional',
       'add.submit': 'Add',
 
       'items.headline': 'Inventory',
@@ -284,7 +332,7 @@
       'item.delete': 'Delete',
       'item.deleteConfirm': 'Really remove “{name}” from the list?',
       'item.borrower': 'Lent to',
-      'item.borrowerPlaceholder': 'Name (optional)',
+      'item.borrowerPlaceholder': 'Name, optional',
       'item.since': 'since',
       'item.lentTo': 'Lent to {name} since {date}',
       'item.lentSince': 'Lent out since {date}',
@@ -294,23 +342,50 @@
       'request.copy': 'Copy request text',
       'request.copied': 'Request text copied.',
       'request.subject': 'Borrowing request: {item}',
-      'request.body': 'Hi! I would like to borrow {item}. Does that work for you?',
+      'request.body': 'Hi, I would like to borrow {item}. Does that work for you?',
 
-      'settings.headline': 'Settings & contact',
+      'settings.headline': 'Settings and contact',
       'settings.hint': 'These details are encrypted along with the list and only feed the request buttons your friends see.',
       'settings.email': 'E-mail for requests',
       'settings.phone': 'WhatsApp number',
-      'settings.phoneHint': 'International format, e.g. +49 …',
+      'settings.phoneHint': 'International format, for example +49',
       'settings.showBorrower': 'Show borrower names in the view link as well',
       'settings.delete': 'Delete list permanently',
       'settings.deleteConfirm': 'The entire list will be irreversibly deleted from the server. Continue?',
       'settings.deleted': 'List deleted.',
+      'settings.aiHeadline': 'Voice and AI structuring',
+      'settings.aiHint': 'Without a key the browser splits the spoken text itself. With your own Gemini key the AI takes over, and the spoken text then leaves your device.',
+      'settings.aiKey': 'Gemini API key, optional',
+      'settings.aiKeyHint': 'Stays in this browser only. It is never sent to the server and never stored in the list, so it does not apply to your friends.',
+      'settings.aiProxy': 'This server offers AI structuring. Without your own key the spoken text is sent there.',
+      'settings.aiKeySaved': 'Key stored in this browser.',
+      'settings.aiKeyCleared': 'Key removed from this browser.',
+
+      'voice.start': 'Speak items',
+      'voice.stop': 'Stop recording',
+      'voice.textLabel': 'Recognised text',
+      'voice.placeholder': 'Say or type several items in one go',
+      'voice.apply': 'Apply',
+      'voice.listening': 'Listening …',
+      'voice.processing': 'Processing …',
+      'voice.hintLocal': 'Splitting happens in your browser. A Gemini key in the settings gives better results.',
+      'voice.hintAi': 'Gemini structures the text. It is sent to Google for that.',
+      'voice.hintProxy': 'This application\u2019s server handles the structuring.',
+      'voice.hintNoSpeech': 'This browser has no speech recognition. Typing and Apply still works.',
+      'voice.added': '{n} items added.',
+      'voice.added_1': 'One item added.',
+      'voice.none': 'No item could be derived from that.',
+      'voice.denied': 'Microphone access was denied.',
+      'voice.noSpeechHeard': 'Nothing understood. Please try again.',
+      'voice.errorMic': 'Speech recognition failed.',
+      'voice.errorAi': 'The AI was unreachable; the text was split in the browser.',
+      'voice.insecure': 'Voice input requires an HTTPS connection.',
 
       'status.saved': 'Saved',
       'status.saving': 'Saving …',
       'status.unsaved': 'Not saved',
       'status.error': 'Saving failed',
-      'status.overwritten': 'The list was changed elsewhere; your version was kept.',
+      'status.overwritten': 'The list was changed elsewhere. Your version was kept.',
       'status.refreshed': 'Refreshed.',
 
       'error.headline': 'That did not work',
@@ -325,7 +400,7 @@
       'error.ratelimit': 'Too many new lists in a short time. Please try again later.',
       'error.exists': 'This list id is already taken. Please try again.',
 
-      'footer.text': 'Free software, MIT licence – end-to-end encrypted.'
+      'footer.text': 'Free software, MIT licence, end-to-end encrypted.'
     }
   };
 
@@ -367,16 +442,20 @@
     $$('[data-i18n-placeholder]').forEach(function (node) {
       node.setAttribute('placeholder', t(node.getAttribute('data-i18n-placeholder')));
     });
-    $$('.langbtn').forEach(function (btn) {
-      var active = btn.getAttribute('data-lang') === lang;
-      btn.classList.toggle('is-active', active);
-      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
-    });
+    /* Regel 19: das Bedienelement zeigt das Ziel, nicht den Zustand. */
+    var langBtn = $('#btnLang');
+    if (langBtn) {
+      var target = (lang === 'de') ? 'en' : 'de';
+      langBtn.textContent = target.toUpperCase();
+      langBtn.setAttribute('title', t('a11y.lang'));
+      langBtn.setAttribute('aria-label', t('a11y.lang'));
+    }
     var badge = $('#storageBadge');
     if (Store && badge) {
       badge.textContent = t(Store.kind === 'local' ? 'badge.local' : 'badge.cloud');
       badge.hidden = false;
     }
+    updateVoiceHint();
   }
 
   function formatDate(tsSeconds) {
@@ -527,6 +606,7 @@
   };
 
   var Store = null;
+  var serverInfo = null;   // Antwort von ?a=ping; nennt u. a. einen angebotenen KI-Proxy
 
   /**
    * Wählt den Speicher: Antwortet api.php mit der erwarteten Kennung, läuft
@@ -539,6 +619,7 @@
     }
     return apiGet('?a=ping').then(function (res) {
       var ok = res.status === 200 && res.body && res.body.service === 'leih-katalog';
+      if (ok) { serverInfo = res.body; }
       return ok ? RemoteStore : LocalStore;
     }, function () { return LocalStore; });
   }
@@ -648,22 +729,18 @@
   var toastTimer = null;
   function toast(msg) {
     var node = $('#toast');
-    node.textContent = msg;
+    $('#toastText').textContent = msg;
     node.hidden = false;
-    node.classList.add('is-visible');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () {
-      node.classList.remove('is-visible');
-      setTimeout(function () { node.hidden = true; }, 250);
-    }, 3200);
+    toastTimer = setTimeout(function () { node.hidden = true; }, 3600);
   }
 
   function setSaveState(kind) {
     var node = $('#saveState');
     if (!node) { return; }
-    if (state.mode !== 'edit' || !kind) { node.textContent = ''; node.className = 'savestate'; return; }
+    if (state.mode !== 'edit' || !kind) { node.textContent = ''; node.className = 'nz-label'; return; }
     node.textContent = t('status.' + kind);
-    node.className = 'savestate savestate--' + kind;
+    node.className = 'nz-label' + (kind === 'error' ? ' savestate-error' : '');
   }
 
   /** Vollständiges Neuzeichnen der Listenansicht. */
@@ -701,8 +778,15 @@
       $('#linkEdit').value = editLink();
       if (document.activeElement !== $('#cfgEmail')) { $('#cfgEmail').value = state.doc.contact.email; }
       if (document.activeElement !== $('#cfgPhone')) { $('#cfgPhone').value = state.doc.contact.phone; }
+      if (document.activeElement !== $('#cfgAiKey')) { $('#cfgAiKey').value = getAiKey(); }
       $('#cfgShowBorrower').checked = state.doc.showBorrower;
     }
+
+    /* Die Spracheingabe steht nur beim Bearbeiten. Ohne Spracherkennung im
+       Browser bleibt das Eingabefeld nutzbar, nur die Schaltfläche entfällt. */
+    $('#voiceBox').hidden = !isEdit;
+    $('#btnMic').hidden = !speechSupported();
+    updateVoiceHint();
 
     /* Inventar */
     var items = state.doc.items;
@@ -713,9 +797,8 @@
     listNode.textContent = '';
     items.forEach(function (item) { listNode.appendChild(isEdit ? renderEditRow(item) : renderViewRow(item)); });
 
-    var empty = $('#itemsEmpty');
-    empty.hidden = count > 0;
-    empty.textContent = t(isEdit ? 'items.empty' : 'items.emptyView');
+    $('#itemsEmpty').hidden = count > 0;
+    $('#itemsEmptyText').textContent = t(isEdit ? 'items.empty' : 'items.emptyView');
 
     setSaveState(state.saving ? 'saving' : (state.dirty ? 'unsaved' : 'saved'));
   }
@@ -726,10 +809,14 @@
     var li = el('li', 'item item--' + item.status);
     li.setAttribute('data-id', item.id);
 
-    var toggle = el('button', 'statusbtn statusbtn--' + item.status, statusLabel(item));
+    /* Der Zustand steckt im Punkt, nicht in der Farbe der Schaltfläche:
+       Grün bleibt nach Regel 3 die Farbe des Anklickbaren. */
+    var toggle = el('button', 'nz-btn nz-btn--sm statusbtn');
     toggle.type = 'button';
     toggle.setAttribute('data-act', 'toggle');
     toggle.title = t(item.status === 'lent' ? 'item.markAvailable' : 'item.markLent');
+    toggle.appendChild(statusDot(item.status));
+    toggle.appendChild(el('span', null, statusLabel(item)));
     li.appendChild(toggle);
 
     var main = el('div', 'item-main');
@@ -739,10 +826,10 @@
     if (item.status === 'lent') {
       var meta = el('div', 'item-lentmeta');
 
-      var whoLabel = el('label', 'inline-label', t('item.borrower'));
+      var whoLabel = el('label', null, t('item.borrower'));
       var who = document.createElement('input');
       who.type = 'text';
-      who.className = 'input input--inline';
+      who.className = 'nz-input';
       who.value = item.borrower;
       who.maxLength = 80;
       who.placeholder = t('item.borrowerPlaceholder');
@@ -750,10 +837,10 @@
       whoLabel.appendChild(who);
       meta.appendChild(whoLabel);
 
-      var sinceLabel = el('label', 'inline-label', t('item.since'));
+      var sinceLabel = el('label', null, t('item.since'));
       var since = document.createElement('input');
       since.type = 'date';
-      since.className = 'input input--inline';
+      since.className = 'nz-input';
       since.value = item.since || '';
       since.setAttribute('data-field', 'since');
       sinceLabel.appendChild(since);
@@ -763,11 +850,12 @@
     }
     li.appendChild(main);
 
-    var del = el('button', 'iconbtn iconbtn--danger', '✕');
+    var del = el('button', 'nz-btn nz-btn--sm nz-btn--icon');
     del.type = 'button';
     del.setAttribute('data-act', 'delete');
     del.title = t('item.delete');
     del.setAttribute('aria-label', t('item.delete') + ': ' + item.name);
+    del.appendChild(icon('trash'));
     li.appendChild(del);
     return li;
   }
@@ -775,7 +863,11 @@
   function renderViewRow(item) {
     var li = el('li', 'item item--' + item.status);
     li.setAttribute('data-id', item.id);
-    li.appendChild(el('span', 'badge badge--' + item.status, statusLabel(item)));
+
+    var badge = el('span', 'nz-badge');
+    badge.appendChild(statusDot(item.status));
+    badge.appendChild(el('span', null, statusLabel(item)));
+    li.appendChild(badge);
 
     var main = el('div', 'item-main');
     main.appendChild(el('span', 'item-name', item.name));
@@ -796,8 +888,8 @@
   }
 
   /**
-   * Anfrage-Buttons: die Links werden rein lokal erzeugt, es wird nichts
-   * an Dritte übertragen, bevor die Nutzerin klickt.
+   * Anfrage-Schaltflächen. Die Verweise entstehen rein lokal; es wird nichts
+   * an Dritte übertragen, bevor jemand klickt.
    */
   function requestActions(item) {
     var box = el('div', 'item-actions');
@@ -807,23 +899,28 @@
     var phone = (state.doc.contact.phone || '').replace(/[^\d]/g, '');
 
     if (email) {
-      var mail = el('a', 'btn btn--small', t('request.mail'));
+      var mail = el('a', 'nz-btn nz-btn--sm');
       mail.href = 'mailto:' + encodeURIComponent(email) +
         '?subject=' + encodeURIComponent(subject) +
         '&body=' + encodeURIComponent(body);
       mail.rel = 'noopener';
+      mail.appendChild(icon('mail'));
+      mail.appendChild(el('span', null, t('request.mail')));
       box.appendChild(mail);
     }
     if (phone) {
-      var wa = el('a', 'btn btn--small', t('request.whatsapp'));
+      var wa = el('a', 'nz-btn nz-btn--sm');
       wa.href = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(body);
       wa.target = '_blank';
       wa.rel = 'noopener noreferrer';
+      wa.appendChild(icon('chat'));
+      wa.appendChild(el('span', null, t('request.whatsapp')));
       box.appendChild(wa);
     }
     if (!email && !phone) {
-      var copy = el('button', 'btn btn--small btn--ghost', t('request.copy'));
+      var copy = el('button', 'nz-btn nz-btn--sm');
       copy.type = 'button';
+      copy.textContent = t('request.copy');
       copy.addEventListener('click', function () {
         copyText(body).then(function (ok) { toast(t(ok ? 'request.copied' : 'share.copyfail')); });
       });
@@ -1086,12 +1183,384 @@
   }
 
   /* ===================================================================== *
-   * 12 · Ereignisse
+   * 12 · Spracheingabe und KI-Strukturierung
+   *
+   *     Zwei Wege führen von gesprochenem Freitext zu Einträgen:
+   *     a) lokal im Browser über Trennwörter – ohne Schlüssel, ohne Übertragung,
+   *     b) über Gemini – genauer, dafür verlässt der Text das Gerät.
+   *     Der Schlüssel liegt ausschließlich im localStorage; er gehört bewusst
+   *     nicht in das verschlüsselte Dokument, das Freunde lesen können.
+   * ===================================================================== */
+
+  var AI_BASE  = 'https://generativelanguage.googleapis.com/v1beta/models/';
+  var AI_MODEL = 'gemini-2.5-flash';
+  var AI_MAX_CHARS = 1500;
+  var LS_AIKEY = 'lid.aikey';
+
+  /* Systemanweisung: ausschließlich ein JSON-Array, kein Markdown, keine Erklärung. */
+  var AI_SYSTEM_PROMPT = [
+    'You convert a spoken inventory description into structured data.',
+    'Return ONLY a valid JSON array. No markdown, no code fences, no commentary, no other keys.',
+    'Format: [{"item": "Gegenstandsname", "status": "available"}]',
+    'Rules:',
+    '- "status" is exactly "available" or "lent". Use "lent" only when the speaker states the thing is currently lent out, borrowed or otherwise unavailable.',
+    '- Keep "item" in the language the speaker used. Use a short, singular, capitalised noun phrase without articles, numerals or filler words.',
+    '- Split enumerations into separate entries. If a count is stated, repeat the entry that many times, at most ten.',
+    '- Ignore anything that is not a lendable object.',
+    '- If nothing usable is present, return [].'
+  ].join('\n');
+
+  /* Erzwingt das Format zusätzlich auf Protokollebene, nicht nur per Anweisung. */
+  var AI_RESPONSE_SCHEMA = {
+    type: 'ARRAY',
+    items: {
+      type: 'OBJECT',
+      properties: {
+        item: { type: 'STRING' },
+        status: { type: 'STRING', enum: ['available', 'lent'] }
+      },
+      required: ['item', 'status']
+    }
+  };
+
+  var speechRec = null;      // SpeechRecognition-Instanz, einmal erzeugt
+  var speechActive = false;
+  var speechFinal = '';      // bereits endgültig erkannte Wortfolgen
+  var speechBefore = '';     // Feldinhalt beim Start, erkennt "nichts Neues gesagt"
+
+  /* -- Schlüsselverwaltung (nur dieses Gerät) ----------------------------- */
+
+  function getAiKey() {
+    try { return localStorage.getItem(LS_AIKEY) || ''; } catch (e) { return ''; }
+  }
+
+  function setAiKey(value) {
+    try {
+      if (value) { localStorage.setItem(LS_AIKEY, value); }
+      else { localStorage.removeItem(LS_AIKEY); }
+    } catch (e) { /* privater Modus: dann eben nur für diese Sitzung */ }
+  }
+
+  function aiProxyAvailable() {
+    return !!(Store && Store.kind === 'remote' && serverInfo && serverInfo.aiProxy);
+  }
+
+  /* -- Lokale Zerlegung --------------------------------------------------- */
+
+  /* Füllwörter und Artikel am Anfang eines Fragments, beide Sprachen. */
+  var FILLER_RE = /^(?:\s*(?:und|and|sowie|plus|auch|außerdem|noch|dann|also|ich\s+(?:habe|hab|besitze|verleihe)|i\s+(?:have|own|lend)|da\s+(?:ist|sind)|there\s+(?:is|are)|ein(?:e|en|em|er|es)?|der|die|das|den|dem|mein(?:e|en|em|er)?|unser(?:e|en)?|a|an|the|my|our)\b[\s,]*)+/i;
+
+  /* Kennzeichnet einen als verliehen gesprochenen Gegenstand. */
+  var LENT_RE = /\s*(?:\b(?:ist|sind|is|are)\b\s*)?(?:\b(?:gerade|zurzeit|aktuell|currently)\b\s*)?\b(?:verliehen|ausgeliehen|vergeben|lent(?:\s+out)?|borrowed|on\s+loan)\b\s*/i;
+
+  /* Aufzählungstrenner. String.split zerlegt an allen Treffern. */
+  var SPLIT_RE = /\s*(?:[,;\n\/]|\bund\b|\bsowie\b|\band\b|\bplus\b)\s*/i;
+
+  var NUMBER_WORDS = {
+    ein: 1, eine: 1, einen: 1, one: 1, zwei: 2, two: 2, drei: 3, three: 3,
+    vier: 4, four: 4, fünf: 5, five: 5, sechs: 6, six: 6
+  };
+
+  /** Trennt eine führende Mengenangabe ab: "zwei Campingstühle" → 2 × "Campingstühle". */
+  function splitCount(fragment) {
+    var digits = /^(\d{1,2})\s+(.+)$/.exec(fragment);
+    if (digits) {
+      return { count: Math.min(10, Math.max(1, parseInt(digits[1], 10))), rest: digits[2] };
+    }
+    var word = /^([A-Za-zÄÖÜäöüß]+)\s+(.+)$/.exec(fragment);
+    if (word && NUMBER_WORDS[word[1].toLowerCase()]) {
+      return { count: NUMBER_WORDS[word[1].toLowerCase()], rest: word[2] };
+    }
+    return { count: 1, rest: fragment };
+  }
+
+  /** Gleicht gegen den Katalog ab – normalisiert Schreibweise, übersetzt aber nicht. */
+  function canonicalName(name) {
+    var lower = name.toLowerCase();
+    for (var i = 0; i < CATALOG.length; i++) {
+      if (CATALOG[i].de.toLowerCase() === lower) { return CATALOG[i].de; }
+      if (CATALOG[i].en.toLowerCase() === lower) { return CATALOG[i].en; }
+    }
+    return name.charAt(0).toUpperCase() + name.slice(1);
+  }
+
+  /**
+   * Rückfallebene ohne KI: zerlegt den Freitext anhand von Trennwörtern.
+   * Bewusst bescheiden – sie soll das Mikrofon ohne Schlüssel nutzbar machen,
+   * nicht Sprachverstehen nachbilden.
+   */
+  function localStructure(text) {
+    var entries = [];
+    String(text).split(SPLIT_RE).forEach(function (raw) {
+      var fragment = String(raw || '').replace(/[.!?]+\s*$/, '').trim();
+      if (!fragment) { return; }
+
+      var lent = LENT_RE.test(fragment);
+      if (lent) { fragment = fragment.replace(LENT_RE, ' ').trim(); }
+
+      fragment = fragment.replace(FILLER_RE, '').trim();
+      if (fragment.length < 2) { return; }
+
+      var parsed = splitCount(fragment);
+      var name = parsed.rest.replace(FILLER_RE, '').trim();
+      if (name.length < 2) { return; }
+      name = canonicalName(name.slice(0, 80));
+
+      for (var n = 0; n < parsed.count; n++) {
+        entries.push({ item: name, status: lent ? 'lent' : 'available' });
+      }
+    });
+    return entries;
+  }
+
+  /* -- KI-Strukturierung -------------------------------------------------- */
+
+  /** Nimmt auch dann noch ein Array an, wenn das Modell Zaunzeichen mitschickt. */
+  function parseAiJson(raw) {
+    var text = String(raw || '').trim();
+    var fenced = /^```(?:json)?\s*([\s\S]*?)\s*```$/i.exec(text);
+    if (fenced) { text = fenced[1].trim(); }
+    if (text.charAt(0) !== '[') {
+      var start = text.indexOf('[');
+      var end = text.lastIndexOf(']');
+      if (start === -1 || end <= start) { throw new AppError('aiFormat'); }
+      text = text.slice(start, end + 1);
+    }
+    var data;
+    try { data = JSON.parse(text); } catch (e) { throw new AppError('aiFormat'); }
+    if (!Array.isArray(data)) { throw new AppError('aiFormat'); }
+    return normaliseEntries(data);
+  }
+
+  /** Fremde Antworten defensiv behandeln: nur bekannte Felder, begrenzte Länge. */
+  function normaliseEntries(list) {
+    var out = [];
+    (Array.isArray(list) ? list : []).slice(0, 50).forEach(function (entry) {
+      if (!entry || typeof entry !== 'object') { return; }
+      var name = typeof entry.item === 'string' ? entry.item.trim() : '';
+      if (name.length < 2) { return; }
+      out.push({
+        item: name.slice(0, 80),
+        status: entry.status === 'lent' ? 'lent' : 'available'
+      });
+    });
+    return out;
+  }
+
+  function aiViaGemini(text, key) {
+    return fetch(AI_BASE + encodeURIComponent(AI_MODEL) + ':generateContent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: AI_SYSTEM_PROMPT }] },
+        contents: [{ role: 'user', parts: [{ text: text }] }],
+        generationConfig: {
+          temperature: 0,
+          responseMimeType: 'application/json',
+          responseSchema: AI_RESPONSE_SCHEMA
+        }
+      })
+    }).then(function (res) {
+      if (!res.ok) { throw new AppError('aiHttp'); }
+      return res.json();
+    }).then(function (data) {
+      var candidate = data && data.candidates && data.candidates[0];
+      var parts = candidate && candidate.content && candidate.content.parts;
+      return parseAiJson(parts && parts[0] && parts[0].text);
+    });
+  }
+
+  function aiViaProxy(text) {
+    return apiPost({ a: 'ai', text: text, lang: lang }).then(function (res) {
+      if (res.status !== 200 || !res.body || !Array.isArray(res.body.items)) {
+        throw new AppError('aiHttp');
+      }
+      return normaliseEntries(res.body.items);
+    });
+  }
+
+  /**
+   * Wählt den Weg und fällt bei jedem Fehlschlag auf die lokale Zerlegung
+   * zurück – die Spracheingabe soll nie an einer fremden API scheitern.
+   */
+  function structureText(text) {
+    var key = getAiKey();
+    var viaAi = null;
+    if (key) { viaAi = aiViaGemini(text, key); }
+    else if (aiProxyAvailable()) { viaAi = aiViaProxy(text); }
+    if (!viaAi) { return Promise.resolve(localStructure(text)); }
+
+    return viaAi.then(function (entries) {
+      return entries.length ? entries : localStructure(text);
+    }, function () {
+      toast(t('voice.errorAi'));
+      return localStructure(text);
+    });
+  }
+
+  /* -- Oberfläche --------------------------------------------------------- */
+
+  function speechSupported() {
+    return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+  }
+
+  function setVoiceState(message, isError) {
+    var node = $('#voiceState');
+    if (!node) { return; }
+    node.textContent = message || '';
+    node.className = 'nz-label voicestate' + (isError ? ' voicestate-error' : '');
+  }
+
+  function updateVoiceHint() {
+    var node = $('#voiceHint');
+    if (!node) { return; }
+    var parts = [];
+    if (!speechSupported()) { parts.push(t('voice.hintNoSpeech')); }
+    if (getAiKey()) { parts.push(t('voice.hintAi')); }
+    else if (aiProxyAvailable()) { parts.push(t('voice.hintProxy')); }
+    else { parts.push(t('voice.hintLocal')); }
+    node.textContent = parts.join(' ');
+
+    var proxyNote = $('#aiProxyNote');
+    if (proxyNote) { proxyNote.hidden = !aiProxyAvailable(); }
+  }
+
+  function setListening(active) {
+    speechActive = active;
+    var btn = $('#btnMic');
+    if (!btn) { return; }
+    btn.classList.toggle('is-listening', active);
+    btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    $('.micbtn-label', btn).textContent = t(active ? 'voice.stop' : 'voice.start');
+    if (active) {
+      var node = $('#voiceState');
+      node.className = 'nz-label voicestate';
+      node.textContent = '';
+      node.appendChild(statusDot('available'));
+      node.appendChild(el('span', null, t('voice.listening')));
+    } else {
+      setVoiceState('', false);
+    }
+  }
+
+  /** Erzeugt die Erkennung einmalig und hängt die Ereignisse an. */
+  function buildRecognition() {
+    var Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Ctor) { return null; }
+    var rec = new Ctor();
+    rec.continuous = true;      // mehrere Gegenstände am Stück
+    rec.interimResults = true;  // Zwischenstand sichtbar machen
+    rec.maxAlternatives = 1;
+
+    rec.onresult = function (ev) {
+      var interim = '';
+      for (var i = ev.resultIndex; i < ev.results.length; i++) {
+        var transcript = ev.results[i][0].transcript;
+        if (ev.results[i].isFinal) {
+          speechFinal += (speechFinal ? ' ' : '') + transcript.trim();
+        } else {
+          interim += transcript;
+        }
+      }
+      $('#voiceText').value = (speechFinal + ' ' + interim).trim().slice(0, AI_MAX_CHARS);
+    };
+
+    rec.onerror = function (ev) {
+      var code = ev && ev.error;
+      if (code === 'no-speech') { setVoiceState(t('voice.noSpeechHeard'), true); return; }
+      if (code === 'aborted') { return; }  // vom Nutzer beendet
+      if (code === 'not-allowed' || code === 'service-not-allowed') {
+        setVoiceState(t('voice.denied'), true);
+      } else {
+        setVoiceState(t('voice.errorMic'), true);
+      }
+    };
+
+    rec.onend = function () {
+      setListening(false);
+      var text = $('#voiceText').value.trim();
+      if (text && text !== speechBefore) { processVoiceText(text); }
+    };
+
+    return rec;
+  }
+
+  function toggleMic() {
+    if (!speechSupported()) { return; }
+    if (speechActive) {
+      try { speechRec.stop(); } catch (e) { setListening(false); }
+      return;
+    }
+    if (!window.isSecureContext) { setVoiceState(t('voice.insecure'), true); return; }
+
+    if (!speechRec) { speechRec = buildRecognition(); }
+    if (!speechRec) { return; }
+
+    speechRec.lang = (lang === 'de') ? 'de-DE' : 'en-US';
+    speechFinal = $('#voiceText').value.trim();
+    speechBefore = speechFinal;
+    try {
+      speechRec.start();
+      setListening(true);
+    } catch (e) {
+      setListening(false);
+      setVoiceState(t('voice.errorMic'), true);
+    }
+  }
+
+  /** Freitext → Einträge → Liste. Gemeinsamer Weg für Sprache und Tastatur. */
+  function processVoiceText(text) {
+    var input = String(text).trim().slice(0, AI_MAX_CHARS);
+    if (!input) { return Promise.resolve(); }
+    setVoiceState(t('voice.processing'), false);
+
+    return structureText(input).then(function (entries) {
+      if (!entries.length) {
+        setVoiceState(t('voice.none'), true);
+        return;
+      }
+      /* Rückwärts einfügen, damit die Reihenfolge des Gesprochenen erhalten bleibt. */
+      entries.slice().reverse().forEach(function (entry) {
+        state.doc.items.unshift({
+          id: randomHex(6),
+          name: entry.item,
+          note: '',
+          status: entry.status === 'lent' ? 'lent' : 'available',
+          borrower: '',
+          since: entry.status === 'lent' ? new Date().toISOString().slice(0, 10) : ''
+        });
+      });
+      touch();
+      render();
+      $('#voiceText').value = '';
+      speechFinal = '';
+      speechBefore = '';
+      setVoiceState('', false);
+      toast(entries.length === 1 ? t('voice.added_1') : t('voice.added', { n: entries.length }));
+    });
+  }
+
+  /* ===================================================================== *
+   * 13 · Ereignisse
    * ===================================================================== */
 
   function bindEvents() {
-    $$('.langbtn').forEach(function (btn) {
-      btn.addEventListener('click', function () { setLang(btn.getAttribute('data-lang')); });
+    $('#btnLang').addEventListener('click', function () {
+      setLang(lang === 'de' ? 'en' : 'de');
+    });
+
+    $('#btnMic').addEventListener('click', toggleMic);
+    $('#btnVoiceApply').addEventListener('click', function () {
+      processVoiceText($('#voiceText').value);
+    });
+
+    /* Der Schlüssel wird erst beim Verlassen des Feldes abgelegt, damit nicht
+       jede Tastenfolge im localStorage landet. */
+    $('#cfgAiKey').addEventListener('change', function () {
+      var value = this.value.trim();
+      setAiKey(value);
+      updateVoiceHint();
+      toast(t(value ? 'settings.aiKeySaved' : 'settings.aiKeyCleared'));
     });
 
     $('#btnCreate').addEventListener('click', createList);
@@ -1165,7 +1634,7 @@
   }
 
   /* ===================================================================== *
-   * 13 · Router und Start
+   * 14 · Router und Start
    * ===================================================================== */
 
   function route() {
