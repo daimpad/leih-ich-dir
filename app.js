@@ -1192,6 +1192,11 @@
    *     nicht in das verschlüsselte Dokument, das Freunde lesen können.
    * ===================================================================== */
 
+  /* Endpunkt und Kopfzeile sind gegen die Auskunftsdokumente von v1 und v1beta
+     geprüft (Fassung 20260910). Die Modellkennung lässt sich unangemeldet nicht
+     prüfen, weil die Anmeldung vor der Modellauflösung greift; gemini-2.5-flash
+     ist die am besten belegte Kennung. Wer sie ändert, prüft sie vorher mit
+     einem gültigen Schlüssel über GET /v1beta/models. */
   var AI_BASE  = 'https://generativelanguage.googleapis.com/v1beta/models/';
   var AI_MODEL = 'gemini-2.5-flash';
   var AI_MAX_CHARS = 1500;
@@ -1210,7 +1215,13 @@
     '- If nothing usable is present, return [].'
   ].join('\n');
 
-  /* Erzwingt das Format zusätzlich auf Protokollebene, nicht nur per Anweisung. */
+  /* Erzwingt das Format zusätzlich auf Protokollebene, nicht nur per Anweisung.
+     Der Typ wird hier groß geschrieben, das verlangt der Dialekt: eine Auswahl
+     aus OpenAPI 3.0, nicht JSON Schema. Kein $ref, kein oneOf.
+     responseSchema ist im Auskunftsdokument als abgekündigt markiert, arbeitet
+     aber in v1 und v1beta und wird am breitesten unterstützt. Nachfolger sind
+     responseJsonSchema und responseFormat; ein Wechsel gehört in einen eigenen
+     Schritt, nicht nebenbei. */
   var AI_RESPONSE_SCHEMA = {
     type: 'ARRAY',
     items: {
@@ -1347,6 +1358,17 @@
     return out;
   }
 
+  /**
+   * Direkter Aufruf aus dem Browser. Das geht, weil die Gegenstelle CORS
+   * erlaubt und dabei jede Herkunft zurückspiegelt.
+   *
+   * ACHTUNG, hier keinen weiteren Kopfzeileneintrag ergänzen. Die Vorabanfrage
+   * prüft die angefragten Kopfzeilen gegen eine Erlaubnisliste. Erlaubt sind
+   * content-type, x-goog-api-key, authorization, x-goog-api-client und
+   * x-goog-user-project. Jede andere lässt die Vorabanfrage mit 403 und ganz
+   * ohne CORS-Kopfzeilen scheitern; im Browser erscheint dann nur ein
+   * nichtssagendes „Failed to fetch", und die eigentliche Anfrage geht nie raus.
+   */
   function aiViaGemini(text, key) {
     return fetch(AI_BASE + encodeURIComponent(AI_MODEL) + ':generateContent', {
       method: 'POST',
@@ -1400,8 +1422,15 @@
 
   /* -- Oberfläche --------------------------------------------------------- */
 
+  /**
+   * Prüft nicht nur den Konstruktor, sondern auch, ob er etwas kann.
+   * Firefox 142 stellt SpeechRecognition bereits bereit, aber ohne jedes
+   * Mitglied: start, lang, continuous und sämtliche Ereignisse kamen erst mit
+   * 143. Ein Konstruktor allein ist also kein Versprechen.
+   */
   function speechSupported() {
-    return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+    var Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
+    return !!(Ctor && Ctor.prototype && typeof Ctor.prototype.start === 'function');
   }
 
   function setVoiceState(message, isError) {
