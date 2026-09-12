@@ -166,7 +166,7 @@
       'start.lead': 'Eine Liste deiner Gegenstände, die du an Freunde verleihst. Ohne Konto, ohne Tracking, und lesen können sie nur du und deine Freunde.',
       'start.point1': 'Inhalte werden im Browser verschlüsselt. Der Server speichert nur unlesbare Zeichenketten.',
       'start.point2': 'Ein geheimer Bearbeiten-Link für dich, ein Ansehen-Link für deine Freunde.',
-      'start.point3': 'Freunde sehen immer den aktuellen Stand und fragen per E-Mail oder WhatsApp an.',
+      'start.point3': 'Freunde sehen immer den aktuellen Stand und fragen mit einem Klick an, über welchen Weg sie mögen.',
       'start.create': 'Neue Liste anlegen',
       'start.creating': 'Liste wird angelegt …',
       'start.hint': 'Der Bearbeiten-Link ist dein einziger Zugang. Speichere ihn als Lesezeichen, er lässt sich nicht wiederherstellen.',
@@ -181,6 +181,8 @@
       'share.viewLabel': 'Ansehen-Link für Freunde',
       'share.editLabel': 'Bearbeiten-Link, geheim',
       'share.copy': 'Kopieren',
+      'share.send': 'Teilen',
+      'share.message': 'Schau dir an, was ich verleihe: {title}',
       'share.copied': 'Link kopiert.',
       'share.copyfail': 'Kopieren nicht möglich. Bitte den Link von Hand markieren.',
       'share.reveal': 'Zeigen',
@@ -213,8 +215,14 @@
       'item.lentTo': 'Verliehen an {name} seit {date}',
       'item.lentSince': 'Verliehen seit {date}',
 
+      'modal.name': 'Gegenstand',
+      'modal.note': 'Notiz',
+      'modal.status': 'Verfügbarkeit',
+      'modal.done': 'Fertig',
+      'modal.close': 'Schließen',
+
       'request.mail': 'Per E-Mail anfragen',
-      'request.whatsapp': 'Per WhatsApp anfragen',
+      'request.share': 'Anfrage teilen',
       'request.copy': 'Anfragetext kopieren',
       'request.copied': 'Anfragetext kopiert.',
       'request.subject': 'Leihanfrage: {item}',
@@ -236,8 +244,6 @@
       'settings.dangerHeadline': 'Liste löschen',
       'settings.dangerHint': 'Die Liste wird unwiderruflich vom Server entfernt. Beide Links laufen danach ins Leere.',
       'settings.email': 'E-Mail für Anfragen',
-      'settings.phone': 'WhatsApp-Nummer',
-      'settings.phoneHint': 'Internationales Format, zum Beispiel +49',
       'settings.showBorrower': 'Namen der Ausleihenden auch im Ansehen-Link zeigen',
       'settings.delete': 'Liste endgültig löschen',
       'settings.deleteConfirm': 'Die gesamte Liste wird unwiderruflich vom Server gelöscht. Fortfahren?',
@@ -306,7 +312,7 @@
       'start.lead': 'A list of the things you lend to friends. No account, no tracking, and only you and your friends can read the contents.',
       'start.point1': 'Contents are encrypted in the browser. The server only stores unreadable strings.',
       'start.point2': 'One secret edit link for you, one view link for your friends.',
-      'start.point3': 'Friends always see the current state and ask via e-mail or WhatsApp.',
+      'start.point3': 'Friends always see the current state and ask with one click, through whichever channel they prefer.',
       'start.create': 'Create a new list',
       'start.creating': 'Creating list …',
       'start.hint': 'The edit link is your only way back in. Bookmark it, it cannot be recovered.',
@@ -321,6 +327,8 @@
       'share.viewLabel': 'View link for friends',
       'share.editLabel': 'Edit link, secret',
       'share.copy': 'Copy',
+      'share.send': 'Share',
+      'share.message': 'Have a look at what I lend out: {title}',
       'share.copied': 'Link copied.',
       'share.copyfail': 'Copying failed. Please select the link by hand.',
       'share.reveal': 'Show',
@@ -353,8 +361,14 @@
       'item.lentTo': 'Lent to {name} since {date}',
       'item.lentSince': 'Lent out since {date}',
 
+      'modal.name': 'Item',
+      'modal.note': 'Note',
+      'modal.status': 'Availability',
+      'modal.done': 'Done',
+      'modal.close': 'Close',
+
       'request.mail': 'Ask by e-mail',
-      'request.whatsapp': 'Ask via WhatsApp',
+      'request.share': 'Share request',
       'request.copy': 'Copy request text',
       'request.copied': 'Request text copied.',
       'request.subject': 'Borrowing request: {item}',
@@ -376,8 +390,6 @@
       'settings.dangerHeadline': 'Delete list',
       'settings.dangerHint': 'The list is irreversibly removed from the server. Both links then lead nowhere.',
       'settings.email': 'E-mail for requests',
-      'settings.phone': 'WhatsApp number',
-      'settings.phoneHint': 'International format, for example +49',
       'settings.showBorrower': 'Show borrower names in the view link as well',
       'settings.delete': 'Delete list permanently',
       'settings.deleteConfirm': 'The entire list will be irreversibly deleted from the server. Continue?',
@@ -683,7 +695,7 @@
     return {
       v: SCHEMA_VERSION,
       title: '',
-      contact: { email: '', phone: '' },
+      contact: { email: '' },
       showBorrower: false,
       items: []
     };
@@ -697,7 +709,9 @@
     doc.showBorrower = raw.showBorrower === true;
     if (raw.contact && typeof raw.contact === 'object') {
       doc.contact.email = typeof raw.contact.email === 'string' ? raw.contact.email : '';
-      doc.contact.phone = typeof raw.contact.phone === 'string' ? raw.contact.phone : '';
+      /* Eine frueher gepflegte Telefonnummer wird nicht mehr uebernommen:
+         Die Anfrage laeuft jetzt ueber die Weitergabe des Geraets und ist
+         damit an keinen Dienst gebunden. */
     }
     if (Array.isArray(raw.items)) {
       doc.items = raw.items.filter(function (it) {
@@ -811,7 +825,6 @@
       $('#linkView').value = viewLink();
       $('#linkEdit').value = editLink();
       if (document.activeElement !== $('#cfgEmail')) { $('#cfgEmail').value = state.doc.contact.email; }
-      if (document.activeElement !== $('#cfgPhone')) { $('#cfgPhone').value = state.doc.contact.phone; }
       if (document.activeElement !== $('#cfgAiKey')) { $('#cfgAiKey').value = getAiKey(); }
       $('#cfgShowBorrower').checked = state.doc.showBorrower;
     }
@@ -822,145 +835,260 @@
     $('#btnMic').hidden = !speechSupported();
     updateVoiceHint();
 
-    /* Inventar */
+    /* Die schwebende Schaltflaeche fuehrt zum Eingabefeld, das im Inventar steht. */
+    $('#fabAdd').hidden = !isEdit;
+
+    /* Die Weitergabe des Geraets gibt es nicht ueberall; ohne sie bleibt Kopieren. */
+    $('#btnShareView').hidden = !(isEdit && canShare());
+
+    renderItems();
+    setSaveState(state.saving ? 'saving' : (state.dirty ? 'unsaved' : 'saved'));
+  }
+
+  /** Zeichnet nur die Liste neu, etwa wenn im Fenster ein Name geaendert wird. */
+  function renderItems() {
     var items = state.doc.items;
     var count = items.length;
     $('#itemsCount').textContent = count === 1 ? t('items.count_1') : t('items.count', { n: count });
 
     var listNode = $('#itemList');
     listNode.textContent = '';
-    items.forEach(function (item) { listNode.appendChild(isEdit ? renderEditRow(item) : renderViewRow(item)); });
+    items.forEach(function (item) { listNode.appendChild(renderRow(item)); });
 
     $('#itemsEmpty').hidden = count > 0;
-    $('#itemsEmptyText').textContent = t(isEdit ? 'items.empty' : 'items.emptyView');
-
-    setSaveState(state.saving ? 'saving' : (state.dirty ? 'unsaved' : 'saved'));
+    $('#itemsEmptyText').textContent = t(state.mode === 'edit' ? 'items.empty' : 'items.emptyView');
   }
 
   function statusLabel(item) { return t(item.status === 'lent' ? 'item.lent' : 'item.available'); }
 
-  function renderEditRow(item) {
+  /**
+   * Eine Zeile im Inventar zeigt nur zwei Dinge: den Namen und ein Zeichen fuer
+   * die Verfuegbarkeit. Alles Weitere steht im Fenster dahinter. Die ganze
+   * Zeile ist das Ziel, deshalb ist sie eine Schaltflaeche und darf nach
+   * Regel 29 auf das Zeigen antworten.
+   */
+  function renderRow(item) {
     var li = el('li', 'item item--' + item.status);
     li.setAttribute('data-id', item.id);
 
-    /* Der Zustand steckt im Punkt, nicht in der Farbe der Schaltfläche:
-       Grün bleibt nach Regel 3 die Farbe des Anklickbaren. */
-    var toggle = el('button', 'nz-btn nz-btn--sm statusbtn');
-    toggle.type = 'button';
-    toggle.setAttribute('data-act', 'toggle');
-    toggle.title = t(item.status === 'lent' ? 'item.markAvailable' : 'item.markLent');
-    toggle.appendChild(statusDot(item.status));
-    toggle.appendChild(el('span', null, statusLabel(item)));
-    li.appendChild(toggle);
-
-    var main = el('div', 'item-main');
-    main.appendChild(el('span', 'item-name', item.name));
-    if (item.note) { main.appendChild(el('span', 'item-note', item.note)); }
-
-    if (item.status === 'lent') {
-      var meta = el('div', 'item-lentmeta');
-
-      var whoLabel = el('label', null, t('item.borrower'));
-      var who = document.createElement('input');
-      who.type = 'text';
-      who.className = 'nz-input';
-      who.value = item.borrower;
-      who.maxLength = 80;
-      who.placeholder = t('item.borrowerPlaceholder');
-      who.setAttribute('data-field', 'borrower');
-      whoLabel.appendChild(who);
-      meta.appendChild(whoLabel);
-
-      var sinceLabel = el('label', null, t('item.since'));
-      var since = document.createElement('input');
-      since.type = 'date';
-      since.className = 'nz-input';
-      since.value = item.since || '';
-      since.setAttribute('data-field', 'since');
-      sinceLabel.appendChild(since);
-      meta.appendChild(sinceLabel);
-
-      main.appendChild(meta);
-    }
-    li.appendChild(main);
-
-    var del = el('button', 'nz-btn nz-btn--sm nz-btn--icon');
-    del.type = 'button';
-    del.setAttribute('data-act', 'delete');
-    del.title = t('item.delete');
-    del.setAttribute('aria-label', t('item.delete') + ': ' + item.name);
-    del.appendChild(icon('trash'));
-    li.appendChild(del);
+    var row = el('button', 'itemrow');
+    row.type = 'button';
+    row.setAttribute('data-act', 'open');
+    row.appendChild(icon(item.status === 'lent' ? 'user' : 'check'));
+    row.appendChild(el('span', 'item-name', item.name));
+    row.appendChild(el('span', 'nz-sr-only', statusLabel(item)));
+    li.appendChild(row);
     return li;
   }
 
-  function renderViewRow(item) {
-    var li = el('li', 'item item--' + item.status);
-    li.setAttribute('data-id', item.id);
+  /* ------------------------------------------------------------------ *
+   * Fenster zu einem Gegenstand
+   * ------------------------------------------------------------------ */
 
-    var badge = el('span', 'nz-badge');
-    badge.appendChild(statusDot(item.status));
-    badge.appendChild(el('span', null, statusLabel(item)));
-    li.appendChild(badge);
+  var modalItemId = null;
 
-    var main = el('div', 'item-main');
-    main.appendChild(el('span', 'item-name', item.name));
-    if (item.note) { main.appendChild(el('span', 'item-note', item.note)); }
+  function modalField(labelText, node) {
+    var field = el('div', 'nz-field');
+    var label = el('label', 'nz-field__label', labelText);
+    label.setAttribute('for', node.id);
+    field.appendChild(label);
+    field.appendChild(node);
+    return field;
+  }
+
+  function textInput(id, value, max, placeholder) {
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.id = id;
+    input.className = 'nz-input';
+    input.value = value || '';
+    input.maxLength = max;
+    if (placeholder) { input.placeholder = placeholder; }
+    return input;
+  }
+
+  function buildModalBody(item) {
+    var body = $('#modalBody');
+    body.textContent = '';
+    var isEdit = state.mode === 'edit';
+
+    if (isEdit) {
+      var name = textInput('mdName', item.name, 120);
+      name.addEventListener('input', function () {
+        item.name = this.value;
+        $('#modalTitle').textContent = this.value;
+        touch();
+        renderItems();
+      });
+      body.appendChild(modalField(t('modal.name'), name));
+
+      var note = textInput('mdNote', item.note, 200, t('add.notePlaceholder'));
+      note.addEventListener('input', function () { item.note = this.value; touch(); });
+      body.appendChild(modalField(t('modal.note'), note));
+
+      var status = el('div', 'nz-field');
+      var toggle = el('button', 'nz-btn statusbtn');
+      toggle.type = 'button';
+      toggle.appendChild(icon(item.status === 'lent' ? 'user' : 'check'));
+      toggle.appendChild(el('span', null, t(item.status === 'lent' ? 'item.markAvailable' : 'item.markLent')));
+      toggle.addEventListener('click', function () {
+        toggleItem(item.id);
+        refreshModal();
+      });
+      status.appendChild(el('span', 'nz-field__label', t('modal.status')));
+      status.appendChild(toggle);
+      body.appendChild(status);
+
+      if (item.status === 'lent') {
+        var who = textInput('mdBorrower', item.borrower, 80, t('item.borrowerPlaceholder'));
+        who.addEventListener('input', function () { item.borrower = this.value; touch(); });
+        body.appendChild(modalField(t('item.borrower'), who));
+
+        var since = document.createElement('input');
+        since.type = 'date';
+        since.id = 'mdSince';
+        since.className = 'nz-input';
+        since.value = item.since || '';
+        since.addEventListener('input', function () { item.since = this.value; touch(); });
+        body.appendChild(modalField(t('item.since'), since));
+      }
+      return;
+    }
+
+    /* Nur-Lese-Ansicht */
+    var line = el('p', 'modal-status');
+    line.appendChild(icon(item.status === 'lent' ? 'user' : 'check'));
+    line.appendChild(el('span', null, statusLabel(item)));
+    body.appendChild(line);
+
+    if (item.note) { body.appendChild(el('p', null, item.note)); }
 
     if (item.status === 'lent' && item.since) {
       var info = (state.doc.showBorrower && item.borrower)
         ? t('item.lentTo', { name: item.borrower, date: formatDay(item.since) })
         : t('item.lentSince', { date: formatDay(item.since) });
-      main.appendChild(el('span', 'item-lentinfo', info));
+      body.appendChild(el('p', 'nz-field__hint', info));
     }
-    li.appendChild(main);
+  }
+
+  function buildModalFoot(item) {
+    var foot = $('#modalFoot');
+    foot.textContent = '';
+
+    if (state.mode === 'edit') {
+      var del = el('button', 'nz-btn nz-btn--danger');
+      del.type = 'button';
+      del.appendChild(icon('trash'));
+      del.appendChild(el('span', null, t('item.delete')));
+      del.addEventListener('click', function () {
+        var id = item.id;
+        closeItemModal();
+        deleteItem(id);
+      });
+      foot.appendChild(del);
+
+      var done = el('button', 'nz-btn nz-btn--primary');
+      done.type = 'button';
+      done.textContent = t('modal.done');
+      done.addEventListener('click', closeItemModal);
+      foot.appendChild(done);
+      return;
+    }
 
     if (item.status === 'available') {
-      li.appendChild(requestActions(item));
+      requestActions(item).forEach(function (node) { foot.appendChild(node); });
     }
-    return li;
+    var close = el('button', 'nz-btn');
+    close.type = 'button';
+    close.textContent = t('modal.close');
+    close.addEventListener('click', closeItemModal);
+    foot.appendChild(close);
+  }
+
+  function openItemModal(id) {
+    var item = findItem(id);
+    if (!item) { return; }
+    modalItemId = id;
+    $('#modalTitle').textContent = item.name;
+    buildModalBody(item);
+    buildModalFoot(item);
+    var dialog = $('#itemModal');
+    if (dialog.showModal) { dialog.showModal(); } else { dialog.setAttribute('open', 'open'); }
+  }
+
+  function refreshModal() {
+    var item = findItem(modalItemId);
+    if (!item) { closeItemModal(); return; }
+    $('#modalTitle').textContent = item.name;
+    buildModalBody(item);
+    buildModalFoot(item);
+  }
+
+  function closeItemModal() {
+    var dialog = $('#itemModal');
+    if (dialog.close) { dialog.close(); } else { dialog.removeAttribute('open'); }
+    modalItemId = null;
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Weitergabe
+   * ------------------------------------------------------------------ */
+
+  function canShare() {
+    return typeof navigator !== 'undefined' && typeof navigator.share === 'function';
   }
 
   /**
-   * Anfrage-Schaltflächen. Die Verweise entstehen rein lokal; es wird nichts
-   * an Dritte übertragen, bevor jemand klickt.
+   * Reicht Text oder Verweis an das Gerät weiter, das daraufhin jede
+   * installierte Anwendung anbietet. Ein Abbruch durch die Nutzerin ist kein
+   * Fehler und bleibt deshalb stumm.
+   */
+  function nativeShare(data) {
+    if (!canShare()) { return Promise.resolve(false); }
+    return navigator.share(data).then(function () { return true; }, function () { return false; });
+  }
+
+  /**
+   * Anfrage zu einem Gegenstand. Kein Dienst ist fest verdrahtet: Entweder
+   * E-Mail, wenn eine Adresse hinterlegt ist, oder die Weitergabe des Geraets,
+   * und als Rueckfallebene die Zwischenablage.
+   *
+   * @return {Array<HTMLElement>}
    */
   function requestActions(item) {
-    var box = el('div', 'item-actions');
+    var nodes = [];
     var subject = t('request.subject', { item: item.name });
     var body = t('request.body', { item: item.name });
     var email = (state.doc.contact.email || '').trim();
-    var phone = (state.doc.contact.phone || '').replace(/[^\d]/g, '');
 
     if (email) {
-      var mail = el('a', 'nz-btn nz-btn--sm');
+      var mail = el('a', 'nz-btn');
       mail.href = 'mailto:' + encodeURIComponent(email) +
         '?subject=' + encodeURIComponent(subject) +
         '&body=' + encodeURIComponent(body);
       mail.rel = 'noopener';
       mail.appendChild(icon('mail'));
       mail.appendChild(el('span', null, t('request.mail')));
-      box.appendChild(mail);
+      nodes.push(mail);
     }
-    if (phone) {
-      var wa = el('a', 'nz-btn nz-btn--sm');
-      wa.href = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(body);
-      wa.target = '_blank';
-      wa.rel = 'noopener noreferrer';
-      wa.appendChild(icon('chat'));
-      wa.appendChild(el('span', null, t('request.whatsapp')));
-      box.appendChild(wa);
-    }
-    if (!email && !phone) {
-      var copy = el('button', 'nz-btn nz-btn--sm');
+
+    if (canShare()) {
+      var share = el('button', 'nz-btn nz-btn--primary');
+      share.type = 'button';
+      share.appendChild(icon('share'));
+      share.appendChild(el('span', null, t('request.share')));
+      share.addEventListener('click', function () { nativeShare({ text: body }); });
+      nodes.push(share);
+    } else {
+      var copy = el('button', 'nz-btn');
       copy.type = 'button';
       copy.textContent = t('request.copy');
       copy.addEventListener('click', function () {
         copyText(body).then(function (ok) { toast(t(ok ? 'request.copied' : 'share.copyfail')); });
       });
-      box.appendChild(copy);
+      nodes.push(copy);
     }
-    return box;
+    return nodes;
   }
 
   /* ===================================================================== *
@@ -1652,10 +1780,27 @@
 
     $('#addForm').addEventListener('submit', function (ev) {
       ev.preventDefault();
-      addItem($('#addName').value, $('#addNote').value);
+      addItem($('#addName').value, '');
       $('#addName').value = '';
-      $('#addNote').value = '';
       $('#addName').focus();
+    });
+
+    /* Die schwebende Schaltflaeche holt das Eingabefeld ins Bild. */
+    $('#fabAdd').addEventListener('click', function () {
+      var field = $('#addName');
+      field.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      field.focus({ preventScroll: true });
+    });
+
+    $('#modalClose').addEventListener('click', closeItemModal);
+    $('#itemModal').addEventListener('close', function () { modalItemId = null; });
+
+    $('#btnShareView').addEventListener('click', function () {
+      nativeShare({
+        title: state.doc.title || t('list.untitled'),
+        text: t('share.message', { title: state.doc.title || t('list.untitled') }),
+        url: viewLink()
+      });
     });
 
     $('#listTitleInput').addEventListener('input', function () {
@@ -1664,25 +1809,13 @@
     });
 
     $('#cfgEmail').addEventListener('input', function () { state.doc.contact.email = this.value.trim(); touch(); });
-    $('#cfgPhone').addEventListener('input', function () { state.doc.contact.phone = this.value.trim(); touch(); });
     $('#cfgShowBorrower').addEventListener('change', function () { state.doc.showBorrower = this.checked; touch(); });
 
     /* Delegation für die Inventarliste */
-    var list = $('#itemList');
-    list.addEventListener('click', function (ev) {
-      var btn = ev.target.closest('[data-act]');
-      if (!btn) { return; }
-      var id = btn.closest('.item').getAttribute('data-id');
-      if (btn.getAttribute('data-act') === 'toggle') { toggleItem(id); }
-      if (btn.getAttribute('data-act') === 'delete') { deleteItem(id); }
-    });
-    list.addEventListener('input', function (ev) {
-      var field = ev.target.getAttribute && ev.target.getAttribute('data-field');
-      if (!field) { return; }
-      var item = findItem(ev.target.closest('.item').getAttribute('data-id'));
-      if (!item) { return; }
-      item[field] = ev.target.value;
-      touch();
+    $('#itemList').addEventListener('click', function (ev) {
+      var row = ev.target.closest('[data-act="open"]');
+      if (!row) { return; }
+      openItemModal(row.closest('.item').getAttribute('data-id'));
     });
 
     $$('[data-copy]').forEach(function (btn) {

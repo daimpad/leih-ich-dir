@@ -253,50 +253,76 @@
 .items { list-style: none; margin: 0; padding: 0; }
 
 /* Regel 16: gestrichelt 2px in der Textfarbe, wo eine Grenze angedeutet wird. */
-.item {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--nz-space-3);
-  padding-block: var(--nz-space-4);
-  border-top: var(--nz-stroke-rule) dashed var(--nz-line);
-}
-.item:first-child { border-top: 0; padding-top: 0; }
+.item { border-top: var(--nz-stroke-rule) dashed var(--nz-line); }
+.item:first-child { border-top: 0; }
 
-.item-main { flex: 1 1 8rem; min-width: 0; }
-.item-name { font-weight: 600; overflow-wrap: anywhere; display: block; }
-.item-note,
-.item-lentinfo {
-  display: block;
-  font-size: var(--nz-text-sm);
-  color: var(--nz-text-muted);
-  overflow-wrap: anywhere;
-}
-.item-lentinfo { margin-top: var(--nz-space-1); }
-
-.item-lentmeta {
+/* Die ganze Zeile ist das Ziel. Sie ist deshalb eine Schaltfläche, aber keine
+   im Sinne von Regel 17: keine Fläche, kein Rahmen, nur eine Zeile. Auf das
+   Zeigen antwortet sie mit der grünen Unterstreichung, die das Erscheinungsbild
+   auch seinem Aufklapper gibt, nicht mit einem Schatten. */
+.itemrow {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--nz-space-2);
-  margin-top: var(--nz-space-3);
-}
-.item-lentmeta label {
-  display: inline-flex;
   align-items: center;
-  gap: var(--nz-space-2);
-  font-family: var(--nz-font-mono);
-  font-weight: 700;
-  font-size: var(--nz-text-xs);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--nz-text-muted);
+  gap: var(--nz-space-3);
+  width: 100%;
+  padding: var(--nz-space-4) var(--nz-space-1);
+  background: none;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
 }
-.item-lentmeta .nz-input { width: auto; padding: 6px 8px; font-size: var(--nz-text-sm); }
+.itemrow .ico { color: var(--nz-text); }
+.item-name { font-weight: 600; overflow-wrap: anywhere; min-width: 0; }
+.itemrow:hover .item-name {
+  text-decoration: underline;
+  text-decoration-color: var(--nz-signal);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 3px;
+}
+.itemrow:focus-visible { outline: var(--nz-stroke-strong) solid var(--nz-focus); outline-offset: -3px; }
 
-.item-actions { display: flex; gap: var(--nz-space-2); flex-wrap: wrap; justify-content: flex-end; }
+/* Hinzufügen steht in der Liste, oberhalb der Einträge. */
+.addbox {
+  padding-bottom: var(--nz-space-4);
+  border-bottom: var(--nz-stroke-rule) dashed var(--nz-line);
+  margin-bottom: var(--nz-space-2);
+}
 
-/* Der Statusschalter ist eine Schaltfläche, der Punkt darin trägt den Zustand.
-   Damit bleibt Grün nach Regel 3 die Farbe des Anklickbaren, nicht des Status. */
-.statusbtn { min-width: 9.5rem; justify-content: flex-start; }
+/* Fenster zu einem Gegenstand */
+.modal-status {
+  display: flex;
+  align-items: center;
+  gap: var(--nz-space-3);
+  font-weight: 600;
+}
+.nz-modal__foot { flex-wrap: wrap; }
+.statusbtn { justify-content: flex-start; }
+
+/* Schwebende Schaltfläche, Regel 15. Grün, weil sie eine Aktion ist, und
+   quadratisch, weil der Radius im Haus immer null ist. */
+.fab {
+  position: fixed;
+  right: var(--nz-space-5);
+  bottom: var(--nz-space-5);
+  z-index: 50;
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  background: var(--nz-signal);
+  color: var(--nz-on-signal);
+  border: var(--nz-stroke-rule) solid var(--nz-line);
+  box-shadow: var(--nz-shadow-md);
+  cursor: pointer;
+}
+.fab .ico { width: 1.75rem; height: 1.75rem; }
+.fab:hover { box-shadow: var(--nz-shadow-lg); }
+.fab:focus-visible { outline: var(--nz-stroke-strong) solid var(--nz-focus); outline-offset: 3px; }
+
+/* Die Meldungen weichen der schwebenden Schaltfläche aus. */
+.nz-toast-region { bottom: calc(var(--nz-space-5) + 56px + var(--nz-space-3)); }
 
 /* == 6 · Spracheingabe =================================================== */
 
@@ -365,9 +391,8 @@
   .addrow .nz-btn,
   .voicerow > .nz-btn { width: 100%; }
 
-  .item { flex-wrap: wrap; }
-  .item-actions { width: 100%; justify-content: flex-start; }
-  .statusbtn { width: 100%; }
+  .addrow .nz-btn { width: 100%; }
+  .fab { right: var(--nz-space-3); bottom: var(--nz-space-3); }
 
   .nz-toast-region { left: var(--nz-space-3); right: var(--nz-space-3); bottom: var(--nz-space-3); max-width: none; }
   .nz-toast { min-width: 0; }
