@@ -113,15 +113,36 @@ Zerlegung im Browser, und die Eingabe geht nicht verloren.
 **Der Schlüssel bleibt auf dem Gerät.** Er liegt im `localStorage` des
 Browsers, nicht im verschlüsselten Dokument. Freunde, die den Ansehen-Link
 öffnen, bekommen ihn also nicht. Ein Schlüssel im ausgelieferten Quelltext
-wäre öffentlich lesbar; deshalb gibt es ihn dort nicht.
+wäre öffentlich lesbar, deshalb gibt es ihn dort nicht. Ein Schlüssel in
+clientseitigem JavaScript ist grundsätzlich öffentlich, sobald die Seite ihn
+lädt; CORS schützt ihn nicht, weil die Gegenstelle jede Herkunft zurückspiegelt.
+Deshalb ist es der Schlüssel der Nutzerin und nicht der des Betriebs.
 
 **Was das für die Zusage bedeutet.** Die Liste bleibt Ende-zu-Ende
 verschlüsselt. Der gesprochene Satz ist davon ausgenommen: Er ist der einzige
-Klartext, der das Gerät verlässt, und zwar zweimal, wenn beide Stufen genutzt
-werden. Chrome überträgt das Audio zur Erkennung an Google, und die KI-Anfrage
-überträgt den erkannten Text. Wer das nicht will, hinterlegt keinen Schlüssel
-und lässt den Proxy aus; dann bleibt nur die Erkennung des Browsers, und die
-Zerlegung passiert lokal.
+Klartext, der das Gerät verlässt.
+
+Das geschieht an zwei Stellen, und die erste liegt nicht in unserer Hand. Wo
+die Spracherkennung läuft, entscheidet der Browser:
+
+* Auf dem Desktop nutzt Chrome ein lokales Sprachpaket, wenn eines installiert
+  ist, und weicht nur sonst auf Google aus. Deutsch und Englisch gehören zu den
+  Sprachen, für die es solche Pakete gibt.
+* Auf Android gibt es die lokale Erkennung nicht. Dort geht das Audio immer an
+  Google.
+
+Die Anwendung kann das weder erkennen noch beeinflussen. Die zweite Stelle ist
+die KI-Anfrage, und die überträgt den erkannten Text immer. Wer beides nicht
+will, hinterlegt keinen Schlüssel und lässt den Proxy aus. Dann bleibt die
+Zerlegung im Browser, und es wird nichts übertragen.
+
+**Zu Modell und Kontingent.** `AI_MODEL` steht in `app.js` und `api.php` und
+ist auf `gemini-2.5-flash` gesetzt. Eine Modellkennung lässt sich unangemeldet
+nicht prüfen, weil die Anmeldung vor der Modellauflösung greift. Wer sie
+ändert, prüft sie vorher mit einem gültigen Schlüssel über
+`GET /v1beta/models`. Die Kontingente der kostenlosen Stufe stehen im AI Studio
+des eigenen Projekts; die Zahlen, die Drittseiten dazu nennen, widersprechen
+einander.
 
 ### Server-Proxy einschalten
 

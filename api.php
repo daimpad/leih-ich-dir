@@ -72,6 +72,8 @@ const THROTTLE_GC_PROB = 50;       // 1 von n Anfragen räumt alte Zählerdateie
  * -------------------------------------------------------------------------- */
 const AI_PROXY_ENABLED = false;
 const AI_ENDPOINT      = 'https://generativelanguage.googleapis.com/v1beta/models/';
+/* Am besten belegte Kennung. Eine geänderte Kennung vorher mit einem gültigen
+   Schlüssel über GET /v1beta/models prüfen, unangemeldet geht das nicht. */
 const AI_MODEL         = 'gemini-2.5-flash';
 const AI_MAX_TEXT      = 1500;     // Zeichen je Anfrage
 const AI_LIMIT         = 60;       // Anfragen pro Fenster und IP
@@ -516,6 +518,9 @@ function action_ai(array $in): never
         'generationConfig'  => [
             'temperature'      => 0,
             'responseMimeType' => 'application/json',
+            /* Groß geschriebene Typen: der Dialekt ist eine Auswahl aus
+               OpenAPI 3.0, nicht JSON Schema. responseSchema ist als
+               abgekündigt markiert, arbeitet aber in v1 und v1beta. */
             'responseSchema'   => [
                 'type'  => 'ARRAY',
                 'items' => [
