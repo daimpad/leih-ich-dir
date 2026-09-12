@@ -40,5 +40,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Parse app.js
-        run: node --check app.js
+      - name: Parse every JavaScript file
+        run: |
+          # Alle ausgelieferten Skripte, nicht nur app.js. Der Fund kam daher,
+          # dass theme.js und check.js dazukamen und hier zunaechst fehlten.
+          find . -name '*.js' -not -path './.git/*' -not -path './vendor/*' -print0 \
+            | xargs -0 -n1 -t node --check

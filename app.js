@@ -177,7 +177,7 @@
       'list.updated': 'Zuletzt aktualisiert: {date}',
       'list.readonly': 'Nur-Lese-Ansicht',
 
-      'share.headline': 'Links',
+      'share.headline': 'Link teilen',
       'share.viewLabel': 'Ansehen-Link für Freunde',
       'share.editLabel': 'Bearbeiten-Link, geheim',
       'share.copy': 'Kopieren',
@@ -220,8 +220,21 @@
       'request.subject': 'Leihanfrage: {item}',
       'request.body': 'Hallo, ich möchte {item} ausleihen. Passt das bei dir?',
 
-      'settings.headline': 'Einstellungen und Kontakt',
-      'settings.hint': 'Diese Angaben werden mitverschlüsselt und nur für die Anfrage-Schaltflächen deiner Freunde genutzt.',
+      'settings.headline': 'Einstellungen',
+      'contact.headline': 'Kontakt',
+      'contact.hint': 'Diese Angaben werden mitverschlüsselt und nur für die Anfrage-Schaltflächen deiner Freunde genutzt.',
+      'settings.themeHeadline': 'Erscheinungsbild',
+      'settings.themeHint': 'Gilt für diesen Browser, nicht für die Liste.',
+      'settings.themeSystem': 'Wie das System',
+      'settings.themeLight': 'Hell',
+      'settings.themeDark': 'Dunkel',
+      'settings.cacheHeadline': 'Zwischenspeicher',
+      'settings.cacheHint': 'Entfernt alles, was diese Anwendung in diesem Browser ablegt: Sprache, Erscheinungsbild, KI-Schlüssel und im Vorschaumodus die lokal gehaltenen Listen. Deine Liste auf dem Server und deine Links bleiben unberührt.',
+      'settings.cacheClear': 'Zwischenspeicher löschen',
+      'settings.cacheConfirm': 'Alles löschen, was diese Anwendung in diesem Browser ablegt? Die Liste auf dem Server bleibt bestehen.',
+      'settings.cacheDone': 'Zwischenspeicher geleert.',
+      'settings.dangerHeadline': 'Liste löschen',
+      'settings.dangerHint': 'Die Liste wird unwiderruflich vom Server entfernt. Beide Links laufen danach ins Leere.',
       'settings.email': 'E-Mail für Anfragen',
       'settings.phone': 'WhatsApp-Nummer',
       'settings.phoneHint': 'Internationales Format, zum Beispiel +49',
@@ -276,6 +289,9 @@
       'error.ratelimit': 'Zu viele neue Listen in kurzer Zeit. Bitte später erneut versuchen.',
       'error.exists': 'Diese Listen-Kennung ist bereits vergeben. Bitte erneut versuchen.',
 
+      'footer.imprint': 'Impressum',
+      'footer.privacy': 'Datenschutz',
+      'footer.about': 'Über',
       'footer.text': 'Freie Software, MIT-Lizenz, Ende-zu-Ende-verschlüsselt.'
     },
 
@@ -301,7 +317,7 @@
       'list.updated': 'Last updated: {date}',
       'list.readonly': 'Read-only view',
 
-      'share.headline': 'Links',
+      'share.headline': 'Share link',
       'share.viewLabel': 'View link for friends',
       'share.editLabel': 'Edit link, secret',
       'share.copy': 'Copy',
@@ -344,8 +360,21 @@
       'request.subject': 'Borrowing request: {item}',
       'request.body': 'Hi, I would like to borrow {item}. Does that work for you?',
 
-      'settings.headline': 'Settings and contact',
-      'settings.hint': 'These details are encrypted along with the list and only feed the request buttons your friends see.',
+      'settings.headline': 'Settings',
+      'contact.headline': 'Contact',
+      'contact.hint': 'These details are encrypted along with the list and only feed the request buttons your friends see.',
+      'settings.themeHeadline': 'Appearance',
+      'settings.themeHint': 'Applies to this browser, not to the list.',
+      'settings.themeSystem': 'Follow the system',
+      'settings.themeLight': 'Light',
+      'settings.themeDark': 'Dark',
+      'settings.cacheHeadline': 'Local data',
+      'settings.cacheClear': 'Clear local data',
+      'settings.cacheHint': 'Removes everything this application stores in this browser: language, appearance, AI key, and in preview mode the locally held lists. Your list on the server and your links stay untouched.',
+      'settings.cacheConfirm': 'Remove everything this application stores in this browser? The list on the server stays.',
+      'settings.cacheDone': 'Local data cleared.',
+      'settings.dangerHeadline': 'Delete list',
+      'settings.dangerHint': 'The list is irreversibly removed from the server. Both links then lead nowhere.',
       'settings.email': 'E-mail for requests',
       'settings.phone': 'WhatsApp number',
       'settings.phoneHint': 'International format, for example +49',
@@ -400,6 +429,9 @@
       'error.ratelimit': 'Too many new lists in a short time. Please try again later.',
       'error.exists': 'This list id is already taken. Please try again.',
 
+      'footer.imprint': 'Imprint',
+      'footer.privacy': 'Privacy',
+      'footer.about': 'About',
       'footer.text': 'Free software, MIT licence, end-to-end encrypted.'
     }
   };
@@ -456,6 +488,7 @@
       badge.hidden = false;
     }
     updateVoiceHint();
+    if (window.LeihTheme) { window.LeihTheme.setLang(lang); }
   }
 
   function formatDate(tsSeconds) {
@@ -770,6 +803,7 @@
     /* Bereiche, die nur im Bearbeitenmodus sichtbar sind */
     $('#shareBox').hidden = !isEdit;
     $('#addForm').hidden = !isEdit;
+    $('#contactBox').hidden = !isEdit;
     $('#settingsBox').hidden = !isEdit;
     $('#btnRefresh').hidden = isEdit;
 
@@ -1141,6 +1175,25 @@
 
   function stopRefresh() {
     if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null; }
+  }
+
+  /**
+   * Leert alles, was diese Anwendung im Browser ablegt. Die Liste auf dem
+   * Server bleibt; im Vorschaumodus ist der lokale Speicher allerdings der
+   * Server, dort verschwindet sie mit. Der Hinweis daneben sagt das.
+   */
+  function clearLocalData() {
+    if (!window.confirm(t('settings.cacheConfirm'))) { return; }
+    try {
+      var doomed = [];
+      for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        if (key && key.indexOf('lid.') === 0) { doomed.push(key); }
+      }
+      doomed.forEach(function (key) { localStorage.removeItem(key); });
+    } catch (e) { /* privater Modus: dann gab es nichts zu loeschen */ }
+    toast(t('settings.cacheDone'));
+    setTimeout(function () { location.reload(); }, 600);
   }
 
   function deleteList() {
@@ -1595,6 +1648,7 @@
     $('#btnCreate').addEventListener('click', createList);
     $('#btnRefresh').addEventListener('click', function () { refresh(true); });
     $('#btnDeleteList').addEventListener('click', deleteList);
+    $('#btnClearCache').addEventListener('click', clearLocalData);
 
     $('#addForm').addEventListener('submit', function (ev) {
       ev.preventDefault();

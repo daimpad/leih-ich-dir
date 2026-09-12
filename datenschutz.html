@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Datenschutz · leihichdir.de</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%23FFFEE5'/><g fill='none' stroke='%23000' stroke-width='4' stroke-linecap='square'><rect x='4' y='20' width='18' height='20'/><rect x='38' y='20' width='18' height='20'/><path d='M24 30 L34 30'/></g><path d='M32 25 L38 30 L32 35 Z' fill='%2300FF9C'/></svg>">
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<link rel="stylesheet" href="vendor/nozilla-ci/design-system.css">
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+</head>
+<body>
+
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <defs><g id="g-sign"><rect x="54" y="54" width="6" height="6" fill="#00FF9C" stroke="none"/></g></defs>
+  <symbol id="i-moon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M38 8 L22 18 L18 32 L22 46 L38 56 L30 45 L28 32 L30 19 Z" fill="currentColor" stroke="none"/>
+    <rect x="44" y="20" width="7" height="7" fill="#00FF9C" stroke="none"/>
+    <use href="#g-sign"/>
+  </symbol>
+  <symbol id="i-sun" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <circle cx="32" cy="32" r="11" fill="#00FF9C" stroke="none"/>
+    <path d="M32 6 L32 14"/><path d="M32 50 L32 58"/><path d="M6 32 L14 32"/><path d="M50 32 L58 32"/>
+    <path d="M14 14 L20 20"/><path d="M44 44 L50 50"/><path d="M50 14 L44 20"/><path d="M20 44 L14 50"/>
+    <use href="#g-sign"/>
+  </symbol>
+</svg>
+
+<header class="site">
+  <div class="shell bar">
+    <a class="brand" href="./">
+      <img class="brand-logo" src="assets/pics/logo.svg" alt="" width="330" height="87">
+      <span class="brand-word">leihichdir</span>
+    </a>
+    <div class="bar-controls">
+      <button type="button" class="ctl-square" data-theme-toggle>
+        <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-moon"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="shell page">
+
+  <div class="titleblock">
+    <h1>Datenschutz</h1>
+    <p class="nz-lead">Was diese Anwendung verarbeitet, und was sie technisch nicht sehen kann.</p>
+  </div>
+
+  <div class="nz-alert nz-alert--warn note">
+    <div><p class="nz-alert__body">
+      Entwurf. Die technischen Angaben beschreiben, was die Anwendung
+      tatsächlich tut. Die rechtliche Einordnung und die Angaben zur
+      verantwortlichen Stelle gehören geprüft, bevor der Dienst startet.
+    </p></div>
+  </div>
+
+  <section class="nz-card nz-card--raised">
+    <h2 class="nz-card__title">Verantwortliche Stelle</h2>
+    <p>[Name und Anschrift wie im Impressum]<br>E-Mail: [adresse@example.org]</p>
+  </section>
+
+  <section class="nz-card nz-card--raised">
+    <h2 class="nz-card__title">Was verarbeitet wird</h2>
+
+    <h3 class="settings-sub">Inhalte der Listen</h3>
+    <p>
+      Gegenstände, Notizen, Namen von Ausleihenden und die hinterlegten
+      Kontaktangaben werden im Browser mit AES-GCM verschlüsselt, bevor sie den
+      Rechner verlassen. Der Server speichert ausschließlich diese
+      unlesbaren Zeichenketten. Der Schlüssel steht hinter dem Rautezeichen der
+      Adresse und wird von Browsern nicht an den Server übertragen. Der Betrieb
+      kann die Inhalte daher nicht einsehen.
+    </p>
+
+    <h3 class="settings-sub">Zugriffsdaten</h3>
+    <p>
+      Für das Anlegen neuer Listen und für Anfragen an die KI gilt eine
+      Mengenbegrenzung je Stunde. Dafür wird die IP-Adresse mit einem
+      installationsspezifischen Salz gehasht und nur dieser Hash zusammen mit
+      einem Zähler gespeichert. Die Adresse selbst wird nicht abgelegt. Die
+      Zähler werden nach Ablauf des Zeitfensters entfernt. Darüber hinaus gelten
+      die üblichen Protokolle des Webservers.
+    </p>
+
+    <h3 class="settings-sub">Keine Cookies, kein Tracking</h3>
+    <p>
+      Die Anwendung setzt keine Cookies, bindet keine fremden Schriften, keine
+      Analysedienste und keine Werbenetzwerke ein. Sprache, Erscheinungsbild und
+      ein etwaiger eigener KI-Schlüssel liegen ausschließlich im lokalen
+      Speicher des Browsers und lassen sich dort über die Einstellungen wieder
+      entfernen.
+    </p>
+
+    <h3 class="settings-sub">Spracheingabe</h3>
+    <p>
+      Wer die Spracheingabe nutzt, verlässt den verschlüsselten Bereich. Zwei
+      Übertragungen können dabei stattfinden:
+    </p>
+    <ul class="points">
+      <li><span>
+        Die <strong>Spracherkennung des Browsers</strong> wandelt Audio in Text.
+        Wo das geschieht, entscheidet der Browser. Auf dem Desktop nutzt Chrome
+        ein lokales Sprachpaket, wenn eines installiert ist, und weicht sonst auf
+        Server von Google aus. Auf Android gibt es die lokale Erkennung nicht,
+        dort wird das Audio immer an Google übertragen. Diese Anwendung kann das
+        weder erkennen noch beeinflussen.
+      </span></li>
+      <li><span>
+        Die <strong>Strukturierung des erkannten Textes</strong> läuft über
+        Google Gemini. Der erkannte Text wird dafür an Google übertragen, in den
+        USA verarbeitet und von dieser Anwendung weder protokolliert noch
+        gespeichert. Wer das nicht möchte, nutzt die Spracheingabe nicht; die
+        Liste lässt sich vollständig über die Tastatur pflegen.
+      </span></li>
+    </ul>
+    <p>
+      Rechtsgrundlage ist die Einwilligung durch die bewusste Nutzung der
+      Schaltfläche zum Einsprechen, Artikel 6 Absatz 1 Buchstabe a DSGVO.
+      [Angaben zur Übermittlung in ein Drittland prüfen lassen.]
+    </p>
+  </section>
+
+  <section class="nz-card nz-card--raised">
+    <h2 class="nz-card__title">Löschung</h2>
+    <p>
+      Eine Liste lässt sich jederzeit über den Bearbeiten-Link selbst löschen,
+      dann wird die Datei auf dem Server entfernt. Listen, die [ein Jahr] lang
+      nicht mehr geändert wurden, werden automatisch gelöscht. Da der Betrieb
+      die Inhalte nicht lesen kann, ist eine Auskunft über einzelne Listen
+      technisch nicht möglich.
+    </p>
+  </section>
+
+  <section class="nz-card nz-card--raised">
+    <h2 class="nz-card__title">Rechte der Betroffenen</h2>
+    <p>
+      Es bestehen die Rechte auf Auskunft, Berichtigung, Löschung,
+      Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch sowie
+      ein Beschwerderecht bei einer Aufsichtsbehörde. Anfragen richten sich an
+      die oben genannte Adresse.
+    </p>
+  </section>
+
+
+</main>
+
+<footer class="site-footer">
+  <div class="shell">
+    <nav class="footer-nav" aria-label="Rechtliches">
+      <a href="impressum.html">Impressum</a>
+      <a href="datenschutz.html">Datenschutz</a>
+      <a href="ueber.html">Über</a>
+      <a href="https://nozilla.de" rel="noopener">nozilla<span class="footer-claim">Gute digitale Dienste.</span></a>
+    </nav>
+    <p class="nz-small nz-muted">
+      <a href="./">Zurück zur Anwendung</a>
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

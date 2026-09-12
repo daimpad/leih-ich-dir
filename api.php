@@ -43,7 +43,19 @@ function data_dir(): string
 function lists_dir(): string { return data_dir() . '/lists'; }
 function throttle_dir(): string { return data_dir() . '/throttle'; }
 function salt_file(): string { return data_dir() . '/.salt'; }
-function ai_key_file(): string { return data_dir() . '/.ai-key'; }
+/**
+ * Ablageorte des KI-Schlüssels, in dieser Reihenfolge geprüft.
+ *
+ * Die zweite Fassung ohne führenden Punkt gibt es, weil viele Dateiverwaltungen
+ * von Webhostern versteckte Dateien weder anzeigen noch anlegen können. Beide
+ * liegen in data/ und sind damit über HTTP gleich gut gesperrt.
+ *
+ * @return list<string>
+ */
+function ai_key_files(): array
+{
+    return [data_dir() . '/.ai-key', data_dir() . '/ai-key.txt'];
+}
 
 const MAX_REQUEST_SIZE = 1048576;  // 1 MiB Rohanfrage
 const MAX_CT_CHARS     = 524288;   // 512 KiB Chiffrat (base64url)
@@ -68,6 +80,7 @@ const THROTTLE_GC_PROB = 50;       // 1 von n Anfragen räumt alte Zählerdateie
  * Text weiterhin selbst. Erst der Schlüssel macht den Proxy scharf:
  *
  *   printf '%s' 'SCHLUESSEL' > data/.ai-key && chmod 600 data/.ai-key
+ *   oder data/ai-key.txt, falls die Dateiverwaltung keine Punktdateien kann
  *   oder SetEnv LEIH_AI_KEY … im Virtual Host
  *
  * Der Schlüssel gehört nicht ins Repository; data/ steht in .gitignore.
@@ -424,15 +437,20 @@ function action_delete(array $in): never
 
 /* == KI-Proxy ============================================================== */
 
-/** Liest den Schlüssel aus der Umgebung oder aus data/.ai-key. */
+/** Liest den Schlüssel aus der Umgebung oder aus einer der Schlüsseldateien. */
 function ai_key(): string
 {
     $env = getenv('LEIH_AI_KEY');
     if (is_string($env) && $env !== '') {
         return trim($env);
     }
-    $file = @file_get_contents(ai_key_file());
-    return is_string($file) ? trim($file) : '';
+    foreach (ai_key_files() as $path) {
+        $content = @file_get_contents($path);
+        if (is_string($content) && trim($content) !== '') {
+            return trim($content);
+        }
+    }
+    return '';
 }
 
 function ai_available(): bool

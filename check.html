@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Abnahme · leihichdir.de</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%23FFFEE5'/><g fill='none' stroke='%23000' stroke-width='4' stroke-linecap='square'><rect x='4' y='20' width='18' height='20'/><rect x='38' y='20' width='18' height='20'/><path d='M24 30 L34 30'/></g><path d='M32 25 L38 30 L32 35 Z' fill='%2300FF9C'/></svg>">
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<link rel="stylesheet" href="vendor/nozilla-ci/design-system.css">
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+</head>
+<body>
+
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <defs><g id="g-sign"><rect x="54" y="54" width="6" height="6" fill="#00FF9C" stroke="none"/></g></defs>
+  <symbol id="i-moon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M38 8 L22 18 L18 32 L22 46 L38 56 L30 45 L28 32 L30 19 Z" fill="currentColor" stroke="none"/>
+    <rect x="44" y="20" width="7" height="7" fill="#00FF9C" stroke="none"/>
+    <use href="#g-sign"/>
+  </symbol>
+  <symbol id="i-sun" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <circle cx="32" cy="32" r="11" fill="#00FF9C" stroke="none"/>
+    <path d="M32 6 L32 14"/><path d="M32 50 L32 58"/><path d="M6 32 L14 32"/><path d="M50 32 L58 32"/>
+    <path d="M14 14 L20 20"/><path d="M44 44 L50 50"/><path d="M50 14 L44 20"/><path d="M20 44 L14 50"/>
+    <use href="#g-sign"/>
+  </symbol>
+</svg>
+
+<header class="site">
+  <div class="shell bar">
+    <a class="brand" href="./">
+      <img class="brand-logo" src="assets/pics/logo.svg" alt="" width="330" height="87">
+      <span class="brand-word">leihichdir</span>
+    </a>
+    <div class="bar-controls">
+      <span class="nz-badge">Abnahme</span>
+      <button type="button" class="ctl-square" data-theme-toggle>
+        <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-moon"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="shell page">
+
+  <div class="titleblock">
+    <h1>Abnahme</h1>
+    <p class="nz-lead">
+      Diese Seite prüft die Installation aus dem Browser heraus, ohne Konsole.
+      Sie legt dafür eine leere Liste an und löscht sie sofort wieder.
+    </p>
+  </div>
+
+  <div class="nz-card nz-card--raised">
+    <p class="actions">
+      <button type="button" id="btnRun" class="nz-btn nz-btn--primary nz-btn--lg">Prüfung starten</button>
+    </p>
+    <p id="summary" class="nz-field__hint"></p>
+  </div>
+
+  <div class="nz-card nz-card--raised" id="resultCard" hidden>
+    <h2 class="nz-card__title">Ergebnis</h2>
+    <div id="results"></div>
+    <p class="actions">
+      <button type="button" id="btnCopy" class="nz-btn nz-btn--sm">Ergebnis kopieren</button>
+    </p>
+  </div>
+
+  <div class="nz-alert note">
+    <div><p class="nz-alert__body">
+      Diese Seite gehört nicht in den Dauerbetrieb. Sie verrät zwar nichts,
+      was nicht ohnehin von außen prüfbar wäre, aber nach der Abnahme kann
+      <code>check.html</code> und <code>check.js</code> gelöscht werden.
+    </p></div>
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  <div class="shell"><p class="nz-small"><a href="./">Zurück zur Anwendung</a></p></div>
+</footer>
+
+<script src="check.js" defer></script>
+</body>
+</html>
