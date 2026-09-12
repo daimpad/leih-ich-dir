@@ -21,6 +21,17 @@ jobs:
       - name: Run API tests
         run: php tests/api-test.php
 
+      - name: Check deployment script against a local server
+        run: |
+          php -S 127.0.0.1:8799 -t . > /dev/null 2>&1 &
+          sleep 2
+          # Der eingebaute Server kennt keine .htaccess, deshalb koennen
+          # Kopfzeilen und Abschottung dort nicht bestehen. Geprueft wird hier
+          # nur, dass das Skript laeuft und die Schnittstelle findet.
+          php tools/check-deployment.php http://127.0.0.1:8799 | tee /tmp/abnahme.txt || true
+          grep -q 'api.php antwortet als Dienst                   ok' /tmp/abnahme.txt
+          grep -q 'Liste anlegen, data/ ist beschreibbar          ok' /tmp/abnahme.txt
+
   javascript:
     name: JavaScript Syntax
     runs-on: ubuntu-latest

@@ -174,12 +174,23 @@ check('read nach delete → 404', $code === 404);
 [$code] = http_json($base, ['a' => 'frei-erfunden']);
 check('unbekannte Aktion → 400', $code === 400);
 
-/* Der KI-Proxy ist ab Werk abgeschaltet und meldet das auch. */
+/* Der KI-Proxy ist eingeschaltet, aber ohne hinterlegten Schlüssel stumm.
+   Das ist die wichtige Eigenschaft: Der Schalter allein gibt nichts frei. */
 [$code, $body] = http_json($base . '?a=ping');
-check('ping meldet den KI-Proxy als abgeschaltet', ($body['aiProxy'] ?? true) === false);
+check('ping meldet den Proxy ohne Schlüssel als nicht bereit', ($body['aiProxy'] ?? true) === false);
 
 [$code] = http_json($base, ['a' => 'ai', 'text' => 'Bohrmaschine und Zelt']);
-check('KI-Anfrage bei abgeschaltetem Proxy → 404', $code === 404);
+check('KI-Anfrage ohne hinterlegten Schlüssel → 404', $code === 404);
+
+/* Mit Schlüssel meldet ping den Proxy als bereit. Die Anfrage selbst wird
+   hier nicht gestellt: Sie ginge nach draußen, und ein Test soll nicht vom
+   Netz abhängen. */
+file_put_contents($dataDir . '/.ai-key', 'AIzaNurFuerDenTest');
+[$code, $body] = http_json($base . '?a=ping');
+check('ping meldet den Proxy mit Schlüssel als bereit', ($body['aiProxy'] ?? false) === true);
+unlink($dataDir . '/.ai-key');
+[$code, $body] = http_json($base . '?a=ping');
+check('ping meldet ihn nach Entfernen wieder als nicht bereit', ($body['aiProxy'] ?? true) === false);
 
 /* Der Server darf zu keinem Zeitpunkt Klartext ablegen. */
 $plainId = bin2hex(random_bytes(16));

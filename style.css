@@ -75,6 +75,15 @@
 }
 .ico-brand { width: 1.9rem; height: 1.9rem; }
 
+/* Wortmarke. Das Zeichen kommt aus assets/pics/logo.svg und bleibt dort
+   unveraendert; es wird als Bild eingebunden, nicht eingebettet. Die Hoehe
+   fuehrt, die Breite ergibt sich aus dem Seitenverhaeltnis 330:87. */
+.brand-logo {
+  height: 1.9rem;
+  width: auto;
+  display: block;
+}
+
 .mono { font-family: var(--nz-font-mono); font-size: var(--nz-text-sm); }
 
 /* == 2 · Kopf und Fuß ==================================================== */
@@ -291,6 +300,11 @@
 
 @media (max-width: 34rem) {
   .shell { padding-inline: var(--nz-space-3); }
+
+  /* Auf schmalen Geraeten teilen sich Marke und Bedienelemente die Zeile.
+     Das Zeichen wird kleiner, bevor irgendetwas umbricht. */
+  .brand-logo { height: 1.5rem; }
+  .brand-word { font-size: var(--nz-text-base); }
 
   /* Regel 20: automatische Silbentrennung greift nur auf schmalen Bildschirmen. */
   .titleblock h1 { hyphens: auto; }
