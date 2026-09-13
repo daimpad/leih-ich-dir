@@ -22,10 +22,12 @@ oder Kontaktdaten.
 | **Zweisprachig** | Deutsch und Englisch, automatische Erkennung plus manuelle Umschaltung |
 | **Hell und dunkel** | folgt dem System, lässt sich in der Kopfleiste und in den Einstellungen übersteuern |
 | **Autovervollständigung** | 29 typische Leih-Gegenstände über ein natives `<datalist>`-Element |
-| **Ein Eintrag, ein Fenster** | die Liste zeigt Name und Verfügbarkeit, alles Weitere steht hinter dem Eintrag |
-| **Anfragen** | vorformulierter Text in der aktiven Sprache, weitergegeben über das Gerät an jede App oder per `mailto:` |
+| **Ein Eintrag, ein Fenster** | verfügbar bleibt schmucklos, verliehen trägt Name und Datum in der Zeile |
+| **Anfragen** | steht bei Freunden in der Zeile: vorformulierter Text, weitergegeben über das Gerät oder per `mailto:` |
+| **Rücknahme statt Rückfrage** | ein gelöschter Eintrag lässt sich neun Sekunden lang zurückholen |
+| **Gemerkte Listen** | eigene Listen stehen auf der Startseite dieses Browsers, rein lokal und ohne Konto |
 | **Spracheingabe** | Gegenstände unterwegs einsprechen, Zerlegung im Browser oder wahlweise per Gemini |
-| **Erscheinungsbild** | das Corporate Design von nozilla, mitgeliefert und ohne fremde Server |
+| **Erscheinungsbild** | eigenständig in `style.css`, Schriften mitgeliefert, keine fremden Server |
 | **Ohne Abhängigkeiten** | pures PHP, HTML, CSS, Vanilla JS, kein Framework, kein Bauschritt, keine Datenbank |
 
 ## Funktionsweise der Verschlüsselung
@@ -184,25 +186,33 @@ schlicht `data/.ai-key`. Beides wirkt sofort.
 
 ## Erscheinungsbild
 
-Die Oberfläche folgt dem Corporate Design von nozilla
-([daimpad/nozilla-ci](https://github.com/daimpad/nozilla-ci)):
-Papierton als Grund, Signalgrün ausschließlich für Aktionen, Tinte-Schwarz für
-Text und Linien, Radius null, harte Schatten ohne Weichzeichnung, keine Emoji.
+Warmer Papierton als Grund, weiche Kanten, ruhige Schatten. Die Farbe trägt
+Bedeutung und nicht Schmuck:
 
-Übernommen wurde nicht abgeschrieben, sondern eingebunden:
+| Farbe | Heißt |
+| --- | --- |
+| Grün | frei — und führt die Handlung an |
+| Bernstein | verliehen |
+| Rot | zerstörend, und nur dort |
 
-* `vendor/nozilla-ci/design-system.css` ist eine unveränderte Kopie. Ein
-  Abgleich mit dem Ursprung bleibt damit ein Dateivergleich. Der Stand steht
-  in `vendor/nozilla-ci/README.md`.
-* `style.css` ist die Anwendungsschicht darüber. Sie enthält keinen einzigen
-  Farb- oder Schriftwert, sondern arbeitet ausschließlich über die Marken
-  `--nz-*` und die Bausteine `.nz-*`.
-* Die Zeichen in `index.html` sind Kopien aus `project/assets/icon-*.svg`,
-  eingebettet als Symbolsatz, damit sie über `currentColor` dem hellen und dem
-  dunklen Erscheinungsbild folgen. Jedes trägt die Signatur des Hauses.
+Alles steht in `style.css`. Die Datei ist die gesamte Gestaltung; ein zweites
+Stylesheet gibt es nicht.
+
+* Farben, Abstände, Radien und Schatten stehen als Merkmale in `:root`, einmal
+  hell und einmal dunkel. Im Rumpf der Datei steht kein einziger Farbwert.
+* Dunkel folgt erst der Systemvorgabe und dann der ausdrücklichen Wahl aus den
+  Einstellungen; `theme.js` setzt dafür `data-theme` am Wurzelelement, noch
+  bevor der Körper gezeichnet wird.
+* Die Zeichen liegen als Symbolsatz in `index.html`, einfarbig und über
+  `currentColor` an die Schriftfarbe gebunden. Raster 64 × 64, Strichstärke 4
+  bis 5, eckige Enden.
 * Die Schriften Zilla Slab, Inter und Space Mono liegen als WOFF2-Teilmengen
   unter `assets/fonts/` und werden selbst ausgeliefert. Zusammen 104 KiB.
   Erzeugt mit `tools/build-fonts.py`.
+
+Eingebettete `style`-Angaben gibt es nicht: Die Sicherheitsrichtlinie erlaubt
+nur `style-src 'self'`, der Browser verwirft sie stillschweigend, und ein
+Abstand, der nur auf dem Entwicklungsrechner sitzt, ist schlimmer als keiner.
 
 Nichts wird von fremden Servern nachgeladen. Das ist nicht nur eine Frage der
 Ladezeit: Ein Aufruf von `fonts.gstatic.com` würde die IP-Adresse jeder
@@ -220,12 +230,9 @@ unterbindet das ohnehin.
 ├── datenschutz.html              Entwurf, juristisch prüfen lassen
 ├── ueber.html                    Beschreibung des Projekts
 ├── app.js                        Verschlüsselung · i18n · Rendering · Sprache · Speicher
-├── style.css                     Anwendungsschicht über dem Erscheinungsbild
+├── style.css                     das gesamte Erscheinungsbild
 ├── api.php                       Flat-File-Backend, optional mit KI-Proxy
 ├── .htaccess                     Sicherheits-Header, Sperren für Punktdateien
-├── vendor/nozilla-ci/
-│   ├── design-system.css         unveränderte Kopie des Erscheinungsbilds
-│   └── README.md                 Herkunft, Stand, Abgleich
 ├── assets/
 │   ├── fonts/                    WOFF2-Teilmengen und ihre @font-face-Regeln
 │   └── pics/logo.svg             Wortmarke
@@ -498,7 +505,7 @@ Gemini key, by the AI. That spoken text is the one piece of plaintext that
 leaves the device, and the German section above says exactly when.
 
 The visual identity is the nozilla corporate design, vendored verbatim under
-`vendor/nozilla-ci/`, with self-hosted font subsets. Nothing is fetched from
+`style.css`, with self-hosted font subsets. Nothing is fetched from
 third-party servers.
 
 Interface, documentation and issues are welcome in German or English.

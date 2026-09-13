@@ -10,7 +10,6 @@
 <title>Abnahme · leihichdir.de</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%23FFFEE5'/><g fill='none' stroke='%23000' stroke-width='4' stroke-linecap='square'><rect x='4' y='20' width='18' height='20'/><rect x='38' y='20' width='18' height='20'/><path d='M24 30 L34 30'/></g><path d='M32 25 L38 30 L32 35 Z' fill='%2300FF9C'/></svg>">
 <link rel="stylesheet" href="assets/fonts/fonts.css">
-<link rel="stylesheet" href="vendor/nozilla-ci/design-system.css">
 <link rel="stylesheet" href="style.css">
 <script src="theme.js"></script>
 </head>
@@ -38,7 +37,7 @@
       <span class="brand-word">leihichdir</span>
     </a>
     <div class="bar-controls">
-      <span class="nz-badge">Abnahme</span>
+      <span class="chip">Abnahme</span>
       <button type="button" class="ctl-square" data-theme-toggle>
         <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-moon"/></svg>
       </button>
@@ -50,29 +49,29 @@
 
   <div class="titleblock">
     <h1>Abnahme</h1>
-    <p class="nz-lead">
+    <p class="lead">
       Diese Seite prüft die Installation aus dem Browser heraus, ohne Konsole.
       Sie legt dafür eine leere Liste an und löscht sie sofort wieder.
     </p>
   </div>
 
-  <div class="nz-card nz-card--raised">
+  <div class="card">
     <p class="actions">
-      <button type="button" id="btnRun" class="nz-btn nz-btn--primary nz-btn--lg">Prüfung starten</button>
+      <button type="button" id="btnRun" class="btn btn--primary btn--lg">Prüfung starten</button>
     </p>
-    <p id="summary" class="nz-field__hint"></p>
+    <p id="summary" class="hint"></p>
   </div>
 
-  <div class="nz-card nz-card--raised" id="resultCard" hidden>
-    <h2 class="nz-card__title">Ergebnis</h2>
+  <div class="card" id="resultCard" hidden>
+    <h2 class="card__title">Ergebnis</h2>
     <div id="results"></div>
     <p class="actions">
-      <button type="button" id="btnCopy" class="nz-btn nz-btn--sm">Ergebnis kopieren</button>
+      <button type="button" id="btnCopy" class="btn btn--sm">Ergebnis kopieren</button>
     </p>
   </div>
 
-  <div class="nz-alert note">
-    <div><p class="nz-alert__body">
+  <div class="note note">
+    <div><p class="note__body">
       Diese Seite gehört nicht in den Dauerbetrieb. Sie verrät zwar nichts,
       was nicht ohnehin von außen prüfbar wäre, aber nach der Abnahme kann
       <code>check.html</code> und <code>check.js</code> gelöscht werden.
@@ -82,7 +81,7 @@
 </main>
 
 <footer class="site-footer">
-  <div class="shell"><p class="nz-small"><a href="./">Zurück zur Anwendung</a></p></div>
+  <div class="shell"><p class="txt-sm"><a href="./">Zurück zur Anwendung</a></p></div>
 </footer>
 
 <script src="check.js" defer></script>

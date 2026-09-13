@@ -20,8 +20,11 @@
   var SCHEMA_VERSION = 1;      // Version des *entschlüsselten* Dokuments
   var SAVE_DEBOUNCE  = 800;    // ms bis zum automatischen Speichern
   var REFRESH_MS     = 45000;  // Intervall für Live-Daten im Ansehen-Modus
+  var UNDO_MS        = 9000;   // Frist, in der sich ein Löschen zurücknehmen lässt
   var LS_PREFIX      = 'lid.'; // localStorage-Namensraum (Vorschaumodus)
   var LS_LANG        = 'lid.lang';
+  var LS_MINE        = 'lid.mine'; // auf diesem Gerät gemerkte eigene Listen
+  var MINE_MAX       = 8;      // mehr merkt sich niemand, und die Startseite bliebe voll
 
   /* ===================================================================== *
    * 1 · Kleine Helfer
@@ -56,7 +59,7 @@
 
   /** Statuspunkt: grün für verfügbar, orange für verliehen. */
   function statusDot(status) {
-    return el('span', 'nz-dot' + (status === 'lent' ? ' nz-dot--warn' : ''));
+    return el('span', 'dot' + (status === 'lent' ? ' dot--warn' : ''));
   }
 
   /** Fehler mit maschinenlesbarem Code (siehe I18N-Schlüssel error.*). */
@@ -160,20 +163,19 @@
       'a11y.lang': 'Switch to English',
       'banner.preview': 'Vorschaumodus: Es ist kein PHP-Backend erreichbar. Listen werden nur lokal in diesem Browser gespeichert. Das ist ideal, um die Oberfläche auszuprobieren.',
       'badge.local': 'lokal',
-      'badge.cloud': 'Server',
 
       'hero.a': 'Leih',
       'hero.b': 'ich',
       'hero.c': 'dir.',
-      'hero.lead': 'Eine Liste deiner Gegenstände, die du an Freunde verleihst. Ohne Konto, ohne Tracking, und lesen können sie nur du und deine Freunde.',
+      'hero.lead': 'Eine Liste deiner Gegenstände, die du an Freunde verleihst. Ohne Konto, und lesen können sie nur du und die, denen du den Link gibst.',
 
+      'trust.label': 'Eigenschaften',
       'trust.tracking': 'Kein Tracking',
       'trust.account': 'Ohne Konto',
       'trust.ads': 'Keine Werbung',
-      'trust.crypto': 'Verschlüsselt',
-      'trust.source': 'Open Source',
+      'trust.crypto': 'Ende-zu-Ende verschlüsselt',
+      'trust.source': 'Quelloffen',
 
-      'steps.headline': 'In drei Schritten',
       'steps.one': 'Liste anlegen',
       'steps.oneText': 'Ein Klick, und du hast zwei Links: einen geheimen zum Bearbeiten und einen zum Weitergeben.',
       'steps.two': 'Gegenstände eintragen',
@@ -181,21 +183,28 @@
       'steps.three': 'Link weitergeben',
       'steps.threeText': 'Freunde sehen, was gerade frei ist, und fragen mit einem Klick an.',
 
-      'start.headline': 'Dein Leih-Katalog',
-      'start.lead': 'Eine Liste deiner Gegenstände, die du an Freunde verleihst. Ohne Konto, ohne Tracking, und lesen können sie nur du und deine Freunde.',
-      'start.point1': 'Inhalte werden im Browser verschlüsselt. Der Server speichert nur unlesbare Zeichenketten.',
-      'start.point2': 'Ein geheimer Bearbeiten-Link für dich, ein Ansehen-Link für deine Freunde.',
-      'start.point3': 'Freunde sehen immer den aktuellen Stand und fragen mit einem Klick an, über welchen Weg sie mögen.',
       'start.create': 'Neue Liste anlegen',
+      'start.createHint': 'dauert einen Klick',
       'start.creating': 'Liste wird angelegt …',
-      'start.hint': 'Der Bearbeiten-Link ist dein einziger Zugang. Speichere ihn als Lesezeichen, er lässt sich nicht wiederherstellen.',
 
       'list.titleLabel': 'Titel der Liste',
       'list.titlePlaceholder': 'Titel der Liste',
       'list.untitled': 'Leih-Katalog',
       'list.updated': 'Zuletzt aktualisiert: {date}',
-      'list.readonly': 'Nur-Lese-Ansicht',
       'list.by': 'Liste von {name}',
+      'list.free': '{n} gerade frei',
+      'list.free_1': '1 gerade frei',
+      'list.lentCount': '{n} verliehen',
+      'list.newTitle': 'Meine Leihliste',
+
+      'mine.headline': 'Deine Listen auf diesem Gerät',
+      'mine.hint': 'Nur in diesem Browser gemerkt. Der Bearbeiten-Link bleibt dein einziger Zugang.',
+
+      'key.headline': 'Deine Liste ist angelegt',
+      'key.body': 'Dieser Link ist dein einziger Zugang. Er steht nirgends sonst — auch wir kennen ihn nicht.',
+      'key.label': 'Bearbeiten-Link',
+      'key.remember': 'Auf diesem Gerät gemerkt — beim nächsten Besuch findest du die Liste auf der Startseite wieder.',
+      'key.done': 'Ich habe den Link gesichert',
 
       'share.headline': 'Link teilen',
       'share.tabView': 'Ansehen',
@@ -213,10 +222,8 @@
       'share.hide': 'Verbergen',
       'share.hint': 'Der Schlüssel steht hinter dem Rautezeichen und wird technisch nie an den Server übertragen.',
 
-      'add.headline': 'Gegenstand hinzufügen',
       'add.nameLabel': 'Gegenstand',
       'add.namePlaceholder': 'zum Beispiel Bohrmaschine',
-      'add.noteLabel': 'Notiz',
       'add.notePlaceholder': 'Notiz, optional',
       'add.submit': 'Hinzufügen',
 
@@ -226,18 +233,21 @@
       'items.count_1': '1 Gegenstand',
       'items.empty': 'Noch nichts eingetragen. Füge oben deinen ersten Gegenstand hinzu.',
       'items.emptyView': 'Diese Liste ist im Moment leer.',
+      'items.checked': 'zuletzt geprüft vor {n} Min.',
+      'items.checkedNow': 'gerade geprüft',
 
       'item.available': 'Verfügbar',
       'item.lent': 'Verliehen',
-      'item.markLent': 'Als verliehen markieren',
-      'item.markAvailable': 'Als verfügbar markieren',
       'item.delete': 'Löschen',
-      'item.deleteConfirm': '„{name}“ wirklich aus der Liste entfernen?',
+      'item.ask': 'Anfragen',
+      'item.deleted': '„{name}“ entfernt.',
+      'item.undo': 'Rückgängig',
       'item.borrower': 'Verliehen an',
       'item.borrowerPlaceholder': 'Name, optional',
       'item.since': 'seit',
       'item.lentTo': 'Verliehen an {name} seit {date}',
       'item.lentSince': 'Verliehen seit {date}',
+      'item.lentToPlain': 'Verliehen an {name}',
 
       'modal.name': 'Gegenstand',
       'modal.note': 'Notiz',
@@ -245,6 +255,7 @@
       'modal.done': 'Fertig',
       'modal.close': 'Schließen',
 
+      'request.headline': '{item} anfragen',
       'request.mail': 'Per E-Mail anfragen',
       'request.share': 'Anfrage teilen',
       'request.copy': 'Anfragetext kopieren',
@@ -254,7 +265,9 @@
       'request.bodyNamed': 'Hallo {name}, ich möchte {item} ausleihen. Passt das bei dir?',
 
       'settings.headline': 'Einstellungen',
+      'settings.sub': 'Erscheinungsbild, Schlüssel, Liste löschen',
       'contact.headline': 'Kontakt',
+      'contact.sub': 'Name und E-Mail für Anfragen',
       'contact.name': 'Dein Name',
       'contact.namePlaceholder': 'zum Beispiel Damian',
       'contact.nameHint': 'Steht über der Liste und in der Anrede, wenn jemand anfragt.',
@@ -335,20 +348,19 @@
       'a11y.lang': 'Auf Deutsch umschalten',
       'banner.preview': 'Preview mode: no PHP backend reachable. Lists are stored locally in this browser only. Handy for trying out the interface.',
       'badge.local': 'local',
-      'badge.cloud': 'server',
 
       'hero.a': 'Borrow',
       'hero.b': 'it',
       'hero.c': 'from me.',
-      'hero.lead': 'A list of the things you lend to friends. No account, no tracking, and only you and your friends can read the contents.',
+      'hero.lead': 'A list of the things you lend to friends. No account, and only you and the people you send the link to can read it.',
 
+      'trust.label': 'Properties',
       'trust.tracking': 'No tracking',
       'trust.account': 'No account',
       'trust.ads': 'No ads',
-      'trust.crypto': 'Encrypted',
+      'trust.crypto': 'End-to-end encrypted',
       'trust.source': 'Open source',
 
-      'steps.headline': 'In three steps',
       'steps.one': 'Create a list',
       'steps.oneText': 'One click, and you have two links: a secret one for editing and one to pass on.',
       'steps.two': 'Add your things',
@@ -356,21 +368,28 @@
       'steps.three': 'Pass the link on',
       'steps.threeText': 'Friends see what is free right now and ask with one click.',
 
-      'start.headline': 'Your lending catalogue',
-      'start.lead': 'A list of the things you lend to friends. No account, no tracking, and only you and your friends can read the contents.',
-      'start.point1': 'Contents are encrypted in the browser. The server only stores unreadable strings.',
-      'start.point2': 'One secret edit link for you, one view link for your friends.',
-      'start.point3': 'Friends always see the current state and ask with one click, through whichever channel they prefer.',
       'start.create': 'Create a new list',
+      'start.createHint': 'takes one click',
       'start.creating': 'Creating list …',
-      'start.hint': 'The edit link is your only way back in. Bookmark it, it cannot be recovered.',
 
       'list.titleLabel': 'List title',
       'list.titlePlaceholder': 'List title',
       'list.untitled': 'Lending catalogue',
       'list.updated': 'Last updated: {date}',
-      'list.readonly': 'Read-only view',
       'list.by': 'List by {name}',
+      'list.free': '{n} free right now',
+      'list.free_1': '1 free right now',
+      'list.lentCount': '{n} lent out',
+      'list.newTitle': 'My lending list',
+
+      'mine.headline': 'Your lists on this device',
+      'mine.hint': 'Remembered in this browser only. The edit link remains your only way in.',
+
+      'key.headline': 'Your list is ready',
+      'key.body': 'This link is your only way in. It exists nowhere else — not even we know it.',
+      'key.label': 'Edit link',
+      'key.remember': 'Remembered on this device — next time you will find the list on the start page.',
+      'key.done': 'I have saved the link',
 
       'share.headline': 'Share link',
       'share.tabView': 'View',
@@ -388,10 +407,8 @@
       'share.hide': 'Hide',
       'share.hint': 'The key lives behind the # sign and is technically never sent to the server.',
 
-      'add.headline': 'Add an item',
       'add.nameLabel': 'Item',
       'add.namePlaceholder': 'e.g. cordless drill',
-      'add.noteLabel': 'Note',
       'add.notePlaceholder': 'Note, optional',
       'add.submit': 'Add',
 
@@ -401,18 +418,21 @@
       'items.count_1': '1 item',
       'items.empty': 'Nothing here yet. Add your first item above.',
       'items.emptyView': 'This list is empty at the moment.',
+      'items.checked': 'checked {n} min ago',
+      'items.checkedNow': 'just checked',
 
       'item.available': 'Available',
       'item.lent': 'Lent out',
-      'item.markLent': 'Mark as lent out',
-      'item.markAvailable': 'Mark as available',
       'item.delete': 'Delete',
-      'item.deleteConfirm': 'Really remove “{name}” from the list?',
+      'item.ask': 'Ask',
+      'item.deleted': '“{name}” removed.',
+      'item.undo': 'Undo',
       'item.borrower': 'Lent to',
       'item.borrowerPlaceholder': 'Name, optional',
       'item.since': 'since',
       'item.lentTo': 'Lent to {name} since {date}',
       'item.lentSince': 'Lent out since {date}',
+      'item.lentToPlain': 'Lent to {name}',
 
       'modal.name': 'Item',
       'modal.note': 'Note',
@@ -420,6 +440,7 @@
       'modal.done': 'Done',
       'modal.close': 'Close',
 
+      'request.headline': 'Ask for {item}',
       'request.mail': 'Ask by e-mail',
       'request.share': 'Share request',
       'request.copy': 'Copy request text',
@@ -429,7 +450,9 @@
       'request.bodyNamed': 'Hi {name}, I would like to borrow {item}. Does that work for you?',
 
       'settings.headline': 'Settings',
+      'settings.sub': 'Appearance, key, delete list',
       'contact.headline': 'Contact',
+      'contact.sub': 'Name and e-mail for requests',
       'contact.name': 'Your name',
       'contact.namePlaceholder': 'for example Damian',
       'contact.nameHint': 'Shown above the list and in the greeting when somebody asks.',
@@ -544,6 +567,9 @@
     $$('[data-i18n-placeholder]').forEach(function (node) {
       node.setAttribute('placeholder', t(node.getAttribute('data-i18n-placeholder')));
     });
+    $$('[data-i18n-label]').forEach(function (node) {
+      node.setAttribute('aria-label', t(node.getAttribute('data-i18n-label')));
+    });
     /* Regel 19: das Bedienelement zeigt das Ziel, nicht den Zustand. */
     var langBtn = $('#btnLang');
     if (langBtn) {
@@ -552,10 +578,13 @@
       langBtn.setAttribute('title', t('a11y.lang'));
       langBtn.setAttribute('aria-label', t('a11y.lang'));
     }
+    /* Das Abzeichen nennt den Speicherort nur dann, wenn er vom Erwarteten
+       abweicht: im Vorschaumodus liegt die Liste im Browser, sonst auf dem
+       Server, und Letzteres muss niemand lesen. */
     var badge = $('#storageBadge');
     if (Store && badge) {
-      badge.textContent = t(Store.kind === 'local' ? 'badge.local' : 'badge.cloud');
-      badge.hidden = false;
+      badge.textContent = t('badge.local');
+      badge.hidden = (Store.kind !== 'local');
     }
     updateVoiceHint();
     if (window.LeihTheme) { window.LeihTheme.setLang(lang); }
@@ -742,7 +771,8 @@
     updated: 0,
     doc: null,       // Klartext-Dokument
     dirty: false,
-    saving: false
+    saving: false,
+    checkedAt: 0     // Zeitpunkt des letzten erfolgreichen Serverabgleichs
   };
 
   var saveTimer = null;
@@ -800,6 +830,56 @@
   function viewLink() { return baseUrl() + viewHash(state.id, state.keyStr); }
   function editLink() { return baseUrl() + editHash(state.id, state.keyStr, state.token); }
 
+  /* ------------------------------------------------------------------ *
+   * Eigene Listen, auf diesem Gerät gemerkt
+   *
+   * Kein Konto, kein Server: eine Zeile im localStorage, die den Bearbeiten-
+   * Link derselben Herkunft festhält, in der er ohnehin schon steht — im
+   * Verlauf des Browsers. Sie erspart den häufigsten Verlustfall, nämlich den
+   * geschlossenen Reiter, und verschwindet mit „Zwischenspeicher löschen".
+   * ------------------------------------------------------------------ */
+
+  function readMine() {
+    var raw = null;
+    try { raw = localStorage.getItem(LS_MINE); } catch (e) { return []; }
+    if (!raw) { return []; }
+    var list;
+    try { list = JSON.parse(raw); } catch (e) { return []; }
+    if (!Array.isArray(list)) { return []; }
+    return list.filter(function (entry) {
+      return entry && typeof entry.id === 'string' && typeof entry.hash === 'string';
+    });
+  }
+
+  function writeMine(list) {
+    try { localStorage.setItem(LS_MINE, JSON.stringify(list.slice(0, MINE_MAX))); }
+    catch (e) { /* privater Modus oder voll: dann eben nicht */ }
+  }
+
+  /** Legt die Liste vorn ab oder frischt ihren Eintrag auf. */
+  function rememberList() {
+    if (state.mode !== 'edit' || !state.id || !state.token) { return; }
+    var entry = {
+      id: state.id,
+      hash: editHash(state.id, state.keyStr, state.token),
+      title: state.doc.title || '',
+      ts: Date.now()
+    };
+    var rest = readMine().filter(function (it) { return it.id !== entry.id; });
+    rest.unshift(entry);
+    writeMine(rest);
+  }
+
+  function forgetList(id) {
+    writeMine(readMine().filter(function (it) { return it.id !== id; }));
+  }
+
+  /** Im privaten Fenster schlaegt das Merken fehl; dann darf es auch niemand
+      versprechen. */
+  function mineWorks() {
+    return readMine().some(function (it) { return it.id === state.id; });
+  }
+
   /** Zerlegt das URL-Fragment. Rückgabe: null | {mode, id, key, token}. */
   function parseHash() {
     var raw = location.hash.replace(/^#/, '');
@@ -834,20 +914,51 @@
   }
 
   var toastTimer = null;
-  function toast(msg) {
+
+  /**
+   * Meldung am unteren Rand. Mit `action` traegt sie eine Gegenhandlung und
+   * bleibt laenger stehen: Das ersetzt die Rueckfrage vor dem Loeschen durch
+   * die Moeglichkeit, es zurueckzunehmen.
+   *
+   * @param {string} msg
+   * @param {{label: string, run: function}=} action
+   */
+  function toast(msg, action) {
     var node = $('#toast');
+    var act = $('#toastAct');
     $('#toastText').textContent = msg;
-    node.hidden = false;
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { node.hidden = true; }, 3600);
+
+    if (action) {
+      act.textContent = action.label;
+      act.hidden = false;
+      act.onclick = function () {
+        clearTimeout(toastTimer);
+        node.hidden = true;
+        act.hidden = true;
+        act.onclick = null;
+        action.run();
+      };
+    } else {
+      act.hidden = true;
+      act.onclick = null;
+    }
+
+    node.hidden = false;
+    toastTimer = setTimeout(function () {
+      node.hidden = true;
+      act.hidden = true;
+      act.onclick = null;
+    }, action ? UNDO_MS : 3600);
   }
 
   function setSaveState(kind) {
     var node = $('#saveState');
     if (!node) { return; }
-    if (state.mode !== 'edit' || !kind) { node.textContent = ''; node.className = 'nz-label'; return; }
+    if (state.mode !== 'edit' || !kind) { node.hidden = true; node.textContent = ''; return; }
+    node.hidden = false;
     node.textContent = t('status.' + kind);
-    node.className = 'nz-label' + (kind === 'error' ? ' savestate-error' : '');
+    node.className = 'chip' + (kind === 'saved' ? ' chip--ok' : (kind === 'error' ? ' chip--warn' : ''));
   }
 
   /** Vollständiges Neuzeichnen der Listenansicht. */
@@ -869,19 +980,13 @@
     }
     document.title = (state.doc.title || t('list.untitled')) + ' · leih-ich-dir';
 
-    var meta = [];
-    var owner = (state.doc.contact.name || '').trim();
-    if (!isEdit && owner) { meta.push(t('list.by', { name: owner })); }
-    if (state.updated) { meta.push(t('list.updated', { date: formatDate(state.updated) })); }
-    if (!isEdit) { meta.push(t('list.readonly')); }
-    $('#listMeta').textContent = meta.join(' · ');
-
     /* Bereiche, die nur im Bearbeitenmodus sichtbar sind */
     $('#shareBox').hidden = !isEdit;
     $('#addForm').hidden = !isEdit;
     $('#contactBox').hidden = !isEdit;
     $('#settingsBox').hidden = !isEdit;
     $('#btnRefresh').hidden = isEdit;
+    if (!isEdit) { $('#keyBox').hidden = true; }
 
     if (isEdit) {
       $('#linkView').value = viewLink();
@@ -899,9 +1004,6 @@
     $('#voiceBox').hidden = !(isEdit && voiceOpen);
     updateVoiceHint();
 
-    /* Die schwebende Schaltflaeche fuehrt zum Eingabefeld, das im Inventar steht. */
-    $('#fabAdd').hidden = !isEdit;
-
     /* Die Weitergabe des Geraets gibt es nicht ueberall; ohne sie bleibt Kopieren. */
     $('#btnShareView').hidden = !(isEdit && canShare());
 
@@ -909,39 +1011,144 @@
     setSaveState(state.saving ? 'saving' : (state.dirty ? 'unsaved' : 'saved'));
   }
 
+  /**
+   * Die Zeile unter dem Titel. Sie sagt im Bearbeiten-Modus, wie viel in der
+   * Liste steht und wann zuletzt gespeichert wurde; im Ansehen-Modus, von wem
+   * die Liste ist und was gerade frei ist — die einzige Zahl, die Freunde
+   * wirklich interessiert.
+   */
+  function renderMeta() {
+    var items = state.doc.items;
+    var lent = 0;
+    items.forEach(function (it) { if (it.status === 'lent') { lent++; } });
+    var free = items.length - lent;
+    var parts = [];
+
+    if (state.mode === 'view') {
+      var owner = (state.doc.contact.name || '').trim();
+      if (owner) { parts.push(t('list.by', { name: owner })); }
+      parts.push(free === 1 ? t('list.free_1') : t('list.free', { n: free }));
+    } else {
+      parts.push(items.length === 1 ? t('items.count_1') : t('items.count', { n: items.length }));
+      if (lent > 0) { parts.push(t('list.lentCount', { n: lent })); }
+      if (state.updated) { parts.push(t('list.updated', { date: formatDate(state.updated) })); }
+    }
+    $('#listMeta').textContent = parts.join(' · ');
+  }
+
+  /** „zuletzt geprüft vor …" — macht die Schaltfläche daneben entbehrlich. */
+  function renderChecked() {
+    var node = $('#checkedAt');
+    if (!node) { return; }
+    if (state.mode !== 'view' || !state.checkedAt) { node.textContent = ''; return; }
+    var min = Math.round((Date.now() - state.checkedAt) / 60000);
+    node.textContent = min < 1 ? t('items.checkedNow') : t('items.checked', { n: min });
+  }
+
   /** Zeichnet nur die Liste neu, etwa wenn im Fenster ein Name geaendert wird. */
   function renderItems() {
     var items = state.doc.items;
-    var count = items.length;
-    $('#itemsCount').textContent = count === 1 ? t('items.count_1') : t('items.count', { n: count });
-
     var listNode = $('#itemList');
+    listNode.className = 'items' + (state.mode === 'view' ? ' items--read' : '');
     listNode.textContent = '';
     items.forEach(function (item) { listNode.appendChild(renderRow(item)); });
 
-    $('#itemsEmpty').hidden = count > 0;
+    $('#itemsEmpty').hidden = items.length > 0;
     $('#itemsEmptyText').textContent = t(state.mode === 'edit' ? 'items.empty' : 'items.emptyView');
+    renderMeta();
+    renderChecked();
+  }
+
+  /**
+   * Die gemerkten Listen auf der Startseite. Sie stehen dort, wo jemand sie
+   * sucht, der den Reiter geschlossen hat — und nur dann, wenn es sie gibt.
+   */
+  function renderMine() {
+    var box = $('#mineBox');
+    var list = $('#mineList');
+    if (!box || !list) { return; }
+    var mine = readMine();
+    list.textContent = '';
+    box.hidden = mine.length === 0;
+    if (!mine.length) { return; }
+
+    mine.forEach(function (entry) {
+      var li = el('li');
+      var a = el('a');
+      a.href = entry.hash;
+      a.appendChild(el('span', 'name', entry.title || t('list.untitled')));
+      if (entry.ts) { a.appendChild(el('span', 'when', formatDay(new Date(entry.ts).toISOString().slice(0, 10)))); }
+      a.appendChild(icon('chev'));
+      li.appendChild(a);
+      list.appendChild(li);
+    });
   }
 
   function statusLabel(item) { return t(item.status === 'lent' ? 'item.lent' : 'item.available'); }
 
+  /** Die runde Marke links in der Zeile. Sie traegt die einzige Aussage, die
+      sich auf einen Blick lesen lassen muss: frei oder nicht. */
+  function statusBadge(item) {
+    var lent = item.status === 'lent';
+    var badge = el('span', 'item-badge');
+    badge.appendChild(icon(lent ? 'out' : 'check'));
+    return badge;
+  }
+
+  /** Wer hat es, und seit wann. Ohne Namen bleibt es bei der Tatsache. */
+  function lentLine(item) {
+    var show = state.mode === 'edit' || state.doc.showBorrower;
+    var who = (item.borrower || '').trim();
+    if (show && who && item.since) { return t('item.lentTo', { name: who, date: formatDay(item.since) }); }
+    if (show && who) { return t('item.lentToPlain', { name: who }); }
+    if (item.since) { return t('item.lentSince', { date: formatDay(item.since) }); }
+    return t('item.lent');
+  }
+
   /**
-   * Eine Zeile im Inventar zeigt nur zwei Dinge: den Namen und ein Zeichen fuer
-   * die Verfuegbarkeit. Alles Weitere steht im Fenster dahinter. Die ganze
-   * Zeile ist das Ziel, deshalb ist sie eine Schaltflaeche und darf nach
-   * Regel 29 auf das Zeigen antworten.
+   * Eine Zeile im Inventar. Verfuegbares bleibt schmucklos — dass etwas da
+   * ist, ist der Normalfall und braucht keine Auszeichnung. Verliehenes
+   * traegt, was man wissen will: bei wem und seit wann, in der Zeile und
+   * nicht erst im Fenster dahinter.
+   *
+   * Im Ansehen-Modus steht die Anfrage in der Zeile. Sie ist der Zweck der
+   * Seite und hat nichts hinter einem zweiten Tipper verloren.
    */
   function renderRow(item) {
+    var lent = item.status === 'lent';
     var li = el('li', 'item item--' + item.status);
     li.setAttribute('data-id', item.id);
 
-    var row = el('button', 'itemrow');
-    row.type = 'button';
-    row.setAttribute('data-act', 'open');
-    row.appendChild(icon(item.status === 'lent' ? 'user' : 'check'));
-    row.appendChild(el('span', 'item-name', item.name));
-    row.appendChild(el('span', 'nz-sr-only', statusLabel(item)));
-    li.appendChild(row);
+    var text = el('span', 'item-text');
+    text.appendChild(el('span', 'item-name', item.name));
+    if (lent) { text.appendChild(el('span', 'item-state', lentLine(item))); }
+    else if (item.note) { text.appendChild(el('span', 'item-note', item.note)); }
+
+    if (state.mode === 'view') {
+      var row = el('div', 'itemrow' + (lent ? ' items-read-lent' : ''));
+      row.appendChild(statusBadge(item));
+      row.appendChild(text);
+      if (!lent) {
+        var ask = el('button', 'btn btn--primary btn--sm item-ask');
+        ask.type = 'button';
+        ask.setAttribute('data-act', 'ask');
+        ask.textContent = t('item.ask');
+        row.appendChild(ask);
+      }
+      li.appendChild(row);
+      return li;
+    }
+
+    var btn = el('button', 'itemrow');
+    btn.type = 'button';
+    btn.setAttribute('data-act', 'open');
+    btn.appendChild(statusBadge(item));
+    btn.appendChild(text);
+    btn.appendChild(el('span', 'sr-only', statusLabel(item)));
+    var chev = el('span', 'item-chev');
+    chev.appendChild(icon('chev'));
+    btn.appendChild(chev);
+    li.appendChild(btn);
     return li;
   }
 
@@ -952,8 +1159,8 @@
   var modalItemId = null;
 
   function modalField(labelText, node) {
-    var field = el('div', 'nz-field');
-    var label = el('label', 'nz-field__label', labelText);
+    var field = el('div', 'field');
+    var label = el('label', 'field__label', labelText);
     label.setAttribute('for', node.id);
     field.appendChild(label);
     field.appendChild(node);
@@ -964,118 +1171,172 @@
     var input = document.createElement('input');
     input.type = 'text';
     input.id = id;
-    input.className = 'nz-input';
+    input.className = 'input';
     input.value = value || '';
     input.maxLength = max;
     if (placeholder) { input.placeholder = placeholder; }
     return input;
   }
 
-  function buildModalBody(item) {
-    var body = $('#modalBody');
-    body.textContent = '';
-    var isEdit = state.mode === 'edit';
+  /**
+   * Der Inhalt des Fensters im Bearbeiten-Modus. Der Name steht hier als
+   * Feld, nicht noch einmal als Ueberschrift: zweimal dasselbe Wort
+   * uebereinander sagt nichts doppelt so gut.
+   */
+  /**
+   * Der Kopf des Fensters. Im Bearbeiten-Modus ist die Ueberschrift selbst
+   * das Feld: Der Name eines Gegenstands zweimal untereinander zu zeigen,
+   * einmal als Titel und einmal als Eingabe, sagt nichts doppelt so gut.
+   */
+  function buildModalHead(item) {
+    var head = $('#modalTitle');
+    var dialog = $('#itemModal');
+    head.textContent = '';
 
-    if (isEdit) {
-      var name = textInput('mdName', item.name, 120);
-      name.addEventListener('input', function () {
-        item.name = this.value;
-        $('#modalTitle').textContent = this.value;
-        touch();
-        renderItems();
-      });
-      body.appendChild(modalField(t('modal.name'), name));
-
-      var note = textInput('mdNote', item.note, 200, t('add.notePlaceholder'));
-      note.addEventListener('input', function () { item.note = this.value; touch(); });
-      body.appendChild(modalField(t('modal.note'), note));
-
-      var status = el('div', 'nz-field');
-      var toggle = el('button', 'nz-btn statusbtn');
-      toggle.type = 'button';
-      toggle.appendChild(icon(item.status === 'lent' ? 'user' : 'check'));
-      toggle.appendChild(el('span', null, t(item.status === 'lent' ? 'item.markAvailable' : 'item.markLent')));
-      toggle.addEventListener('click', function () {
-        toggleItem(item.id);
-        refreshModal();
-      });
-      status.appendChild(el('span', 'nz-field__label', t('modal.status')));
-      status.appendChild(toggle);
-      body.appendChild(status);
-
-      if (item.status === 'lent') {
-        var who = textInput('mdBorrower', item.borrower, 80, t('item.borrowerPlaceholder'));
-        who.addEventListener('input', function () { item.borrower = this.value; touch(); });
-        body.appendChild(modalField(t('item.borrower'), who));
-
-        var since = document.createElement('input');
-        since.type = 'date';
-        since.id = 'mdSince';
-        since.className = 'nz-input';
-        since.value = item.since || '';
-        since.addEventListener('input', function () { item.since = this.value; touch(); });
-        body.appendChild(modalField(t('item.since'), since));
-      }
+    if (state.mode !== 'edit') {
+      head.textContent = t('request.headline', { item: item.name });
+      dialog.setAttribute('aria-label', head.textContent);
       return;
     }
 
-    /* Nur-Lese-Ansicht */
-    var line = el('p', 'modal-status');
-    line.appendChild(icon(item.status === 'lent' ? 'user' : 'check'));
-    line.appendChild(el('span', null, statusLabel(item)));
-    body.appendChild(line);
+    var label = el('label', 'sr-only', t('modal.name'));
+    label.setAttribute('for', 'mdName');
+    var name = textInput('mdName', item.name, 120);
+    name.className = 'input modal-title-input';
+    name.addEventListener('input', function () {
+      item.name = this.value;
+      dialog.setAttribute('aria-label', this.value);
+      touch();
+      renderItems();
+    });
+    head.appendChild(label);
+    head.appendChild(name);
+    dialog.setAttribute('aria-label', item.name);
+  }
 
-    if (item.note) { body.appendChild(el('p', null, item.note)); }
+  function buildModalBody(item) {
+    var body = $('#modalBody');
+    body.textContent = '';
 
-    if (item.status === 'lent' && item.since) {
-      var info = (state.doc.showBorrower && item.borrower)
-        ? t('item.lentTo', { name: item.borrower, date: formatDay(item.since) })
-        : t('item.lentSince', { date: formatDay(item.since) });
-      body.appendChild(el('p', 'nz-field__hint', info));
+    var note = textInput('mdNote', item.note, 200, t('add.notePlaceholder'));
+    note.addEventListener('input', function () { item.note = this.value; touch(); renderItems(); });
+    body.appendChild(modalField(t('modal.note'), note));
+
+    /* Zweistellige Wahl statt einer Schaltflaeche, die ihren eigenen Zustand
+       nicht verraet: Beide Moeglichkeiten stehen nebeneinander, die geltende
+       ist gefuellt. */
+    var field = el('div', 'field');
+    field.appendChild(el('span', 'field__label', t('modal.status')));
+    var seg = el('div', 'seg');
+
+    var free = el('button', null);
+    free.type = 'button';
+    free.textContent = t('item.available');
+    free.setAttribute('aria-pressed', item.status === 'available' ? 'true' : 'false');
+    free.addEventListener('click', function () {
+      if (item.status === 'available') { return; }
+      toggleItem(item.id);
+      refreshModal();
+    });
+
+    var lent = el('button', 'is-lent');
+    lent.type = 'button';
+    lent.textContent = t('item.lent');
+    lent.setAttribute('aria-pressed', item.status === 'lent' ? 'true' : 'false');
+    lent.addEventListener('click', function () {
+      if (item.status === 'lent') { return; }
+      toggleItem(item.id);
+      refreshModal();
+    });
+
+    seg.appendChild(free);
+    seg.appendChild(lent);
+    field.appendChild(seg);
+    body.appendChild(field);
+
+    if (item.status === 'lent') {
+      var who = textInput('mdBorrower', item.borrower, 80, t('item.borrowerPlaceholder'));
+      who.addEventListener('input', function () { item.borrower = this.value; touch(); renderItems(); });
+      body.appendChild(modalField(t('item.borrower'), who));
+
+      var since = document.createElement('input');
+      since.type = 'date';
+      since.id = 'mdSince';
+      since.className = 'input';
+      since.value = item.since || '';
+      since.addEventListener('input', function () { item.since = this.value; touch(); renderItems(); });
+      body.appendChild(modalField(t('item.since'), since));
     }
   }
 
+  /**
+   * Die Fussleiste. Loeschen steht links und traegt keine Flaeche: Es ist die
+   * einzige Handlung hier, die sich nicht zuruecknehmen laesst, indem man sie
+   * noch einmal ausfuehrt — und genau deshalb darf sie nicht wie die erste
+   * Wahl aussehen. Die Rueckfrage entfaellt, dafuer laesst sich das Loeschen
+   * neun Sekunden lang zuruecknehmen.
+   */
   function buildModalFoot(item) {
     var foot = $('#modalFoot');
     foot.textContent = '';
 
-    if (state.mode === 'edit') {
-      var del = el('button', 'nz-btn nz-btn--danger');
-      del.type = 'button';
-      del.appendChild(icon('trash'));
-      del.appendChild(el('span', null, t('item.delete')));
-      del.addEventListener('click', function () {
-        var id = item.id;
-        closeItemModal();
-        deleteItem(id);
-      });
-      foot.appendChild(del);
+    var del = el('button', 'btn btn--danger');
+    del.type = 'button';
+    del.appendChild(icon('trash'));
+    del.appendChild(el('span', null, t('item.delete')));
+    del.addEventListener('click', function () {
+      var id = item.id;
+      closeItemModal();
+      deleteItem(id);
+    });
+    foot.appendChild(del);
 
-      var done = el('button', 'nz-btn nz-btn--primary');
-      done.type = 'button';
-      done.textContent = t('modal.done');
-      done.addEventListener('click', closeItemModal);
-      foot.appendChild(done);
-      return;
-    }
-
-    if (item.status === 'available') {
-      requestActions(item).forEach(function (node) { foot.appendChild(node); });
-    }
-    var close = el('button', 'nz-btn');
-    close.type = 'button';
-    close.textContent = t('modal.close');
-    close.addEventListener('click', closeItemModal);
-    foot.appendChild(close);
+    var done = el('button', 'btn btn--primary');
+    done.type = 'button';
+    done.textContent = t('modal.done');
+    done.addEventListener('click', closeItemModal);
+    foot.appendChild(done);
   }
 
   function openItemModal(id) {
     var item = findItem(id);
-    if (!item) { return; }
+    if (!item || state.mode !== 'edit') { return; }
     modalItemId = id;
-    $('#modalTitle').textContent = item.name;
+    buildModalHead(item);
     buildModalBody(item);
     buildModalFoot(item);
+    openDialog();
+  }
+
+  /**
+   * Das Fenster, das Freunde sehen: nur die Wege, ueber die sie anfragen
+   * koennen. Es traegt keinen weiteren Inhalt, weil alles Uebrige bereits in
+   * der Zeile steht.
+   */
+  function openAskModal(id) {
+    var item = findItem(id);
+    if (!item || item.status !== 'available') { return; }
+    modalItemId = id;
+    buildModalHead(item);
+
+    var body = $('#modalBody');
+    body.textContent = '';
+    body.appendChild(el('p', 'hint', requestBody(item)));
+
+    var foot = $('#modalFoot');
+    foot.textContent = '';
+    var close = el('button', 'btn btn--ghost');
+    close.type = 'button';
+    close.textContent = t('modal.close');
+    close.addEventListener('click', closeItemModal);
+    foot.appendChild(close);
+    foot.appendChild(el('span', 'spacer'));
+    requestActions(item).forEach(function (node) { foot.appendChild(node); });
+
+    openDialog();
+  }
+
+  function openDialog() {
     var dialog = $('#itemModal');
     if (dialog.showModal) { dialog.showModal(); } else { dialog.setAttribute('open', 'open'); }
   }
@@ -1083,7 +1344,6 @@
   function refreshModal() {
     var item = findItem(modalItemId);
     if (!item) { closeItemModal(); return; }
-    $('#modalTitle').textContent = item.name;
     buildModalBody(item);
     buildModalFoot(item);
   }
@@ -1133,8 +1393,10 @@
     var body = requestBody(item);
     var email = (state.doc.contact.email || '').trim();
 
+    /* Hat die Besitzerin eine Adresse hinterlegt, ist das ihr Weg, und der
+       traegt deshalb die Flaeche. Sonst fuehrt die Weitergabe des Geraets. */
     if (email) {
-      var mail = el('a', 'nz-btn');
+      var mail = el('a', 'btn btn--primary');
       mail.href = 'mailto:' + encodeURIComponent(email) +
         '?subject=' + encodeURIComponent(subject) +
         '&body=' + encodeURIComponent(body);
@@ -1145,14 +1407,14 @@
     }
 
     if (canShare()) {
-      var share = el('button', 'nz-btn nz-btn--primary');
+      var share = el('button', email ? 'btn' : 'btn btn--primary');
       share.type = 'button';
       share.appendChild(icon('share'));
       share.appendChild(el('span', null, t('request.share')));
       share.addEventListener('click', function () { nativeShare({ text: body }); });
       nodes.push(share);
-    } else {
-      var copy = el('button', 'nz-btn');
+    } else if (!email) {
+      var copy = el('button', 'btn btn--primary');
       copy.type = 'button';
       copy.textContent = t('request.copy');
       copy.addEventListener('click', function () {
@@ -1221,7 +1483,8 @@
         state.dirty = (docGen !== generation);
         setSaveState(state.dirty ? 'unsaved' : 'saved');
         if (state.dirty) { scheduleSave(); }
-        $('#listMeta').textContent = t('list.updated', { date: formatDate(state.updated) });
+        rememberList();
+        renderMeta();
       } else {
         setSaveState('error');
         toast(t('error.' + mapError(res)));
@@ -1277,13 +1540,36 @@
     render();
   }
 
+  /**
+   * Loeschen ohne Rueckfrage, dafuer mit Rueckweg: Der Eintrag verschwindet
+   * sofort, und die Meldung bietet neun Sekunden lang an, ihn an seine Stelle
+   * zurueckzusetzen. Das ist die freundlichere Ordnung — eine Abfrage vor
+   * jedem Loeschen wird nach dem dritten Mal ohnehin weggeklickt, und dann
+   * schuetzt sie niemanden mehr.
+   */
   function deleteItem(id) {
-    var item = findItem(id);
-    if (!item) { return; }
-    if (!window.confirm(t('item.deleteConfirm', { name: item.name }))) { return; }
-    state.doc.items = state.doc.items.filter(function (it) { return it.id !== id; });
+    var index = -1;
+    for (var i = 0; i < state.doc.items.length; i++) {
+      if (state.doc.items[i].id === id) { index = i; break; }
+    }
+    if (index < 0) { return; }
+
+    var removed = state.doc.items[index];
+    state.doc.items.splice(index, 1);
     touch();
     render();
+
+    toast(t('item.deleted', { name: removed.name }), {
+      label: t('item.undo'),
+      run: function () {
+        /* Die Liste kann sich zwischenzeitlich geaendert haben; der Eintrag
+           kehrt an seine alte Stelle zurueck, hoechstens ans Ende. */
+        var at = Math.min(index, state.doc.items.length);
+        state.doc.items.splice(at, 0, removed);
+        touch();
+        render();
+      }
+    });
   }
 
   /* ===================================================================== *
@@ -1298,6 +1584,7 @@
     var id = randomHex(16);
     var token = randomToken(24);
     var doc = emptyDoc();
+    doc.title = t('list.newTitle');
     var keyRef = null;
 
     Crypt.generateKey().then(function (key) {
@@ -1318,8 +1605,16 @@
         state.doc = doc;
         state.dirty = false;
         history.replaceState(null, '', editHash(id, keyStr, token));
+        rememberList();
         render();
         stopRefresh();
+
+        /* Der Zugang, einmal und deutlich. Er steht ueber allem anderen, bis
+           er bestaetigt wurde: Wer diesen Link verliert, verliert die Liste,
+           und niemand kann ihn wiederherstellen. */
+        $('#keyLink').value = editLink();
+        $('#keyBox').hidden = false;
+        $('#keyRemember').hidden = !mineWorks();
       });
     }).catch(function (err) {
       btn.disabled = false;
@@ -1349,6 +1644,8 @@
     }).then(function (raw) {
       state.doc = normalizeDoc(raw);
       state.dirty = false;
+      state.checkedAt = Date.now();
+      if (state.mode === 'edit') { rememberList(); }
       render();
       if (state.mode === 'view') { startRefresh(); } else { stopRefresh(); }
     }).catch(function (err) {
@@ -1361,7 +1658,9 @@
     if (state.mode !== 'view' || !state.id) { return; }
     Store.read(state.id, state.rev).then(function (res) {
       if (res.status !== 200) { return; }
+      state.checkedAt = Date.now();
       if (res.body.unchanged) {
+        renderChecked();
         if (manual) { toast(t('status.refreshed')); }
         return;
       }
@@ -1410,9 +1709,11 @@
     if (!window.confirm(t('settings.deleteConfirm'))) { return; }
     Store.remove(state.id, state.proof).then(function (res) {
       if (res.status !== 200) { throw new AppError(mapError(res)); }
+      forgetList(state.id);
       state.mode = 'start';
       state.doc = null;
       history.replaceState(null, '', location.pathname);
+      renderMine();
       showView('viewStart');
       toast(t('settings.deleted'));
     }).catch(function (err) {
@@ -1705,7 +2006,7 @@
     var node = $('#voiceState');
     if (!node) { return; }
     node.textContent = message || '';
-    node.className = 'nz-label voicestate' + (isError ? ' voicestate-error' : '');
+    node.className = 'tag voicestate' + (isError ? ' voicestate-error' : '');
   }
 
   function updateVoiceHint() {
@@ -1731,7 +2032,7 @@
     $('.micbtn-label', btn).textContent = t(active ? 'voice.stop' : 'voice.start');
     if (active) {
       var node = $('#voiceState');
-      node.className = 'nz-label voicestate';
+      node.className = 'tag voicestate';
       node.textContent = '';
       node.appendChild(statusDot('available'));
       node.appendChild(el('span', null, t('voice.listening')));
@@ -1857,7 +2158,7 @@
     });
 
     /* Reiter im Abschnitt Link teilen */
-    $$('.nz-tab').forEach(function (tab) {
+    $$('.tab').forEach(function (tab) {
       tab.addEventListener('click', function () { selectTab(tab.getAttribute('data-tab')); });
     });
     $('#btnVoiceApply').addEventListener('click', function () {
@@ -1885,11 +2186,9 @@
       $('#addName').focus();
     });
 
-    /* Die schwebende Schaltflaeche holt das Eingabefeld ins Bild. */
-    $('#fabAdd').addEventListener('click', function () {
-      var field = $('#addName');
-      field.scrollIntoView({ block: 'center', behavior: 'smooth' });
-      field.focus({ preventScroll: true });
+    /* Der Zugang wird weggeräumt, wenn er ausdrücklich gesichert wurde. */
+    $('#btnKeyDone').addEventListener('click', function () {
+      $('#keyBox').hidden = true;
     });
 
     $('#modalClose').addEventListener('click', closeItemModal);
@@ -1914,9 +2213,11 @@
 
     /* Delegation für die Inventarliste */
     $('#itemList').addEventListener('click', function (ev) {
-      var row = ev.target.closest('[data-act="open"]');
-      if (!row) { return; }
-      openItemModal(row.closest('.item').getAttribute('data-id'));
+      var hit = ev.target.closest('[data-act]');
+      if (!hit) { return; }
+      var id = hit.closest('.item').getAttribute('data-id');
+      if (hit.getAttribute('data-act') === 'ask') { openAskModal(id); return; }
+      openItemModal(id);
     });
 
     $$('[data-copy]').forEach(function (btn) {
@@ -1962,6 +2263,7 @@
     if (!parsed) {
       stopRefresh();
       state.mode = 'start';
+      renderMine();
       showView('viewStart');
       return;
     }

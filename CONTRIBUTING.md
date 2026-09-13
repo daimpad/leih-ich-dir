@@ -17,9 +17,9 @@ der Grund für viele Entwurfsentscheidungen im Code:
    Shared Hosting laufen.
 4. **Minimalismus.** Eine neue Funktion muss mehr Nutzen stiften, als sie
    Oberfläche und Wartungsaufwand kostet. Im Zweifel: erst ein Issue eröffnen.
-5. **Das Erscheinungsbild kommt von außen.** Es stammt aus
-   [daimpad/nozilla-ci](https://github.com/daimpad/nozilla-ci) und liegt
-   unverändert in `vendor/`. Wer dort eine Zahl ändert, verliert den Abgleich.
+5. **Das Erscheinungsbild gehört dem Projekt.** Es steht vollständig in
+   `style.css`. Farben, Abstände und Radien stehen als Merkmale in `:root`;
+   wer das Aussehen ändert, ändert dort und nirgends sonst.
 
 ## Ablauf
 
@@ -72,31 +72,34 @@ sofern er die Anwendung selbst abhängigkeitsfrei lässt.
 
 **CSS**
 
-- `vendor/nozilla-ci/design-system.css` wird **nicht** bearbeitet. Anpassungen
-  gehören in `style.css`.
-- Dort keine Farb-, Schrift- oder Abstandswerte eintragen, sondern die Marken
-  `--nz-*` benutzen. Gibt es für etwas keine Marke, ist das ein Hinweis darauf,
-  dass der Baustein woanders hingehört.
-- Bausteine des Hauses (`.nz-btn`, `.nz-card`, `.nz-input`, `.nz-badge`,
-  `.nz-alert`, `.nz-empty` …) vor eigenen Klassen bevorzugen.
-- Formsprache: Radius null, harte Schatten ohne Weichzeichnung, keine Verläufe,
-  keine Glaseffekte. Signalgrün ist Aktionsfarbe, keine Fläche und kein Status.
-- Es gibt genau zwei Linien: durchgezogen 2 px und gestrichelt 2 px, beide in
-  der Textfarbe. Schwache graue Linien gibt es nicht.
-- Layout mit Flexbox, mobile Breite ab 320 px berücksichtigen.
+- Alles steht in `style.css`, gegliedert nach Abschnitten. Keine zweite
+  Stylesheet-Datei, kein Baukasten von außen.
+- Keine Farb-, Schrift- oder Abstandswerte im Rumpf der Datei, sondern die
+  Merkmale aus `:root` benutzen. Gibt es für etwas kein Merkmal, ist das ein
+  Hinweis darauf, dass der Baustein woanders hingehört.
+- Jede Farbe ist auch für dunkel zu setzen, in beiden Blöcken: unter
+  `prefers-color-scheme` **und** unter `[data-theme="dark"]`.
+- Bestehende Bausteine (`.btn`, `.card`, `.input`, `.chip`, `.note`, `.fold`,
+  `.itemrow` …) vor neuen Klassen bevorzugen.
+- Formsprache: runde Ecken aus `--r-*`, weiche Schatten aus `--shadow*`, keine
+  Verläufe. Grün heißt frei und führt die Handlung, Bernstein heißt verliehen,
+  Rot bleibt dem Zerstörenden vorbehalten.
+- **Keine eingebetteten `style`-Angaben.** Die Sicherheitsrichtlinie erlaubt
+  nur `style-src 'self'`; der Browser verwirft sie stillschweigend.
+- Layout mit Flexbox und Grid, mobile Breite ab 320 px berücksichtigen.
 
 **Zeichen und Schriften**
 
-- Keine Emoji, nirgends. Zeichen stammen aus `project/assets/icon-*.svg` des
-  Erscheinungsbilds und werden als `<symbol>` in `index.html` eingebettet.
-- Ein neues Motiv wird nicht hier gezeichnet, sondern im Ursprungs-Repository
-  ergänzt und von dort übernommen.
+- Keine Emoji, nirgends. Zeichen liegen als `<symbol>` in `index.html`, sind
+  einfarbig und folgen über `currentColor` der Schriftfarbe.
+- Ein neues Motiv hält sich an die vorhandene Bauart: Raster 64 × 64,
+  Strichstärke 4 bis 5, eckige Enden, keine Füllung außer `currentColor`.
 - Schriften werden selbst ausgeliefert. Neue Schnitte entstehen über
   `tools/build-fonts.py`, nie über einen Verweis auf Google Fonts.
 
 ## Sprache der Texte
 
-Sichtbare Texte folgen den Hausregeln des Erscheinungsbilds:
+Sichtbare Texte folgen diesen Regeln:
 
 - Kurze Hauptsätze, konkret vor allgemein.
 - Keine Gedankenstriche im Fließtext, dort steht ein Komma. Bei Paaren aus
