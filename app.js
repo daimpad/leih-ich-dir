@@ -162,6 +162,25 @@
       'badge.local': 'lokal',
       'badge.cloud': 'Server',
 
+      'hero.a': 'Leih',
+      'hero.b': 'ich',
+      'hero.c': 'dir.',
+      'hero.lead': 'Eine Liste deiner Gegenstände, die du an Freunde verleihst. Ohne Konto, ohne Tracking, und lesen können sie nur du und deine Freunde.',
+
+      'trust.tracking': 'Kein Tracking',
+      'trust.account': 'Ohne Konto',
+      'trust.ads': 'Keine Werbung',
+      'trust.crypto': 'Verschlüsselt',
+      'trust.source': 'Open Source',
+
+      'steps.headline': 'In drei Schritten',
+      'steps.one': 'Liste anlegen',
+      'steps.oneText': 'Ein Klick, und du hast zwei Links: einen geheimen zum Bearbeiten und einen zum Weitergeben.',
+      'steps.two': 'Gegenstände eintragen',
+      'steps.twoText': 'Tippen oder einsprechen. Erst nur den Namen, alles Weitere steht hinter dem Eintrag.',
+      'steps.three': 'Link weitergeben',
+      'steps.threeText': 'Freunde sehen, was gerade frei ist, und fragen mit einem Klick an.',
+
       'start.headline': 'Dein Leih-Katalog',
       'start.lead': 'Eine Liste deiner Gegenstände, die du an Freunde verleihst. Ohne Konto, ohne Tracking, und lesen können sie nur du und deine Freunde.',
       'start.point1': 'Inhalte werden im Browser verschlüsselt. Der Server speichert nur unlesbare Zeichenketten.',
@@ -176,8 +195,13 @@
       'list.untitled': 'Leih-Katalog',
       'list.updated': 'Zuletzt aktualisiert: {date}',
       'list.readonly': 'Nur-Lese-Ansicht',
+      'list.by': 'Liste von {name}',
 
       'share.headline': 'Link teilen',
+      'share.tabView': 'Ansehen',
+      'share.tabEdit': 'Bearbeiten',
+      'share.viewHint': 'Diesen Link geben deine Freunde weiter. Er zeigt die Liste, ändern lässt sich damit nichts.',
+      'share.editHint': 'Dieser Link ist dein Zugang. Gib ihn niemandem und speichere ihn als Lesezeichen.',
       'share.viewLabel': 'Ansehen-Link für Freunde',
       'share.editLabel': 'Bearbeiten-Link, geheim',
       'share.copy': 'Kopieren',
@@ -227,9 +251,13 @@
       'request.copied': 'Anfragetext kopiert.',
       'request.subject': 'Leihanfrage: {item}',
       'request.body': 'Hallo, ich möchte {item} ausleihen. Passt das bei dir?',
+      'request.bodyNamed': 'Hallo {name}, ich möchte {item} ausleihen. Passt das bei dir?',
 
       'settings.headline': 'Einstellungen',
       'contact.headline': 'Kontakt',
+      'contact.name': 'Dein Name',
+      'contact.namePlaceholder': 'zum Beispiel Damian',
+      'contact.nameHint': 'Steht über der Liste und in der Anrede, wenn jemand anfragt.',
       'contact.hint': 'Diese Angaben werden mitverschlüsselt und nur für die Anfrage-Schaltflächen deiner Freunde genutzt.',
       'settings.themeHeadline': 'Erscheinungsbild',
       'settings.themeHint': 'Gilt für diesen Browser, nicht für die Liste.',
@@ -257,6 +285,7 @@
       'settings.aiKeyCleared': 'Schlüssel aus dem Browser entfernt.',
 
       'voice.start': 'Einsprechen',
+      'voice.bulk': 'Mehrere auf einmal',
       'voice.stop': 'Aufnahme beenden',
       'voice.textLabel': 'Erkannter Text',
       'voice.placeholder': 'Mehrere Gegenstände am Stück sprechen oder eintippen',
@@ -308,6 +337,25 @@
       'badge.local': 'local',
       'badge.cloud': 'server',
 
+      'hero.a': 'Borrow',
+      'hero.b': 'it',
+      'hero.c': 'from me.',
+      'hero.lead': 'A list of the things you lend to friends. No account, no tracking, and only you and your friends can read the contents.',
+
+      'trust.tracking': 'No tracking',
+      'trust.account': 'No account',
+      'trust.ads': 'No ads',
+      'trust.crypto': 'Encrypted',
+      'trust.source': 'Open source',
+
+      'steps.headline': 'In three steps',
+      'steps.one': 'Create a list',
+      'steps.oneText': 'One click, and you have two links: a secret one for editing and one to pass on.',
+      'steps.two': 'Add your things',
+      'steps.twoText': 'Type or speak. Just the name at first, everything else sits behind the entry.',
+      'steps.three': 'Pass the link on',
+      'steps.threeText': 'Friends see what is free right now and ask with one click.',
+
       'start.headline': 'Your lending catalogue',
       'start.lead': 'A list of the things you lend to friends. No account, no tracking, and only you and your friends can read the contents.',
       'start.point1': 'Contents are encrypted in the browser. The server only stores unreadable strings.',
@@ -322,8 +370,13 @@
       'list.untitled': 'Lending catalogue',
       'list.updated': 'Last updated: {date}',
       'list.readonly': 'Read-only view',
+      'list.by': 'List by {name}',
 
       'share.headline': 'Share link',
+      'share.tabView': 'View',
+      'share.tabEdit': 'Edit',
+      'share.viewHint': 'This is the link your friends get. It shows the list; nothing can be changed with it.',
+      'share.editHint': 'This link is your way in. Give it to nobody and bookmark it.',
       'share.viewLabel': 'View link for friends',
       'share.editLabel': 'Edit link, secret',
       'share.copy': 'Copy',
@@ -373,9 +426,13 @@
       'request.copied': 'Request text copied.',
       'request.subject': 'Borrowing request: {item}',
       'request.body': 'Hi, I would like to borrow {item}. Does that work for you?',
+      'request.bodyNamed': 'Hi {name}, I would like to borrow {item}. Does that work for you?',
 
       'settings.headline': 'Settings',
       'contact.headline': 'Contact',
+      'contact.name': 'Your name',
+      'contact.namePlaceholder': 'for example Damian',
+      'contact.nameHint': 'Shown above the list and in the greeting when somebody asks.',
       'contact.hint': 'These details are encrypted along with the list and only feed the request buttons your friends see.',
       'settings.themeHeadline': 'Appearance',
       'settings.themeHint': 'Applies to this browser, not to the list.',
@@ -403,6 +460,7 @@
       'settings.aiKeyCleared': 'Key removed from this browser.',
 
       'voice.start': 'Speak items',
+      'voice.bulk': 'Several at once',
       'voice.stop': 'Stop recording',
       'voice.textLabel': 'Recognised text',
       'voice.placeholder': 'Say or type several items in one go',
@@ -690,12 +748,13 @@
   var saveTimer = null;
   var refreshTimer = null;
   var docGen = 0;   // zählt Änderungen; erkennt Bearbeitungen während eines Schreibvorgangs
+  var voiceOpen = false;   // die Sprachbox steht zu, bis das Mikrofon oder der Verweis sie öffnet
 
   function emptyDoc() {
     return {
       v: SCHEMA_VERSION,
       title: '',
-      contact: { email: '' },
+      contact: { name: '', email: '' },
       showBorrower: false,
       items: []
     };
@@ -708,6 +767,7 @@
     doc.title = typeof raw.title === 'string' ? raw.title : '';
     doc.showBorrower = raw.showBorrower === true;
     if (raw.contact && typeof raw.contact === 'object') {
+      doc.contact.name = typeof raw.contact.name === 'string' ? raw.contact.name.slice(0, 60) : '';
       doc.contact.email = typeof raw.contact.email === 'string' ? raw.contact.email : '';
       /* Eine frueher gepflegte Telefonnummer wird nicht mehr uebernommen:
          Die Anfrage laeuft jetzt ueber die Weitergabe des Geraets und ist
@@ -810,6 +870,8 @@
     document.title = (state.doc.title || t('list.untitled')) + ' · leih-ich-dir';
 
     var meta = [];
+    var owner = (state.doc.contact.name || '').trim();
+    if (!isEdit && owner) { meta.push(t('list.by', { name: owner })); }
     if (state.updated) { meta.push(t('list.updated', { date: formatDate(state.updated) })); }
     if (!isEdit) { meta.push(t('list.readonly')); }
     $('#listMeta').textContent = meta.join(' · ');
@@ -824,15 +886,17 @@
     if (isEdit) {
       $('#linkView').value = viewLink();
       $('#linkEdit').value = editLink();
+      if (document.activeElement !== $('#cfgName')) { $('#cfgName').value = state.doc.contact.name; }
       if (document.activeElement !== $('#cfgEmail')) { $('#cfgEmail').value = state.doc.contact.email; }
       if (document.activeElement !== $('#cfgAiKey')) { $('#cfgAiKey').value = getAiKey(); }
       $('#cfgShowBorrower').checked = state.doc.showBorrower;
     }
 
-    /* Die Spracheingabe steht nur beim Bearbeiten. Ohne Spracherkennung im
-       Browser bleibt das Eingabefeld nutzbar, nur die Schaltfläche entfällt. */
-    $('#voiceBox').hidden = !isEdit;
+    /* Das Mikrofon steht neben dem Hinzufügen und erscheint nur, wenn der
+       Browser Spracherkennung mitbringt. Die Box darunter bleibt zu, bis sie
+       gebraucht wird; ohne Mikrofon führt der Verweis daneben hinein. */
     $('#btnMic').hidden = !speechSupported();
+    $('#voiceBox').hidden = !(isEdit && voiceOpen);
     updateVoiceHint();
 
     /* Die schwebende Schaltflaeche fuehrt zum Eingabefeld, das im Inventar steht. */
@@ -1055,10 +1119,18 @@
    *
    * @return {Array<HTMLElement>}
    */
+  /** Mit hinterlegtem Namen wird die Anfrage persoenlich angesprochen. */
+  function requestBody(item) {
+    var owner = (state.doc.contact.name || '').trim();
+    return owner
+      ? t('request.bodyNamed', { name: owner, item: item.name })
+      : t('request.body', { item: item.name });
+  }
+
   function requestActions(item) {
     var nodes = [];
     var subject = t('request.subject', { item: item.name });
-    var body = t('request.body', { item: item.name });
+    var body = requestBody(item);
     var email = (state.doc.contact.email || '').trim();
 
     if (email) {
@@ -1089,6 +1161,15 @@
       nodes.push(copy);
     }
     return nodes;
+  }
+
+  /** Schaltet zwischen den Reitern im Abschnitt Link teilen. */
+  function selectTab(name) {
+    ['View', 'Edit'].forEach(function (key) {
+      var active = (key === name);
+      $('#tabBtn' + key).setAttribute('aria-selected', active ? 'true' : 'false');
+      $('#tab' + key).hidden = !active;
+    });
   }
 
   /* ===================================================================== *
@@ -1609,6 +1690,12 @@
    * Mitglied: start, lang, continuous und sämtliche Ereignisse kamen erst mit
    * 143. Ein Konstruktor allein ist also kein Versprechen.
    */
+  /** Oeffnet oder schliesst die Box mit dem erkannten Text. */
+  function setVoiceOpen(open) {
+    voiceOpen = !!open;
+    $('#voiceBox').hidden = !(state.mode === 'edit' && voiceOpen);
+  }
+
   function speechSupported() {
     var Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
     return !!(Ctor && Ctor.prototype && typeof Ctor.prototype.start === 'function');
@@ -1706,6 +1793,7 @@
     if (!speechRec) { speechRec = buildRecognition(); }
     if (!speechRec) { return; }
 
+    setVoiceOpen(true);
     speechRec.lang = (lang === 'de') ? 'de-DE' : 'en-US';
     speechFinal = $('#voiceText').value.trim();
     speechBefore = speechFinal;
@@ -1746,6 +1834,7 @@
       speechFinal = '';
       speechBefore = '';
       setVoiceState('', false);
+      setVoiceOpen(false);
       toast(entries.length === 1 ? t('voice.added_1') : t('voice.added', { n: entries.length }));
     });
   }
@@ -1760,6 +1849,17 @@
     });
 
     $('#btnMic').addEventListener('click', toggleMic);
+
+    /* Der Verweis oeffnet dieselbe Box zum Eintippen, auch ohne Mikrofon. */
+    $('#btnBulk').addEventListener('click', function () {
+      setVoiceOpen(!voiceOpen);
+      if (voiceOpen) { $('#voiceText').focus(); }
+    });
+
+    /* Reiter im Abschnitt Link teilen */
+    $$('.nz-tab').forEach(function (tab) {
+      tab.addEventListener('click', function () { selectTab(tab.getAttribute('data-tab')); });
+    });
     $('#btnVoiceApply').addEventListener('click', function () {
       processVoiceText($('#voiceText').value);
     });
@@ -1808,6 +1908,7 @@
       touch();
     });
 
+    $('#cfgName').addEventListener('input', function () { state.doc.contact.name = this.value; touch(); });
     $('#cfgEmail').addEventListener('input', function () { state.doc.contact.email = this.value.trim(); touch(); });
     $('#cfgShowBorrower').addEventListener('change', function () { state.doc.showBorrower = this.checked; touch(); });
 

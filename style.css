@@ -79,7 +79,7 @@
    unveraendert; es wird als Bild eingebunden, nicht eingebettet. Die Hoehe
    fuehrt, die Breite ergibt sich aus dem Seitenverhaeltnis 330:87. */
 .brand-logo {
-  height: 1.9rem;
+  height: 2.4rem;
   width: auto;
   display: block;
 }
@@ -194,6 +194,51 @@
 }
 .savestate-error { color: var(--nz-c-danger); }
 
+/* == 3b · Startseite ===================================================== */
+
+/* Hero. Kein Kunstgriff, nur Schriftgrad und Luft: Das Erscheinungsbild sagt
+   „fancy through craft, not effects". */
+.hero { margin-bottom: var(--nz-space-7); }
+.hero h1 { margin: 0 0 var(--nz-space-5); }
+.hero .nz-lead { max-width: 32ch; margin: 0; color: var(--nz-text); }
+
+/* Vertrauensanker auf dem Papierton. Ohne Zeichen: Jedes Zeichen des Hauses
+   steht für genau eine Sache, und für diese fünf gibt es keine. */
+.trust {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--nz-space-2);
+  margin: 0 0 var(--nz-space-6);
+  padding: 0;
+}
+
+/* Die Schrittzahl steht nach Regel 27 schwarz mit weißer Schrift. Grün sagt
+   „hier kann man klicken", und eine Schrittzahl kann man nicht klicken.
+   Über die Marken gedreht gilt das im dunklen Erscheinungsbild sinngemäß. */
+.steps { list-style: none; margin: 0 0 var(--nz-space-5); padding: 0; }
+.steps li {
+  display: flex;
+  gap: var(--nz-space-4);
+  padding-block: var(--nz-space-4);
+  border-top: var(--nz-stroke-rule) dashed var(--nz-line);
+}
+.steps li:first-child { border-top: 0; padding-top: 0; }
+.step-no {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  background: var(--nz-line);
+  color: var(--nz-bg);
+  font-family: var(--nz-font-mono);
+  font-weight: 700;
+  font-size: var(--nz-text-sm);
+}
+.steps h3 { font-size: var(--nz-text-lg); margin: 0 0 var(--nz-space-1); }
+.steps p { margin: 0; color: var(--nz-text-muted); }
+
 /* == 4 · Bausteine ======================================================= */
 
 .actions { margin: 0; }
@@ -212,11 +257,40 @@
 .points li:last-child { margin-bottom: 0; }
 .points .ico { margin-top: 3px; }
 
+.tabpanel { padding-top: var(--nz-space-4); }
+
 .linkrow { display: flex; gap: var(--nz-space-2); flex-wrap: wrap; }
 .linkrow .nz-input { flex: 1 1 16rem; min-width: 0; }
 
 .addrow { display: flex; gap: var(--nz-space-2); flex-wrap: wrap; }
-.addrow #addName { flex: 2 1 13rem; }
+.addrow #addName { flex: 1 1 11rem; }
+
+.addhint {
+  display: flex;
+  align-items: baseline;
+  gap: var(--nz-space-3);
+  flex-wrap: wrap;
+  margin: var(--nz-space-3) 0 0;
+}
+
+/* Eine Schaltfläche, die wie ein Verweis aussieht: Sie öffnet nur einen
+   Bereich, dafür wäre eine Schaltfläche im Haussinn zu laut. */
+.linkbtn {
+  font-family: var(--nz-font-mono);
+  font-weight: 700;
+  font-size: var(--nz-text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--nz-text);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+.linkbtn:hover { text-decoration-color: var(--nz-signal); }
 .addrow #addNote { flex: 1 1 9rem; }
 
 /* Aufklapper der Einstellungen. Der Baustein bleibt der des Hauses. */
@@ -375,13 +449,13 @@
      Mit dem zweiten Quadrat wird es eng, deshalb weicht zuerst das Abzeichen:
      Es sagt nur, wo gespeichert wird, und der Hinweisstreifen sagt das ohnehin.
      Die Quadrate bleiben 44 Pixel gross, das ist die Grenze fuer Fingerbedienung. */
-  .brand-logo { height: 1.5rem; }
+  .brand-logo { height: 2rem; }
   .brand-word { font-size: var(--nz-text-base); }
   #storageBadge { display: none; }
 
   /* Unter 336 Pixeln reicht auch das nicht, dann wird die Marke kleiner. */
   @media (max-width: 21rem) {
-    .brand-logo { height: 1.25rem; }
+    .brand-logo { height: 1.6rem; }
     .brand-word { font-size: var(--nz-text-sm); }
   }
 
@@ -394,8 +468,19 @@
   .addrow .nz-btn { width: 100%; }
   .fab { right: var(--nz-space-3); bottom: var(--nz-space-3); }
 
-  .nz-toast-region { left: var(--nz-space-3); right: var(--nz-space-3); bottom: var(--nz-space-3); max-width: none; }
+  .nz-toast-region { left: var(--nz-space-3); right: var(--nz-space-3); max-width: none; }
   .nz-toast { min-width: 0; }
+
+  /* Fußzeile: zwei Spalten statt einer gedrängten Zeile, der Zusatz von
+     nozilla rückt darunter. */
+  .footer-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--nz-space-3) var(--nz-space-4);
+  }
+  .footer-nav a:last-child { grid-column: 1 / -1; }
+  .footer-claim { display: block; }
+  .footer-claim::before { content: ""; }
 }
 
 @media (prefers-reduced-motion: reduce) {
