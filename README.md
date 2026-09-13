@@ -372,6 +372,66 @@ cd /var/www/leih-ich-dir && git pull --ff-only
 Entfernt Listen, die ein Jahr lang nicht geschrieben wurden. Mit `--dry-run`
 lässt sich der Lauf zunächst beobachten.
 
+## Deployment über Plesk (netcup-Webhosting)
+
+Auf einem Webhosting-Paket ohne Konsolenzugriff übernimmt Plesk das `git
+pull`. Die Einrichtung ist einmalig; danach landet jeder Push auf `main` von
+selbst auf dem Server.
+
+**1. Repository eintragen**
+
+Plesk → Websites & Domains → leihichdir.de → **Git** → *Repository
+hinzufügen* → *Remote-Git-Hosting*:
+
+| Feld | Wert |
+| --- | --- |
+| Repository-URL | `https://github.com/daimpad/leih-ich-dir.git` |
+| Branch | `main` |
+| Zielordner der Bereitstellung | `/httpdocs` |
+| Bereitstellung | automatisch |
+
+Das Repository ist öffentlich, ein Bereitstellungsschlüssel entfällt deshalb.
+Wäre es privat, zeigte Plesk einen öffentlichen SSH-Schlüssel an, der unter
+GitHub → Settings → Deploy keys einzutragen wäre.
+
+**2. Webhook in GitHub hinterlegen**
+
+Plesk nennt nach dem Anlegen eine Webhook-Adresse. Diese unter GitHub →
+Settings → Webhooks → *Add webhook* eintragen, Inhaltstyp
+`application/json`, Ereignis *Just the push event*. Erst damit zieht Plesk von
+allein. Ohne Webhook bleibt der Knopf *Jetzt bereitstellen* im Panel.
+
+**3. Datenordner aus dem DocumentRoot nehmen**
+
+Empfohlen, weil die Bereitstellung damit nie in die Nähe der Nutzdaten kommt.
+Im Dateimanager einen Ordner außerhalb von `httpdocs` anlegen, etwa
+`/var/www/vhosts/leihichdir.de/private/leih-data`, und unter *Apache & nginx
+Einstellungen* → *Zusätzliche Direktiven für HTTP und HTTPS* eintragen:
+
+```apache
+SetEnv LEIH_DATA_DIR /var/www/vhosts/leihichdir.de/private/leih-data
+```
+
+Steht die Domain auf *nginx allein*, greifen weder diese Zeile noch
+`.htaccess`. Dann gehört der nginx-Block aus dem vorigen Abschnitt in
+*Zusätzliche nginx-Direktiven*, oder die Domain wird auf Apache mit nginx als
+Proxy zurückgestellt.
+
+**4. KI-Schlüssel ablegen**
+
+Ohne Konsole über den Dateimanager: eine Datei `ai-key.txt`, die allein den
+Schlüssel enthält, in den Datenordner legen — also in `httpdocs/data/` oder,
+falls gesetzt, in den Ordner aus `LEIH_DATA_DIR`.
+
+**5. Abnahme**
+
+```
+https://leihichdir.de/check.html
+```
+
+Die Prüfung zeigt unter anderem, ob `.htaccess` greift, ob `data/` von außen
+gesperrt ist und ob der Proxy den Schlüssel gefunden hat.
+
 ## Vorschau über GitHub Pages
 
 Die Oberfläche lässt sich ohne Server betrachten. GitHub Pages liefert nur
