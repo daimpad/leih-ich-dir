@@ -189,11 +189,9 @@
       'list.titleLabel': 'Titel der Liste',
       'list.titlePlaceholder': 'Titel der Liste',
       'list.untitled': 'Leih-Katalog',
-      'list.updated': 'Zuletzt aktualisiert: {date}',
       'list.by': 'Liste von {name}',
       'list.free': '{n} gerade frei',
       'list.free_1': '1 gerade frei',
-      'list.lentCount': '{n} verliehen',
       'list.newTitle': 'Meine Leihliste',
 
       'mine.headline': 'Deine Listen auf diesem Gerät',
@@ -227,8 +225,6 @@
 
       'items.headline': 'Inventar',
       'items.refresh': 'Aktualisieren',
-      'items.count': '{n} Gegenstände',
-      'items.count_1': '1 Gegenstand',
       'items.empty': 'Was liegt bei Dir herum und wird kaum benutzt?',
       'items.emptyView': 'In dieser Liste steht im Moment nichts.',
       'items.checked': 'zuletzt geprüft vor {n} Min.',
@@ -473,11 +469,9 @@
       'list.titleLabel': 'List title',
       'list.titlePlaceholder': 'List title',
       'list.untitled': 'Lending catalogue',
-      'list.updated': 'Last updated: {date}',
       'list.by': 'List by {name}',
       'list.free': '{n} free right now',
       'list.free_1': '1 free right now',
-      'list.lentCount': '{n} lent out',
       'list.newTitle': 'My lending list',
 
       'mine.headline': 'Your lists on this device',
@@ -511,8 +505,6 @@
 
       'items.headline': 'Inventory',
       'items.refresh': 'Refresh',
-      'items.count': '{n} items',
-      'items.count_1': '1 item',
       'items.empty': 'What is lying around at your place, barely ever used?',
       'items.emptyView': 'There is nothing in this list at the moment.',
       'items.checked': 'checked {n} min ago',
@@ -1233,22 +1225,28 @@
    * wirklich interessiert.
    */
   function renderMeta() {
-    var items = state.doc.items;
-    var lent = 0;
-    items.forEach(function (it) { if (it.status === 'lent') { lent++; } });
-    var free = items.length - lent;
+    /* Der Satz ueber der Liste gilt nur noch dem Freund: Wessen Liste das
+       ist und wie viel gerade frei ist. Wer selbst bearbeitet, weiss beides
+       und braucht die Zeile nicht. */
     var parts = [];
-
     if (state.mode === 'view') {
+      var frei = 0;
+      state.doc.items.forEach(function (it) { if (it.status !== 'lent') { frei++; } });
       var owner = (state.doc.contact.name || '').trim();
       if (owner) { parts.push(t('list.by', { name: owner })); }
-      parts.push(free === 1 ? t('list.free_1') : t('list.free', { n: free }));
-    } else {
-      parts.push(items.length === 1 ? t('items.count_1') : t('items.count', { n: items.length }));
-      if (lent > 0) { parts.push(t('list.lentCount', { n: lent })); }
-      if (state.updated) { parts.push(t('list.updated', { date: formatDate(state.updated) })); }
+      parts.push(frei === 1 ? t('list.free_1') : t('list.free', { n: frei }));
     }
     $('#listMeta').textContent = parts.join(' · ');
+
+    /* Im Bearbeiten-Modus steht ueber der Liste kein Satz mehr. Wann zuletzt
+       geschrieben wurde, gehoert klein neben die Ueberschrift des Inventars:
+       Es ist eine Angabe zur Liste, keine Ueberschrift der Seite. */
+    var stamp = $('#listUpdated');
+    if (stamp) {
+      var zeigen = state.mode === 'edit' && !!state.updated;
+      stamp.hidden = !zeigen;
+      stamp.textContent = zeigen ? formatDate(state.updated) : '';
+    }
   }
 
   /** „zuletzt geprüft vor …" — macht die Schaltfläche daneben entbehrlich. */
@@ -2574,6 +2572,7 @@
            er bestaetigt wurde: Wer diesen Link verliert, verliert die Liste,
            und niemand kann ihn wiederherstellen. */
         $('#keyLink').value = editLink();
+        $('#chkKeyDone').checked = false;
         $('#keyBox').hidden = false;
         $('#keyRemember').hidden = !mineWorks();
       });
@@ -3154,7 +3153,8 @@
        ist der Abschluss des Anlegens und nicht das Anlegen selbst: Wer den
        Bearbeiten-Link nicht bestaetigt hat, hat die Liste noch nicht in der
        Hand — und ueber einer Warnung wird ohnehin nicht gefeiert. */
-    $('#btnKeyDone').addEventListener('click', function () {
+    $('#chkKeyDone').addEventListener('change', function () {
+      if (!this.checked) { return; }
       $('#keyBox').hidden = true;
       feierZugang();
     });

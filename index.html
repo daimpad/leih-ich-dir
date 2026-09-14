@@ -337,6 +337,7 @@
     <section class="card" id="inventoryBox">
       <div class="items-head">
         <h2 class="card__title" data-i18n="items.headline">Inventar</h2>
+        <span id="listUpdated" class="checked" hidden></span>
         <span id="checkedAt" class="checked"></span>
         <button type="button" id="btnRefresh" class="btn btn--ghost btn--icon" hidden>
           <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-refresh"/></svg>
@@ -452,8 +453,12 @@
       <p class="hint keybox__remember" id="keyRemember" data-i18n="key.remember">
         Auf diesem Gerät gemerkt — beim nächsten Besuch findest Du die Liste auf der Startseite wieder.
       </p>
-      <p class="spaced-lg actions">
-        <button type="button" id="btnKeyDone" class="btn" data-i18n="key.done">Ich habe den Link gesichert</button>
+      <p class="spaced-lg">
+        <label class="check keybox__check">
+          <input type="checkbox" id="chkKeyDone">
+          <span class="check__box" aria-hidden="true"></span>
+          <span data-i18n="key.done">Ich habe den Link gesichert</span>
+        </label>
       </p>
     </section>
 
