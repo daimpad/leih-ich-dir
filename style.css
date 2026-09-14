@@ -62,9 +62,11 @@
 
   --shell: 44rem;
 
-  --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --slab: 'Zilla Slab', Georgia, serif;
-  --mono: 'Space Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --sans:    'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --slab:    'Zilla Slab', Georgia, serif;
+  --mono:    'Space Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  /* Anzeigeschrift für Wortmarke und Überschriften erster und zweiter Ordnung. */
+  --display: 'Ranchers', 'Zilla Slab', Georgia, sans-serif;
 }
 
 /* Dunkel: erst nach Systemvorgabe, dann nach ausdrücklicher Wahl. Die
@@ -137,6 +139,19 @@ body {
 [hidden] { display: none !important; }
 
 h1, h2, h3, h4 { margin: 0; font-weight: 600; line-height: 1.2; letter-spacing: -.02em; }
+
+/* Erste und zweite Ordnung tragen die Anzeigeschrift. Sie hat genau einen
+   Schnitt: Fettung wäre gerechnet und nicht gezeichnet, und enge Laufweite
+   verträgt sie nicht — beides wird deshalb zurückgesetzt. Dieselbe Regel
+   gilt für die beiden Felder, die als Überschrift auftreten. */
+h1, h2,
+.title-input,
+.modal-title-input,
+.brand-word {
+  font-family: var(--display);
+  font-weight: 400;
+  letter-spacing: 0;
+}
 p, ul, ol { margin: 0; }
 img, svg { max-width: 100%; }
 
@@ -192,7 +207,7 @@ button, input, textarea, select { font: inherit; color: inherit; }
 
 .brand { display: flex; align-items: center; gap: var(--s-2); text-decoration: none; color: inherit; }
 .brand-logo { height: 2rem; width: auto; display: block; }
-.brand-word { font-size: 1.12rem; font-weight: 600; letter-spacing: -.02em; }
+.brand-word { font-size: 1.45rem; }
 
 .bar-controls { display: flex; align-items: center; gap: var(--s-2); }
 
@@ -297,7 +312,7 @@ button, input, textarea, select { font: inherit; color: inherit; }
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card);
   padding: var(--s-5) var(--s-5); margin-bottom: var(--s-3); box-shadow: var(--shadow);
 }
-.card__title { font-size: 1.2rem; }
+.card__title { font-size: 1.35rem; }
 .card__head { display: flex; align-items: center; gap: var(--s-2); }
 
 /* Auskunft auf Zuruf: das Zeichen trägt den Satz im Titel, sichtbar beim
@@ -317,11 +332,15 @@ button, input, textarea, select { font: inherit; color: inherit; }
 }
 .fold > summary {
   display: flex; align-items: center; gap: var(--s-3); cursor: pointer;
-  padding: var(--s-4) var(--s-5); font-weight: 600; list-style: none;
+  padding: var(--s-4) var(--s-5); list-style: none;
+  font-family: var(--display); font-weight: 400; font-size: 1.35rem;
 }
 .fold > summary::-webkit-details-marker { display: none; }
 .fold > summary .ico { color: var(--muted); }
-.fold > summary .fold-sub { margin-left: auto; color: var(--faint); font-weight: 400; font-size: .92rem; text-align: right; }
+.fold > summary .fold-sub {
+  margin-left: auto; color: var(--faint); text-align: right;
+  font-family: var(--sans); font-size: .92rem;
+}
 .fold[open] > summary { border-bottom: 1px solid var(--line); }
 .fold__body { padding: var(--s-5); }
 .fold__body hr { border: 0; border-top: 1px solid var(--line); margin: var(--s-5) 0; }
@@ -351,7 +370,7 @@ button, input, textarea, select { font: inherit; color: inherit; }
 /* == 7 · Startseite ==================================================== */
 
 .hero { padding-block: var(--s-3) 0; }
-.hero h1 { font-size: clamp(2.4rem, 7vw, 3.6rem); letter-spacing: -.035em; }
+.hero h1 { font-size: clamp(2.6rem, 7.5vw, 4rem); line-height: 1.05; }
 .hero h1 mark { background: none; color: var(--green); }
 .hero .lead { margin-top: var(--s-4); max-width: 30rem; font-size: 1.18rem; }
 .hero .actions { margin-top: var(--s-6); }
@@ -379,7 +398,7 @@ button, input, textarea, select { font: inherit; color: inherit; }
 
 /* Eigene Listen, auf diesem Gerät gemerkt. */
 .mine { margin-top: var(--s-6); }
-.mine h2 { font-size: 1.05rem; margin-bottom: var(--s-3); }
+.mine h2 { font-size: 1.15rem; margin-bottom: var(--s-3); }
 .mine ul { list-style: none; padding: 0; display: grid; gap: var(--s-2); }
 .mine a {
   display: flex; align-items: center; gap: var(--s-3); text-decoration: none; color: inherit;
@@ -397,16 +416,16 @@ button, input, textarea, select { font: inherit; color: inherit; }
   border-radius: var(--r-card); padding: var(--s-5); margin-bottom: var(--s-3);
   box-shadow: var(--shadow);
 }
-.keybox__title { font-size: 1.2rem; color: var(--amber); }
+.keybox__title { font-size: 1.35rem; color: var(--amber); }
 .keybox .hint { color: var(--amber); opacity: .85; margin-top: var(--s-2); }
 .keybox .input { background: var(--surface); border-color: var(--amber); }
 
 /* == 8 · Liste ========================================================= */
 
 .titleblock { margin-bottom: var(--s-5); }
-.titleblock h1 { font-size: 1.8rem; }
+.titleblock h1 { font-size: 1.9rem; }
 .title-input {
-  font-size: 1.8rem; font-weight: 600; letter-spacing: -.02em;
+  font-size: 1.9rem;
   padding: .3rem .6rem; margin-left: -.6rem; background: none; border-color: transparent;
 }
 .title-input:hover { background: var(--surface-alt); }
@@ -471,11 +490,11 @@ button, input, textarea, select { font: inherit; color: inherit; }
 }
 .modal::backdrop { background: rgba(27, 24, 19, .38); }
 .modal__head { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-5) var(--s-5) var(--s-2); }
-.modal__title { font-size: 1.2rem; flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.modal__title { font-size: 1.35rem; flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
 
 /* Die Ueberschrift als Feld: sie sieht aus wie Text, bis man sie anfasst. */
 .modal-title-input {
-  font-size: 1.2rem; font-weight: 600; letter-spacing: -.02em;
+  font-size: 1.35rem;
   padding: .25rem .5rem; margin-left: -.5rem;
   background: none; border-color: transparent;
 }
@@ -544,7 +563,7 @@ button, input, textarea, select { font: inherit; color: inherit; }
   .fold > summary { padding: var(--s-4); }
   .hero h1 { font-size: 2.4rem; }
   .hero .lead { font-size: 1.06rem; }
-  .titleblock h1, .title-input { font-size: 1.5rem; }
+  .titleblock h1, .title-input { font-size: 1.6rem; }
 
   /* Der Aufklapper-Zusatz rutscht unter den Namen statt ihn zu drängen. */
   .fold > summary { flex-wrap: wrap; }
