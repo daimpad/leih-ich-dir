@@ -25,7 +25,7 @@ oder Kontaktdaten.
 | **Ein Eintrag, ein Fenster** | verfügbar bleibt schmucklos, verliehen trägt Name und Datum in der Zeile |
 | **Anfragen** | steht bei Freunden in der Zeile: vorformulierter Text, weitergegeben über das Gerät oder per `mailto:` |
 | **Rücknahme statt Rückfrage** | ein gelöschter Eintrag lässt sich neun Sekunden lang zurückholen |
-| **Gemerkte Listen** | eigene Listen stehen auf der Startseite dieses Browsers, rein lokal und ohne Konto |
+| **Gemerkte Listen** | eigene Listen stehen auf der Startseite dieses Browsers und über einen Verweis in der Kopfleiste, rein lokal und ohne Konto |
 | **Spracheingabe** | Gegenstände unterwegs einsprechen, Zerlegung im Browser oder wahlweise per Gemini |
 | **Erscheinungsbild** | eigenständig in `style.css`, Schriften mitgeliefert, keine fremden Server |
 | **Ohne Abhängigkeiten** | pures PHP, HTML, CSS, Vanilla JS, kein Framework, kein Bauschritt, keine Datenbank |

@@ -210,12 +210,6 @@
     </a>
     <div class="bar-controls">
       <span id="storageBadge" class="chip" hidden></span>
-      <!-- Erscheint erst, wenn dieses Gerät Listen gemerkt hat, und nicht auf
-           der Startseite, wo sie ohnehin stehen. -->
-      <a id="lnkMine" class="ctl-square ctl-wide" href="./" hidden data-i18n-label="mine.link">
-        <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-list"/></svg>
-        <span class="ctl-label" data-i18n="mine.link">Meine Listen</span>
-      </a>
       <!-- Regel 19: Bedienelement der Kopfleiste als Quadrat, weiße Fläche,
            durchgezogene Linie, harter Schatten. Es zeigt das Ziel, nicht den Zustand. -->
       <button type="button" id="btnLang" class="ctl-square">EN</button>
@@ -229,6 +223,15 @@
         <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gear"/></svg>
       </a>
     </div>
+    <!-- Der Weg zu den eigenen Listen ist ein Geschwister der Bedienelemente
+         und nicht eines von ihnen: Schmal rueckt er dadurch in eine eigene
+         Zeile und steht dort ausgeschrieben und unterstrichen, statt als
+         namenloses Zeichen zwischen Sprache, Licht und Einstellungen zu
+         verschwinden. Er erscheint erst, wenn dieses Geraet Listen kennt. -->
+    <a id="lnkMine" class="ctl-square ctl-wide" href="./" hidden data-i18n-label="mine.link">
+      <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-list"/></svg>
+      <span class="ctl-label" data-i18n="mine.link">Meine Listen</span>
+    </a>
   </div>
 </header>
 

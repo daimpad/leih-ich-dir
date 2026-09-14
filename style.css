@@ -219,11 +219,16 @@ button, input, textarea, select { font: inherit; color: inherit; }
    Knoepfe an den oberen Rand des Fensters und werden dort beschnitten. */
 header.site { padding-block: var(--s-4); }
 
-.bar { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); }
+/* Die Zeile darf umbrechen: Schmal rueckt der Verweis auf die eigenen
+   Listen unter die Marke und die Bedienelemente. */
+.bar { display: flex; align-items: center; flex-wrap: wrap; gap: var(--s-2) var(--s-4); }
 
 /* Die Marke ist nur noch Schrift. Die Silbe in der Mitte traegt die Farbe:
    Sie macht aus einer Aneinanderreihung von Buchstaben wieder einen Satz. */
-.brand { display: flex; align-items: center; gap: var(--s-2); text-decoration: none; color: inherit; }
+.brand {
+  display: flex; align-items: center; gap: var(--s-2);
+  text-decoration: none; color: inherit; margin-right: auto;
+}
 .brand-word { font-size: 1.45rem; }
 .brand-ich { color: var(--green); }
 
@@ -243,6 +248,12 @@ header.site { padding-block: var(--s-4); }
   width: auto; padding-inline: var(--s-4); text-decoration: none;
 }
 .ctl-label { font-size: .88rem; }
+
+/* Breit steht der Verweis auf die eigenen Listen links neben den Schaltern,
+   so wie bisher. Die Reihenfolge steht hier und nicht im Markup, weil er
+   schmal darunter rutscht. */
+#lnkMine { order: 1; }
+.bar-controls { order: 2; }
 
 /* == 4 · Schaltflächen ================================================= */
 
@@ -891,6 +902,27 @@ header.site { padding-block: var(--s-4); }
   /* Im Kopf bleibt vom Knopf das Zeichen. */
   .ctl-label { display: none; }
   .ctl-wide { padding-inline: 0; width: 2.4rem; }
+
+  /* Der Weg zu den eigenen Listen bekommt eine eigene Zeile und das Aussehen
+     eines Verweises: ausgeschrieben, gruen, unterstrichen. Als namenloses
+     Rundzeichen zwischen Sprache, Licht und Einstellungen war er von einem
+     Schalter nicht zu unterscheiden. */
+  #lnkMine {
+    order: 3; flex: 0 0 100%; width: auto;
+    justify-content: flex-start;
+    height: auto; min-width: 0;
+    /* Der Strich liegt unter dem Wort, die Flaeche zum Tippen ist groesser:
+       senkrecht gepolstert kommt der Verweis auf die Hoehe der Schalter. */
+    padding-block: var(--s-2); padding-inline: 0;
+    background: none; border: 0; border-radius: 0; box-shadow: none;
+    color: var(--green-ink);
+  }
+  #lnkMine:hover { color: var(--green); }
+  #lnkMine:active { transform: none; }
+  #lnkMine .ctl-label {
+    display: inline; font-size: 1rem;
+    text-decoration: underline; text-underline-offset: .18em;
+  }
 
   /* Schmal steht der Zusatz unter den Verweisen statt neben ihnen. */
   .footer-row { flex-direction: column; align-items: flex-start; }
