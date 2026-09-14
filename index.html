@@ -119,6 +119,17 @@
     <path d="M32 32 L32 19"/>
     <path d="M32 32 L43 32"/>
   </symbol>
+  <!-- Pfeil: fuehrt von einem Schritt zum naechsten. Liste: die eigenen. -->
+  <symbol id="i-arrow" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M8 32 L52 32"/>
+    <path d="M36 16 L52 32 L36 48"/>
+  </symbol>
+  <symbol id="i-list" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M24 16 L56 16"/><path d="M24 32 L56 32"/><path d="M24 48 L56 48"/>
+    <rect x="8" y="13" width="6" height="6" fill="currentColor" stroke="none"/>
+    <rect x="8" y="29" width="6" height="6" fill="currentColor" stroke="none"/>
+    <rect x="8" y="45" width="6" height="6" fill="currentColor" stroke="none"/>
+  </symbol>
   <!-- Winkel: „dahinter steckt mehr". Pfeil hinaus: verliehen. -->
   <symbol id="i-info" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter">
     <circle cx="32" cy="32" r="24"/>
@@ -145,6 +156,12 @@
     </a>
     <div class="bar-controls">
       <span id="storageBadge" class="chip" hidden></span>
+      <!-- Erscheint erst, wenn dieses Gerät Listen gemerkt hat, und nicht auf
+           der Startseite, wo sie ohnehin stehen. -->
+      <a id="lnkMine" class="ctl-square ctl-wide" href="./" hidden data-i18n-label="mine.link">
+        <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-list"/></svg>
+        <span class="ctl-label" data-i18n="mine.link">Meine Listen</span>
+      </a>
       <!-- Regel 19: Bedienelement der Kopfleiste als Quadrat, weiße Fläche,
            durchgezogene Linie, harter Schatten. Es zeigt das Ziel, nicht den Zustand. -->
       <button type="button" id="btnLang" class="ctl-square">EN</button>
@@ -173,22 +190,24 @@
   <!-- ==================================================================== -->
   <section id="viewStart" class="view" hidden>
 
+    <!-- Der Hero fasst Zusage, Satz und Auszeichnungen in einem Rahmen
+         zusammen. Der Grund ist gemalt, nicht geladen: zwei weiche Farbkreise
+         und ein feines Punktraster, alles aus Verläufen. -->
     <div class="hero">
-      <h1><span data-i18n="hero.a">Leih</span> <mark data-i18n="hero.b">ich</mark> <span data-i18n="hero.c">Dir.</span></h1>
-      <p class="lead" data-i18n="hero.lead">Versende Deine Liste an Leihgegenständen an andere.</p>
+      <div class="hero-panel">
+        <div class="hero-glow" aria-hidden="true"></div>
+        <div class="hero-body">
+          <h1><span data-i18n="hero.a">Leih</span> <mark data-i18n="hero.b">ich</mark> <span data-i18n="hero.c">Dir.</span></h1>
+          <p class="lead" data-i18n="hero.lead">Versende Deine Liste an Leihgegenständen an andere.</p>
 
-      <!-- Vier Zusagen, jede mit einem Haken. Sie stehen zwischen der Zusage
-           und der Aufforderung, weil sie beides verbindet. -->
-      <ul class="trust" data-i18n-label="trust.label" aria-label="Eigenschaften">
-        <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.tracking">Kein Tracking</span></li>
-        <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.account">Keine Registrierung</span></li>
-        <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.ads">Keine Werbung</span></li>
-        <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.crypto">Ende-zu-Ende verschlüsselt</span></li>
-      </ul>
-
-      <p class="actions">
-        <button type="button" id="btnCreate" class="btn btn--primary btn--lg" data-i18n="start.create">Neue Liste anlegen</button>
-      </p>
+          <ul class="trust" data-i18n-label="trust.label" aria-label="Eigenschaften">
+            <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.tracking">Kein Tracking</span></li>
+            <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.account">Keine Registrierung</span></li>
+            <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.ads">Keine Werbung</span></li>
+            <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.crypto">Ende-zu-Ende verschlüsselt</span></li>
+          </ul>
+        </div>
+      </div>
     </div>
 
     <!-- Auf diesem Gerät gemerkte Listen. Rein lokal, kein Konto, und nur
@@ -197,33 +216,34 @@
       <h2 data-i18n="mine.headline">Deine Listen auf diesem Gerät</h2>
       <ul id="mineList"></ul>
       <p class="hint" data-i18n="mine.hint">
-        Nur in diesem Browser gemerkt. Der Bearbeiten-Link bleibt Dein einziger Zugang.
+        Nur in diesem Browser gemerkt.
       </p>
     </section>
 
+    <!-- Drei Schritte in einer Reihe, mit Pfeilen dazwischen. Schmal
+         untereinander, die Pfeile drehen sich dann mit. -->
     <ol class="steps">
       <li>
         <span class="step-no" aria-hidden="true">1</span>
-        <div>
-          <h3 data-i18n="steps.one">Liste anlegen</h3>
-          <p data-i18n="steps.oneText">Du bekommst zwei Links: einen geheimen zum Bearbeiten, einen zum Weitergeben.</p>
-        </div>
+        <h3 data-i18n="steps.one">Liste anlegen</h3>
+        <p data-i18n="steps.oneText">Du bekommst zwei Links: einen geheimen zum Bearbeiten, einen zum Weitergeben.</p>
       </li>
       <li>
         <span class="step-no" aria-hidden="true">2</span>
-        <div>
-          <h3 data-i18n="steps.two">Sachen eintragen</h3>
-          <p data-i18n="steps.twoText">Tippen oder einsprechen. Erst nur der Name, alles Weitere hinter dem Eintrag.</p>
-        </div>
+        <h3 data-i18n="steps.two">Sachen eintragen</h3>
+        <p data-i18n="steps.twoText">Tippen oder einsprechen. Erst nur der Name, alles Weitere hinter dem Eintrag.</p>
       </li>
       <li>
         <span class="step-no" aria-hidden="true">3</span>
-        <div>
-          <h3 data-i18n="steps.three">Link weitergeben</h3>
-          <p data-i18n="steps.threeText">Freunde sehen, was frei ist, und fragen mit einem Tipper an.</p>
-        </div>
+        <h3 data-i18n="steps.three">Link weitergeben</h3>
+        <p data-i18n="steps.threeText">Freunde sehen, was frei ist, und fragen mit einem Tipper an.</p>
       </li>
     </ol>
+
+    <!-- Der Aufruf am Ende, in voller Grösse. -->
+    <div class="cta">
+      <button type="button" id="btnCreate" class="btn btn--primary btn--xl" data-i18n="start.create">Neue Liste anlegen</button>
+    </div>
 
   </section>
 

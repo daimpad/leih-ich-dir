@@ -62,9 +62,15 @@
 
   --shell: 44rem;
 
-  --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --slab: 'Zilla Slab', Georgia, serif;
-  --mono: 'Space Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  /* Pfeil zwischen den Schritten, als Maske eingebettet: eine Form, die der
+     Linienfarbe folgt, ohne eine Datei nachzuladen. */
+  --pfeil: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M8 32 L52 32 M36 16 L52 32 L36 48' fill='none' stroke='%23000' stroke-width='6' stroke-linecap='square'/%3E%3C/svg%3E");
+
+  --sans:    'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --slab:    'Zilla Slab', Georgia, serif;
+  --mono:    'Space Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  /* Anzeigeschrift für Wortmarke und Überschriften erster und zweiter Ordnung. */
+  --display: 'Ranchers', 'Zilla Slab', Georgia, sans-serif;
 }
 
 /* Dunkel: erst nach Systemvorgabe, dann nach ausdrücklicher Wahl. Die
@@ -137,6 +143,19 @@ body {
 [hidden] { display: none !important; }
 
 h1, h2, h3, h4 { margin: 0; font-weight: 600; line-height: 1.2; letter-spacing: -.02em; }
+
+/* Erste und zweite Ordnung tragen die Anzeigeschrift. Sie hat genau einen
+   Schnitt: Fettung wäre gerechnet und nicht gezeichnet, und enge Laufweite
+   verträgt sie nicht — beides wird deshalb zurückgesetzt. Dieselbe Regel
+   gilt für die beiden Felder, die als Überschrift auftreten. */
+h1, h2,
+.title-input,
+.modal-title-input,
+.brand-word {
+  font-family: var(--display);
+  font-weight: 400;
+  letter-spacing: 0;
+}
 p, ul, ol { margin: 0; }
 img, svg { max-width: 100%; }
 
@@ -187,12 +206,15 @@ button, input, textarea, select { font: inherit; color: inherit; }
 .shell { max-width: var(--shell); margin: 0 auto; padding-inline: var(--s-5); }
 .page { padding-block: var(--s-4) var(--s-7); }
 
+/* Die Startseite traegt drei Spalten und darf dafuer breiter stehen. */
+.page--wide { max-width: 58rem; }
+
 .site-header { padding-block: var(--s-4); }
 .bar { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); }
 
 .brand { display: flex; align-items: center; gap: var(--s-2); text-decoration: none; color: inherit; }
 .brand-logo { height: 2rem; width: auto; display: block; }
-.brand-word { font-size: 1.12rem; font-weight: 600; letter-spacing: -.02em; }
+.brand-word { font-size: 1.45rem; }
 
 .bar-controls { display: flex; align-items: center; gap: var(--s-2); }
 
@@ -205,6 +227,11 @@ button, input, textarea, select { font: inherit; color: inherit; }
   font-size: .82rem; font-weight: 500; letter-spacing: .04em;
 }
 .ctl-square:hover { color: var(--ink); border-color: var(--line-firm); }
+.ctl-wide {
+  display: inline-flex; align-items: center; gap: var(--s-2);
+  width: auto; padding-inline: var(--s-4); text-decoration: none;
+}
+.ctl-label { font-size: .88rem; }
 
 /* == 4 · Schaltflächen ================================================= */
 
@@ -297,7 +324,7 @@ button, input, textarea, select { font: inherit; color: inherit; }
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card);
   padding: var(--s-5) var(--s-5); margin-bottom: var(--s-3); box-shadow: var(--shadow);
 }
-.card__title { font-size: 1.2rem; }
+.card__title { font-size: 1.35rem; }
 .card__head { display: flex; align-items: center; gap: var(--s-2); }
 
 /* Auskunft auf Zuruf: das Zeichen trägt den Satz im Titel, sichtbar beim
@@ -317,11 +344,15 @@ button, input, textarea, select { font: inherit; color: inherit; }
 }
 .fold > summary {
   display: flex; align-items: center; gap: var(--s-3); cursor: pointer;
-  padding: var(--s-4) var(--s-5); font-weight: 600; list-style: none;
+  padding: var(--s-4) var(--s-5); list-style: none;
+  font-family: var(--display); font-weight: 400; font-size: 1.35rem;
 }
 .fold > summary::-webkit-details-marker { display: none; }
 .fold > summary .ico { color: var(--muted); }
-.fold > summary .fold-sub { margin-left: auto; color: var(--faint); font-weight: 400; font-size: .92rem; text-align: right; }
+.fold > summary .fold-sub {
+  margin-left: auto; color: var(--faint); text-align: right;
+  font-family: var(--sans); font-size: .92rem;
+}
 .fold[open] > summary { border-bottom: 1px solid var(--line); }
 .fold__body { padding: var(--s-5); }
 .fold__body hr { border: 0; border-top: 1px solid var(--line); margin: var(--s-5) 0; }
@@ -350,36 +381,99 @@ button, input, textarea, select { font: inherit; color: inherit; }
 
 /* == 7 · Startseite ==================================================== */
 
+/* Der Hero ist ein Rahmen um drei Dinge: die Zusage, den Satz und die vier
+   Auszeichnungen. Der Grund ist gemalt und nicht geladen — zwei weiche
+   Farbkreise und ein feines Punktraster, alles aus Verläufen. */
 .hero { padding-block: var(--s-3) 0; }
-.hero h1 { font-size: clamp(2.4rem, 7vw, 3.6rem); letter-spacing: -.035em; }
+
+.hero-panel {
+  position: relative; overflow: hidden;
+  border: 1px solid var(--line); border-radius: 28px;
+  background: linear-gradient(160deg, var(--surface) 0%, var(--surface-alt) 100%);
+  box-shadow: var(--shadow-lift);
+  padding: clamp(var(--s-6), 5vw, var(--s-8)) clamp(var(--s-5), 4vw, var(--s-8));
+}
+
+/* Die beiden Farbkreise liegen hinter dem Text und tragen nichts vor. */
+.hero-glow { position: absolute; inset: 0; pointer-events: none; }
+.hero-glow::before,
+.hero-glow::after {
+  content: ""; position: absolute; border-radius: 50%; filter: blur(60px);
+}
+.hero-glow::before {
+  width: 26rem; height: 26rem; right: -8rem; top: -10rem;
+  background: var(--green); opacity: .18;
+}
+.hero-glow::after {
+  width: 18rem; height: 18rem; left: -9rem; bottom: -12rem;
+  background: var(--amber); opacity: .08;
+}
+
+/* Punktraster, zwei Pixel gross, in der Textfarbe und kaum sichtbar. */
+.hero-panel::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image: radial-gradient(currentColor 1px, transparent 1px);
+  background-size: 18px 18px;
+  opacity: .05;
+}
+
+.hero-body { position: relative; }
+.hero h1 { font-size: clamp(2.6rem, 8vw, 4.4rem); line-height: 1.02; }
 .hero h1 mark { background: none; color: var(--green); }
-.hero .lead { margin-top: var(--s-4); max-width: 30rem; font-size: 1.18rem; }
-.hero .actions { margin-top: var(--s-6); }
-.hero .actions small { color: var(--faint); font-size: .9rem; }
+.hero .lead { margin-top: var(--s-4); max-width: 32rem; font-size: clamp(1.08rem, 2.2vw, 1.3rem); }
 
-/* Vier Zusagen mit Haken. Der Haken ist grün, weil er dasselbe sagt wie in
-   der Liste: hier ist etwas in Ordnung. */
-.trust { list-style: none; padding: 0; margin-top: var(--s-5); display: grid; gap: var(--s-2); }
-.trust li { display: flex; align-items: center; gap: var(--s-3); color: var(--muted); }
-.trust .ico { width: 1.05rem; height: 1.05rem; color: var(--green); }
+/* Vier Zusagen mit Haken, als Plaketten auf dem Grund. Der Haken ist grün,
+   weil er dasselbe sagt wie in der Liste: hier ist etwas in Ordnung. */
+.trust {
+  list-style: none; padding: 0; margin-top: var(--s-6);
+  display: flex; flex-wrap: wrap; gap: var(--s-2);
+}
+.trust li {
+  display: flex; align-items: center; gap: var(--s-2);
+  padding: .4rem .85rem; border-radius: 999px;
+  background: var(--surface); border: 1px solid var(--line);
+  color: var(--muted); font-size: .92rem; white-space: nowrap;
+}
+.trust .ico { width: 1rem; height: 1rem; color: var(--green); }
 
-.steps { list-style: none; padding: 0; margin-top: var(--s-6); display: grid; gap: var(--s-2); }
+/* Drei Schritte nebeneinander. Die Pfeile sitzen in den Lücken und gehören
+   zur Darstellung, nicht zum Text; deshalb sind sie gezeichnet und nicht
+   geschrieben. */
+.steps {
+  list-style: none; padding: 0; margin-top: var(--s-7);
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-6);
+}
 .steps li {
+  position: relative;
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card);
-  box-shadow: var(--shadow); padding: var(--s-4) var(--s-5);
-  display: grid; grid-template-columns: 2rem 1fr; gap: var(--s-3);
+  box-shadow: var(--shadow); padding: var(--s-5);
+}
+.steps li + li::before {
+  content: ""; position: absolute; top: 50%; left: calc(var(--s-6) * -1);
+  width: var(--s-6); height: 1.4rem; transform: translateY(-50%);
+  background: currentColor; color: var(--faint);
+  -webkit-mask: var(--pfeil) center / 1.4rem 1.4rem no-repeat;
+  mask: var(--pfeil) center / 1.4rem 1.4rem no-repeat;
 }
 .step-no {
-  width: 1.8rem; height: 1.8rem; border-radius: 999px;
+  width: 2.1rem; height: 2.1rem; border-radius: 999px;
   background: var(--green-soft); color: var(--green-ink);
-  display: grid; place-items: center; font-size: .9rem; font-weight: 600;
+  display: grid; place-items: center; font-size: 1rem; font-weight: 600;
+  margin-bottom: var(--s-3);
 }
-.steps h3 { font-size: 1.02rem; }
-.steps p { color: var(--muted); font-size: .95rem; margin-top: .1rem; }
+.steps h3 { font-size: 1.05rem; }
+.steps p { color: var(--muted); font-size: .95rem; margin-top: .25rem; }
+
+/* Der Aufruf am Ende, in voller Grösse und in der Mitte. */
+.cta { margin-top: var(--s-7); display: grid; place-items: center; }
+.btn--xl {
+  padding: 1.1rem 2.4rem; font-size: 1.2rem; border-radius: 16px;
+  box-shadow: var(--shadow-lift);
+}
 
 /* Eigene Listen, auf diesem Gerät gemerkt. */
 .mine { margin-top: var(--s-6); }
-.mine h2 { font-size: 1.05rem; margin-bottom: var(--s-3); }
+.mine h2 { font-size: 1.15rem; margin-bottom: var(--s-3); }
 .mine ul { list-style: none; padding: 0; display: grid; gap: var(--s-2); }
 .mine a {
   display: flex; align-items: center; gap: var(--s-3); text-decoration: none; color: inherit;
@@ -397,16 +491,16 @@ button, input, textarea, select { font: inherit; color: inherit; }
   border-radius: var(--r-card); padding: var(--s-5); margin-bottom: var(--s-3);
   box-shadow: var(--shadow);
 }
-.keybox__title { font-size: 1.2rem; color: var(--amber); }
+.keybox__title { font-size: 1.35rem; color: var(--amber); }
 .keybox .hint { color: var(--amber); opacity: .85; margin-top: var(--s-2); }
 .keybox .input { background: var(--surface); border-color: var(--amber); }
 
 /* == 8 · Liste ========================================================= */
 
 .titleblock { margin-bottom: var(--s-5); }
-.titleblock h1 { font-size: 1.8rem; }
+.titleblock h1 { font-size: 1.9rem; }
 .title-input {
-  font-size: 1.8rem; font-weight: 600; letter-spacing: -.02em;
+  font-size: 1.9rem;
   padding: .3rem .6rem; margin-left: -.6rem; background: none; border-color: transparent;
 }
 .title-input:hover { background: var(--surface-alt); }
@@ -471,11 +565,11 @@ button, input, textarea, select { font: inherit; color: inherit; }
 }
 .modal::backdrop { background: rgba(27, 24, 19, .38); }
 .modal__head { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-5) var(--s-5) var(--s-2); }
-.modal__title { font-size: 1.2rem; flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.modal__title { font-size: 1.35rem; flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
 
 /* Die Ueberschrift als Feld: sie sieht aus wie Text, bis man sie anfasst. */
 .modal-title-input {
-  font-size: 1.2rem; font-weight: 600; letter-spacing: -.02em;
+  font-size: 1.35rem;
   padding: .25rem .5rem; margin-left: -.5rem;
   background: none; border-color: transparent;
 }
@@ -533,8 +627,24 @@ button, input, textarea, select { font: inherit; color: inherit; }
 
 /* == 12 · Telefon ====================================================== */
 
+@media (max-width: 46rem) {
+  /* Untereinander, und die Pfeile drehen sich mit. */
+  .steps { grid-template-columns: 1fr; gap: var(--s-6); }
+  .steps li + li::before {
+    top: calc(var(--s-6) * -1); left: 50%; width: 1.4rem; height: var(--s-6);
+    transform: translateX(-50%) rotate(90deg);
+  }
+}
+
 @media (max-width: 34rem) {
   .shell { padding-inline: var(--s-4); }
+  .hero-panel { border-radius: 22px; }
+  .trust li { font-size: .88rem; }
+  .btn--xl { padding: 1rem 1.8rem; font-size: 1.1rem; width: 100%; }
+  .cta { display: block; }
+  /* Im Kopf bleibt vom Knopf das Zeichen. */
+  .ctl-label { display: none; }
+  .ctl-wide { padding-inline: 0; width: 2.4rem; }
 
   /* Schmal steht der Zusatz unter den Verweisen statt neben ihnen. */
   .footer-row { flex-direction: column; align-items: flex-start; }
@@ -544,7 +654,7 @@ button, input, textarea, select { font: inherit; color: inherit; }
   .fold > summary { padding: var(--s-4); }
   .hero h1 { font-size: 2.4rem; }
   .hero .lead { font-size: 1.06rem; }
-  .titleblock h1, .title-input { font-size: 1.5rem; }
+  .titleblock h1, .title-input { font-size: 1.6rem; }
 
   /* Der Aufklapper-Zusatz rutscht unter den Namen statt ihn zu drängen. */
   .fold > summary { flex-wrap: wrap; }

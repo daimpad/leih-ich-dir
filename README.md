@@ -206,9 +206,17 @@ Stylesheet gibt es nicht.
 * Die Zeichen liegen als Symbolsatz in `index.html`, einfarbig und über
   `currentColor` an die Schriftfarbe gebunden. Raster 64 × 64, Strichstärke 4
   bis 5, eckige Enden.
-* Die Schriften Zilla Slab, Inter und Space Mono liegen als WOFF2-Teilmengen
-  unter `assets/fonts/` und werden selbst ausgeliefert. Zusammen 104 KiB.
-  Erzeugt mit `tools/build-fonts.py`.
+* Vier Schriften liegen als WOFF2-Teilmengen unter `assets/fonts/` und werden
+  selbst ausgeliefert, zusammen 127 KiB. Alle stehen unter der SIL Open Font
+  License; erzeugt mit `tools/build-fonts.py` aus den TrueType-Dateien in
+  [google/fonts](https://github.com/google/fonts).
+
+  | Schrift | Wofür |
+  | --- | --- |
+  | Ranchers | Wortmarke und Überschriften erster und zweiter Ordnung |
+  | Inter | Fließtext, Bedienelemente, alles Übrige |
+  | Zilla Slab | der Zusatz in der Fußzeile |
+  | Space Mono | Links und Schlüssel, alles Wörtliche |
 
 Eingebettete `style`-Angaben gibt es nicht: Die Sicherheitsrichtlinie erlaubt
 nur `style-src 'self'`, der Browser verwirft sie stillschweigend, und ein

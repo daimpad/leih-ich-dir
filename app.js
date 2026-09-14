@@ -196,6 +196,7 @@
       'list.newTitle': 'Meine Leihliste',
 
       'mine.headline': 'Deine Listen auf diesem Gerät',
+      'mine.link': 'Meine Listen',
       'mine.hint': 'Nur in diesem Browser gemerkt.',
 
       'key.headline': 'Bewahre diesen Link auf!',
@@ -378,6 +379,7 @@
       'list.newTitle': 'My lending list',
 
       'mine.headline': 'Your lists on this device',
+      'mine.link': 'My lists',
       'mine.hint': 'Remembered in this browser only.',
 
       'key.headline': 'Keep this link!',
@@ -902,6 +904,10 @@
       var node = document.getElementById(id);
       if (node) { node.hidden = (id !== name); }
     });
+    /* Die Startseite steht in drei Spalten und braucht mehr Breite als eine
+       Liste von Gegenstaenden, die schmal besser zu lesen ist. */
+    var main = document.getElementById('main');
+    if (main) { main.classList.toggle('page--wide', name === 'viewStart'); }
   }
 
   function showError(code) {
@@ -1004,6 +1010,7 @@
 
     renderItems();
     updateSettingsLink();
+    updateMineLink();
     setSaveState(state.saving ? 'saving' : (state.dirty ? 'unsaved' : 'saved'));
   }
 
@@ -1059,6 +1066,12 @@
    * Die gemerkten Listen auf der Startseite. Sie stehen dort, wo jemand sie
    * sucht, der den Reiter geschlossen hat — und nur dann, wenn es sie gibt.
    */
+  function updateMineLink() {
+    var link = $('#lnkMine');
+    if (!link) { return; }
+    link.hidden = !(readMine().length > 0 && state.mode !== 'start');
+  }
+
   function renderMine() {
     var box = $('#mineBox');
     var list = $('#mineList');
@@ -1068,6 +1081,7 @@
     box.hidden = mine.length === 0;
     if (!mine.length) { return; }
 
+    updateMineLink();
     mine.forEach(function (entry) {
       var li = el('li');
       var a = el('a');
@@ -2317,6 +2331,9 @@
       $('#lnkBack').setAttribute('data-i18n', 'settings.backStart');
       $('#lnkBack').textContent = t('settings.backStart');
     }
+
+    var mineLink = $('#lnkMine');
+    if (mineLink) { mineLink.hidden = readMine().length === 0; }
 
     detectStore().then(function (store) {
       Store = store;

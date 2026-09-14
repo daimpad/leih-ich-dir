@@ -37,6 +37,12 @@
     <path d="M27 28 L27 45"/>
     <path d="M37 28 L37 45"/>
   </symbol>
+  <symbol id="i-list" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M24 16 L56 16"/><path d="M24 32 L56 32"/><path d="M24 48 L56 48"/>
+    <rect x="8" y="13" width="6" height="6" fill="currentColor" stroke="none"/>
+    <rect x="8" y="29" width="6" height="6" fill="currentColor" stroke="none"/>
+    <rect x="8" y="45" width="6" height="6" fill="currentColor" stroke="none"/>
+  </symbol>
   <symbol id="i-chev" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter">
     <path d="M26 16 L42 32 L26 48"/>
   </symbol>
@@ -51,6 +57,10 @@
       <span class="brand-word">leihichdir</span>
     </a>
     <div class="bar-controls">
+      <a id="lnkMine" class="ctl-square ctl-wide" href="./" hidden data-i18n-label="mine.link">
+        <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-list"/></svg>
+        <span class="ctl-label" data-i18n="mine.link">Meine Listen</span>
+      </a>
       <button type="button" id="btnLang" class="ctl-square">EN</button>
       <button type="button" id="btnTheme" class="ctl-square" data-theme-toggle>
         <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-moon" id="themeIconUse"/></svg>

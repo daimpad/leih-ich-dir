@@ -1,6 +1,18 @@
-/* Schriften des Erscheinungsbilds, selbst ausgeliefert.
-   Erzeugt von tools/build-fonts.py aus den TrueType-Dateien in
-   daimpad/nozilla-ci. Nicht von Hand bearbeiten. */
+/* Schriften, selbst ausgeliefert. Erzeugt von tools/build-fonts.py.
+   Nicht von Hand bearbeiten.
+
+   Ranchers · Impallari Type · SIL OFL 1.1
+   Inter · Rasmus Andersson · SIL OFL 1.1
+   Zilla Slab · Typotheque · SIL OFL 1.1
+   Space Mono · Colophon Foundry · SIL OFL 1.1 */
+
+@font-face {
+  font-family: 'Ranchers';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('ranchers-400.woff2') format('woff2');
+}
 
 @font-face {
   font-family: 'Inter';
