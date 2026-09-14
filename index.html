@@ -64,7 +64,7 @@
   "isAccessibleForFree": true,
   "description": "Eine Liste der Dinge, die Du verleihst, geteilt ueber einen Link. Die Inhalte werden im Browser verschluesselt; der Server speichert nur unlesbare Zeichenketten.",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
-  "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "license": "https://opensource.org/license/mit",
   "author": {
     "@type": "Organization",
     "name": "NOZILLA - Damian Paderta",
@@ -415,7 +415,13 @@
   <!-- ==================================================================== -->
   <!-- Listenansicht, Bearbeiten- und Lesemodus teilen sich das Markup       -->
   <!-- ==================================================================== -->
-  <section id="viewList" class="view" hidden>
+  <!-- translate="no": Die Uebersetzungsfunktion des Browsers arbeitet nicht in
+       der Seite. Sie liest die Textknoten aus und reicht sie an Google
+       beziehungsweise Apple weiter — also genau die Gegenstandsnamen, die eben
+       erst im Browser entschluesselt wurden. Die CSP hilft dagegen nicht: Es ist
+       eine Funktion des Browsers, keine Anfrage der Seite. Die Startansicht traegt
+       das Merkmal bewusst nicht, dort steht kein Geheimnis. -->
+  <section id="viewList" class="view" hidden translate="no">
 
     <!-- 1 · Titel der Liste -->
     <div class="titleblock">
@@ -664,7 +670,8 @@
      ob bearbeitet oder nur gelesen wird. -->
 <!-- Der Name steht im Kopf und ist dort zugleich das Eingabefeld; die
      Beschriftung des Fensters setzt app.js deshalb von Hand. -->
-<dialog class="modal" id="itemModal">
+<!-- Auch hier steht entschluesselter Inhalt, siehe die Begruendung bei #viewList. -->
+<dialog class="modal" id="itemModal" translate="no">
   <div class="modal__head">
     <h2 class="modal__title" id="modalTitle"></h2>
     <button type="button" class="modal__x" id="modalClose">
@@ -686,7 +693,8 @@
 </div>
 
 <div class="toast-region" id="toastRegion" aria-live="polite">
-  <div class="toast" id="toast" hidden>
+  <!-- Die Meldung nennt Namen von Gegenstaenden. -->
+  <div class="toast" id="toast" hidden translate="no">
     <div class="toast__body" id="toastText"></div>
     <button type="button" class="toast__act" id="toastAct" hidden></button>
   </div>
