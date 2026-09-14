@@ -144,6 +144,10 @@
     <path d="M26 18 L46 18 L46 38"/>
   </symbol>
 
+  <symbol id="i-phone" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M14 8 L26 8 L30 22 L23 27 C26 35 29 38 37 41 L42 34 L56 38 L56 50 C56 54 53 56 49 56 C28 54 10 36 8 15 C8 11 10 8 14 8 Z"/>
+  </symbol>
+
   <!-- Die acht Gesichter. Gleiche Bauart wie alle anderen Zeichen des Hauses:
        Kreis als Kopf, gefuellte Rechtecke als Augen, eckige Linienzuege als
        Mund. Keine Rundungen, keine zweite Farbe — die Farbe kommt von der
@@ -369,8 +373,8 @@
                     data-i18n-placeholder="voice.placeholder"
                     placeholder="Mehrere Sachen am Stück sprechen oder eintippen"></textarea>
           <div class="voicerow">
-            <button type="button" id="btnVoiceApply" class="btn btn--sm" data-i18n="voice.apply">Übernehmen</button>
-            <small class="hint" id="voiceHint"></small>
+            <button type="button" id="btnVoiceApply" class="btn btn--primary btn--sm" data-i18n="voice.apply">Übernehmen</button>
+            <small class="hint" id="voiceHint" hidden></small>
           </div>
         </div>
       </form>
@@ -396,7 +400,7 @@
       <summary>
         <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-user"/></svg>
         <span data-i18n="contact.headline">Kontakt</span>
-        <span class="fold-sub" data-i18n="contact.sub">Name und E-Mail für Anfragen</span>
+        <span class="fold-sub" data-i18n="contact.sub">Name, E-Mail und Telefon für Anfragen</span>
       </summary>
       <div class="fold__body">
         <p class="hint" data-i18n="contact.hint">
@@ -413,6 +417,15 @@
         <div class="field">
           <label class="field__label" for="cfgEmail" data-i18n="settings.email">E-Mail für Anfragen</label>
           <input type="email" id="cfgEmail" class="input" maxlength="120" placeholder="name@example.org">
+        </div>
+        <div class="field">
+          <label class="field__label" for="cfgPhone" data-i18n="contact.phone">Telefon, freiwillig</label>
+          <input type="tel" id="cfgPhone" class="input" maxlength="40" autocomplete="tel"
+                 data-i18n-placeholder="contact.phonePlaceholder" placeholder="+49 …">
+          <small class="hint" data-i18n="contact.phoneHint">
+            Erscheint als Anrufen-Schaltfläche, wenn jemand einen Gegenstand anfragt. Wer
+            lieber schreibt, lässt das Feld leer.
+          </small>
         </div>
         <div class="field">
           <label class="check">
