@@ -46,3 +46,14 @@ Beide entstehen aus `tools/icon-vorlage.html`, die dieselbe Geometrie trägt wie
 die SVG-Datei. **Wer die Pfote ändert, muss beide Stellen nachziehen.** Die
 Rasterdateien wie beim Vorschaubild mit einem Browser ablichten; die `.ico`
 ist ein schlichter Behälter, in dem seit Vista ein PNG stehen darf.
+
+## Warum die Vorlagen hier liegen
+
+`tools/` ist über `.htaccess` mit 404 gesperrt, die Vorlagen sind also nur
+über einen lokalen Server erreichbar. Das ist Absicht: `og-vorlage.html`
+trägt dieselbe Wortmarke und denselben Satz wie die Startseite und wäre
+sonst eine indexierbare Dublette. Beide Vorlagen tragen zusätzlich ein
+`noindex` im Kopf, weil auf GitHub Pages, unter nginx und unter `php -S`
+keine `.htaccess` gilt; dort schließt sie das Pages-Deployment ohnehin aus.
+
+Sie dürfen deshalb nie nach `assets/` oder ins Wurzelverzeichnis wandern.

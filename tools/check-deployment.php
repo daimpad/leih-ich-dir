@@ -110,6 +110,9 @@ foreach ([
     ['/app.js', 'javascript'],
     ['/theme.js', 'javascript'],
     ['/einstellungen.html', 'text/html'],
+    ['/ueber.html', 'text/html'],
+    ['/impressum.html', 'text/html'],
+    ['/datenschutz.html', 'text/html'],
     ['/assets/fonts/fonts.css', 'text/css'],
     ['/assets/fonts/ranchers-400.woff2', 'font/woff2'],
     ['/assets/fonts/inter-400.woff2', 'font/woff2'],
@@ -136,6 +139,8 @@ foreach ([
     '/.git/config',
     '/tests/api-test.php',
     '/tools/purge.php',
+    '/tools/og-vorlage.html',
+    '/tools/icon-vorlage.html',
 ] as $path) {
     $res = fetch($base . $path);
     line('MUSS', 'gesperrt: ' . $path, $res['status'] !== 200, 'Status ' . $res['status']);

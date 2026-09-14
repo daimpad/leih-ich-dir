@@ -142,6 +142,9 @@
       ['app.js', 'javascript'],
       ['theme.js', 'javascript'],
       ['einstellungen.html', 'text/html'],
+      ['ueber.html', 'text/html'],
+      ['impressum.html', 'text/html'],
+      ['datenschutz.html', 'text/html'],
       ['assets/fonts/fonts.css', 'text/css'],
       ['assets/fonts/ranchers-400.woff2', 'font/woff2'],
       ['assets/fonts/inter-400.woff2', 'font/woff2'],
@@ -168,7 +171,8 @@
 
   function checkSealed() {
     group('Abschottung');
-    var paths = ['data/', 'data/lists/', '.git/config', 'tests/api-test.php', 'tools/purge.php'];
+    var paths = ['data/', 'data/lists/', '.git/config', 'tests/api-test.php',
+                 'tools/purge.php', 'tools/og-vorlage.html', 'tools/icon-vorlage.html'];
     return paths.reduce(function (chain, path) {
       return chain.then(function () {
         return head(path).then(function (r) {
