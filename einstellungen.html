@@ -56,15 +56,20 @@
       <span class="brand-word">Leih<span class="brand-ich">Ich</span>Dir</span>
     </a>
     <div class="bar-controls">
-      <a id="lnkMine" class="ctl-square ctl-wide" href="./" hidden data-i18n-label="mine.link">
-        <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-list"/></svg>
-        <span class="ctl-label" data-i18n="mine.link">Meine Listen</span>
-      </a>
       <button type="button" id="btnLang" class="ctl-square">EN</button>
       <button type="button" id="btnTheme" class="ctl-square" data-theme-toggle>
         <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-moon" id="themeIconUse"/></svg>
       </button>
     </div>
+    <!-- Der Weg zu den eigenen Listen ist ein Geschwister der Bedienelemente
+         und nicht eines von ihnen: Schmal rueckt er dadurch in eine eigene
+         Zeile und steht dort ausgeschrieben und unterstrichen, statt als
+         namenloses Zeichen zwischen Sprache, Licht und Einstellungen zu
+         verschwinden. Er erscheint erst, wenn dieses Geraet Listen kennt. -->
+    <a id="lnkMine" class="ctl-square ctl-wide" href="./" hidden data-i18n-label="mine.link">
+      <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-list"/></svg>
+      <span class="ctl-label" data-i18n="mine.link">Meine Listen</span>
+    </a>
   </div>
 </header>
 
