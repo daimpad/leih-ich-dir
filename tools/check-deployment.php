@@ -108,8 +108,10 @@ echo "\nAuslieferung\n";
 foreach ([
     ['/style.css', 'text/css'],
     ['/app.js', 'javascript'],
-    ['/vendor/nozilla-ci/design-system.css', 'text/css'],
+    ['/theme.js', 'javascript'],
+    ['/einstellungen.html', 'text/html'],
     ['/assets/fonts/fonts.css', 'text/css'],
+    ['/assets/fonts/ranchers-400.woff2', 'font/woff2'],
     ['/assets/fonts/inter-400.woff2', 'font/woff2'],
     ['/assets/pics/logo.svg', 'image/svg+xml'],
 ] as [$path, $type]) {

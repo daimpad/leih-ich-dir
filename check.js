@@ -140,7 +140,10 @@
     var files = [
       ['style.css', 'text/css'],
       ['app.js', 'javascript'],
+      ['theme.js', 'javascript'],
+      ['einstellungen.html', 'text/html'],
       ['assets/fonts/fonts.css', 'text/css'],
+      ['assets/fonts/ranchers-400.woff2', 'font/woff2'],
       ['assets/fonts/inter-400.woff2', 'font/woff2'],
       ['assets/pics/logo.svg', 'image/svg+xml']
     ];
@@ -220,8 +223,8 @@
     return document.fonts.ready.then(function () {
       var h1 = document.querySelector('h1');
       var family = h1 ? getComputedStyle(h1).fontFamily : '';
-      check(LEVEL_SHOULD, 'Ueberschrift nutzt Zilla Slab',
-        family.indexOf('Zilla Slab') !== -1, family || 'unbekannt');
+      check(LEVEL_SHOULD, 'Ueberschrift nutzt Ranchers',
+        family.indexOf('Ranchers') !== -1, family || 'unbekannt');
       var loaded = 0;
       document.fonts.forEach(function (f) { if (f.status === 'loaded') { loaded++; } });
       check(LEVEL_SHOULD, 'Schriftdateien geladen', loaded > 0, loaded + ' von ' + document.fonts.size);
