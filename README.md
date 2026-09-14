@@ -20,7 +20,7 @@ oder Kontaktdaten.
 | **Zwei Linkarten** | ein geheimer Bearbeiten-Link, ein konstanter Ansehen-Link für Freunde |
 | **Live-Daten** | der Ansehen-Link lädt den aktuellen Stand und aktualisiert sich selbsttätig |
 | **Zweisprachig** | Deutsch und Englisch, automatische Erkennung plus manuelle Umschaltung |
-| **Hell und dunkel** | folgt dem System, lässt sich in der Kopfleiste und in den Einstellungen übersteuern |
+| **Hell und dunkel** | folgt dem System, lässt sich in der Kopfleiste und auf der Einstellungsseite übersteuern |
 | **Autovervollständigung** | 29 typische Leih-Gegenstände über ein natives `<datalist>`-Element |
 | **Ein Eintrag, ein Fenster** | verfügbar bleibt schmucklos, verliehen trägt Name und Datum in der Zeile |
 | **Anfragen** | steht bei Freunden in der Zeile: vorformulierter Text, weitergegeben über das Gerät oder per `mailto:` |
@@ -99,7 +99,7 @@ verfügbar ist:
 
 | Weg | Voraussetzung | Wohin der Text geht |
 |---|---|---|
-| **Gemini, eigener Schlüssel** | Schlüssel in den Einstellungen hinterlegt | vom Gerät direkt zu Google |
+| **Gemini, eigener Schlüssel** | Schlüssel auf der Einstellungsseite hinterlegt | vom Gerät direkt zu Google |
 | **Gemini über den Server** | Schlüssel in `data/.ai-key` hinterlegt | über diesen Server zu Google |
 | **Zerlegung im Browser** | immer | nirgendwohin |
 
@@ -201,8 +201,8 @@ Stylesheet gibt es nicht.
 * Farben, Abstände, Radien und Schatten stehen als Merkmale in `:root`, einmal
   hell und einmal dunkel. Im Rumpf der Datei steht kein einziger Farbwert.
 * Dunkel folgt erst der Systemvorgabe und dann der ausdrücklichen Wahl aus den
-  Einstellungen; `theme.js` setzt dafür `data-theme` am Wurzelelement, noch
-  bevor der Körper gezeichnet wird.
+  Einstellungsseite; `theme.js` setzt dafür `data-theme` am Wurzelelement,
+  noch bevor der Körper gezeichnet wird.
 * Die Zeichen liegen als Symbolsatz in `index.html`, einfarbig und über
   `currentColor` an die Schriftfarbe gebunden. Raster 64 × 64, Strichstärke 4
   bis 5, eckige Enden.
@@ -224,6 +224,7 @@ unterbindet das ohnehin.
 ```
 .
 ├── index.html                    Oberfläche und Symbolsatz, ohne Inline-Skripte
+├── einstellungen.html            Erscheinungsbild, Schlüssel, Zwischenspeicher
 ├── check.html · check.js         Abnahme im Browser, nach dem Deployment löschbar
 ├── theme.js                      Wahl zwischen hell, dunkel und der Systemeinstellung
 ├── impressum.html                Entwurf, Angaben müssen ergänzt werden

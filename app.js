@@ -166,15 +166,14 @@
 
       'hero.a': 'Leih',
       'hero.b': 'ich',
-      'hero.c': 'dir.',
-      'hero.lead': 'Eine Liste deiner Gegenstände, die du an Freunde verleihst. Ohne Konto, und lesen können sie nur du und die, denen du den Link gibst.',
+      'hero.c': 'Dir.',
+      'hero.lead': 'Versende Deine Liste an Leihgegenständen an andere.',
 
       'trust.label': 'Eigenschaften',
       'trust.tracking': 'Kein Tracking',
-      'trust.account': 'Ohne Konto',
+      'trust.account': 'Keine Registrierung',
       'trust.ads': 'Keine Werbung',
       'trust.crypto': 'Ende-zu-Ende verschlüsselt',
-      'trust.source': 'Quelloffen',
 
       'steps.one': 'Liste anlegen',
       'steps.oneText': 'Ein Klick, und du hast zwei Links: einen geheimen zum Bearbeiten und einen zum Weitergeben.',
@@ -184,7 +183,6 @@
       'steps.threeText': 'Freunde sehen, was gerade frei ist, und fragen mit einem Klick an.',
 
       'start.create': 'Neue Liste anlegen',
-      'start.createHint': 'dauert einen Klick',
       'start.creating': 'Liste wird angelegt …',
 
       'list.titleLabel': 'Titel der Liste',
@@ -198,10 +196,9 @@
       'list.newTitle': 'Meine Leihliste',
 
       'mine.headline': 'Deine Listen auf diesem Gerät',
-      'mine.hint': 'Nur in diesem Browser gemerkt. Der Bearbeiten-Link bleibt dein einziger Zugang.',
+      'mine.hint': 'Nur in diesem Browser gemerkt.',
 
-      'key.headline': 'Deine Liste ist angelegt',
-      'key.body': 'Dieser Link ist dein einziger Zugang. Er steht nirgends sonst — auch wir kennen ihn nicht.',
+      'key.headline': 'Bewahre diesen Link auf!',
       'key.label': 'Bearbeiten-Link',
       'key.remember': 'Auf diesem Gerät gemerkt — beim nächsten Besuch findest du die Liste auf der Startseite wieder.',
       'key.done': 'Ich habe den Link gesichert',
@@ -265,15 +262,16 @@
       'request.bodyNamed': 'Hallo {name}, ich möchte {item} ausleihen. Passt das bei dir?',
 
       'settings.headline': 'Einstellungen',
-      'settings.sub': 'Erscheinungsbild, Schlüssel, Liste löschen',
+      'settings.pageHint': 'Diese Angaben gelten für diesen Browser, nicht für deine Listen.',
+      'settings.back': 'Zurück zur Liste',
+      'settings.backStart': 'Zurück zur Startseite',
       'contact.headline': 'Kontakt',
       'contact.sub': 'Name und E-Mail für Anfragen',
       'contact.name': 'Dein Name',
-      'contact.namePlaceholder': 'zum Beispiel Damian',
+      'contact.namePlaceholder': '',
       'contact.nameHint': 'Steht über der Liste und in der Anrede, wenn jemand anfragt.',
       'contact.hint': 'Diese Angaben werden mitverschlüsselt und nur für die Anfrage-Schaltflächen deiner Freunde genutzt.',
       'settings.themeHeadline': 'Erscheinungsbild',
-      'settings.themeHint': 'Gilt für diesen Browser, nicht für die Liste.',
       'settings.themeSystem': 'Wie das System',
       'settings.themeLight': 'Hell',
       'settings.themeDark': 'Dunkel',
@@ -339,8 +337,7 @@
 
       'footer.imprint': 'Impressum',
       'footer.privacy': 'Datenschutz',
-      'footer.about': 'Über',
-      'footer.text': 'Freie Software, MIT-Lizenz, Ende-zu-Ende-verschlüsselt.'
+      'footer.about': 'Über'
     },
 
     en: {
@@ -352,14 +349,13 @@
       'hero.a': 'Borrow',
       'hero.b': 'it',
       'hero.c': 'from me.',
-      'hero.lead': 'A list of the things you lend to friends. No account, and only you and the people you send the link to can read it.',
+      'hero.lead': 'Send your list of things to lend to other people.',
 
       'trust.label': 'Properties',
       'trust.tracking': 'No tracking',
-      'trust.account': 'No account',
+      'trust.account': 'No sign-up',
       'trust.ads': 'No ads',
       'trust.crypto': 'End-to-end encrypted',
-      'trust.source': 'Open source',
 
       'steps.one': 'Create a list',
       'steps.oneText': 'One click, and you have two links: a secret one for editing and one to pass on.',
@@ -369,7 +365,6 @@
       'steps.threeText': 'Friends see what is free right now and ask with one click.',
 
       'start.create': 'Create a new list',
-      'start.createHint': 'takes one click',
       'start.creating': 'Creating list …',
 
       'list.titleLabel': 'List title',
@@ -383,10 +378,9 @@
       'list.newTitle': 'My lending list',
 
       'mine.headline': 'Your lists on this device',
-      'mine.hint': 'Remembered in this browser only. The edit link remains your only way in.',
+      'mine.hint': 'Remembered in this browser only.',
 
-      'key.headline': 'Your list is ready',
-      'key.body': 'This link is your only way in. It exists nowhere else — not even we know it.',
+      'key.headline': 'Keep this link!',
       'key.label': 'Edit link',
       'key.remember': 'Remembered on this device — next time you will find the list on the start page.',
       'key.done': 'I have saved the link',
@@ -450,15 +444,16 @@
       'request.bodyNamed': 'Hi {name}, I would like to borrow {item}. Does that work for you?',
 
       'settings.headline': 'Settings',
-      'settings.sub': 'Appearance, key, delete list',
+      'settings.pageHint': 'These apply to this browser, not to your lists.',
+      'settings.back': 'Back to the list',
+      'settings.backStart': 'Back to the start page',
       'contact.headline': 'Contact',
       'contact.sub': 'Name and e-mail for requests',
       'contact.name': 'Your name',
-      'contact.namePlaceholder': 'for example Damian',
+      'contact.namePlaceholder': '',
       'contact.nameHint': 'Shown above the list and in the greeting when somebody asks.',
       'contact.hint': 'These details are encrypted along with the list and only feed the request buttons your friends see.',
       'settings.themeHeadline': 'Appearance',
-      'settings.themeHint': 'Applies to this browser, not to the list.',
       'settings.themeSystem': 'Follow the system',
       'settings.themeLight': 'Light',
       'settings.themeDark': 'Dark',
@@ -524,8 +519,7 @@
 
       'footer.imprint': 'Imprint',
       'footer.privacy': 'Privacy',
-      'footer.about': 'About',
-      'footer.text': 'Free software, MIT licence, end-to-end encrypted.'
+      'footer.about': 'About'
     }
   };
 
@@ -569,6 +563,9 @@
     });
     $$('[data-i18n-label]').forEach(function (node) {
       node.setAttribute('aria-label', t(node.getAttribute('data-i18n-label')));
+    });
+    $$('[data-i18n-title]').forEach(function (node) {
+      node.setAttribute('title', t(node.getAttribute('data-i18n-title')));
     });
     /* Regel 19: das Bedienelement zeigt das Ziel, nicht den Zustand. */
     var langBtn = $('#btnLang');
@@ -984,7 +981,6 @@
     $('#shareBox').hidden = !isEdit;
     $('#addForm').hidden = !isEdit;
     $('#contactBox').hidden = !isEdit;
-    $('#settingsBox').hidden = !isEdit;
     $('#btnRefresh').hidden = isEdit;
     if (!isEdit) { $('#keyBox').hidden = true; }
 
@@ -993,7 +989,6 @@
       $('#linkEdit').value = editLink();
       if (document.activeElement !== $('#cfgName')) { $('#cfgName').value = state.doc.contact.name; }
       if (document.activeElement !== $('#cfgEmail')) { $('#cfgEmail').value = state.doc.contact.email; }
-      if (document.activeElement !== $('#cfgAiKey')) { $('#cfgAiKey').value = getAiKey(); }
       $('#cfgShowBorrower').checked = state.doc.showBorrower;
     }
 
@@ -1008,6 +1003,7 @@
     $('#btnShareView').hidden = !(isEdit && canShare());
 
     renderItems();
+    updateSettingsLink();
     setSaveState(state.saving ? 'saving' : (state.dirty ? 'unsaved' : 'saved'));
   }
 
@@ -1712,6 +1708,7 @@
       forgetList(state.id);
       state.mode = 'start';
       state.doc = null;
+      if (isSettingsPage()) { location.href = './'; return; }
       history.replaceState(null, '', location.pathname);
       renderMine();
       showView('viewStart');
@@ -2010,6 +2007,9 @@
   }
 
   function updateVoiceHint() {
+    var proxyNote = $('#aiProxyNote');
+    if (proxyNote) { proxyNote.hidden = !aiProxyAvailable(); }
+
     var node = $('#voiceHint');
     if (!node) { return; }
     var parts = [];
@@ -2018,9 +2018,6 @@
     else if (aiProxyAvailable()) { parts.push(t('voice.hintProxy')); }
     else { parts.push(t('voice.hintLocal')); }
     node.textContent = parts.join(' ');
-
-    var proxyNote = $('#aiProxyNote');
-    if (proxyNote) { proxyNote.hidden = !aiProxyAvailable(); }
   }
 
   function setListening(active) {
@@ -2165,19 +2162,8 @@
       processVoiceText($('#voiceText').value);
     });
 
-    /* Der Schlüssel wird erst beim Verlassen des Feldes abgelegt, damit nicht
-       jede Tastenfolge im localStorage landet. */
-    $('#cfgAiKey').addEventListener('change', function () {
-      var value = this.value.trim();
-      setAiKey(value);
-      updateVoiceHint();
-      toast(t(value ? 'settings.aiKeySaved' : 'settings.aiKeyCleared'));
-    });
-
     $('#btnCreate').addEventListener('click', createList);
     $('#btnRefresh').addEventListener('click', function () { refresh(true); });
-    $('#btnDeleteList').addEventListener('click', deleteList);
-    $('#btnClearCache').addEventListener('click', clearLocalData);
 
     $('#addForm').addEventListener('submit', function (ev) {
       ev.preventDefault();
@@ -2255,6 +2241,16 @@
    * 14 · Router und Start
    * ===================================================================== */
 
+  /** Der Verweis auf die Einstellungen traegt die offene Liste mit sich. */
+  function updateSettingsLink() {
+    var link = $('#lnkSettings');
+    if (!link) { return; }
+    var hash = (state.mode === 'edit' && state.id && state.token)
+      ? editHash(state.id, state.keyStr, state.token)
+      : '';
+    link.setAttribute('href', 'einstellungen.html' + hash);
+  }
+
   function route() {
     var parsed;
     try { parsed = parseHash(); }
@@ -2275,7 +2271,74 @@
     openList(parsed);
   }
 
+  /* ===================================================================== *
+   * 14a · Einstellungsseite
+   *
+   * Die Einstellungen stehen auf einer eigenen Seite. Sie teilt sich mit der
+   * Anwendung diese Datei, weil sie dieselbe Sprache, dasselbe Erscheinungs-
+   * bild und denselben Speicher braucht — aber sie zeichnet keine Liste und
+   * ruft deshalb nichts aus dem Abschnitt Rendering auf.
+   * ===================================================================== */
+
+  function isSettingsPage() {
+    return document.body.getAttribute('data-page') === 'settings';
+  }
+
+  function initSettings() {
+    lang = detectLang();
+    document.documentElement.lang = lang;
+    applyStaticI18n();
+
+    $('#btnLang').addEventListener('click', function () {
+      setLang(lang === 'de' ? 'en' : 'de');
+    });
+
+    $('#cfgAiKey').value = getAiKey();
+    $('#cfgAiKey').addEventListener('change', function () {
+      var value = this.value.trim();
+      setAiKey(value);
+      updateVoiceHint();
+      toast(t(value ? 'settings.aiKeySaved' : 'settings.aiKeyCleared'));
+    });
+    $('#btnClearCache').addEventListener('click', clearLocalData);
+
+    /* Wurde die Seite aus einer offenen Liste heraus aufgerufen, trägt das
+       Fragment deren Bearbeiten-Link. Nur dann führt der Weg zurück, und nur
+       dann gibt es hier etwas zu löschen. */
+    var parsed = null;
+    try { parsed = parseHash(); } catch (err) { parsed = null; }
+    var back = (parsed && parsed.mode === 'edit')
+      ? './' + editHash(parsed.id, parsed.key, parsed.token)
+      : './';
+    $('#lnkBack').setAttribute('href', back);
+    if (!parsed || parsed.mode !== 'edit') {
+      /* Das Merkmal wird getauscht, nicht der Text: sonst überschreibt der
+         nächste Sprachwechsel die Beschriftung wieder. */
+      $('#lnkBack').setAttribute('data-i18n', 'settings.backStart');
+      $('#lnkBack').textContent = t('settings.backStart');
+    }
+
+    detectStore().then(function (store) {
+      Store = store;
+      applyStaticI18n();
+      updateVoiceHint();
+      if (!parsed || parsed.mode !== 'edit') { return; }
+
+      state.mode = 'edit';
+      state.id = parsed.id;
+      state.keyStr = parsed.key;
+      state.token = parsed.token;
+      return Crypt.proof(parsed.token).then(function (proof) {
+        state.proof = proof;
+        $('#dangerBox').hidden = false;
+        $('#btnDeleteList').addEventListener('click', deleteList);
+      });
+    });
+  }
+
   function init() {
+    if (isSettingsPage()) { initSettings(); return; }
+
     lang = detectLang();
     document.documentElement.lang = lang;
     applyStaticI18n();
