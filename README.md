@@ -28,6 +28,7 @@ oder Kontaktdaten.
 | **Gemerkte Listen** | eigene Listen stehen auf der Startseite dieses Browsers und über einen Verweis in der Kopfleiste, rein lokal und ohne Konto |
 | **Spracheingabe** | Gegenstände unterwegs einsprechen, Zerlegung im Browser oder wahlweise per Gemini |
 | **Erscheinungsbild** | eigenständig in `style.css`, Schriften mitgeliefert, keine fremden Server |
+| **Auffindbar** | Titel, Beschreibungen, Open Graph, `robots.txt` und `sitemap.xml`; strukturierte Angaben als JSON-LD |
 | **Ohne Abhängigkeiten** | pures PHP, HTML, CSS, Vanilla JS, kein Framework, kein Bauschritt, keine Datenbank |
 
 ## Funktionsweise der Verschlüsselung

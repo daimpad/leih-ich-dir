@@ -4,6 +4,11 @@
     dieselbe ist: Die Pfote haelt ihre eigene Leihliste. Auf 16 Punkten ist
     von einer Wortmarke nichts mehr zu lesen, von dieser Form dagegen schon.
 
+    Die Zehen stehen bewusst weit auseinander: Ihre Luecken messen je rund
+    2,3 Einheiten der viewBox, also gut ein halbes Pixel bei 16 Punkten. Eine
+    engere Reihe verschmilzt dort zu einem Balken. Reihe und Ballen sind beide
+    auf x = 32 zentriert, damit das Zeichen im Rahmen nicht verrutscht.
+
     Die Farben stehen im Dokument und folgen der Systemvorgabe, damit das
     Zeichen auch auf einer dunklen Registerleiste steht. Ein <style> im SVG
     ist zulaessig: Die Datei ist ein eigenes Dokument, die CSP der Seite
@@ -19,10 +24,10 @@
   </style>
   <rect class="grund" width="64" height="64" rx="14"/>
   <g class="pfote">
-    <ellipse cx="16.5" cy="25.5" rx="6.2" ry="8" transform="rotate(-22 16.5 25.5)"/>
-    <ellipse cx="29.5" cy="18" rx="6.4" ry="8.4"/>
-    <ellipse cx="43" cy="20.5" rx="6.2" ry="8" transform="rotate(18 43 20.5)"/>
-    <ellipse cx="53" cy="31.5" rx="5.4" ry="7" transform="rotate(36 53 31.5)"/>
-    <path d="M32.5 32c8.3 0 15 6.2 15 13.5S40.8 57.5 32.5 57.5s-15-4.7-15-12S24.2 32 32.5 32z"/>
+    <ellipse cx="14" cy="26" rx="4.5" ry="6.4" transform="rotate(-24 14 26)"/>
+    <ellipse cx="26" cy="20" rx="4.8" ry="6.6" transform="rotate(-6 26 20)"/>
+    <ellipse cx="38" cy="20" rx="4.8" ry="6.6" transform="rotate(6 38 20)"/>
+    <ellipse cx="50" cy="26" rx="4.5" ry="6.4" transform="rotate(24 50 26)"/>
+    <path d="M32 33c8.8 0 16 5.8 16 12.8S40.8 57 32 57s-16-4.2-16-11.2S23.2 33 32 33z"/>
   </g>
 </svg>

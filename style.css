@@ -19,6 +19,7 @@
  *  10 · Fenster, Meldungen
  *  11 · Fußzeile
  *  12 · Telefon
+ *  13 · Grobe Zeiger
  * ===================================================================== */
 
 /* == 1 · Merkmale ====================================================== */
@@ -134,14 +135,22 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
+/* Der Wert sagt dem Browser, wie er Formularelemente, Bildlaufleisten und
+   das Fenster hinter der Seite faerben soll. Der Anfangswert ueberlaesst
+   ihm die Wahl; die beiden Regeln weiter unten binden ihn an die Wahl in
+   der Kopfleiste, sobald jemand sie getroffen hat. */
 html { color-scheme: light dark; }
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
 
 body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
   font-family: var(--sans);
-  font-size: 16px;
+  /* 1rem statt 16px: Wer die Grundgroesse im Browser hochsetzt, bekommt
+     sie auch hier. Der Rest des Stylesheets rechnet ohnehin in rem. */
+  font-size: 1rem;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   -webkit-text-size-adjust: 100%;
@@ -534,7 +543,9 @@ header.site { padding-block: var(--s-4); }
   padding: .7rem .9rem; box-shadow: var(--shadow);
 }
 .mine a:hover { background: var(--surface-alt); }
-.mine .name { flex: 1 1 auto; font-weight: 500; }
+/* Ohne min-width: 0 waechst ein Flex-Kind ueber seinen Platz hinaus; ein
+   langer Listenname schoebe die Seite dann waagerecht auf. */
+.mine .name { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; font-weight: 500; }
 .mine .when { color: var(--faint); font-size: .85rem; }
 
 /* Der Zugang. Eigene Farbe, weil er kein Bericht ist, sondern eine
@@ -639,6 +650,11 @@ header.site { padding-block: var(--s-4); }
   width: min(26rem, calc(100vw - 2rem)); padding: 0; border: 0;
   border-radius: 20px; background: var(--surface); color: var(--ink);
   box-shadow: var(--shadow-lift);
+  /* Im Querformat oder bei offener Bildschirmtastatur bleibt sonst der Fuss
+     des Fensters unerreichbar: Es waechst ueber den Schirm hinaus, und ein
+     <dialog> rollt von sich aus nicht. */
+  max-height: calc(100dvh - 2rem);
+  display: flex; flex-direction: column;
 }
 .modal::backdrop { background: rgba(27, 24, 19, .38); }
 .modal__head { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-5) var(--s-5) var(--s-2); }
@@ -656,7 +672,7 @@ header.site { padding-block: var(--s-4); }
   background: none; border: 0; border-radius: 999px; cursor: pointer; color: var(--muted);
 }
 .modal__x:hover { background: var(--surface-alt); color: var(--ink); }
-.modal__body { padding: var(--s-3) var(--s-5) var(--s-5); }
+.modal__body { padding: var(--s-3) var(--s-5) var(--s-5); overflow-y: auto; min-height: 0; }
 .modal__foot {
   display: flex; align-items: center; justify-content: space-between; gap: var(--s-3);
   padding: var(--s-4) var(--s-5); background: var(--surface-alt);
@@ -959,4 +975,34 @@ header.site { padding-block: var(--s-4); }
 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
+}
+
+/* == 13 · Grobe Zeiger ================================================= *
+ *
+ * Ein Finger trifft ungenauer als ein Mauszeiger. Die Bedienelemente der
+ * Kopfleiste messen 38,4 Punkte, das Schliesskreuz im Fenster 35,2 — beides
+ * unter den 44, die sich als Mass fuer eine bequeme Trefferflaeche
+ * eingebuergert haben.
+ *
+ * Statt die Elemente zu vergroessern und damit das Bild zu aendern, waechst
+ * nur die Flaeche: ein unsichtbares Feld liegt mittig ueber dem Element und
+ * nimmt den Tipp mit entgegen. Der Abstand in der Kopfleiste betraegt acht
+ * Punkte, die Felder beruehren sich also nicht.
+ * ===================================================================== */
+
+@media (pointer: coarse) {
+  .ctl-square, .modal__x, .info, .btn--sm, .chip--level { position: relative; }
+  .ctl-square::after,
+  .modal__x::after,
+  .info::after,
+  .btn--sm::after,
+  .chip--level::after {
+    content: ""; position: absolute;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: max(100%, 44px); height: max(100%, 44px);
+  }
+
+  /* Ein Feld unter 16 Punkten laesst iOS Safari beim Antippen in die Seite
+     zoomen und nicht wieder heraus. Am Schreibtisch bleibt der Link schmal. */
+  .linkrow .input { font-size: 1rem; }
 }
