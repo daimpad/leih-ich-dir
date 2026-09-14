@@ -170,15 +170,16 @@
       'hero.lead': 'Versende Deine Liste an Leihgegenständen an andere.',
 
       'trust.label': 'Eigenschaften',
-      'trust.tracking': 'Kein Tracking',
-      'trust.account': 'Keine Registrierung',
-      'trust.ads': 'Keine Werbung',
-      'trust.crypto': 'Ende-zu-Ende verschlüsselt',
+      'trust.tracking': 'Kostenlos',
+      'trust.account': 'Werbefrei',
+      'trust.ads': 'Ohne Login',
+      'trust.crypto': 'Verschlüsselt',
 
-      'steps.one': 'Liste anlegen',
-      'steps.oneText': 'Ein Klick, und Du hast zwei Links: einen geheimen zum Bearbeiten und einen zum Weitergeben.',
-      'steps.two': 'Gegenstände eintragen',
-      'steps.twoText': 'Tippen oder einsprechen. Erst nur den Namen, alles Weitere steht hinter dem Eintrag.',
+      'steps.headline': 'So geht\u2019s',
+      'steps.one': 'Gegenstände eintragen',
+      'steps.oneText': 'Tippen oder einsprechen. Erst nur der Name, alles Weitere steht hinter dem Eintrag.',
+      'steps.two': 'Kontaktdetails angeben',
+      'steps.twoText': 'Name und E-Mail, damit Deine Freunde Dich erreichen. Beides wird mitverschlüsselt.',
       'steps.three': 'Link weitergeben',
       'steps.threeText': 'Freunde sehen, was gerade frei ist, und fragen mit einem Klick an.',
 
@@ -197,7 +198,6 @@
 
       'mine.headline': 'Deine Listen auf diesem Gerät',
       'mine.link': 'Meine Listen',
-      'mine.hint': 'Nur in diesem Browser gemerkt.',
 
       'key.headline': 'Bewahre diesen Link auf!',
       'key.label': 'Bearbeiten-Link',
@@ -353,15 +353,16 @@
       'hero.lead': 'Send your list of things to lend to other people.',
 
       'trust.label': 'Properties',
-      'trust.tracking': 'No tracking',
-      'trust.account': 'No sign-up',
-      'trust.ads': 'No ads',
-      'trust.crypto': 'End-to-end encrypted',
+      'trust.tracking': 'Free',
+      'trust.account': 'No ads',
+      'trust.ads': 'No login',
+      'trust.crypto': 'Encrypted',
 
-      'steps.one': 'Create a list',
-      'steps.oneText': 'One click, and you have two links: a secret one for editing and one to pass on.',
-      'steps.two': 'Add your things',
-      'steps.twoText': 'Type or speak. Just the name at first, everything else sits behind the entry.',
+      'steps.headline': 'How it works',
+      'steps.one': 'Add your things',
+      'steps.oneText': 'Type or speak. Just the name at first, everything else sits behind the entry.',
+      'steps.two': 'Add your contact details',
+      'steps.twoText': 'Name and e-mail, so your friends can reach you. Both are encrypted with the list.',
       'steps.three': 'Pass the link on',
       'steps.threeText': 'Friends see what is free right now and ask with one click.',
 
@@ -380,7 +381,6 @@
 
       'mine.headline': 'Your lists on this device',
       'mine.link': 'My lists',
-      'mine.hint': 'Remembered in this browser only.',
 
       'key.headline': 'Keep this link!',
       'key.label': 'Edit link',
