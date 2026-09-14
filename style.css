@@ -515,6 +515,10 @@ header.site { padding-block: var(--s-4); }
 /* Nebenbemerkung, kein zweiter Hinweis: klein und in einer Zeile, damit sie
    dem Link daneben nicht das Gewicht nimmt. */
 .keybox .keybox__remember { font-size: .74rem; margin-top: var(--s-1); }
+/* Der Haken im Zugangskasten traegt dessen Farbe, nicht das Gruen der
+   Anwendung: Hier wird eine Warnung bestaetigt, nichts Erfreuliches. */
+.keybox__check input:checked + .check__box { background: var(--amber); border-color: var(--amber); }
+.keybox__check .check__box { border-color: var(--amber); }
 .keybox .input { background: var(--surface); border-color: var(--amber); }
 
 /* == 8 · Liste ========================================================= */

@@ -189,11 +189,9 @@
       'list.titleLabel': 'Titel der Liste',
       'list.titlePlaceholder': 'Titel der Liste',
       'list.untitled': 'Leih-Katalog',
-      'list.updated': 'Zuletzt aktualisiert: {date}',
       'list.by': 'Liste von {name}',
       'list.free': '{n} gerade frei',
       'list.free_1': '1 gerade frei',
-      'list.lentCount': '{n} verliehen',
       'list.newTitle': 'Meine Leihliste',
 
       'mine.headline': 'Deine Listen auf diesem Gerät',
@@ -227,8 +225,6 @@
 
       'items.headline': 'Inventar',
       'items.refresh': 'Aktualisieren',
-      'items.count': '{n} Gegenstände',
-      'items.count_1': '1 Gegenstand',
       'items.empty': 'Was liegt bei Dir herum und wird kaum benutzt?',
       'items.emptyView': 'In dieser Liste steht im Moment nichts.',
       'items.checked': 'zuletzt geprüft vor {n} Min.',
@@ -341,6 +337,7 @@
 
       /* -- Das Spielerische ------------------------------------------- */
 
+      'items.updatedLabel': 'Zuletzt gespeichert: {date}',
       'items.emptyHead': 'Noch nichts drin',
       'items.emptyEg': 'Zum Beispiel',
       'item.longOut': '{name} ist seit {n} Tagen unterwegs. Ein kurzer Anruf wäre kein Drama.',
@@ -473,11 +470,9 @@
       'list.titleLabel': 'List title',
       'list.titlePlaceholder': 'List title',
       'list.untitled': 'Lending catalogue',
-      'list.updated': 'Last updated: {date}',
       'list.by': 'List by {name}',
       'list.free': '{n} free right now',
       'list.free_1': '1 free right now',
-      'list.lentCount': '{n} lent out',
       'list.newTitle': 'My lending list',
 
       'mine.headline': 'Your lists on this device',
@@ -511,8 +506,6 @@
 
       'items.headline': 'Inventory',
       'items.refresh': 'Refresh',
-      'items.count': '{n} items',
-      'items.count_1': '1 item',
       'items.empty': 'What is lying around at your place, barely ever used?',
       'items.emptyView': 'There is nothing in this list at the moment.',
       'items.checked': 'checked {n} min ago',
@@ -625,6 +618,7 @@
 
       /* -- The playful part ------------------------------------------- */
 
+      'items.updatedLabel': 'Last saved: {date}',
       'items.emptyHead': 'Nothing here yet',
       'items.emptyEg': 'For example',
       'item.longOut': '{name} has been out for {n} days. A short call would not be a drama.',
@@ -1227,28 +1221,44 @@
   }
 
   /**
-   * Die Zeile unter dem Titel. Sie sagt im Bearbeiten-Modus, wie viel in der
-   * Liste steht und wann zuletzt gespeichert wurde; im Ansehen-Modus, von wem
-   * die Liste ist und was gerade frei ist — die einzige Zahl, die Freunde
-   * wirklich interessiert.
+   * Die Zeile unter dem Titel und der Zeitstempel im Kopf des Inventars.
+   *
+   * Die Zeile gilt nur noch dem Ansehen-Modus: von wem die Liste ist und was
+   * gerade frei ist — die einzige Zahl, die Freunde wirklich interessiert.
+   * Wer selbst bearbeitet, weiss beides und bekommt dort nichts zu lesen.
+   * Fuer ihn steht allein der Zeitpunkt des letzten Schreibens neben der
+   * Ueberschrift des Inventars.
    */
   function renderMeta() {
-    var items = state.doc.items;
-    var lent = 0;
-    items.forEach(function (it) { if (it.status === 'lent') { lent++; } });
-    var free = items.length - lent;
+    /* Der Satz ueber der Liste gilt nur noch dem Freund: Wessen Liste das
+       ist und wie viel gerade frei ist. Wer selbst bearbeitet, weiss beides
+       und braucht die Zeile nicht. */
     var parts = [];
-
     if (state.mode === 'view') {
+      var frei = 0;
+      state.doc.items.forEach(function (it) { if (it.status !== 'lent') { frei++; } });
       var owner = (state.doc.contact.name || '').trim();
       if (owner) { parts.push(t('list.by', { name: owner })); }
-      parts.push(free === 1 ? t('list.free_1') : t('list.free', { n: free }));
-    } else {
-      parts.push(items.length === 1 ? t('items.count_1') : t('items.count', { n: items.length }));
-      if (lent > 0) { parts.push(t('list.lentCount', { n: lent })); }
-      if (state.updated) { parts.push(t('list.updated', { date: formatDate(state.updated) })); }
+      parts.push(frei === 1 ? t('list.free_1') : t('list.free', { n: frei }));
     }
     $('#listMeta').textContent = parts.join(' · ');
+
+    /* Im Bearbeiten-Modus steht ueber der Liste kein Satz mehr. Wann zuletzt
+       geschrieben wurde, gehoert klein neben die Ueberschrift des Inventars:
+       Es ist eine Angabe zur Liste, keine Ueberschrift der Seite. */
+    var stamp = $('#listUpdated');
+    if (stamp) {
+      var zeigen = state.mode === 'edit' && !!state.updated;
+      stamp.hidden = !zeigen;
+      var wann = zeigen ? formatDate(state.updated) : '';
+      stamp.textContent = wann;
+      /* Sichtbar steht dort nur Datum und Uhrzeit. Vorgelesen waere das eine
+         Zahl ohne Zusammenhang, zumal die gleich aussehende Angabe daneben
+         etwas anderes bedeutet — deshalb traegt der Knoten die Beschriftung,
+         die der Text nicht zeigt. */
+      if (wann) { stamp.setAttribute('aria-label', t('items.updatedLabel', { date: wann })); }
+      else { stamp.removeAttribute('aria-label'); }
+    }
   }
 
   /** „zuletzt geprüft vor …" — macht die Schaltfläche daneben entbehrlich. */
@@ -2574,6 +2584,7 @@
            er bestaetigt wurde: Wer diesen Link verliert, verliert die Liste,
            und niemand kann ihn wiederherstellen. */
         $('#keyLink').value = editLink();
+        $('#chkKeyDone').checked = false;
         $('#keyBox').hidden = false;
         $('#keyRemember').hidden = !mineWorks();
       });
@@ -3154,9 +3165,19 @@
        ist der Abschluss des Anlegens und nicht das Anlegen selbst: Wer den
        Bearbeiten-Link nicht bestaetigt hat, hat die Liste noch nicht in der
        Hand — und ueber einer Warnung wird ohnehin nicht gefeiert. */
-    $('#btnKeyDone').addEventListener('click', function () {
+    $('#chkKeyDone').addEventListener('change', function () {
+      if (!this.checked) { return; }
       $('#keyBox').hidden = true;
       feierZugang();
+    });
+
+    /* Ein Ankreuzfeld hoert auf die Leertaste, nicht auf die Eingabetaste.
+       Die Schaltflaeche davor konnte beides; das bleibt so. */
+    $('#chkKeyDone').addEventListener('keydown', function (ev) {
+      if (ev.key !== 'Enter' || this.checked) { return; }
+      ev.preventDefault();
+      this.checked = true;
+      this.dispatchEvent(new Event('change', { bubbles: true }));
     });
 
     $('#modalClose').addEventListener('click', closeItemModal);
