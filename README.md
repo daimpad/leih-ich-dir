@@ -1,7 +1,7 @@
 # leih-ich-dir
 
-Ein minimalistischer **Leih-Katalog**: Du pflegst eine Liste deiner Gegenstände,
-deine Freunde sehen über einen Link, was gerade verfügbar ist, und fragen mit
+Ein minimalistischer **Leih-Katalog**: Du pflegst eine Liste Deiner Gegenstände,
+Deine Freunde sehen über einen Link, was gerade verfügbar ist, und fragen mit
 einem Klick an, über welchen Weg sie mögen.
 
 Die Inhalte werden **im Browser ver- und entschlüsselt**. Der Server speichert
