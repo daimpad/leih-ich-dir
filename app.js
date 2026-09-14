@@ -186,7 +186,7 @@
       'start.create': 'Neue Liste anlegen',
       'start.creating': 'Liste wird angelegt …',
 
-      'list.titleLabel': 'Titel der Liste',
+      'list.titleLabel': 'Titel der Liste, freiwillig',
       'list.titlePlaceholder': 'Titel der Liste',
       'list.untitled': 'Leih-Katalog',
       'list.by': 'Liste von {name}',
@@ -219,7 +219,9 @@
       'share.hint': 'Der Schlüssel steht hinter dem Rautezeichen und wird technisch nie an den Server übertragen.',
 
       'add.nameLabel': 'Gegenstand',
-      'add.namePlaceholder': 'zum Beispiel Bohrmaschine',
+      'add.namePlaceholder': 'z. B. {name}',
+      'add.emptyWarn': 'Gib dem Gegenstand zuerst einen Namen.',
+      'form.required': 'Pflichtfeld',
       'add.notePlaceholder': 'Notiz, optional',
       'add.submit': 'Hinzufügen',
 
@@ -236,15 +238,15 @@
       'item.ask': 'Anfragen',
       'item.deleted': '„{name}“ entfernt.',
       'item.undo': 'Rückgängig',
-      'item.borrower': 'Verliehen an',
+      'item.borrower': 'Verliehen an, freiwillig',
       'item.borrowerPlaceholder': 'Name, optional',
-      'item.since': 'seit',
+      'item.since': 'Seit wann, freiwillig',
       'item.lentTo': 'Verliehen an {name} seit {date}',
       'item.lentSince': 'Verliehen seit {date}',
       'item.lentToPlain': 'Verliehen an {name}',
 
       'modal.name': 'Gegenstand',
-      'modal.note': 'Notiz',
+      'modal.note': 'Notiz, freiwillig',
       'modal.status': 'Verfügbarkeit',
       'modal.done': 'Fertig',
       'modal.close': 'Schließen',
@@ -265,7 +267,7 @@
       'settings.backStart': 'Zurück zur Startseite',
       'contact.headline': 'Kontakt',
       'contact.sub': 'Name, E-Mail und Telefon für Anfragen',
-      'contact.name': 'Dein Name',
+      'contact.name': 'Dein Name, freiwillig',
       'contact.namePlaceholder': '',
       'contact.nameHint': 'Steht über der Liste und in der Anrede, wenn jemand anfragt.',
       'contact.phone': 'Telefon, freiwillig',
@@ -283,7 +285,7 @@
       'settings.cacheDone': 'Zwischenspeicher geleert.',
       'settings.dangerHeadline': 'Liste löschen',
       'settings.dangerHint': 'Die Liste wird unwiderruflich vom Server entfernt. Beide Links laufen danach ins Leere.',
-      'settings.email': 'E-Mail für Anfragen',
+      'settings.email': 'E-Mail für Anfragen, freiwillig',
       'settings.showBorrower': 'Namen der Ausleihenden auch im Ansehen-Link zeigen',
       'settings.delete': 'Liste endgültig löschen',
       'settings.deleteConfirm': 'Die gesamte Liste wird unwiderruflich vom Server gelöscht. Fortfahren?',
@@ -308,6 +310,7 @@
       'voice.hintProxy': 'Die Strukturierung übernimmt der Server dieser Anwendung.',
       'voice.added': '{n} Gegenstände übernommen.',
       'voice.added_1': 'Ein Gegenstand übernommen.',
+      'voice.emptyWarn': 'Schreib oder sprich zuerst etwas.',
       'voice.none': 'Daraus ließ sich kein Gegenstand ableiten.',
       'voice.denied': 'Zugriff auf das Mikrofon wurde abgelehnt.',
       'voice.noSpeechHeard': 'Nichts verstanden. Bitte noch einmal.',
@@ -339,7 +342,7 @@
 
       'items.updatedLabel': 'Zuletzt gespeichert: {date}',
       'items.emptyHead': 'Noch nichts drin',
-      'items.emptyEg': 'Zum Beispiel',
+      'items.emptyEg': 'z. B.',
       'item.longOut': '{name} ist seit {n} Tagen unterwegs. Ein kurzer Anruf wäre kein Drama.',
 
       'spiel.badge': 'Abzeichen · {name}',
@@ -467,7 +470,7 @@
       'start.create': 'Create a new list',
       'start.creating': 'Creating list …',
 
-      'list.titleLabel': 'List title',
+      'list.titleLabel': 'List title, optional',
       'list.titlePlaceholder': 'List title',
       'list.untitled': 'Lending catalogue',
       'list.by': 'List by {name}',
@@ -500,7 +503,9 @@
       'share.hint': 'The key lives behind the # sign and is technically never sent to the server.',
 
       'add.nameLabel': 'Item',
-      'add.namePlaceholder': 'e.g. cordless drill',
+      'add.namePlaceholder': 'e.g. {name}',
+      'add.emptyWarn': 'Give the item a name first.',
+      'form.required': 'Required field',
       'add.notePlaceholder': 'Note, optional',
       'add.submit': 'Add',
 
@@ -517,15 +522,15 @@
       'item.ask': 'Ask',
       'item.deleted': '“{name}” removed.',
       'item.undo': 'Undo',
-      'item.borrower': 'Lent to',
+      'item.borrower': 'Lent to, optional',
       'item.borrowerPlaceholder': 'Name, optional',
-      'item.since': 'since',
+      'item.since': 'Since when, optional',
       'item.lentTo': 'Lent to {name} since {date}',
       'item.lentSince': 'Lent out since {date}',
       'item.lentToPlain': 'Lent to {name}',
 
       'modal.name': 'Item',
-      'modal.note': 'Note',
+      'modal.note': 'Note, optional',
       'modal.status': 'Availability',
       'modal.done': 'Done',
       'modal.close': 'Close',
@@ -546,7 +551,7 @@
       'settings.backStart': 'Back to the start page',
       'contact.headline': 'Contact',
       'contact.sub': 'Name, e-mail and phone for requests',
-      'contact.name': 'Your name',
+      'contact.name': 'Your name, optional',
       'contact.namePlaceholder': '',
       'contact.nameHint': 'Shown above the list and in the greeting when somebody asks.',
       'contact.phone': 'Phone, optional',
@@ -564,7 +569,7 @@
       'settings.cacheDone': 'Local data cleared.',
       'settings.dangerHeadline': 'Delete list',
       'settings.dangerHint': 'The list is irreversibly removed from the server. Both links then lead nowhere.',
-      'settings.email': 'E-mail for requests',
+      'settings.email': 'E-mail for requests, optional',
       'settings.showBorrower': 'Show borrower names in the view link as well',
       'settings.delete': 'Delete list permanently',
       'settings.deleteConfirm': 'The entire list will be irreversibly deleted from the server. Continue?',
@@ -589,6 +594,7 @@
       'voice.hintProxy': 'This application\u2019s server handles the structuring.',
       'voice.added': '{n} items added.',
       'voice.added_1': 'One item added.',
+      'voice.emptyWarn': 'Type or say something first.',
       'voice.none': 'No item could be derived from that.',
       'voice.denied': 'Microphone access was denied.',
       'voice.noSpeechHeard': 'Nothing understood. Please try again.',
@@ -620,7 +626,7 @@
 
       'items.updatedLabel': 'Last saved: {date}',
       'items.emptyHead': 'Nothing here yet',
-      'items.emptyEg': 'For example',
+      'items.emptyEg': 'e.g.',
       'item.longOut': '{name} has been out for {n} days. A short call would not be a drama.',
 
       'spiel.badge': 'Badge · {name}',
@@ -781,6 +787,7 @@
       badge.textContent = t('badge.local');
       badge.hidden = (Store.kind !== 'local');
     }
+    setAddPlaceholder();
     updateVoiceHint();
     if (window.LeihTheme) { window.LeihTheme.setLang(lang); }
   }
@@ -839,6 +846,47 @@
     { de: 'Brettspiel',             en: 'Board game' },
     { de: 'Kinderwagen',            en: 'Stroller' }
   ];
+
+  /**
+   * Beispiele aus dem Katalog, bei jedem Seitenaufruf andere. Die Auswahl
+   * wird EINMAL beim Start gezogen und dann festgehalten: Wuerde sie bei
+   * jedem Zeichnen neu ausgewuerfelt, sprangen die Woerter unter dem Finger
+   * weg, sobald jemand einen Gegenstand eintraegt.
+   *
+   * @param {number} n
+   * @return {Array<number>} Stellen im Katalog, ohne Wiederholung
+   */
+  function zieheBeispiele(n) {
+    var rest = [];
+    for (var i = 0; i < CATALOG.length; i++) { rest.push(i); }
+    var gezogen = [];
+    var anzahl = Math.min(n, rest.length);
+    for (var k = 0; k < anzahl; k++) {
+      gezogen.push(rest.splice(Math.floor(Math.random() * rest.length), 1)[0]);
+    }
+    return gezogen;
+  }
+
+  var BEISPIELE = null;   // drei fuer den leeren Kasten, eines fuer das Feld
+
+  function beispiele() {
+    if (!BEISPIELE) { BEISPIELE = zieheBeispiele(4); }
+    return BEISPIELE;
+  }
+
+  function katalogWort(index) {
+    var eintrag = CATALOG[index];
+    return eintrag ? (eintrag[lang] || eintrag.de) : '';
+  }
+
+  /** Der Platzhalter nennt einen Gegenstand aus dem Katalog, nicht immer
+      denselben. Er wird nach jedem Sprachwechsel neu gesetzt, weil
+      applyStaticI18n() sonst die Vorlage mit dem Platzhalter darin schreibt. */
+  function setAddPlaceholder() {
+    var feld = $('#addName');
+    if (!feld) { return; }
+    feld.setAttribute('placeholder', t('add.namePlaceholder', { name: katalogWort(beispiele()[3]) }));
+  }
 
   function fillDatalist() {
     var list = $('#itemSuggestions');
@@ -1166,7 +1214,9 @@
     if (state.mode !== 'edit' || !kind) { node.hidden = true; node.textContent = ''; return; }
     node.hidden = false;
     node.textContent = t('status.' + kind);
-    node.className = 'chip' + (kind === 'saved' ? ' chip--ok' : (kind === 'error' ? ' chip--warn' : ''));
+    /* chip--sm gehoert dazu: Der Zustand steht klein neben dem Titel, und
+       diese Zeile schreibt die Klassenliste vollstaendig neu. */
+    node.className = 'chip chip--sm' + (kind === 'saved' ? ' chip--ok' : (kind === 'error' ? ' chip--warn' : ''));
   }
 
   /** Vollständiges Neuzeichnen der Listenansicht. */
@@ -1292,8 +1342,6 @@
    * — ein Fehlgriff richtet damit nichts an. Sie beschleunigen genau die
    * Phase, die am laengsten dauert, und verschwinden danach fuer immer.
    */
-  var EMPTY_EG = [0, 8, 23];   // Bohrmaschine, Bollerwagen, Waffeleisen
-
   function renderEmptyHints(zeigen) {
     var box = $('#itemsEmptyEg');
     var liste = $('#itemsEmptyList');
@@ -1301,10 +1349,9 @@
     box.hidden = !zeigen;
     if (!zeigen) { return; }
     liste.textContent = '';
-    EMPTY_EG.forEach(function (idx, i) {
-      var eintrag = CATALOG[idx];
-      if (!eintrag) { return; }
-      var wort = eintrag[lang] || eintrag.de;
+    beispiele().slice(0, 3).forEach(function (idx, i) {
+      var wort = katalogWort(idx);
+      if (!wort) { return; }
       if (i > 0) { liste.appendChild(document.createTextNode(' · ')); }
       var b = el('button', null, wort);
       b.type = 'button';
@@ -1322,10 +1369,13 @@
    * Die gemerkten Listen auf der Startseite. Sie stehen dort, wo jemand sie
    * sucht, der den Reiter geschlossen hat — und nur dann, wenn es sie gibt.
    */
+  /** Der Verweis in der Kopfleiste steht ueberall, wo es etwas zu zeigen
+      gibt — auch auf der Startseite: Der Kasten mit den Listen sitzt dort
+      unter dem Aufruf, und wer wiederkommt, soll nicht erst suchen. */
   function updateMineLink() {
     var link = $('#lnkMine');
     if (!link) { return; }
-    link.hidden = !(readMine().length > 0 && state.mode !== 'start');
+    link.hidden = readMine().length === 0;
   }
 
   function renderMine() {
@@ -1335,9 +1385,9 @@
     var mine = readMine();
     list.textContent = '';
     box.hidden = mine.length === 0;
+    updateMineLink();
     if (!mine.length) { return; }
 
-    updateMineLink();
     mine.forEach(function (entry) {
       var li = el('li');
       var a = el('a');
@@ -1795,9 +1845,25 @@
     return (code && known[code]) ? code : 'network';
   }
 
+  /** Faerbt ein Pflichtfeld, meldet den Grund und setzt den Schreibzeiger
+      hinein. Die Markierung faellt beim naechsten Tippen von selbst weg. */
+  function bemaengeln(feld, text) {
+    if (!feld) { return; }
+    feld.setAttribute('aria-invalid', 'true');
+    feld.classList.add('is-leer');
+    feld.focus();
+    toast(text, null, 'face-schreck');
+    var frei = function () {
+      feld.removeAttribute('aria-invalid');
+      feld.classList.remove('is-leer');
+      feld.removeEventListener('input', frei);
+    };
+    feld.addEventListener('input', frei);
+  }
+
   function addItem(name, note) {
     name = (name || '').trim();
-    if (!name) { return; }
+    if (!name) { bemaengeln($('#addName'), t('add.emptyWarn')); return; }
     var neu = {
       id: randomHex(6),
       name: name.slice(0, 120),
@@ -3085,7 +3151,7 @@
   /** Freitext → Einträge → Liste. Gemeinsamer Weg für Sprache und Tastatur. */
   function processVoiceText(text) {
     var input = String(text).trim().slice(0, AI_MAX_CHARS);
-    if (!input) { return Promise.resolve(); }
+    if (!input) { bemaengeln($('#voiceText'), t('voice.emptyWarn')); return Promise.resolve(); }
     setVoiceState(t('voice.processing'), false);
 
     return structureText(input).then(function (entries) {

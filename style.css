@@ -385,6 +385,13 @@ header.site { padding-block: var(--s-4); }
 }
 .chip--ok { background: var(--green-soft); color: var(--green-ink); }
 
+/* Der Stern am Pflichtfeld. Er traegt die Warnfarbe und steht ohne Abstand
+   am Wort, damit er zur Beschriftung gehoert und nicht daneben schwebt. */
+.req { color: var(--danger); margin-left: .1rem; }
+/* Ein leer gelassenes Pflichtfeld faellt auf, bis es gefuellt wird. */
+.is-leer { border-color: var(--danger); box-shadow: 0 0 0 3px var(--danger-soft); }
+.is-leer:focus { border-color: var(--danger); box-shadow: 0 0 0 3px var(--danger-soft); }
+
 .empty {
   border: 1px dashed var(--line-firm); border-radius: var(--r-row);
   padding: var(--s-6) var(--s-4); text-align: center; color: var(--muted);
@@ -525,6 +532,11 @@ header.site { padding-block: var(--s-4); }
 
 .titleblock { margin-bottom: var(--s-5); }
 .titleblock h1 { font-size: 2.3rem; }
+/* Titel und Speicherzustand in einer Zeile. Der Zustand steht rechts und
+   klein: Er gehoert zum Titel, draengt sich aber nicht neben ihn. */
+.titlerow { display: flex; align-items: baseline; gap: var(--s-3); }
+.titlerow h1, .titlerow .title-edit { flex: 1 1 auto; min-width: 0; }
+.chip--sm { font-size: .74rem; padding: .15rem .55rem; }
 .title-input {
   font-size: 2.3rem;
   padding: .3rem .6rem; margin-left: -.6rem; background: none; border-color: transparent;
@@ -538,7 +550,19 @@ header.site { padding-block: var(--s-4); }
 
 .addrow { display: flex; gap: var(--s-2); align-items: stretch; }
 .addrow #addName { flex: 1 1 8rem; min-width: 0; }
-.addhint { display: flex; align-items: baseline; gap: var(--s-3); flex-wrap: wrap; margin-top: var(--s-2); font-size: .9rem; }
+/* Der Verweis steht unter der Schaltflaeche, nicht unter dem Feld: Er ist
+   die Alternative zum Hinzufuegen, nicht eine Angabe zum Namen. */
+.addhint {
+  display: flex; align-items: baseline; gap: var(--s-3); flex-wrap: wrap;
+  justify-content: flex-end; margin-top: var(--s-2); font-size: .9rem;
+}
+.addhint .voicestate { margin-right: auto; }
+
+/* Das Feld fuer mehrere auf einmal steht fuer sich, und die Schaltflaeche
+   darunter braucht Abstand: Sie fuehrt die Eingabe aus und darf nicht wie
+   ein Anhaengsel des Feldes wirken. */
+.voicebox { margin-top: var(--s-4); }
+.voicerow { display: flex; align-items: center; gap: var(--s-3); margin-top: var(--s-4); }
 .voicestate { color: var(--green-ink); }
 
 .items { list-style: none; padding: 0; margin-top: var(--s-4); display: grid; gap: var(--s-2); }
