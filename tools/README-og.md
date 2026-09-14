@@ -30,27 +30,22 @@ await p.screenshot({ path: 'assets/pics/og.png' });
 Seitenverhältnis ändert, muss die Angaben `og:image:width` und
 `og:image:height` in den Seitenköpfen mitziehen.
 
-## Die Rasterzeichen
+## Die Zeichen der Anwendung
 
-`favicon.svg` im Wurzelverzeichnis ist die Vorlage für alle Zeichen. Browser, die SVG
-als Favicon lesen, nehmen sie direkt; für die übrigen liegen zwei Rasterdateien
-bereit:
+Favicon, Apple-Symbol und die Symbole des Manifests liegen fertig in
+`assets/favicon/` und stammen nicht aus diesem Verzeichnis — sie werden
+extern erzeugt und hier nur abgelegt. Die Bildmarke im Seitenkopf ist
+`assets/pics/logo.svg`.
 
-- `apple-touch-icon.png`, 180 × 180, für den Startbildschirm unter iOS —
-  deckend, ohne Alphakanal und ohne runde Ecken, weil iOS seine eigene Maske
-  anlegt.
-- `favicon-96x96.png` für Suchergebnisse.
-- `favicon.ico` mit 16 × 16 und 32 × 32 darin, für den stillen Abruf durch
-  Browser und fremde Abholer.
-- `assets/pics/icon-192.png` und `icon-512.png` für das Manifest, dazu
-  `icon-maskable-512.png`: Android schneidet ein maskable Symbol auf einen
-  Kreis zu und garantiert nur die inneren 80 Prozent, die Pfote steht darin
-  deshalb kleiner.
+Zwei Dinge sind dabei zu beachten:
 
-Beide entstehen aus `tools/icon-vorlage.html`, die dieselbe Geometrie trägt wie
-die SVG-Datei. **Wer die Pfote ändert, muss beide Stellen nachziehen.** Die
-Rasterdateien wie beim Vorschaubild mit einem Browser ablichten; die `.ico`
-ist ein schlichter Behälter, in dem seit Vista ein PNG stehen darf.
+- `favicon.ico` liegt **zusätzlich** im Wurzelverzeichnis. Browser und fremde
+  Abholer fordern sie dort blind an, ohne auf den `<link>` zu sehen. Wird die
+  Datei in `assets/favicon/` erneuert, muss die Kopie mitgezogen werden.
+- `site.webmanifest` liegt im Wurzelverzeichnis, nicht bei den Symbolen. Die
+  Adressen darin lösen relativ zum Ort des Manifests auf; aus
+  `assets/favicon/` heraus zeigte `start_url` in dieses Verzeichnis statt auf
+  die Anwendung.
 
 ## Warum die Vorlagen hier liegen
 

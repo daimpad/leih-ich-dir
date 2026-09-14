@@ -12,15 +12,17 @@
      eigenen Inhalt, nur Bedienung. -->
 <meta name="robots" content="noindex, follow">
 <link rel="canonical" href="https://leihichdir.de/einstellungen.html">
-<!-- Das Zeichen der Anwendung. Das SVG folgt Hell und Dunkel, die .ico-Datei
-     ist fuer aeltere Browser und stille Wurzelabrufe da, die PNG-Fassungen
-     fuer Suchergebnisse und den Startbildschirm. Die Pfade tragen bewusst
-     keinen fuehrenden Schraegstrich: Die Oberflaechen-Vorschau liegt unter
-     einem Unterverzeichnis, dort zeigte /favicon.svg ins Leere. -->
-<link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96">
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<!-- Das Zeichen der Anwendung, aus assets/favicon/. Die favicon.ico liegt
+     zusaetzlich im Wurzelverzeichnis, weil Browser und fremde Abholer sie
+     dort blind anfordern, ohne auf diesen Verweis zu sehen. Das Manifest
+     steht ebenfalls in der Wurzel: Seine Adressen loesen relativ zu seinem
+     eigenen Ort auf, aus assets/favicon/ heraus zeigte start_url in dieses
+     Verzeichnis statt auf die Anwendung. Alle Pfade ohne fuehrenden
+     Schraegstrich, damit sie auch unter der Oberflaechen-Vorschau tragen. -->
+<link rel="icon" type="image/png" href="assets/favicon/favicon-96x96.png" sizes="96x96">
+<link rel="icon" type="image/svg+xml" href="assets/favicon/favicon.svg">
 <link rel="shortcut icon" href="favicon.ico">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
 <!-- Die Farbe der Browserleiste auf Telefonen, getrennt fuer Hell und Dunkel. -->
 <meta name="theme-color" content="#FCF9F4" media="(prefers-color-scheme: light)">
@@ -72,16 +74,11 @@
 <header class="site">
   <div class="shell bar">
     <a class="brand" id="lnkHome" href="./">
-      <!-- Die Bildmarke, dieselbe Pfote wie im Zeichen der Anwendung und in der
-           Zeichnung im Hero. Sie steht im Dokument und nicht in einem <img>,
-           damit sie ueber currentColor dem Erscheinungsbild folgt. -->
-      <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-        <ellipse cx="14" cy="26" rx="4.5" ry="6.4" transform="rotate(-24 14 26)"/>
-        <ellipse cx="26" cy="20" rx="4.8" ry="6.6" transform="rotate(-6 26 20)"/>
-        <ellipse cx="38" cy="20" rx="4.8" ry="6.6" transform="rotate(6 38 20)"/>
-        <ellipse cx="50" cy="26" rx="4.5" ry="6.4" transform="rotate(24 50 26)"/>
-        <path d="M32 33c8.8 0 16 5.8 16 12.8S40.8 57 32 57s-16-4.2-16-11.2S23.2 33 32 33z"/>
-      </svg>
+      <!-- Die Bildmarke. Sie traegt ihren eigenen Grund und folgt dem
+           Erscheinungsbild deshalb nicht; ein nachgeladenes Bild genuegt und
+           haelt die sechs Seitenkoepfe schlank. -->
+      <img class="brand-mark" src="assets/pics/logo.svg" alt="" aria-hidden="true"
+           width="93" height="97">
       <!-- Die farbige Silbe haelt den Namen zusammen. -->
       <span class="brand-word">Leih<span class="brand-ich">Ich</span>Dir</span>
     </a>
