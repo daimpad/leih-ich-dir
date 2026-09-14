@@ -69,7 +69,7 @@
   --sans:    'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --slab:    'Zilla Slab', Georgia, serif;
   --mono:    'Space Mono', ui-monospace, 'SF Mono', Menlo, monospace;
-  /* Anzeigeschrift für Wortmarke und Überschriften erster und zweiter Ordnung. */
+  /* Anzeigeschrift für die Wortmarke und die Überschriften. */
   --display: 'Ranchers', 'Zilla Slab', Georgia, sans-serif;
 }
 
@@ -144,11 +144,11 @@ body {
 
 h1, h2, h3, h4 { margin: 0; font-weight: 600; line-height: 1.2; letter-spacing: -.02em; }
 
-/* Erste und zweite Ordnung tragen die Anzeigeschrift. Sie hat genau einen
+/* Die ersten drei Ordnungen tragen die Anzeigeschrift. Sie hat genau einen
    Schnitt: Fettung wäre gerechnet und nicht gezeichnet, und enge Laufweite
    verträgt sie nicht — beides wird deshalb zurückgesetzt. Dieselbe Regel
    gilt für die beiden Felder, die als Überschrift auftreten. */
-h1, h2,
+h1, h2, h3,
 .title-input,
 .modal-title-input,
 .brand-word {
@@ -212,9 +212,11 @@ button, input, textarea, select { font: inherit; color: inherit; }
 .site-header { padding-block: var(--s-4); }
 .bar { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); }
 
+/* Die Marke ist nur noch Schrift. Die Silbe in der Mitte traegt die Farbe:
+   Sie macht aus einer Aneinanderreihung von Buchstaben wieder einen Satz. */
 .brand { display: flex; align-items: center; gap: var(--s-2); text-decoration: none; color: inherit; }
-.brand-logo { height: 2rem; width: auto; display: block; }
 .brand-word { font-size: 1.45rem; }
+.brand-ich { color: var(--green); }
 
 .bar-controls { display: flex; align-items: center; gap: var(--s-2); }
 
@@ -496,6 +498,9 @@ button, input, textarea, select { font: inherit; color: inherit; }
 }
 .keybox__title { font-size: 1.6rem; color: var(--amber); }
 .keybox .hint { color: var(--amber); opacity: .85; margin-top: var(--s-2); }
+/* Nebenbemerkung, kein zweiter Hinweis: klein und in einer Zeile, damit sie
+   dem Link daneben nicht das Gewicht nimmt. */
+.keybox .keybox__remember { font-size: .74rem; margin-top: var(--s-1); }
 .keybox .input { background: var(--surface); border-color: var(--amber); }
 
 /* == 8 · Liste ========================================================= */
@@ -678,10 +683,6 @@ button, input, textarea, select { font: inherit; color: inherit; }
   .toast-region { width: calc(100vw - 2rem); }
 }
 
-/* Sehr schmal: die Wortmarke weicht, das Zeichen bleibt. */
-@media (max-width: 21rem) {
-  .brand-word { display: none; }
-}
 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
