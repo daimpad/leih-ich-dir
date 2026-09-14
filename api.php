@@ -302,10 +302,24 @@ function action_read(): never
     if (!valid_id($id)) {
         fail(400, 'malformed');
     }
-    $raw = @file_get_contents(list_path($id));
-    if ($raw === false) {
+    /* Mit geteilter Sperre lesen. action_write schreibt in dieselbe Datei
+       (ftruncate, dann fwrite) und haelt dabei LOCK_EX; ein ungesperrtes
+       file_get_contents traf das Fenster dazwischen und bekam eine leere
+       oder halbe Datei. Der Leser sah dann 500 corrupt fuer eine Liste, der
+       nichts fehlt — und im Freundeskreis bietet der Aufklapper fuer diesen
+       Status bewusst kein "Erneut versuchen" an. LOCK_SH laesst beliebig
+       viele Leser gleichzeitig zu und haelt nur den Schreiber auf. */
+    $fh = @fopen(list_path($id), 'rb');
+    if ($fh === false) {
         fail(404, 'notfound');
     }
+    if (!flock($fh, LOCK_SH)) {
+        fclose($fh);
+        fail(503, 'busy');
+    }
+    $raw = (string) stream_get_contents($fh);
+    flock($fh, LOCK_UN);
+    fclose($fh);
     $rec = json_decode($raw, true);
     if (!is_array($rec)) {
         fail(500, 'corrupt');

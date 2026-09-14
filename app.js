@@ -385,6 +385,8 @@
 
       'circle.badge': 'Freundeskreis',
       'list.badge': 'Leihliste',
+      'title.edit': 'Deine Leihliste · LeihIchDir',
+      'title.view': 'Eine Leihliste · LeihIchDir',
       'circle.untitled': 'Freundeskreis',
       'circle.newTitle': 'Mein Freundeskreis',
       'circle.unnamed': 'Ohne Namen',
@@ -442,6 +444,9 @@
       'circle.shareLabel': 'Link zum Freundeskreis',
       'circle.copied': 'Gut verwahrt.',
       'circle.deleteConfirm': 'Der gesamte Freundeskreis wird unwiderruflich vom Server gelöscht. Die Listen Deiner Freunde bleiben unberührt. Fortfahren?',
+      'circle.dangerHeadline': 'Freundeskreis löschen',
+      'circle.dangerHint': 'Der Freundeskreis wird unwiderruflich vom Server entfernt. Sein Link läuft danach ins Leere. Die Listen Deiner Freunde bleiben unberührt.',
+      'circle.delete': 'Freundeskreis endgültig löschen',
 
 
       /* -- Das Spielerische ------------------------------------------- */
@@ -750,6 +755,8 @@
 
       'circle.badge': 'Circle',
       'list.badge': 'Lending list',
+      'title.edit': 'Your lending list · LeihIchDir',
+      'title.view': 'A lending list · LeihIchDir',
       'circle.untitled': 'Circle of friends',
       'circle.newTitle': 'My circle of friends',
       'circle.unnamed': 'No name',
@@ -807,6 +814,9 @@
       'circle.shareLabel': 'Link to the circle',
       'circle.copied': 'Kept safe.',
       'circle.deleteConfirm': 'The entire circle will be irreversibly deleted from the server. Your friends lists stay untouched. Continue?',
+      'circle.dangerHeadline': 'Delete the circle',
+      'circle.dangerHint': 'The circle will be irreversibly removed from the server. Its link then leads nowhere. Your friends lists stay untouched.',
+      'circle.delete': 'Delete the circle for good',
 
 
       /* -- The playful part ------------------------------------------- */
@@ -1614,7 +1624,14 @@
     titleRead.classList.toggle('sr-only', isEdit);
     titleRead.textContent = state.doc.title || t('list.untitled');
     if (isEdit && document.activeElement !== titleInput) { titleInput.value = state.doc.title; }
-    document.title = (state.doc.title || t('list.untitled')) + ' · LeihIchDir';
+    /* Kein entschluesselter Titel hier. <title> steht im <head> und damit
+       ausserhalb jedes translate="no"; ausserdem nimmt der Browser den
+       Seitentitel in den Verlauf auf und traegt ihn bei eingeschalteter
+       Synchronisierung an den Hersteller weiter. Beides waere eine
+       Uebertragung von Listeninhalt, und die Datenschutzerklaerung sagt
+       ausdruecklich zu, dass es sie nicht gibt. Die Art der Ansicht steht
+       trotzdem im Reiter, damit sich zwei offene Reiter unterscheiden. */
+    document.title = t(isEdit ? 'title.edit' : 'title.view');
 
     /* Bereiche, die nur im Bearbeitenmodus sichtbar sind */
     $('#shareBox').hidden = !isEdit;
@@ -2742,6 +2759,10 @@
     toast(t('item.deleted', { name: removed.name }), {
       label: t('item.undo'),
       run: function () {
+        /* Nach einem Ortswechsel gibt es nichts mehr zurueckzunehmen:
+           route() setzt state.doc auf null, bevor es die Startseite zeigt,
+           und der Zugriff auf items warf dann unbehandelt. */
+        if (state.mode !== 'edit' || !state.doc) { return; }
         /* Die Liste kann sich zwischenzeitlich geaendert haben; der Eintrag
            kehrt an seine alte Stelle zurueck, hoechstens ans Ende. */
         var at = Math.min(index, state.doc.items.length);
@@ -3536,7 +3557,14 @@
     stopRefresh();   /* Die Uebersicht haelt sich nicht selbst aktuell. */
     state.mode = 'circle';
     state.doc = null;     /* Kein Fremddokument in state, nie. */
-    return kreisHolen(parsed, gen).then(function (doc) {
+    /* Erst die offene Frist einloesen, dann lesen — und darauf warten. Der
+       Aktualisieren-Knopf geht nicht ueber showView, kreisRaeumen laeuft also
+       nicht: Ohne diese Zeile stuende ein eben entfernter Freund im frisch
+       geholten Dokument wieder da, und der spaete Schreibvorgang traefe auf
+       eine Revision, die er nicht kennt. */
+    return kreisFristEinloesen().then(function () {
+      return kreisHolen(parsed, gen);
+    }).then(function (doc) {
       if (gen !== kreisGen || !doc) { return; }
       rememberList();
       /* Die Eintraege stehen vollstaendig, bevor der erste Abruf laeuft.
@@ -3763,13 +3791,14 @@
   var kreisFrist = null;
 
   function kreisFristEinloesen() {
-    if (!kreisFrist) { return; }
+    if (!kreisFrist) { return Promise.resolve(); }
     clearTimeout(kreisFrist);
     kreisFrist = null;
-    kreisSave();
     /* Die Ruecknahme ist damit vorbei. Eine Meldung, deren Knopf nichts mehr
-       tut, ist schlimmer als keine. */
+       tut, ist schlimmer als keine. Zuerst wegnehmen, dann schreiben: Der
+       Knopf soll nicht noch waehrend des Schreibens gedrueckt werden koennen. */
     toastSchliessen();
+    return kreisSave();
   }
 
   function circleRemove(id) {
@@ -4396,6 +4425,10 @@
     setVoiceState(t('voice.processing'), false);
 
     return structureText(input).then(function (entries) {
+      /* Zwischen dem Absenden und der Antwort liegen mehrere Sekunden. Wer in
+         dieser Zeit die Liste verlaesst, hat kein state.doc mehr, und der
+         Zugriff auf items warf bisher unbehandelt. */
+      if (state.mode !== 'edit' || !state.doc) { return; }
       if (!entries.length) {
         setVoiceState(t('voice.none'), true);
         return;
@@ -4428,6 +4461,11 @@
       g.dinge += entries.length;
       spielSave();
       pruefeAbzeichen({ stumm: true });
+    }).catch(function (err) {
+      /* Die Kette hing bisher ohne Auffangnetz. Ein Netzfehler, ein
+         abgelehnter Schluessel oder eine unerwartete Antwort verschwanden
+         damit stumm, und die Zeile blieb auf "wird verarbeitet" stehen. */
+      setVoiceState(t('error.' + (err && err.code ? err.code : 'network')), true);
     });
   }
 
@@ -4686,6 +4724,12 @@
          ausgenommen, es lebt davon, dass parseHash hier null liefert. */
       if (location.hash && location.hash !== MINE_HASH && (state.doc || kreis.doc)) { return; }
       stopRefresh();
+      /* Was offen ist, wird geschrieben, bevor das Dokument verschwindet:
+         save() nimmt seinen Abzug beim Eintritt, der Rest der Kette braucht
+         nur state.id, state.key und state.proof, und die bleiben stehen.
+         Danach die Meldung wegnehmen, denn ihre Ruecknahme ist vorbei. */
+      if (state.mode === 'edit' && state.dirty) { save(); }
+      if (state.doc) { toastSchliessen(); }
       state.mode = 'start';
       state.doc = null;
       renderMine();
@@ -4817,6 +4861,21 @@
          weiss sie allein aus dem Praefix — das genuegt fuer den Loeschtext
          und fuer den Rueckweg. */
       state.mode = parsed.mode;
+      /* Der Loeschkasten ist auf die Liste gemuenzt: Er spricht von "beiden
+         Links", und ein Freundeskreis hat genau einen. Das Merkmal wird
+         getauscht, nicht der Text, sonst ueberschriebe der naechste
+         Sprachwechsel die Beschriftung wieder. Beide Richtungen ausdruecklich,
+         damit der Kasten nicht davon abhaengt, was vorher dastand. */
+      var kreisig = parsed.mode === 'circle';
+      [['#dangerBox .card__title', 'dangerHeadline'],
+       ['#dangerBox .hint', 'dangerHint'],
+       ['#btnDeleteList span[data-i18n]', 'delete']].forEach(function (paar) {
+        var node = $(paar[0]);
+        if (!node) { return; }
+        var key = (kreisig ? 'circle.' : 'settings.') + paar[1];
+        node.setAttribute('data-i18n', key);
+        node.textContent = t(key);
+      });
       state.id = parsed.id;
       state.keyStr = parsed.key;
       state.token = parsed.token;

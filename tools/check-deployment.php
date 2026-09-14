@@ -195,20 +195,36 @@ $sperrenGreifen = false;
 $dynamischGesperrt = 0;
 $statischOffen = 0;
 echo "\nAbschottung\n";
+/* Nicht jede Sperre stammt aus der .htaccess, und der Befund am Ende haengt
+   daran. 'beweis' ist eine gewoehnliche lesbare Datei in einem gewoehnlichen
+   Verzeichnis: Sie ist nur gesperrt, wenn der RedirectMatch greift.
+   'dynamisch' sind die beiden PHP-Skripte, die sich selbst mit 403 sperren,
+   sobald sie nicht auf der Kommandozeile laufen — erst ein 404 stammt vom
+   RedirectMatch. 'sonst' koennen auch ohne .htaccess gesperrt sein: Ein
+   Server ohne Verzeichnisliste antwortet auf einen Ordner mit 403, und
+   Punktdateien sperren viele Aufbauten von sich aus. */
 foreach ([
-    '/data/'                  => 'ordner',
-    '/data/lists/'            => 'ordner',
-    '/.git/config'            => 'statisch',
+    '/data/'                  => 'sonst',
+    '/data/lists/'            => 'sonst',
+    '/.git/config'            => 'sonst',
     '/tests/api-test.php'     => 'dynamisch',
     '/tools/purge.php'        => 'dynamisch',
-    '/tools/og-vorlage.html'  => 'statisch',
+    '/tools/og-vorlage.html'  => 'beweis',
 ] as $path => $art) {
     $res = fetch($base . $path);
     $zu = $res['status'] !== 200;
-    if ($zu) { $sperrenGreifen = true; }
-    if ($art === 'dynamisch' && $zu) { $dynamischGesperrt++; }
-    if ($art === 'statisch' && !$zu) { $statischOffen++; }
-    line('MUSS', 'gesperrt: ' . $path, $zu, 'Status ' . $res['status']);
+    $detail = 'Status ' . $res['status'];
+    if ($art === 'dynamisch' && $res['status'] === 403) {
+        $detail .= ', Selbstsperre des Skripts, kein Beleg fuer die .htaccess';
+    }
+    if ($art === 'beweis') {
+        if ($zu) { $sperrenGreifen = true; } else { $statischOffen++; }
+    }
+    if ($art === 'dynamisch' && $zu && $res['status'] !== 403) {
+        $sperrenGreifen = true;
+        $dynamischGesperrt++;
+    }
+    line('MUSS', 'gesperrt: ' . $path, $zu, $detail);
 }
 
 /* -- Schlussfolgerung ------------------------------------------------------ *
