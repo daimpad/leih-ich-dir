@@ -254,7 +254,13 @@
           <div class="hero-top">
             <div class="hero-sagt">
               <h1><span data-i18n="hero.a">Leih</span> <mark data-i18n="hero.b">ich</mark> <span data-i18n="hero.c">Dir.</span></h1>
-              <p class="lead" data-i18n="hero.lead">Erstelle eine Liste von Gegenständen, die Du verleihen möchtest, und versende sie an Deine Freunde.</p>
+              <p class="lead" data-i18n="hero.lead">Zeig Deinen Freund:innen, was sie bei Dir ausleihen können!</p>
+              <!-- Der Aufruf steht in der Textspalte, nicht unter der ganzen
+                   Reihe: Sonst bliebe neben dem Bild eine leere Flaeche. -->
+              <p class="hero-act">
+                <button type="button" id="btnCreateHero" class="btn btn--primary btn--lg" data-create
+                        data-i18n="start.create">Neue Liste anlegen</button>
+              </p>
             </div>
             <!-- Das Bild sagt, wofuer die Liste da ist: eine Pfote haelt ihre
                  eigene. Es traegt die Aussage mit, deshalb steht es in voller
@@ -290,20 +296,19 @@
               </svg>
           </div>
 
-          <ul class="trust" data-i18n-label="trust.label" aria-label="Eigenschaften">
-            <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.tracking">Kostenlos</span></li>
-            <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.account">Werbefrei</span></li>
-            <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.ads">Ohne Login</span></li>
-            <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.crypto">Verschlüsselt</span></li>
-          </ul>
-
-          <p class="hero-act">
-            <button type="button" id="btnCreateHero" class="btn btn--primary btn--xl" data-create
-                    data-i18n="start.create">Neue Liste anlegen</button>
-          </p>
         </div>
       </div>
     </div>
+
+    <!-- Die vier Zusagen stehen unter dem Rahmen statt darin. Im Rahmen
+         steht, wozu die Liste da ist; darunter, was sie kostet und was sie
+         nicht verlangt. -->
+    <ul class="trust" data-i18n-label="trust.label" aria-label="Eigenschaften">
+      <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.tracking">Kostenlos</span></li>
+      <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.account">Werbefrei</span></li>
+      <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.ads">Ohne Login</span></li>
+      <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.crypto">Verschlüsselt</span></li>
+    </ul>
 
     <!-- Drei Schritte in einer Reihe, mit Pfeilen dazwischen. Schmal
          untereinander, die Pfeile drehen sich dann mit. -->
@@ -327,11 +332,6 @@
         </li>
       </ol>
     </section>
-
-    <!-- Der Aufruf am Ende, in voller Grösse. -->
-    <div class="cta">
-      <button type="button" id="btnCreate" class="btn btn--primary btn--xl" data-create data-i18n="start.create">Neue Liste anlegen</button>
-    </div>
 
     <!-- Auf diesem Gerät gemerkte Listen. Sie stehen unter dem Aufruf: Wer
          zum ersten Mal hier ist, soll den Weg nach vorn sehen, und wer

@@ -476,7 +476,7 @@ header.site { padding-block: var(--s-4); }
 /* Vier Zusagen mit Haken, als Plaketten auf dem Grund. Der Haken ist grün,
    weil er dasselbe sagt wie in der Liste: hier ist etwas in Ordnung. */
 .trust {
-  list-style: none; padding: 0; margin-top: var(--s-5);
+  list-style: none; padding: 0; margin-top: var(--s-6);
   display: flex; flex-wrap: wrap; gap: var(--s-2);
 }
 .trust li {
@@ -517,13 +517,6 @@ header.site { padding-block: var(--s-4); }
 }
 .steps h3 { font-size: 1.05rem; }
 .steps p { color: var(--muted); font-size: .88rem; margin-top: .25rem; }
-
-/* Der Aufruf am Ende, in voller Grösse und in der Mitte. */
-.cta { margin-top: var(--s-7); display: grid; place-items: center; }
-.btn--xl {
-  padding: 1.1rem 2.4rem; font-size: 1.2rem; border-radius: 16px;
-  box-shadow: var(--shadow-lift);
-}
 
 /* Eigene Listen, auf diesem Gerät gemerkt. */
 .mine { margin-top: var(--s-7); }
@@ -898,8 +891,8 @@ header.site { padding-block: var(--s-4); }
   .shell { padding-inline: var(--s-4); }
   .hero-panel { border-radius: 22px; }
   .trust li { font-size: .88rem; }
-  .btn--xl { padding: 1rem 1.8rem; font-size: 1.1rem; width: 100%; }
-  .cta { display: block; }
+  /* Schmal nimmt der Aufruf die ganze Zeile: Daneben steht ohnehin nichts. */
+  .hero-act .btn { width: 100%; }
   /* Im Kopf bleibt vom Knopf das Zeichen. */
   .ctl-label { display: none; }
   .ctl-wide { padding-inline: 0; width: 2.4rem; }
