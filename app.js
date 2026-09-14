@@ -236,6 +236,7 @@
       'item.lent': 'Verliehen',
       'item.delete': 'Löschen',
       'item.ask': 'Anfragen',
+      'item.more': 'Details ergänzen',
       'item.deleted': '„{name}“ entfernt.',
       'item.undo': 'Rückgängig',
       'item.borrower': 'Verliehen an, freiwillig',
@@ -524,6 +525,7 @@
       'item.lent': 'Lent out',
       'item.delete': 'Delete',
       'item.ask': 'Ask',
+      'item.more': 'Add details',
       'item.deleted': '“{name}” removed.',
       'item.undo': 'Undo',
       'item.borrower': 'Lent to, optional',
@@ -754,8 +756,14 @@
     var stored = null;
     try { stored = localStorage.getItem(LS_LANG); } catch (e) { /* private mode */ }
     if (stored === 'de' || stored === 'en') { return stored; }
-    var nav = (navigator.language || 'de').toLowerCase();
-    return nav.indexOf('de') === 0 ? 'de' : 'en';
+    /* Deutsch ist die Standardsprache, ohne Ansehen der Browsereinstellung.
+       Frueher entschied navigator.language, und Abholer von Suchmaschinen
+       melden dort ueblicherweise en-US: Die Seite kippte fuer sie auf
+       Englisch, waehrend Titel, Beschreibung und die Auszeichnung fuer die
+       Vorschau deutsch blieben — widerspruechliche Angaben unter einer
+       .de-Adresse. Englisch bleibt eine Wahl, keine Vermutung; der Schalter
+       dafuer steht in der Kopfleiste jeder Seite. */
+    return 'de';
   }
 
   function setLang(next) {
@@ -1510,6 +1518,10 @@
     btn.appendChild(statusBadge(item));
     btn.appendChild(text);
     btn.appendChild(el('span', 'sr-only', statusLabel(item)));
+    /* Das Formular traegt nur den Namen ein; alles Weitere steht hinter der
+       Zeile. Ohne Beschriftung ist dem Pfeil nicht anzusehen, dass sich
+       dahinter Notiz, Verleihen und Loeschen verbergen. */
+    btn.appendChild(el('span', 'item-more', t('item.more')));
     var chev = el('span', 'item-chev');
     chev.appendChild(icon('chev'));
     btn.appendChild(chev);
