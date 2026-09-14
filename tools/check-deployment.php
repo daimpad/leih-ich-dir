@@ -91,6 +91,36 @@ if (str_starts_with($base, 'https://')) {
         'Status ' . $plain['status']);
 }
 
+/**
+ * Die Direktiven, die diese Anwendung erwartet, und der Wert je Direktive.
+ * @return array<string,string>
+ */
+function csp_soll(): array
+{
+    return [
+        'default-src' => "'self'",
+        'script-src'  => "'self'",
+        'style-src'   => "'self'",
+        'font-src'    => "'self'",
+        'img-src'     => "'self' data:",
+        'connect-src' => "'self' https://generativelanguage.googleapis.com",
+        'base-uri'    => "'none'",
+        'form-action' => "'none'",
+    ];
+}
+
+/** Liest den Wert einer Direktive aus einer Richtlinie, sonst null. */
+function csp_direktive(string $csp, string $name): ?string
+{
+    foreach (explode(';', $csp) as $teil) {
+        $w = preg_split('/\s+/', trim($teil));
+        if ($w && strtolower($w[0]) === $name) {
+            return implode(' ', array_slice($w, 1));
+        }
+    }
+    return null;
+}
+
 /* -- Sicherheitskopfzeilen ------------------------------------------------- */
 
 echo "\nKopfzeilen\n";
@@ -98,6 +128,26 @@ $h = $home['headers'];
 $kopfzeilenFehlen = !isset($h['content-security-policy']);
 line('MUSS', 'Content-Security-Policy gesetzt', !$kopfzeilenFehlen,
     $kopfzeilenFehlen ? 'die Ursache steht am Ende unter Befund' : '');
+/* Nicht nur, dass sie dasteht, sondern was sie sagt. Eine Pruefung auf
+   Teilzeichenketten waere keine: "script-src 'self'" steckt auch in
+   "script-src 'self' 'unsafe-inline'". Verglichen wird der ganze Wert. */
+if (!$kopfzeilenFehlen) {
+    foreach (csp_soll() as $name => $soll) {
+        $ist = csp_direktive($h['content-security-policy'], $name);
+        line('MUSS', "Kopfzeile: $name $soll", $ist === $soll, $ist === null ? 'fehlt' : $ist);
+    }
+}
+/* Fehlt mod_headers, ist die Meta-Fassung in index.html die einzige
+   verbliebene Sperre. Sie gehoert deshalb ebenso geprueft. */
+if (preg_match('~<meta[^>]+http-equiv=["\']Content-Security-Policy["\'][^>]*>~i', $home['body'] ?? '', $m)
+    && preg_match('~content\s*=\s*("|\')(.*?)\1~is', $m[0], $c)) {
+    foreach (csp_soll() as $name => $soll) {
+        $ist = csp_direktive($c[2], $name);
+        line('SOLL', "meta: $name $soll", $ist === $soll, $ist === null ? 'fehlt' : $ist);
+    }
+} else {
+    line('SOLL', 'Content-Security-Policy als <meta> in index.html', false, 'nicht gefunden');
+}
 line('SOLL', 'X-Content-Type-Options nosniff', ($h['x-content-type-options'] ?? '') === 'nosniff');
 line('SOLL', 'Referrer-Policy no-referrer', ($h['referrer-policy'] ?? '') === 'no-referrer');
 line('SOLL', 'X-Frame-Options DENY', strtoupper($h['x-frame-options'] ?? '') === 'DENY');

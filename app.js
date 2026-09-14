@@ -25,6 +25,9 @@
   var LS_LANG        = 'lid.lang';
   var LS_MINE        = 'lid.mine'; // auf diesem Gerät gemerkte eigene Listen
   var MINE_MAX       = 8;      // mehr merkt sich niemand, und die Startseite bliebe voll
+  var MAX_FRIENDS    = 24;     // Listen je Freundeskreis; Begruendung bei ladeKreis()
+  var KREIS_PAR      = 4;      // gleichzeitige Abrufe beim Oeffnen eines Kreises
+  var KREIS_LANGSAM  = 6000;   // ms, ab denen eine Zeile als "dauert" gilt
 
   /* ===================================================================== *
    * 1 · Kleine Helfer
@@ -83,6 +86,15 @@
     }
   };
 
+  /* Die beiden Formen, die ein Fragment tragen darf. Sie stehen hier einmal,
+     weil parseFragment, normalizeCircle und das Aufnehmen eines Freundes
+     dieselbe Regel brauchen; zwei Fassungen laufen frueher oder spaeter
+     auseinander. Die ID spiegelt die Pruefung in api.php, der Schluessel
+     entsteht aus exportKey ueber b64u.encode: 32 Byte roh, ohne
+     Auffuellzeichen also genau 43 Zeichen. */
+  var ID_RE  = /^[0-9a-f]{32}$/;
+  var KEY_RE = /^[A-Za-z0-9_-]{43}$/;
+
   /** Kryptografisch sichere Hex-ID (n Bytes). */
   function randomHex(n) {
     var b = crypto.getRandomValues(new Uint8Array(n));
@@ -109,7 +121,19 @@
     },
 
     importKey: function (str) {
-      return crypto.subtle.importKey('raw', b64u.decode(str), { name: 'AES-GCM' }, true, ['encrypt', 'decrypt'])
+      /* b64u.decode ruft atob, und atob wirft synchron — im Argumentausdruck,
+         also bevor es ein Promise gibt. Ohne diesen Block verliesse die
+         Ausnahme importKey als geworfener Fehler statt als abgelehntes
+         Promise, und der Aufrufer haengt sein catch an nichts. Heute ist das
+         eine weisse Seite: openList() (Abschnitt 10) hat importKey als
+         allerersten Ausdruck, die Ausnahme verlaesst die Funktion vor dem
+         .catch, und in index.html beginnen alle Ansichten mit hidden. Im
+         Freundeskreis genuegte ein einziger beschaedigter Schluessel, um die
+         ganze Uebersicht wortlos abzuraeumen. */
+      var bytes;
+      try { bytes = b64u.decode(str); }
+      catch (e) { return Promise.reject(new AppError('badlink')); }
+      return crypto.subtle.importKey('raw', bytes, { name: 'AES-GCM' }, true, ['encrypt', 'decrypt'])
         .catch(function () { throw new AppError('badlink'); });
     },
 
@@ -130,6 +154,11 @@
       });
     },
 
+    /* Dieselbe Bauart wie importKey: b64u.decode steht auch hier im
+       Argumentausdruck. Unauffaellig ist das nur, weil beide Aufrufstellen
+       innerhalb eines .then-Rueckrufs liegen und die Kette den Wurf faengt.
+       Gerettet wird decrypt also von seiner Aufrufstelle, nicht von sich
+       selbst — wer es kuenftig ausserhalb einer Kette ruft, muss das wissen. */
     decrypt: function (key, payload, aad) {
       if (!payload || !payload.iv || !payload.ct) { return Promise.reject(new AppError('decrypt')); }
       var enc = new TextEncoder();
@@ -280,7 +309,7 @@
       'settings.themeLight': 'Hell',
       'settings.themeDark': 'Dunkel',
       'settings.cacheHeadline': 'Zwischenspeicher',
-      'settings.cacheHint': 'Entfernt alles, was diese Anwendung in diesem Browser ablegt: Sprache, Erscheinungsbild, KI-Schlüssel, Töne, die Ruhigstellung, die gemerkten Listen, Deine Runden und Abzeichen und im Vorschaumodus die lokal gehaltenen Listen. Deine Liste auf dem Server und Deine Links bleiben unberührt.',
+      'settings.cacheHint': 'Entfernt alles, was diese Anwendung in diesem Browser ablegt: Sprache, Erscheinungsbild, KI-Schlüssel, Töne, die Ruhigstellung, die gemerkten Listen und Freundeskreise, Deine Runden und Abzeichen und im Vorschaumodus die lokal gehaltenen Listen und Freundeskreise. Deine Liste auf dem Server und Deine Links bleiben unberührt.',
       'settings.cacheClear': 'Zwischenspeicher löschen',
       'settings.cacheConfirm': 'Alles löschen, was diese Anwendung in diesem Browser ablegt? Die Liste auf dem Server bleibt bestehen.',
       'settings.cacheDone': 'Zwischenspeicher geleert.',
@@ -337,6 +366,66 @@
       'error.toolarge': 'Die Liste ist zu groß für den Server.',
       'error.ratelimit': 'Zu viele neue Listen in kurzer Zeit. Bitte später erneut versuchen.',
       'error.exists': 'Diese Listen-Kennung ist bereits vergeben. Bitte erneut versuchen.',
+      'error.kindmix': 'Dieser Link gehört zu einer anderen Art von Liste.',
+
+      /* -- Freundeskreis ------------------------------------------------ */
+
+      'circle.badge': 'Freundeskreis',
+      'circle.untitled': 'Freundeskreis',
+      'circle.newTitle': 'Mein Freundeskreis',
+      'circle.unnamed': 'Ohne Namen',
+      'circle.titleLabel': 'Name des Freundeskreises, freiwillig',
+      'circle.titlePlaceholder': 'Freundeskreis',
+      'circle.honest': 'Die Personen, deren Listen hier stehen, erfahren davon nichts. Eine Benachrichtigung setzte voraus, dass festgehalten wird, wer welche Liste liest. Dieser Freundeskreis hält das nicht fest.',
+      'circle.previewNote': 'Im Vorschaumodus liegen Listen nur in diesem Browser. Der Freundeskreis findet deshalb nur Listen, die Du hier selbst angelegt hast; die Listen Deiner Freunde liegen in deren Browsern.',
+      'circle.itemsHeadline': 'Was es gibt',
+      'circle.meta': '{n} Listen gesammelt',
+      'circle.meta_1': '1 Liste gesammelt',
+      'circle.searchLabel': 'Unter allen Sachen suchen',
+      'circle.searchPlaceholder': 'Suchen',
+      'circle.total': '{n} Sachen',
+      'circle.total_1': '1 Sache',
+      'circle.hits': '{n} von {g}',
+      'circle.hits_1': '1 von {g}',
+      'circle.none': 'Nichts gefunden',
+      'circle.missing': '{n} Listen konnten nicht geladen werden',
+      'circle.missing_1': '1 Liste konnte nicht geladen werden',
+      'circle.noHit': 'Nichts gefunden.',
+      'circle.reset': 'Suche zurücksetzen',
+      'circle.emptyNoneHead': 'Noch niemand dabei',
+      'circle.emptyNoneText': 'Nimm unten den Ansehen-Link einer Freundin oder eines Freundes auf, dann stehen die Sachen daraus hier.',
+      'circle.emptyAllHead': 'Nichts eingetragen',
+      'circle.emptyAllText': 'Die gesammelten Listen sind erreichbar, aber noch leer.',
+      'circle.manageHeadline': 'Freunde verwalten',
+      'circle.addLabel': 'Ansehen-Link eines Freundes',
+      'circle.addPlaceholder': 'Link einfügen',
+      'circle.add': 'Aufnehmen',
+      'circle.addName': 'Name der Person, freiwillig',
+      'circle.addHere': 'Zum Freundeskreis hinzufügen',
+      'circle.startNew': 'Freundeskreis anlegen',
+      'circle.added': 'Aufgenommen in {kreis}.',
+      'circle.selfAdd': 'Das ist dieser Freundeskreis selbst.',
+      'circle.nestAdd': 'Ein Freundeskreis lässt sich nicht in einen anderen aufnehmen.',
+      'circle.dupAdd': 'Diese Liste steht schon im Freundeskreis.',
+      'circle.full': 'Mehr als {n} Listen fasst ein Freundeskreis nicht.',
+      'circle.remove': 'Aus dem Kreis nehmen',
+      'circle.removed': 'Aus dem Kreis genommen.',
+      'circle.undo': 'Rückgängig',
+      'circle.retry': 'Erneut versuchen',
+      'circle.fPending': 'wird geholt',
+      'circle.fOverflow': 'über der Grenze von {n}, wird nicht geholt',
+      'circle.fSlow': 'dauert gerade',
+      'circle.fPreview': 'liegt im Browser dieser Person, hier nicht abrufbar',
+      'circle.fCount': '{n} Sachen',
+      'circle.fCount_1': '1 Sache',
+      'circle.keyHeadline': 'Bewahre diesen Link auf',
+      'circle.keyLabel': 'Zugangs-Link des Freundeskreises',
+      'circle.keyRemember': 'Auf diesem Gerät gemerkt, beim nächsten Besuch findest Du den Freundeskreis auf der Startseite wieder.',
+      'circle.shareHeadline': 'Freundeskreis weitergeben',
+      'circle.shareWarn': 'Wer diesen Link bekommt, sieht alle Listen Deines Freundeskreises. Einen Link nur zum Ansehen gibt es hier nicht.',
+      'circle.shareLabel': 'Link zum Freundeskreis',
+      'circle.copied': 'Gut verwahrt.',
+      'circle.deleteConfirm': 'Der gesamte Freundeskreis wird unwiderruflich vom Server gelöscht. Die Listen Deiner Freunde bleiben unberührt. Fortfahren?',
 
 
       /* -- Das Spielerische ------------------------------------------- */
@@ -570,7 +659,7 @@
       'settings.themeDark': 'Dark',
       'settings.cacheHeadline': 'Local data',
       'settings.cacheClear': 'Clear local data',
-      'settings.cacheHint': 'Removes everything this application stores in this browser: language, appearance, AI key, sounds, the motion setting, the remembered lists, your rounds and badges, and in preview mode the locally held lists. Your list on the server and your links stay untouched.',
+      'settings.cacheHint': 'Removes everything this application stores in this browser: language, appearance, AI key, sounds, the motion setting, the remembered lists and circles, your rounds and badges, and in preview mode the locally held lists and circles. Your list on the server and your links stay untouched.',
       'settings.cacheConfirm': 'Remove everything this application stores in this browser? The list on the server stays.',
       'settings.cacheDone': 'Local data cleared.',
       'settings.dangerHeadline': 'Delete list',
@@ -626,6 +715,66 @@
       'error.toolarge': 'The list is too large for the server.',
       'error.ratelimit': 'Too many new lists in a short time. Please try again later.',
       'error.exists': 'This list id is already taken. Please try again.',
+      'error.kindmix': 'This link belongs to a different kind of list.',
+
+      /* -- Circle of friends -------------------------------------------- */
+
+      'circle.badge': 'Circle',
+      'circle.untitled': 'Circle of friends',
+      'circle.newTitle': 'My circle of friends',
+      'circle.unnamed': 'No name',
+      'circle.titleLabel': 'Name of the circle, optional',
+      'circle.titlePlaceholder': 'Circle of friends',
+      'circle.honest': 'The people whose lists are kept here are not told about it. A notice would require a record of who reads which list. This circle keeps no such record.',
+      'circle.previewNote': 'In preview mode lists live in this browser only. The circle therefore finds just the lists you created here; your friends lists live in their own browsers.',
+      'circle.itemsHeadline': 'What there is',
+      'circle.meta': '{n} lists collected',
+      'circle.meta_1': '1 list collected',
+      'circle.searchLabel': 'Search across all things',
+      'circle.searchPlaceholder': 'Search',
+      'circle.total': '{n} things',
+      'circle.total_1': '1 thing',
+      'circle.hits': '{n} of {g}',
+      'circle.hits_1': '1 of {g}',
+      'circle.none': 'Nothing found',
+      'circle.missing': '{n} lists could not be loaded',
+      'circle.missing_1': '1 list could not be loaded',
+      'circle.noHit': 'Nothing found.',
+      'circle.reset': 'Clear the search',
+      'circle.emptyNoneHead': 'Nobody here yet',
+      'circle.emptyNoneText': 'Add a friends view link below, then the things from that list appear here.',
+      'circle.emptyAllHead': 'Nothing listed',
+      'circle.emptyAllText': 'The collected lists can be reached, but they are still empty.',
+      'circle.manageHeadline': 'Manage friends',
+      'circle.addLabel': 'View link of a friend',
+      'circle.addPlaceholder': 'Paste link',
+      'circle.add': 'Add',
+      'circle.addName': 'Name of the person, optional',
+      'circle.addHere': 'Add to my circle of friends',
+      'circle.startNew': 'Create a circle of friends',
+      'circle.added': 'Added to {kreis}.',
+      'circle.selfAdd': 'That is this circle itself.',
+      'circle.nestAdd': 'A circle of friends cannot be added to another one.',
+      'circle.dupAdd': 'This list is already in the circle.',
+      'circle.full': 'A circle holds no more than {n} lists.',
+      'circle.remove': 'Remove from the circle',
+      'circle.removed': 'Removed from the circle.',
+      'circle.undo': 'Undo',
+      'circle.retry': 'Try again',
+      'circle.fPending': 'loading',
+      'circle.fOverflow': 'beyond the limit of {n}, not loaded',
+      'circle.fSlow': 'taking a while',
+      'circle.fPreview': 'lives in that persons browser, not reachable here',
+      'circle.fCount': '{n} things',
+      'circle.fCount_1': '1 thing',
+      'circle.keyHeadline': 'Keep this link safe',
+      'circle.keyLabel': 'Access link of the circle',
+      'circle.keyRemember': 'Remembered on this device, you will find the circle on the start page next time.',
+      'circle.shareHeadline': 'Pass on the circle',
+      'circle.shareWarn': 'Anyone who gets this link sees every list in your circle. There is no view-only link for it.',
+      'circle.shareLabel': 'Link to the circle',
+      'circle.copied': 'Kept safe.',
+      'circle.deleteConfirm': 'The entire circle will be irreversibly deleted from the server. Your friends lists stay untouched. Continue?',
 
 
       /* -- The playful part ------------------------------------------- */
@@ -772,6 +921,18 @@
     document.documentElement.lang = lang;
     applyStaticI18n();
     fillDatalist();
+    /* Auf der Einstellungsseite gibt es nichts zu zeichnen. Ihr fehlen die
+       Knoten der Listenansicht, initSettings setzt aber state.mode auf 'edit'
+       oder 'circle' — ohne diese Zeile warf der Sprachwechsel dort in
+       render() eine unbehandelte Ausnahme. Das galt schon vor dem
+       Freundeskreis und faellt hier nur auf, weil er denselben Weg nimmt. */
+    if (isSettingsPage()) { return; }
+    /* Die Zeilen der Uebersicht tragen uebersetzten Text und werden nur einmal
+       gebaut; sie muessen also neu entstehen. Geholt wird dabei nichts:
+       renderKreis zeichnet allein aus kreis.eintraege, der Sprachschalter ist
+       kein Aktualisieren. render() bleibt unberuehrt — es kehrt fuer 'circle'
+       ohnehin gleich zu Beginn zurueck. */
+    if (state.mode === 'circle') { renderKreis(); return; }
     render();
   }
 
@@ -1039,6 +1200,22 @@
   var docGen = 0;   // zählt Änderungen; erkennt Bearbeitungen während eines Schreibvorgangs
   var voiceOpen = false;   // die Sprachbox steht zu, bis das Mikrofon oder der Verweis sie öffnet
 
+  /**
+   * Der Freundeskreis steht ausdruecklich NEBEN state, nicht darin. save()
+   * verschluesselt state.doc im Ganzen; laege dort der Inhalt fremder Listen,
+   * schriebe der Kreis ihn in sein eigenes Chiffrat auf den Server — eine
+   * Kopie, die niemand mehr entfernt. Auch state.circleData genuegte nicht:
+   * Der Abzug in save() griffe sie mit.
+   */
+  var kreis = {
+    id: null, key: null, keyStr: null, token: null, proof: null,
+    rev: 0, doc: null,
+    eintraege: [],    // ein Eintrag je Freund, mit doc oder fehler
+    zeilen: [],       // die flache Gesamtliste, gebaut aus eintraege
+    geprueftAm: 0
+  };
+  var kreisGen = 0;   // wie docGen: verwerfen statt abbrechen
+
   function emptyDoc() {
     return {
       v: SCHEMA_VERSION,
@@ -1077,6 +1254,79 @@
     return doc;
   }
 
+  function emptyCircle() {
+    return {
+      v: SCHEMA_VERSION,
+      kind: 'circle',
+      title: '',
+      friends: []
+    };
+  }
+
+  /** Welche Art ein entschluesseltes Dokument behauptet zu sein. Fehlendes
+      kind bedeutet 'list' — das laesst jedes heute vorhandene Dokument
+      unveraendert gueltig. */
+  function kindOf(raw) {
+    return (raw && raw.kind === 'circle') ? 'circle' : 'list';
+  }
+
+  /**
+   * Normalisiert einen Freundeskreis. Kuerzt nie: Eine Schranke, die
+   * Eintraege wegwirft, gehoert nicht hierher — der erste Schreibvorgang
+   * schriebe die gekuerzte Fassung zurueck, und der Ansehen-Link des
+   * verworfenen Freundes stand nur dort. MAX_FRIENDS greift beim Aufnehmen
+   * und beim Holen, nicht beim Lesen.
+   *
+   * Was hier ausdruecklich NICHT steht: kein token (ein fremder
+   * Schreibzugang hat in einem Freundeskreis nichts zu suchen), keine
+   * fertige url (sonst entschiede fremder Text, wohin diese Anwendung
+   * verweist), kein zwischengespeicherter Titel, keine Gegenstaende, kein
+   * Kontakt des Freundes. Die Reihenfolge des Feldes leistet, was ein
+   * Zeitstempel leisten wuerde.
+   *
+   * @param {*} raw
+   * @param {string|null} selbstId  ID des Kreises; ein Eintrag auf sich
+   *                                selbst wird verworfen.
+   */
+  function normalizeCircle(raw, selbstId) {
+    var doc = emptyCircle();
+    if (!raw || typeof raw !== 'object') { return doc; }
+    doc.title = typeof raw.title === 'string' ? raw.title.slice(0, 80) : '';
+    if (!Array.isArray(raw.friends)) { return doc; }
+    var gesehen = {};
+    doc.friends = raw.friends.filter(function (f) {
+      /* Reihenfolge: erst die Form pruefen, dann als Schluessel benutzen.
+         Nur so kann keine erfundene id in gesehen etwas anrichten. */
+      if (!f || typeof f !== 'object') { return false; }
+      if (!ID_RE.test(f.id) || !KEY_RE.test(f.key)) { return false; }
+      if (selbstId && f.id === selbstId) { return false; }
+      if (gesehen[f.id]) { return false; }
+      gesehen[f.id] = true;
+      return true;
+    }).map(function (f) {
+      return {
+        id: f.id,
+        key: f.key,
+        /* label ist die Beschriftung des Nutzers, nicht die Abschrift des
+           fremden Dokuments. Deshalb darf sie stehenbleiben, ohne gegen
+           "kein Zwischenspeicher entschluesselter Fremdinhalte" zu
+           verstossen. */
+        label: typeof f.label === 'string' ? f.label.slice(0, 60) : ''
+      };
+    });
+    return doc;
+  }
+
+  /**
+   * Der Aufrufer sagt, was er erwartet; das Dokument darf das nur bestaetigen
+   * oder scheitern lassen. Entschiede das Dokument selbst, waere ein
+   * manipuliertes Dokument die Entscheidung.
+   */
+  function normalizeAny(raw, erwartet, selbstId) {
+    if (kindOf(raw) !== erwartet) { throw new AppError('kindmix'); }
+    return erwartet === 'circle' ? normalizeCircle(raw, selbstId) : normalizeDoc(raw);
+  }
+
   /* ===================================================================== *
    * 7 · Links & Navigation
    * ===================================================================== */
@@ -1086,6 +1336,11 @@
   function editHash(id, key, token) { return '#e=' + id + '.' + key + '.' + token; }
   function viewLink() { return baseUrl() + viewHash(state.id, state.keyStr); }
   function editLink() { return baseUrl() + editHash(state.id, state.keyStr, state.token); }
+  /* Ein Freundeskreis hat nur diese eine Form. Eine Zwei-Teile-Fassung ohne
+     Token gaebe es nicht als Ersparnis, sondern als Falle: Sie reichte die
+     Schluessel aller gesammelten Freunde weiter. */
+  function circleHash(id, key, token) { return '#k=' + id + '.' + key + '.' + token; }
+  function circleLink() { return baseUrl() + circleHash(kreis.id, kreis.keyStr, kreis.token); }
 
   /* ------------------------------------------------------------------ *
    * Eigene Listen, auf diesem Gerät gemerkt
@@ -1115,11 +1370,20 @@
 
   /** Legt die Liste vorn ab oder frischt ihren Eintrag auf. */
   function rememberList() {
-    if (state.mode !== 'edit' || !state.id || !state.token) { return; }
+    var istKreis = state.mode === 'circle';
+    if (istKreis) {
+      if (!kreis.id || !kreis.token || !kreis.doc) { return; }
+    } else if (state.mode !== 'edit' || !state.id || !state.token) { return; }
     var entry = {
-      id: state.id,
-      hash: editHash(state.id, state.keyStr, state.token),
-      title: state.doc.title || '',
+      id: istKreis ? kreis.id : state.id,
+      hash: istKreis ? circleHash(kreis.id, kreis.keyStr, kreis.token)
+                     : editHash(state.id, state.keyStr, state.token),
+      /* Ein Freundeskreis ist dasselbe Versprechen wie eine Liste: ein Link,
+         den nur dieses Geraet kennt und dessen Verlust nicht rueckgaengig zu
+         machen ist. Nur die Marke sagt, welche Art es ist; ein Eintrag ohne
+         kind stammt aus der Zeit davor und gilt als Liste. */
+      kind: istKreis ? 'circle' : 'list',
+      title: (istKreis ? kreis.doc.title : state.doc.title) || '',
       ts: Date.now()
     };
     var rest = readMine().filter(function (it) { return it.id !== entry.id; });
@@ -1138,19 +1402,37 @@
   }
 
   /** Zerlegt das URL-Fragment. Rückgabe: null | {mode, id, key, token}. */
-  function parseHash() {
-    var raw = location.hash.replace(/^#/, '');
+  function parseHash() { return parseFragment(location.hash); }
+
+  /**
+   * Dieselbe Zerlegung, aber auf einer uebergebenen Zeichenkette: Das
+   * Aufnehmen eines Freundes bekommt einen eingefuegten Link und darf nur das
+   * Fragment auswerten. Was davor steht, wird verworfen — sonst entschiede
+   * fremder Text darueber, wohin diese Anwendung verweist.
+   */
+  function parseFragment(text) {
+    /* Eingefuegte Links tragen fast immer ein Leerzeichen oder einen
+       Zeilenumbruch mit; die verankerte Regel scheiterte sonst an einer
+       Kleinigkeit, die der Nutzer nicht sieht. */
+    var s = String(text || '').replace(/\s+/g, '');
+    var at = s.indexOf('#');
+    var raw = (at === -1) ? s : s.slice(at + 1);
     if (!raw) { return null; }
-    var m = /^([ev])=(.+)$/.exec(raw);
+    var m = /^([evk])=(.+)$/.exec(raw);
     if (!m) { return null; }
     var parts = m[2].split('.');
     var id = parts[0] || '';
-    if (!/^[0-9a-f]{32}$/.test(id) || !parts[1]) { throw new AppError('badlink'); }
-    if (m[1] === 'e') {
-      if (!parts[2]) { throw new AppError('badlink'); }
-      return { mode: 'edit', id: id, key: parts[1], token: parts[2] };
-    }
-    return { mode: 'view', id: id, key: parts[1], token: null };
+    /* KEY_RE gilt jetzt auch fuer e und v. Das ist eine gewollte Aenderung:
+       Ein gekuerzter Schluessel zeigt kuenftig "unvollstaendig oder
+       beschaedigt" statt eines Entschluesselungsfehlers. Bestehende Links
+       sind unberuehrt, 32 Byte ergeben ueber b64u.encode genau 43 Zeichen. */
+    if (!ID_RE.test(id) || !KEY_RE.test(parts[1] || '')) { throw new AppError('badlink'); }
+    /* 'v' ist die einzige Form ohne Token. 'e' und 'k' sind beides Zugaenge:
+       Ein Freundeskreis wird als Ganzes weitergegeben oder gar nicht, denn
+       sein "Ansehen-Link" reichte die Schluessel aller Freunde weiter. */
+    if (m[1] === 'v') { return { mode: 'view', id: id, key: parts[1], token: null }; }
+    if (!parts[2]) { throw new AppError('badlink'); }
+    return { mode: (m[1] === 'k') ? 'circle' : 'edit', id: id, key: parts[1], token: parts[2] };
   }
 
   /* ===================================================================== *
@@ -1160,7 +1442,11 @@
   var shownView = null;
 
   function showView(name) {
-    ['viewStart', 'viewList', 'viewError'].forEach(function (id) {
+    /* Verlassen wir die Uebersicht, verschwinden die entschluesselten
+       Fremddaten aus DOM und Speicher. hidden allein genuegt nicht: Der
+       Knoten bliebe samt Inhalt im Dokument stehen. */
+    if (shownView === 'viewCircle' && name !== 'viewCircle') { kreisRaeumen(); }
+    ['viewStart', 'viewList', 'viewError', 'viewCircle'].forEach(function (id) {
       var node = document.getElementById(id);
       if (node) { node.hidden = (id !== name); }
     });
@@ -1170,6 +1456,23 @@
        landete mitten in der neuen Liste, beim Teilen statt beim Anfang. */
     if (shownView !== null && shownView !== name) { window.scrollTo(0, 0); }
     shownView = name;
+  }
+
+  /** Raeumt beide Kopien: die im DOM und die im Speicher. Der Zaehler steigt
+      mit, damit laufende Abrufe ins Leere fallen. Einen AbortController gibt
+      es in dieser Anwendung nicht, und apiGet nimmt keinen; die Anfragen
+      laufen also zu Ende, ihr Ergebnis landet nur nirgends mehr. */
+  function kreisRaeumen() {
+    kreisGen++;
+    var liste = $('#circleItems');
+    if (liste) { liste.textContent = ''; }
+    kreis.doc = null;
+    kreis.eintraege = [];
+    kreis.zeilen = [];
+    kreis.key = null;
+    kreis.keyStr = null;
+    kreis.token = null;
+    kreis.proof = null;
   }
 
   function showError(code) {
@@ -1261,6 +1564,9 @@
     $('#addForm').hidden = !isEdit;
     $('#contactBox').hidden = !isEdit;
     $('#btnRefresh').hidden = isEdit;
+    /* Nur in der Liste eines Freundes: Die eigene Liste in den eigenen Kreis
+       zu legen ergibt nichts, sie steht schon im Kasten darunter. */
+    $('#circleAddHereRow').hidden = isEdit;
     if (!isEdit) { $('#keyBox').hidden = true; }
 
     if (isEdit) {
@@ -1429,13 +1735,19 @@
     list.textContent = '';
     box.hidden = mine.length === 0;
     updateMineLink();
+    /* Der Knopf steht VOR der vorzeitigen Rueckkehr: Sonst erreichte ihn
+       genau der Nutzer nie, fuer den er gedacht ist — wer noch nichts
+       gemerkt hat. */
+    var kreisRow = $('#startCircleRow');
+    if (kreisRow) { kreisRow.hidden = mine.some(function (it) { return it.kind === 'circle'; }); }
     if (!mine.length) { return; }
 
     mine.forEach(function (entry) {
       var li = el('li');
       var a = el('a');
       a.href = entry.hash;
-      a.appendChild(el('span', 'name', entry.title || t('list.untitled')));
+      a.appendChild(el('span', 'name', entry.title || t(entry.kind === 'circle' ? 'circle.untitled' : 'list.untitled')));
+      if (entry.kind === 'circle') { a.appendChild(el('span', 'chip chip--sm', t('circle.badge'))); }
       if (entry.ts) { a.appendChild(el('span', 'when', formatDay(new Date(entry.ts).toISOString().slice(0, 10)))); }
       a.appendChild(icon('chev'));
       li.appendChild(a);
@@ -1462,9 +1774,19 @@
     return badge;
   }
 
-  /** Wer hat es, und seit wann. Ohne Namen bleibt es bei der Tatsache. */
-  function lentLine(item) {
-    var show = state.mode === 'edit' || state.doc.showBorrower;
+  /**
+   * Wer hat es, und seit wann. Ohne Namen bleibt es bei der Tatsache.
+   *
+   * Ob der Name gezeigt wird, entscheidet das Dokument, AUS DEM der
+   * Gegenstand stammt. Im Freundeskreis ist das nicht die geoeffnete
+   * Sammlung, und beide naheliegenden Kurzschluesse waeren falsch:
+   * state.mode === 'edit' zeigte Namen, die ein Freund verborgen hat;
+   * state.doc.showBorrower der Sammlung ist das false aus emptyCircle() und
+   * verschwiege Namen, die ein Freund ausdruecklich zeigt. Die Flagge gehoert
+   * an die Herkunft, also an den Aufrufer.
+   */
+  function lentLine(item, zeigeName) {
+    var show = zeigeName === true;
     var who = (item.borrower || '').trim();
     if (show && who && item.since) { return t('item.lentTo', { name: who, date: formatDay(item.since) }); }
     if (show && who) { return t('item.lentToPlain', { name: who }); }
@@ -1488,7 +1810,7 @@
 
     var text = el('span', 'item-text');
     text.appendChild(el('span', 'item-name', item.name));
-    if (lent) { text.appendChild(el('span', 'item-state', lentLine(item))); }
+    if (lent) { text.appendChild(el('span', 'item-state', lentLine(item, state.mode === 'edit' || state.doc.showBorrower))); }
     else if (item.note) { text.appendChild(el('span', 'item-note', item.note)); }
 
     if (state.mode === 'view') {
@@ -1527,6 +1849,328 @@
     btn.appendChild(chev);
     li.appendChild(btn);
     return li;
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Freundeskreis · Zusammenfuehren, Zeichnen, Suchen
+   *
+   * Geholt wird hier nichts. Alles, was diese Funktionen brauchen, steht in
+   * kreis.eintraege; deshalb kosten ein Sprachwechsel und jeder Tastendruck
+   * in der Suche keine einzige Anfrage.
+   * ------------------------------------------------------------------ */
+
+  /* Der Name der Person, zur Laufzeit aufgeloest. Die Reihenfolge ist
+     absichtlich Kontaktname vor Titel: renderMeta baut daraus schon "Liste
+     von {name}", der Titel dagegen ist der Name einer Liste und nicht der
+     einer Person. Der Rueckfall ist ein eigener Text und NICHT
+     t('list.untitled') — das waere "Leih-Katalog" und liesse die Suche nach
+     "katalog" schlagartig alle unbenannten Freunde treffen. */
+  function freundName(e) {
+    if (e.freund.label) { return e.freund.label; }
+    if (e.doc) {
+      var k = (e.doc.contact.name || '').trim();
+      if (k) { return k; }
+      var tl = (e.doc.title || '').trim();
+      if (tl) { return tl; }
+    }
+    return t('circle.unnamed');
+  }
+
+  /* Verglichen wird auf beiden Seiten gleich gefaltet, sonst findet die
+     Eingabe nur, was zufaellig genauso geschrieben ist. Zwei Faltungen, weil
+     Deutsch zwei Schreibweisen desselben Wortes kennt: Wer "Rasenmaeher"
+     sucht, tippt je nach Tastatur "rasenmäher" oder "rasenmaeher". Der
+     Katalog fuehrt genau diesen Doppelfall schon als zwei Eintraege.
+     Kein String.prototype.normalize: CONTRIBUTING.md nennt Promise, fetch und
+     crypto.subtle als abgeschlossene Ausnahmen von ES5. */
+  function falteA(s) {
+    return String(s == null ? '' : s).toLowerCase()
+      .replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u')
+      .replace(/á|à|â/g, 'a').replace(/é|è|ê/g, 'e').replace(/í|ì|î/g, 'i')
+      .replace(/ó|ò|ô/g, 'o').replace(/ú|ù|û/g, 'u').replace(/ß/g, 'ss');
+  }
+  function falteAe(s) {
+    return String(s == null ? '' : s).toLowerCase()
+      .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue')
+      .replace(/á|à|â/g, 'a').replace(/é|è|ê/g, 'e').replace(/í|ì|î/g, 'i')
+      .replace(/ó|ò|ô/g, 'o').replace(/ú|ù|û/g, 'u').replace(/ß/g, 'ss');
+  }
+
+  /** Baut die flache Gesamtliste aus den geholten Eintraegen. */
+  function kreisZeilen() {
+    var zeilen = [];
+    kreis.eintraege.forEach(function (e) {
+      if (!e || !e.doc) { return; }
+      var person = freundName(e);
+      /* Ob der Name des Ausleihenden gezeigt wird, entscheidet die Liste, aus
+         der der Gegenstand stammt — nicht die geoeffnete. */
+      var zeigeName = e.doc.showBorrower === true;
+      e.doc.items.forEach(function (it) {
+        /* Mit Trenner verbunden, damit ein Suchteil nicht ueber eine
+           Feldgrenze hinweg trifft. Gesucht wird in Gegenstand, Person und
+           Notiz — ausdruecklich nicht im Namen des Ausleihenden: Der ist je
+           nach showBorrower unsichtbarer Text, und eine Suche, die
+           unsichtbaren Text trifft, liefert Zeilen ohne erkennbaren Grund. */
+        var roh = it.name + ' · ' + person + (it.note ? ' · ' + it.note : '');
+        zeilen.push({
+          fid: e.freund.id, fkey: e.freund.key, iid: it.id,
+          name: it.name, note: it.note, status: it.status,
+          borrower: it.borrower, since: it.since,
+          person: person, zeigeName: zeigeName,
+          such: { a: falteA(roh), ae: falteAe(roh) },
+          node: null
+        });
+      });
+    });
+
+    /* Flach nach Gegenstandsname, bei Gleichstand nach Person. Nicht nach
+       Person gruppiert — das laese sich als "Liste der Listen", und gesucht
+       wird eine Bohrmaschine, kein Freund. Nicht "frei zuerst" — sonst
+       springt die Liste, sobald ein Freund etwas verleiht. numeric: damit
+       "Steckschluessel 2" vor "Steckschluessel 10" steht. Ein einmal gebauter
+       Collator statt neuer Optionen je Vergleich; das try/catch folgt
+       formatDate. */
+    var koll = null;
+    try { koll = new Intl.Collator(lang, { numeric: true }); } catch (e) { koll = null; }
+    function vgl(a, b) { return koll ? koll.compare(a, b) : a.localeCompare(b, lang); }
+    zeilen.sort(function (x, y) {
+      var n = vgl(x.name, y.name);
+      return n !== 0 ? n : vgl(x.person, y.person);
+    });
+    return zeilen;
+  }
+
+  /* Die Eingabe wird an Leerzeichen zerlegt und alle Teile muessen zutreffen,
+     jeder darf in einem anderen Feld sitzen: "anna bohr" findet dasselbe wie
+     "bohr anna". indexOf und nicht Wortanfang, weil "schluessel" in
+     "Steckschluesselsatz" bei deutschen Zusammensetzungen der Normalfall ist.
+     Kein String.includes — ES5. */
+  function sucheTeile(eingabe) {
+    var roh = String(eingabe || '').replace(/^\s+|\s+$/g, '');
+    if (!roh) { return null; }
+    var teile = roh.split(/\s+/);
+    var out = [];
+    for (var i = 0; i < teile.length; i++) {
+      out.push({ a: falteA(teile[i]), ae: falteAe(teile[i]) });
+    }
+    return out;
+  }
+
+  function passt(z, teile) {
+    if (!teile) { return true; }
+    for (var i = 0; i < teile.length; i++) {
+      if (z.such.a.indexOf(teile[i].a) < 0 && z.such.ae.indexOf(teile[i].ae) < 0) { return false; }
+    }
+    return true;
+  }
+
+  function renderKreisRow(z) {
+    var li = el('li', 'item item--' + z.status + (z.status === 'lent' ? ' items-read-lent' : ''));
+    /* data-fid/data-iid statt data-id: markRow sucht global nach
+       .item[data-id], und Gegenstands-IDs sind ueber mehrere Freundeslisten
+       hinweg nicht eindeutig — normalizeDoc uebernimmt jede vorhandene
+       Zeichenkette. Eine Zeile wird hier ueber das Paar angesprochen. */
+    li.setAttribute('data-fid', z.fid);
+    li.setAttribute('data-iid', z.iid);
+
+    var a = el('a', 'itemrow');
+    a.href = viewHash(z.fid, z.fkey);
+    a.appendChild(statusBadge(z));
+
+    var text = el('span', 'item-text');
+    text.appendChild(el('span', 'item-name', z.name));
+    if (z.status === 'lent') { text.appendChild(el('span', 'item-state', lentLine(z, z.zeigeName))); }
+    /* Anders als im Inventar steht die Notiz auch an einer verliehenen Sache:
+       Die Uebersicht ist eine Suchflaeche, und eine Zeile muss zeigen
+       koennen, warum sie ein Treffer ist. */
+    if (z.note) { text.appendChild(el('span', 'item-note', z.note)); }
+    a.appendChild(text);
+
+    a.appendChild(el('span', 'item-who', z.person));
+    a.appendChild(el('span', 'sr-only', statusLabel(z)));
+    var chev = el('span', 'item-chev');
+    chev.appendChild(icon('chev'));
+    a.appendChild(chev);
+    li.appendChild(a);
+    return li;
+  }
+
+  /** Baut die Zeilen einmal. Ein Tastendruck legt danach nur hidden um. */
+  function renderKreisListe() {
+    var liste = $('#circleItems');
+    if (!liste) { return; }
+    liste.textContent = '';
+    kreis.zeilen = kreisZeilen();
+    kreis.zeilen.forEach(function (z) {
+      z.node = renderKreisRow(z);
+      liste.appendChild(z.node);
+    });
+    filterKreis();
+    renderKreisFreunde();
+    renderKreisMeta();
+  }
+
+  /* Die Zeile unter dem Titel sagt, worueber die Uebersicht ueberhaupt geht.
+     Sie steht hier und nicht in renderKreis, weil sie sich mit jedem
+     Aufnehmen und Entfernen aendert und nicht erst beim naechsten
+     vollstaendigen Zeichnen. */
+  function renderKreisMeta() {
+    var node = $('#circleMeta');
+    if (!node) { return; }
+    var n = kreis.doc ? kreis.doc.friends.length : 0;
+    node.textContent = n === 0 ? '' : (n === 1 ? t('circle.meta_1') : t('circle.meta', { n: n }));
+  }
+
+  /**
+   * Eine Zeile je gesammelter Liste im Aufklapper: Name, Zustand und, nur mit
+   * Zugang, die Knoepfe. Sie ist der einzige Ort, an dem eine Liste benannt
+   * wird, die sich nicht holen liess — in der Uebersicht selbst fehlten ihre
+   * Gegenstaende sonst wortlos.
+   */
+  function renderKreisFreunde() {
+    var liste = $('#circleFriends');
+    if (!liste || !kreis.doc) { return; }
+    liste.textContent = '';
+    var istZugang = !!kreis.token;
+    var vorschau = !!(Store && Store.kind === 'local');
+
+    kreis.doc.friends.forEach(function (f, idx) {
+      var e = null;
+      for (var i = 0; i < kreis.eintraege.length; i++) {
+        if (kreis.eintraege[i] && kreis.eintraege[i].freund.id === f.id) { e = kreis.eintraege[i]; break; }
+      }
+      var li = el('li', 'item');
+      var row = el('div', 'itemrow');
+      var text = el('span', 'item-text');
+      text.appendChild(el('span', 'item-name', e ? freundName(e) : (f.label || t('circle.unnamed'))));
+
+      var zustand;
+      /* Ueber der Grenze wird nicht geholt, aber auch nichts verworfen: Der
+         Normalisierer kuerzt nie, sonst waere der Ansehen-Link beim ersten
+         Schreibvorgang weg. Also steht hier, was mit dem Eintrag ist. */
+      if (idx >= MAX_FRIENDS) { zustand = t('circle.fOverflow', { n: MAX_FRIENDS }); }
+      else if (!e) { zustand = t('circle.fPending'); }
+      else if (e.fehler) {
+        /* Im Vorschaumodus ist 'notfound' der Normalfall und kein Befund: Die
+           Liste des Freundes liegt in dessen Browser, nicht in diesem
+           localStorage. Dann steht dort der Grund und nicht der Fehler. */
+        zustand = (vorschau && e.fehler === 'notfound')
+          ? t('circle.fPreview') : t('error.' + e.fehler);
+      }
+      else if (!e.doc) { zustand = t(e.langsam ? 'circle.fSlow' : 'circle.fPending'); }
+      else { zustand = e.doc.items.length === 1 ? t('circle.fCount_1') : t('circle.fCount', { n: e.doc.items.length }); }
+      text.appendChild(el('span', 'item-note', zustand));
+      row.appendChild(text);
+
+      if (istZugang) {
+        /* Erneut versuchen nur, wo es helfen kann: kreisWiederholbar
+           entscheidet ueber den HTTP-Status, nicht ueber den uebersetzten
+           Code. Im Vorschaumodus hilft es nie. */
+        if (e && e.fehler && !vorschau && kreisWiederholbar(e)) {
+          var wieder = el('button', 'btn btn--sm');
+          wieder.type = 'button';
+          wieder.setAttribute('data-kreis-act', 'retry');
+          wieder.setAttribute('data-kreis-id', f.id);
+          wieder.textContent = t('circle.retry');
+          row.appendChild(wieder);
+        }
+        /* Entfernen bleibt auch im Vorschaumodus stehen, anders als im
+           Bauplan vorgesehen: Dort scheitert jede fremde Liste, und ohne
+           diesen Knopf waere das Aufnehmen dort unumkehrbar. Der Zustand
+           daneben sagt schon, dass nichts kaputt ist. */
+        var weg = el('button', 'btn btn--sm');
+        weg.type = 'button';
+        weg.setAttribute('data-kreis-act', 'remove');
+        weg.setAttribute('data-kreis-id', f.id);
+        weg.textContent = t('circle.remove');
+        row.appendChild(weg);
+      }
+      li.appendChild(row);
+      liste.appendChild(li);
+    });
+  }
+
+  /* Keine Entprellung. Teuer ist nicht das Vergleichen, sondern das DOM: Die
+     Zeilen entstehen einmal, ein Tastendruck legt danach nur hidden um.
+     [hidden] { display: none !important } steht im Erscheinungsbild, und auf
+     .item liegt keine eigene display-Regel — die Zeilen fallen also
+     zuverlaessig aus dem Raster von .items heraus. Eine Verzoegerung kurierte
+     das Falsche: Sie verzoegert die Antwort, statt die Arbeit zu
+     verkleinern. */
+  function filterKreis() {
+    if (!kreis.doc) { return; }
+    var teile = sucheTeile($('#circleQ').value);
+    var treffer = 0;
+    for (var i = 0; i < kreis.zeilen.length; i++) {
+      var ja = passt(kreis.zeilen[i], teile);
+      kreis.zeilen[i].node.hidden = !ja;
+      if (ja) { treffer++; }
+    }
+    var fehlt = 0, freunde = 0;
+    for (var j = 0; j < kreis.eintraege.length; j++) {
+      var e = kreis.eintraege[j];
+      if (!e) { continue; }
+      freunde++;
+      if (e.fehler) { fehlt++; }
+    }
+    $('#circleEmptyNone').hidden = !(kreis.doc.friends.length === 0);
+    $('#circleEmptyAll').hidden  = !(freunde > 0 && kreis.zeilen.length === 0 && fehlt === 0);
+    $('#circleEmptyHit').hidden  = !(teile && treffer === 0 && kreis.zeilen.length > 0);
+    renderKreisZahl(treffer, kreis.zeilen.length, !!teile, fehlt);
+  }
+
+  function renderKreisZahl(treffer, gesamt, gefragt, fehlt) {
+    var node = $('#circleCount');
+    if (!node) { return; }
+    var txt;
+    if (!gefragt) { txt = gesamt === 1 ? t('circle.total_1') : t('circle.total', { n: gesamt }); }
+    else if (treffer === 0) { txt = t('circle.none'); }
+    else { txt = treffer === 1 ? t('circle.hits_1', { g: gesamt }) : t('circle.hits', { n: treffer, g: gesamt }); }
+    /* Die Zahl gilt nur fuer das, was wirklich angekommen ist. Ohne diesen
+       Zusatz behauptete sie eine Vollstaendigkeit, die es nicht gibt. */
+    if (fehlt) { txt += ' · ' + (fehlt === 1 ? t('circle.missing_1') : t('circle.missing', { n: fehlt })); }
+    node.textContent = txt;
+  }
+
+  /** "zuletzt geprueft vor …", mit eigener Zeitmarke und eigenem Knoten:
+      renderChecked steigt bei state.mode !== 'view' aus und schreibt in
+      #checkedAt, einen Knoten aus #viewList. */
+  function renderKreisChecked() {
+    var node = $('#circleChecked');
+    if (!node) { return; }
+    if (!kreis.geprueftAm) { node.textContent = ''; return; }
+    var min = Math.round((Date.now() - kreis.geprueftAm) / 60000);
+    node.textContent = min < 1 ? t('items.checkedNow') : t('items.checked', { n: min });
+  }
+
+  /** Zeichnet die Uebersicht vollstaendig. Holt nichts. */
+  function renderKreis() {
+    showView('viewCircle');
+    var istZugang = !!kreis.token;
+    $('#circleTitleWrap').hidden = !istZugang;
+    $('#circleTitleRead').hidden = false;
+    $('#circleTitleRead').classList.toggle('sr-only', istZugang);
+    $('#circleTitleRead').textContent = (kreis.doc && kreis.doc.title) || t('circle.untitled');
+    if (istZugang && document.activeElement !== $('#circleTitleInput')) {
+      $('#circleTitleInput').value = (kreis.doc && kreis.doc.title) || '';
+    }
+    /* Der Seitentitel bleibt fest: <title> steht im <head> und damit
+       ausserhalb jedes translate="no". Ein Kreisname dort waere eine Aussage
+       ueber Dritte an einer Stelle, die die Anwendung nicht abschirmen kann. */
+    $('#circleManage').hidden = !istZugang;
+    $('#circleShareBox').hidden = !istZugang;
+    $('#circlePreview').hidden = !(Store && Store.kind === 'local');
+    if (istZugang) { $('#circleLink').value = circleLink(); }
+    /* #circleKeyBox wird hier ausdruecklich NICHT verborgen: Er bleibt
+       stehen, bis #chkCircleKeyDone bestaetigt ist. Unbedingtes Verbergen
+       raeumte ihn beim naechstbesten Zeichnen weg — etwa beim Sprachwechsel
+       oder sobald der erste Freund aufgenommen wird. */
+    renderKreisListe();
+    renderKreisChecked();
+    /* Ohne diese beiden Zeilen zeigten der Einstellungen-Verweis und
+       "Meine Listen" weiter auf die zuvor geoeffnete Liste. */
+    updateSettingsLink();
+    updateMineLink();
   }
 
   /* ------------------------------------------------------------------ *
@@ -2738,7 +3382,11 @@
       state.updated = res.body.updated;
       return Crypt.decrypt(state.key, res.body.payload, state.id);
     }).then(function (raw) {
-      state.doc = normalizeDoc(raw);
+      /* normalizeAny und nicht normalizeDoc: Ein #e= oder #v= auf ein
+         Kreis-Dokument oeffnete sonst den Kreis als leere Liste, und der
+         erste Tastendruck im Titelfeld schriebe diese leere Fassung
+         darueber. Die Art entscheidet der Aufrufer, nicht das Dokument. */
+      state.doc = normalizeAny(raw, 'list', null);
       state.dirty = false;
       state.checkedAt = Date.now();
       if (state.mode === 'edit') { rememberList(); }
@@ -2747,6 +3395,386 @@
       hinweisLangeDraussen();
     }).catch(function (err) {
       showError(err && err.code ? err.code : 'network');
+    });
+  }
+
+  /* ===================================================================== *
+   * 10a · Der Freundeskreis
+   *
+   * Eine eigene Art Dokument hinter einem eigenen Fragmentpraefix. Der Server
+   * unterscheidet sie nicht von einer Liste, und genau das ist die Zusage:
+   * api.php bleibt unveraendert, es gibt keine neue Aktion und keine
+   * Verknuepfung zwischen zwei Kennungen.
+   * ===================================================================== */
+
+  /**
+   * Liest das Kreis-Dokument und legt es in kreis ab. Zeichnet nicht, holt
+   * keine Freundesliste und fasst state nicht an: So kann auch der Knopf in
+   * einer fremden Liste schreiben, ohne die Ansicht darunter wegzuziehen.
+   * Der Aufrufer prueft gen selbst, bevor er etwas anzeigt.
+   */
+  function kreisHolen(parsed, gen) {
+    return Crypt.importKey(parsed.key).then(function (key) {
+      if (gen !== kreisGen) { return null; }
+      kreis.key = key;
+      kreis.keyStr = parsed.key;
+      kreis.id = parsed.id;
+      kreis.token = parsed.token;
+      return Crypt.proof(parsed.token);
+    }).then(function (proof) {
+      if (gen !== kreisGen) { return null; }
+      kreis.proof = proof;
+      return Store.read(kreis.id, 0);
+    }).then(function (res) {
+      if (gen !== kreisGen) { return null; }
+      if (res.status === 404) { throw new AppError('notfound'); }
+      if (res.status !== 200) { throw new AppError(mapError(res)); }
+      kreis.rev = res.body.rev;
+      return Crypt.decrypt(kreis.key, res.body.payload, kreis.id);
+    }).then(function (raw) {
+      if (gen !== kreisGen) { return null; }
+      kreis.doc = normalizeAny(raw, 'circle', kreis.id);
+      return kreis.doc;
+    });
+  }
+
+  function oeffneKreis(parsed) {
+    var gen = ++kreisGen;
+    stopRefresh();   /* Die Uebersicht haelt sich nicht selbst aktuell. */
+    state.mode = 'circle';
+    state.doc = null;     /* Kein Fremddokument in state, nie. */
+    return kreisHolen(parsed, gen).then(function (doc) {
+      if (gen !== kreisGen || !doc) { return; }
+      rememberList();
+      kreis.eintraege = [];
+      renderKreis();
+      return ladeKreis(doc.friends.slice(0, MAX_FRIENDS), function (e, pos) {
+        if (gen !== kreisGen) { return; }
+        kreis.eintraege[pos] = e;
+        renderKreisListe();
+      }).then(function (eintraege) {
+        /* Derselbe Grund wie oben, eine Ebene hoeher: Das Promise.all eines
+           abgeloesten Durchlaufs loest trotzdem noch auf, und seine Eintraege
+           duerfen die des neuen nicht verdraengen. */
+        if (gen !== kreisGen) { return; }
+        kreis.eintraege = eintraege;
+        kreis.geprueftAm = Date.now();
+        renderKreis();
+      });
+    }).catch(function (err) {
+      if (gen !== kreisGen) { return; }
+      showError(err && err.code ? err.code : 'network');
+    });
+  }
+
+  /**
+   * Holt die Listen der Freunde: vier gleichzeitig, nachrueckend.
+   *
+   * Nicht seriell, weil apiGet kein Zeitlimit und kein Abbruchsignal kennt —
+   * ein haengender Abruf hielte alle uebrigen unbegrenzt auf. Nicht alle auf
+   * einmal, weil jeder Lesevorgang drueben einen eigenen PHP-Prozess belegt
+   * und Lesen ungedrosselt ist: throttle() steht in api.php nur bei create
+   * und ai, der Server kann sich also nicht wehren, die Schranke muss hier
+   * stehen. Vier ist kein gemessener Wert, sondern die Groessenordnung, die
+   * ein einzelner Reiter einem geteilten Host zumuten darf.
+   */
+  function ladeKreis(freunde, fortschritt) {
+    var eintraege = freunde.map(function (f) {
+      return { freund: f, doc: null, fehler: null, status: 0, langsam: false };
+    });
+    var naechster = 0;
+
+    function holen(pos) {
+      var e = eintraege[pos];
+      var uhr = setTimeout(function () {
+        e.langsam = true;
+        if (fortschritt) { fortschritt(e, pos); }
+      }, KREIS_LANGSAM);
+
+      /* Promise.resolve().then davor: Alles ab hier liegt hinter einem
+         Promise, auch ein synchroner Wurf. Sonst traegt das catch unten
+         nicht — und ein einziger Wurf risse die ganze Schleuse mit. */
+      return Promise.resolve().then(function () {
+        return Crypt.importKey(e.freund.key);
+      }).then(function (key) {
+        return Store.read(e.freund.id, 0).then(function (res) {
+          e.status = res.status;
+          if (res.status === 404) { throw new AppError('notfound'); }
+          if (res.status !== 200) { throw new AppError(mapError(res)); }
+          return Crypt.decrypt(key, res.body.payload, e.freund.id);
+        });
+      }).then(function (raw) {
+        e.doc = normalizeAny(raw, 'list', null);
+      }).catch(function (err) {
+        e.fehler = (err && err.code) ? err.code : 'network';
+      }).then(function () {
+        clearTimeout(uhr);
+        if (fortschritt) { fortschritt(e, pos); }
+      });
+    }
+
+    function schleuse() {
+      if (naechster >= eintraege.length) { return Promise.resolve(); }
+      var pos = naechster++;
+      return holen(pos).then(schleuse);
+    }
+
+    /* Weil das catch VOR dem abschliessenden then steht, kann holen() nie
+       ablehnen, also schleuse() nie, also Promise.all nie. Diese Zusage haelt
+       nur zusammen mit dem try/catch in Crypt.importKey. */
+    var laeufer = [];
+    var n = Math.min(KREIS_PAR, eintraege.length);
+    for (var i = 0; i < n; i++) { laeufer.push(schleuse()); }
+    return Promise.all(laeufer).then(function () { return eintraege; });
+  }
+
+  /* mapError wirft corrupt, busy, malformed und conflict alle auf 'network'.
+     Fuer die Frage "nochmal versuchen?" ist das zu grob: Ein 500 corrupt
+     aendert sich durch eine zweite Anfrage nicht. Deshalb entscheidet hier
+     der Status, nicht der uebersetzte Code. */
+  function kreisWiederholbar(e) {
+    if (e.fehler !== 'network') { return false; }
+    return !e.status || e.status === 0 || e.status >= 502;
+  }
+
+  /**
+   * Schreibt den Kreis. Kein Aufschub wie SAVE_DEBOUNCE: Die Aenderungen hier
+   * sind einzelne Ereignisse — aufnehmen, entfernen, den Titel verlassen.
+   * Damit braucht der Kreis weder touch() noch scheduleSave() noch einen
+   * Eintrag im beforeunload-Zuhoerer, und save() bleibt unberuehrt.
+   */
+  function kreisSave() {
+    if (!kreis.token || !kreis.doc) { return Promise.resolve(); }
+    var snapshot = JSON.parse(JSON.stringify(kreis.doc));
+    snapshot.v = SCHEMA_VERSION;
+    snapshot.kind = 'circle';
+    return Crypt.encrypt(kreis.key, snapshot, kreis.id).then(function (payload) {
+      return Store.write(kreis.id, kreis.proof, kreis.rev, payload).then(function (res) {
+        /* Bei Konflikt NICHT blind ueberschreiben wie save() es tut: Dort
+           geht eine Aenderung an derselben Liste verloren, hier ginge der
+           Ansehen-Link eines Freundes verloren, den es nur hier gab. Also
+           lesen, ueber die IDs zusammenfuehren, dann schreiben. */
+        if (res.status === 409 && res.body && typeof res.body.rev === 'number') {
+          return kreisZusammenfuehren(res.body.rev);
+        }
+        return res;
+      });
+    }).then(function (res) {
+      if (res && res.status === 200) { kreis.rev = res.body.rev; return; }
+      toast(t('error.' + mapError(res)));
+    }).catch(function (err) {
+      toast(t('error.' + (err && err.code ? err.code : 'network')));
+    });
+  }
+
+  function kreisZusammenfuehren(serverRev) {
+    return Store.read(kreis.id, 0).then(function (res) {
+      if (res.status !== 200) { throw new AppError(mapError(res)); }
+      return Crypt.decrypt(kreis.key, res.body.payload, kreis.id);
+    }).then(function (raw) {
+      var fremd = normalizeAny(raw, 'circle', kreis.id);
+      var haben = {};
+      kreis.doc.friends.forEach(function (f) { haben[f.id] = true; });
+      fremd.friends.forEach(function (f) {
+        if (!haben[f.id]) { kreis.doc.friends.push(f); }
+      });
+      kreis.rev = serverRev;
+      var snap = JSON.parse(JSON.stringify(kreis.doc));
+      snap.v = SCHEMA_VERSION;
+      snap.kind = 'circle';
+      return Crypt.encrypt(kreis.key, snap, kreis.id).then(function (p) {
+        return Store.write(kreis.id, kreis.proof, kreis.rev, p);
+      });
+    });
+  }
+
+  /**
+   * Nimmt, was der Nutzer eingefuegt hat, und behaelt davon nur id und key.
+   * Ein versehentlich eingefuegter Bearbeiten-Link wird angenommen und dabei
+   * abgewertet: Der dritte Teil faellt weg. Ein fremder Schreibzugang hat in
+   * einem Freundeskreis nichts zu suchen — und ihn abzulehnen hiesse, den
+   * Nutzer den Link von Hand kuerzen zu lassen.
+   * Ein Kreis-Link faellt schon am Praefix auf, vor jedem Netzzugriff. Eine
+   * Ebene, klar benannt: Die Aufloesung waere unbegrenzt in Tiefe und
+   * Anfragen und endlos bei einem Zyklus.
+   */
+  function parseFreundLink(text) {
+    var p = null;
+    try { p = parseFragment(text); } catch (e) { return { fehler: 'badlink' }; }
+    if (!p) { return { fehler: 'badlink' }; }
+    if (p.mode === 'circle') { return { fehler: 'nest' }; }
+    return { id: p.id, key: p.key };
+  }
+
+  function circleAdd() {
+    if (!kreis.doc || !kreis.token) { return; }
+    var feld = $('#circleAddLink');
+    var r = parseFreundLink(feld.value);
+    if (r.fehler === 'nest') { toast(t('circle.nestAdd')); return; }
+    if (r.fehler) { bemaengeln(feld, t('error.badlink')); return; }
+    if (r.id === kreis.id) { toast(t('circle.selfAdd')); return; }
+    var doppelt = kreis.doc.friends.some(function (f) { return f.id === r.id; });
+    if (doppelt) { toast(t('circle.dupAdd')); return; }
+    if (kreis.doc.friends.length >= MAX_FRIENDS) { toast(t('circle.full', { n: MAX_FRIENDS })); return; }
+
+    var neuer = { id: r.id, key: r.key, label: $('#circleAddName').value.slice(0, 60) };
+    kreis.doc.friends.push(neuer);
+    feld.value = '';
+    $('#circleAddName').value = '';
+    kreisSave();
+    renderKreisListe();
+    var gen = kreisGen;
+    /* Nur den neuen Eintrag holen, nicht alle: Der Rest steht schon. */
+    ladeKreis([neuer], null).then(function (neu) {
+      if (gen !== kreisGen) { return; }
+      kreis.eintraege.push(neu[0]);
+      renderKreisListe();
+    });
+  }
+
+  /**
+   * Entfernen: Ruecknahme statt Rueckfrage, wie beim Gegenstand. Erst nach
+   * Ablauf der Frist wird geschrieben — nicht speichern und dann
+   * wiederherstellen, das waeren zwei Schreibvorgaenge je Zug und bei jedem
+   * die Gefahr eines 409.
+   */
+  function circleRemove(id) {
+    if (!kreis.doc || !kreis.token) { return; }
+    var pos = -1, i;
+    for (i = 0; i < kreis.doc.friends.length; i++) {
+      if (kreis.doc.friends[i].id === id) { pos = i; break; }
+    }
+    if (pos < 0) { return; }
+    var weg = kreis.doc.friends.splice(pos, 1)[0];
+    var wegE = null;
+    for (i = 0; i < kreis.eintraege.length; i++) {
+      if (kreis.eintraege[i] && kreis.eintraege[i].freund.id === id) { wegE = kreis.eintraege.splice(i, 1)[0]; break; }
+    }
+    renderKreisListe();
+    var frist = setTimeout(function () { kreisSave(); }, UNDO_MS);
+    toast(t('circle.removed'), {
+      label: t('circle.undo'),
+      run: function () {
+        clearTimeout(frist);
+        kreis.doc.friends.splice(pos, 0, weg);
+        if (wegE) { kreis.eintraege.push(wegE); }
+        renderKreisListe();
+      }
+    });
+  }
+
+  /** Wie mineWorks(), nur fuer den Kreis: Im privaten Fenster schlaegt das
+      Merken fehl, dann darf es auch niemand versprechen. */
+  function kreisGemerkt() {
+    return readMine().some(function (it) { return it.id === kreis.id; });
+  }
+
+  /**
+   * Legt einen Freundeskreis an. Kein feierZugang(): Das zaehlt g.listen hoch
+   * und feiert mit einer Stufe; ein Freundeskreis ist keine angelegte Liste.
+   * Die Knoepfe tragen auch kein data-create — createButtons() schriebe sonst
+   * beim Anlegen einer gewoehnlichen Liste "Liste wird angelegt …" darauf.
+   */
+  function createCircle(danach) {
+    var id = randomHex(16);
+    var token = randomToken(24);
+    var doc = emptyCircle();
+    doc.title = t('circle.newTitle');
+    var keyRef = null;
+    return Crypt.generateKey().then(function (key) {
+      keyRef = key;
+      return Promise.all([Crypt.exportKey(key), Crypt.proof(token), Crypt.encrypt(key, doc, id)]);
+    }).then(function (parts) {
+      return Store.create(id, parts[1], parts[2]).then(function (res) {
+        if (res.status !== 200) { throw new AppError(mapError(res)); }
+        kreisGen++;
+        kreis.id = id; kreis.key = keyRef; kreis.keyStr = parts[0];
+        kreis.token = token; kreis.proof = parts[1];
+        kreis.rev = res.body.rev; kreis.doc = doc;
+        kreis.eintraege = []; kreis.zeilen = []; kreis.geprueftAm = 0;
+        state.mode = 'circle';
+        state.doc = null;
+        stopRefresh();
+        /* replaceState loest kein hashchange aus; route() laeuft also nicht,
+           und das Zeichnen steht hier ausdruecklich daneben. */
+        history.replaceState(null, '', circleHash(id, parts[0], token));
+        rememberList();
+        if (danach) { danach(); }
+        renderKreis();
+        $('#circleKeyLink').value = circleLink();
+        $('#chkCircleKeyDone').checked = false;
+        $('#circleKeyBox').hidden = false;
+        $('#circleKeyRemember').hidden = !kreisGemerkt();
+      });
+    }).catch(function (err) {
+      toast(t('error.' + (err && err.code ? err.code : 'network')));
+    });
+  }
+
+  /**
+   * Der Knopf unter dem Inventar einer Freundesliste. Drei Faelle, und keiner
+   * davon fragt zurueck: Es gibt genau einen gemerkten Kreis, keinen, oder
+   * mehrere. Bei mehreren gilt der zuletzt angefasste — readMine() haelt die
+   * Reihenfolge.
+   */
+  function circleAddHere() {
+    if (state.mode !== 'view' || !state.id || !state.keyStr) { return; }
+    var mich = { id: state.id, key: state.keyStr, label: (state.doc && state.doc.contact.name) || '' };
+    var kreise = readMine().filter(function (it) { return it.kind === 'circle'; });
+
+    /* Kein gemerkter Kreis: Es entsteht einer, und die Ansicht wechselt
+       hinein — anders bekaeme der Nutzer den Zugangskasten nie zu sehen, und
+       dieser Link ist das Einzige, was den neuen Kreis wiederfindet. */
+    if (!kreise.length) {
+      createCircle(function () {
+        kreis.doc.friends.push(mich);
+        kreisSave();
+      }).then(function () {
+        /* Der Kreis haelt keine Kopie fremder Inhalte, auch nicht die der
+           gerade offenen Liste. Die Gegenstaende muessen also geholt werden,
+           sonst bliebe die frische Uebersicht bis zum naechsten
+           Aktualisieren leer. */
+        if (!kreis.doc) { return; }
+        var gen = kreisGen;
+        return ladeKreis([mich], null).then(function (neu) {
+          if (gen !== kreisGen) { return; }
+          kreis.eintraege.push(neu[0]);
+          renderKreisListe();
+        });
+      });
+      return;
+    }
+
+    /* Es gibt schon einen: Bei mehreren gilt der zuletzt angefasste,
+       readMine() haelt die Reihenfolge. Die Ansicht bleibt stehen, wo sie
+       ist; eine Meldung bestaetigt es. */
+    var ziel = kreise[0];
+    var parsed = null;
+    try { parsed = parseFragment(ziel.hash); } catch (e) { parsed = null; }
+    if (!parsed || parsed.mode !== 'circle') { toast(t('error.badlink')); return; }
+
+    var gen = ++kreisGen;
+    kreisHolen(parsed, gen).then(function (doc) {
+      if (gen !== kreisGen || !doc) { return; }
+      if (doc.friends.some(function (f) { return f.id === mich.id; })) {
+        toast(t('circle.dupAdd'));
+        return kreisRaeumen();
+      }
+      if (doc.friends.length >= MAX_FRIENDS) {
+        toast(t('circle.full', { n: MAX_FRIENDS }));
+        return kreisRaeumen();
+      }
+      doc.friends.push(mich);
+      return kreisSave().then(function () {
+        toast(t('circle.added', { kreis: doc.title || t('circle.untitled') }));
+        /* Aufraeumen, obwohl die Uebersicht gar nicht offen war: Sonst bliebe
+           ein Kreis-Dokument ohne geholte Freunde stehen, und der Kurzweg in
+           route() zeigte beim naechsten Oeffnen eine leere Uebersicht. */
+        kreisRaeumen();
+      });
+    }).catch(function (err) {
+      toast(t('error.' + (err && err.code ? err.code : 'network')));
+      kreisRaeumen();
     });
   }
 
@@ -2764,7 +3792,7 @@
       return Crypt.decrypt(state.key, res.body.payload, state.id).then(function (raw) {
         state.rev = res.body.rev;
         state.updated = res.body.updated;
-        state.doc = normalizeDoc(raw);
+        state.doc = normalizeAny(raw, 'list', null);
         render();
         if (manual) { toast(t('status.refreshed')); }
       });
@@ -2802,8 +3830,10 @@
   }
 
   function deleteList() {
-    if (state.mode !== 'edit') { return; }
-    if (!window.confirm(t('settings.deleteConfirm'))) { return; }
+    if (state.mode !== 'edit' && state.mode !== 'circle') { return; }
+    /* Der Rest arbeitet unveraendert: Er braucht nur state.id und
+       state.proof, und initSettings setzt beide auch fuer einen Kreis. */
+    if (!window.confirm(t(state.mode === 'circle' ? 'circle.deleteConfirm' : 'settings.deleteConfirm'))) { return; }
     Store.remove(state.id, state.proof).then(function (res) {
       if (res.status !== 200) { throw new AppError(mapError(res)); }
       forgetList(state.id);
@@ -3362,6 +4392,9 @@
           /* Der Bearbeiten-Link ist der geheime. Er wird nie gezaehlt und nie
              gefeiert — ihn weiterzugeben waere das Gegenteil dessen, was
              gefeiert gehoert. */
+          /* Der Kreis hat nur einen Link, und er ist geheim; "Bearbeiten-Link
+             kopiert" waere dort das falsche Wort. */
+          if (ziel === 'circleKeyLink' || ziel === 'circleLink') { toast(t('circle.copied')); return; }
           if (ziel !== 'linkView') { toast(t('share.copiedEdit')); return; }
           if (state.mode !== 'edit') { toast(t('share.copied')); return; }
           var vorher = spielRead().weiter;
@@ -3376,6 +4409,81 @@
       var hidden = input.type === 'password';
       input.type = hidden ? 'text' : 'password';
       this.textContent = t(hidden ? 'share.hide' : 'share.reveal');
+    });
+
+    /* ---------------------------------------------------------------- *
+     * Freundeskreis
+     * ---------------------------------------------------------------- */
+
+    $('#btnRevealCircle').addEventListener('click', function () {
+      var input = $('#circleLink');
+      var hidden = input.type === 'password';
+      input.type = hidden ? 'text' : 'password';
+      this.textContent = t(hidden ? 'share.hide' : 'share.reveal');
+    });
+
+    /* Spiegelbildlich zu #chkKeyDone, aber ohne feierZugang(): Ein
+       Freundeskreis ist keine angelegte Liste. */
+    $('#chkCircleKeyDone').addEventListener('change', function () {
+      if (!this.checked) { return; }
+      $('#circleKeyBox').hidden = true;
+    });
+    $('#chkCircleKeyDone').addEventListener('keydown', function (ev) {
+      if (ev.key !== 'Enter' || this.checked) { return; }
+      ev.preventDefault();
+      this.checked = true;
+      this.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    /* Der eigene Knopf, weil #btnRefresh in #viewList liegt und refresh()
+       bei state.mode !== 'view' ohnehin sofort zurueckkehrt. */
+    $('#btnCircleRefresh').addEventListener('click', function () {
+      if (!kreis.id || !kreis.keyStr) { return; }
+      oeffneKreis({ mode: 'circle', id: kreis.id, key: kreis.keyStr, token: kreis.token });
+    });
+
+    $('#circleQ').addEventListener('input', filterKreis);
+    $('#btnCircleReset').addEventListener('click', function () {
+      $('#circleQ').value = '';
+      filterKreis();
+      $('#circleQ').focus();
+    });
+
+    /* Kein touch()/scheduleSave(): Der Kreis kennt keinen Aufschub. Der
+       Titel wird beim Verlassen des Feldes geschrieben, nicht bei jedem
+       Zeichen — sonst waere jeder Tastendruck ein Schreibvorgang. */
+    $('#circleTitleInput').addEventListener('input', function () {
+      if (kreis.doc) { kreis.doc.title = this.value; }
+    });
+    $('#circleTitleInput').addEventListener('change', function () {
+      if (!kreis.doc) { return; }
+      kreis.doc.title = this.value;
+      $('#circleTitleRead').textContent = kreis.doc.title || t('circle.untitled');
+      rememberList();
+      kreisSave();
+    });
+
+    $('#btnCircleAdd').addEventListener('click', circleAdd);
+    $('#btnCircleAddHere').addEventListener('click', circleAddHere);
+    $('#btnStartCircle').addEventListener('click', function () { createCircle(null); });
+
+    /* Delegation fuer den Aufklapper: Entfernen und erneut versuchen. */
+    $('#circleFriends').addEventListener('click', function (ev) {
+      var hit = ev.target.closest('[data-kreis-act]');
+      if (!hit) { return; }
+      var id = hit.getAttribute('data-kreis-id');
+      if (hit.getAttribute('data-kreis-act') === 'remove') { circleRemove(id); return; }
+      var f = null;
+      kreis.doc.friends.forEach(function (x) { if (x.id === id) { f = x; } });
+      if (!f) { return; }
+      var gen = kreisGen;
+      ladeKreis([f], null).then(function (neu) {
+        if (gen !== kreisGen) { return; }
+        for (var i = 0; i < kreis.eintraege.length; i++) {
+          if (kreis.eintraege[i] && kreis.eintraege[i].freund.id === id) { kreis.eintraege[i] = neu[0]; break; }
+        }
+        renderKreisListe();
+      });
     });
 
     /* Ungespeicherte Änderungen vor dem Verlassen wegschreiben. */
@@ -3403,9 +4511,9 @@
   function updateSettingsLink() {
     var link = $('#lnkSettings');
     if (!link) { return; }
-    var hash = (state.mode === 'edit' && state.id && state.token)
-      ? editHash(state.id, state.keyStr, state.token)
-      : '';
+    var hash = '';
+    if (state.mode === 'circle' && kreis.id && kreis.token) { hash = circleHash(kreis.id, kreis.keyStr, kreis.token); }
+    else if (state.mode === 'edit' && state.id && state.token) { hash = editHash(state.id, state.keyStr, state.token); }
     link.setAttribute('href', 'einstellungen.html' + hash);
   }
 
@@ -3415,14 +4523,31 @@
     catch (err) { showError(err.code || 'badlink'); return; }
 
     if (!parsed) {
+      /* Ein Fragment, das kein Zugangslink ist, ist ein Seitenanker und kein
+         Ortswechsel. Der Sprunglink (Ziel #main) hat keinen eigenen Zuhoerer;
+         ohne diese Zeile raeumte er die offene Ansicht weg — bei einer Liste
+         kostete das einen Abruf, beim Freundeskreis alle. MINE_HASH bleibt
+         ausgenommen, es lebt davon, dass parseHash hier null liefert. */
+      if (location.hash && location.hash !== MINE_HASH && (state.doc || kreis.doc)) { return; }
       stopRefresh();
       state.mode = 'start';
+      state.doc = null;
       renderMine();
       showView('viewStart');
       /* Nach dem Zeichnen, denn showView() setzt den Rollstand zurueck. */
       if (location.hash === MINE_HASH) { setTimeout(zeigeMeine, 0); }
       return;
     }
+
+    if (parsed.mode === 'circle') {
+      /* Kurzweg wie unten, aber gegen kreis.doc: state.doc bleibt im Kreis
+         null, der Vergleich darunter griffe also nie und jeder hashchange
+         schickte den Kreis erneut durchs Netz. */
+      if (kreis.id === parsed.id && kreis.doc) { renderKreis(); return; }
+      oeffneKreis(parsed);
+      return;
+    }
+
     /* Bereits geladene Liste nicht erneut anfordern. */
     if (state.id === parsed.id && state.mode === parsed.mode && state.doc) {
       render();
@@ -3500,11 +4625,15 @@
        dann gibt es hier etwas zu löschen. */
     var parsed = null;
     try { parsed = parseHash(); } catch (err) { parsed = null; }
-    var back = (parsed && parsed.mode === 'edit')
-      ? './' + editHash(parsed.id, parsed.key, parsed.token)
-      : './';
+    var zugang = !!parsed && (parsed.mode === 'edit' || parsed.mode === 'circle');
+    var back = './';
+    if (zugang) {
+      back = './' + (parsed.mode === 'circle'
+        ? circleHash(parsed.id, parsed.key, parsed.token)
+        : editHash(parsed.id, parsed.key, parsed.token));
+    }
     $('#lnkBack').setAttribute('href', back);
-    if (!parsed || parsed.mode !== 'edit') {
+    if (!zugang) {
       /* Das Merkmal wird getauscht, nicht der Text: sonst überschreibt der
          nächste Sprachwechsel die Beschriftung wieder. */
       $('#lnkBack').setAttribute('data-i18n', 'settings.backStart');
@@ -3518,9 +4647,12 @@
       Store = store;
       applyStaticI18n();
       updateVoiceHint();
-      if (!parsed || parsed.mode !== 'edit') { return; }
+      if (!zugang) { return; }
 
-      state.mode = 'edit';
+      /* Die Einstellungsseite entschluesselt nichts. Welche Art dort liegt,
+         weiss sie allein aus dem Praefix — das genuegt fuer den Loeschtext
+         und fuer den Rueckweg. */
+      state.mode = parsed.mode;
       state.id = parsed.id;
       state.keyStr = parsed.key;
       state.token = parsed.token;

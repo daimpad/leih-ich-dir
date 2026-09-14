@@ -35,9 +35,10 @@ php -S localhost:8000                                # Anwendung starten
 find . -name '*.php' -print0 | xargs -0 -n1 php -l   # PHP-Syntax
 node --check app.js                                  # JavaScript-Syntax
 php tests/api-test.php                               # Funktionstest des Backends
+node tools/i18n-check.js                             # beide Wörterbücher vollständig
 ```
 
-Alle drei Prüfungen laufen als GitHub-Action; ein Pull Request sollte sie
+Alle vier Prüfungen laufen als GitHub-Action; ein Pull Request sollte sie
 bestehen. Der Funktionstest deckt bislang nur das Backend ab. Änderungen an der
 Oberfläche bitte zusätzlich manuell durchspielen: Liste anlegen, Gegenstand
 hinzufügen, Status wechseln, Ansehen-Link in einem zweiten Browserprofil öffnen,
@@ -104,13 +105,14 @@ Sichtbare Texte folgen diesen Regeln:
 - Kurze Hauptsätze, konkret vor allgemein.
 - Keine Gedankenstriche im Fließtext, dort steht ein Komma. Bei Paaren aus
   Label und Wert steht ein Mittelpunkt.
-- Keine Ausrufezeichen. Zwei eng gefasste Ausnahmen, beide nur innerhalb der
-  Listenansicht: die Überschrift des Zugangskastens, weil ein verlorener
-  Bearbeiten-Link die Liste kostet, und die Klappenzeilen der höchsten
-  Feierstufe, also der Stufenaufstieg und die laut gefeierte Heimkehr. Von den
-  rund dreißig Feiertexten tragen zwei eines. Startseite, Einstellungen,
-  Hinweise, Abzeichentexte, Rundenbuch und jede Fehlermeldung bleiben ohne.
-  Ein Ausrufezeichen, das überall steht, ruft nirgends mehr.
+- Keine Ausrufezeichen. Drei eng gefasste Ausnahmen: die Überschrift des
+  Zugangskastens einer Liste, weil ein verlorener Bearbeiten-Link die Liste
+  kostet; die Klappenzeilen der höchsten Feierstufe, also der Stufenaufstieg
+  und die laut gefeierte Heimkehr; und der erste Satz des Aufrufs auf der
+  Startseite. Von den rund dreißig Feiertexten tragen zwei eines. Der
+  Zugangskasten des Freundeskreises hat bewusst keines bekommen, und
+  Einstellungen, Hinweise, Abzeichentexte, Rundenbuch und jede Fehlermeldung
+  bleiben ohne. Ein Ausrufezeichen, das überall steht, ruft nirgends mehr.
 - Deutsches Wort vor Anglizismus, wo es eines gibt: Schaltfläche statt Button.
 - Keine Werbewörter.
 

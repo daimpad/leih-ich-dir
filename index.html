@@ -416,10 +416,23 @@
          zum ersten Mal hier ist, soll den Weg nach vorn sehen, und wer
          wiederkommt, findet seine Liste dort, wo er hinunterscrollt. Rein
          lokal, kein Konto, und nur sichtbar, wenn es etwas zu zeigen gibt. -->
-    <section class="mine" id="mineBox" hidden>
+    <!-- translate="no" nur auf diesem Kasten, nicht auf der ganzen
+         Startseite: Hier stehen entschluesselte Titel, mit dem Freundeskreis
+         kuenftig auch der Name eines Personenkreises. Der uebrige Aufruf
+         traegt kein Geheimnis, und wer weder Deutsch noch Englisch liest,
+         soll ihn uebersetzen koennen. -->
+    <section class="mine" id="mineBox" hidden translate="no">
       <h2 data-i18n="mine.headline">Deine Listen auf diesem Gerät</h2>
       <ul id="mineList"></ul>
     </section>
+
+    <!-- Der zweite Einstieg in den Freundeskreis. Er steht hier, weil der
+         erste in der Liste eines Freundes sitzt und den noch nicht erreicht,
+         wer gerade zum ersten Mal hier ist. renderMine() schaltet ihn vor
+         seiner vorzeitigen Rueckkehr. -->
+    <p class="actions spaced-lg" id="startCircleRow" hidden>
+      <button type="button" id="btnStartCircle" class="linkbtn" data-i18n="circle.startNew">Freundeskreis anlegen</button>
+    </p>
 
 
   </section>
@@ -526,6 +539,12 @@
         </p>
       </div>
     </section>
+
+    <!-- Nur im Ansehen-Modus, also in der Liste eines Freundes. Darunter ist
+         dort Platz: #shareBox, #addForm und #contactBox sind verborgen. -->
+    <p class="actions spaced-lg" id="circleAddHereRow" hidden>
+      <button type="button" id="btnCircleAddHere" class="linkbtn" data-i18n="circle.addHere">Zum Freundeskreis hinzufügen</button>
+    </p>
 
     <!-- 3 · Kontakt, zugeklappt: erst nötig, wenn jemand anfragen soll -->
     <details class="fold" id="contactBox" hidden>
@@ -643,6 +662,141 @@
         </div>
       </div>
 
+    </section>
+
+  </section>
+
+  <!-- ==================================================================== -->
+  <!-- Freundeskreis: die Gegenstaende aller gesammelten Listen              -->
+  <!-- ==================================================================== -->
+  <!-- translate="no" aus demselben Grund wie bei #viewList: Hier steht die
+       dichteste Ansammlung entschluesselten Fremdmaterials der ganzen
+       Anwendung — Gegenstandsnamen, Notizen und Personennamen aller Freunde.
+       Die Uebersetzungsfunktion des Browsers reichte genau das an Google oder
+       Apple weiter; die CSP hilft dagegen nicht. -->
+  <section id="viewCircle" class="view" hidden translate="no">
+
+    <div class="titleblock">
+      <div class="titlerow">
+        <h1 id="circleTitleRead" hidden></h1>
+        <label class="title-edit" hidden id="circleTitleWrap">
+          <span class="sr-only" data-i18n="circle.titleLabel">Name des Freundeskreises, freiwillig</span>
+          <input type="text" id="circleTitleInput" class="input title-input" maxlength="80"
+                 data-i18n-placeholder="circle.titlePlaceholder" placeholder="Freundeskreis">
+        </label>
+      </div>
+      <p class="titlemeta"><span id="circleMeta"></span></p>
+    </div>
+
+    <!-- Die Ehrlichkeitszeile. Fest, nicht schliessbar, kein Aufklapper: Eine
+         sichtbare Zeile ist eine, die ohne Zutun dasteht. Kein note--warn —
+         Bernstein bedeutet in dieser Anwendung Verleihung und Zugangslink,
+         hier ist nichts schiefgegangen. -->
+    <div class="note" id="circleTruth">
+      <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-info"/></svg>
+      <div><p data-i18n="circle.honest"></p></div>
+    </div>
+
+    <!-- Hinweis im Vorschaumodus, geschaltet von renderKreis(). -->
+    <div class="note" id="circlePreview" hidden>
+      <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-info"/></svg>
+      <div><p data-i18n="circle.previewNote"></p></div>
+    </div>
+
+    <section class="card" id="circleBox">
+      <div class="items-head">
+        <h2 class="card__title" data-i18n="circle.itemsHeadline">Was es gibt</h2>
+        <span id="circleChecked" class="checked"></span>
+        <button type="button" id="btnCircleRefresh" class="btn btn--ghost btn--icon">
+          <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-refresh"/></svg>
+          <span class="sr-only" data-i18n="items.refresh">Aktualisieren</span>
+        </button>
+      </div>
+
+      <!-- Kein <form>: Die Eingabetaste soll hier nichts ausloesen, gefiltert
+           wird bei jedem Zeichen. type="text" und nicht "search": Der native
+           Loeschknopf braucht in Safari eigene Zuruecksetzung, und dafuer
+           gaebe es hier keinen Baustein. -->
+      <div class="field">
+        <label class="sr-only" for="circleQ" data-i18n="circle.searchLabel">Suchen</label>
+        <input type="text" id="circleQ" class="input" autocomplete="off"
+               data-i18n-placeholder="circle.searchPlaceholder" placeholder="Suchen">
+        <p class="hint" id="circleCount" role="status" aria-live="polite"></p>
+      </div>
+
+      <ul id="circleItems" class="items items--kreis"></ul>
+
+      <!-- Drei verschiedene Leerzustaende, drei Knoten: gar keine Freunde,
+           Freunde ohne Gegenstaende, und nichts gefunden. -->
+      <div id="circleEmptyNone" class="empty" hidden>
+        <svg class="empty-face" aria-hidden="true" focusable="false"><use href="#i-face-wart"/></svg>
+        <h3 class="empty-head" data-i18n="circle.emptyNoneHead">Noch niemand dabei</h3>
+        <p data-i18n="circle.emptyNoneText"></p>
+      </div>
+      <div id="circleEmptyAll" class="empty" hidden>
+        <svg class="empty-face" aria-hidden="true" focusable="false"><use href="#i-face-wart"/></svg>
+        <h3 class="empty-head" data-i18n="circle.emptyAllHead">Nichts eingetragen</h3>
+        <p data-i18n="circle.emptyAllText"></p>
+      </div>
+      <p class="hint" id="circleEmptyHit" hidden>
+        <span data-i18n="circle.noHit">Nichts gefunden.</span>
+        <button type="button" id="btnCircleReset" class="linkbtn" data-i18n="circle.reset">Suche zurücksetzen</button>
+      </p>
+    </section>
+
+    <!-- Verwalten: aufnehmen und entfernen. Zugeklappt, weil die Uebersicht
+         der Zweck ist und das Verwalten der Anlass. -->
+    <details class="fold" id="circleManage">
+      <summary><span data-i18n="circle.manageHeadline">Freunde verwalten</span></summary>
+      <div class="fold__body">
+        <div class="field">
+          <label for="circleAddLink" data-i18n="circle.addLabel">Ansehen-Link eines Freundes</label>
+          <div class="addrow">
+            <input type="text" id="circleAddLink" class="input" autocomplete="off"
+                   data-i18n-placeholder="circle.addPlaceholder" placeholder="Link einfügen">
+            <button type="button" id="btnCircleAdd" class="btn btn--primary" data-i18n="circle.add">Aufnehmen</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="circleAddName" data-i18n="circle.addName">Name der Person, freiwillig</label>
+          <input type="text" id="circleAddName" class="input" maxlength="60" autocomplete="off">
+        </div>
+        <ul id="circleFriends" class="items"></ul>
+      </div>
+    </details>
+
+    <!-- Der Zugang zum Kreis. Erscheint einmal nach dem Anlegen und bleibt
+         stehen, bis er ausdrücklich bestätigt wurde. -->
+    <section class="keybox" id="circleKeyBox" hidden>
+      <h2 class="keybox__title" data-i18n="circle.keyHeadline">Bewahre diesen Link auf</h2>
+      <div class="spaced-lg linkrow">
+        <label class="sr-only" for="circleKeyLink" data-i18n="circle.keyLabel">Zugangs-Link des Freundeskreises</label>
+        <input type="text" id="circleKeyLink" class="input mono" readonly>
+        <button type="button" class="btn btn--primary" data-copy="circleKeyLink" data-i18n="share.copy">Kopieren</button>
+      </div>
+      <p class="hint keybox__remember" id="circleKeyRemember" data-i18n="circle.keyRemember"></p>
+      <p class="spaced-lg">
+        <label class="check keybox__check">
+          <input type="checkbox" id="chkCircleKeyDone">
+          <span class="check__box" aria-hidden="true"></span>
+          <span data-i18n="key.done">Ich habe den Link gesichert</span>
+        </label>
+      </p>
+    </section>
+
+    <!-- Weitergeben. Keine Reiter: Es gibt nur einen Link, und die Warnung
+         daneben ist der Grund, warum er nur einen hat. -->
+    <section class="card" id="circleShareBox" hidden>
+      <div class="card__head">
+        <h2 class="card__title" data-i18n="circle.shareHeadline">Freundeskreis weitergeben</h2>
+      </div>
+      <p class="hint" data-i18n="circle.shareWarn"></p>
+      <div class="spaced linkrow">
+        <label class="sr-only" for="circleLink" data-i18n="circle.shareLabel">Link zum Freundeskreis</label>
+        <input type="password" id="circleLink" class="input mono" readonly>
+        <button type="button" class="btn" id="btnRevealCircle" data-i18n="share.reveal">Zeigen</button>
+        <button type="button" class="btn btn--primary" data-copy="circleLink" data-i18n="share.copy">Kopieren</button>
+      </div>
     </section>
 
   </section>

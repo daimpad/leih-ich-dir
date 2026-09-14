@@ -128,7 +128,8 @@
     <p>
       Gegenstände, Notizen, Namen von Ausleihenden und die hinterlegten
       Kontaktangaben werden im Browser mit AES-GCM verschlüsselt, bevor sie den
-      Rechner verlassen. Der Server speichert ausschließlich diese
+      Rechner verlassen. Dasselbe gilt im Freundeskreis für die Ansehen-Links
+      fremder Listen und für die Namen, die Du ihnen gibst. Der Server speichert ausschließlich diese
       unlesbaren Zeichenketten. Der Schlüssel steht hinter dem Rautezeichen der
       Adresse und wird von Browsern nicht an den Server übertragen. Der Betrieb
       kann die Inhalte daher nicht einsehen. Das gilt auch für die Vorschaukarte,
@@ -158,7 +159,17 @@
       installationsspezifischen Salz gehasht und nur dieser Hash zusammen mit
       einem Zähler gespeichert. Die Adresse selbst wird nicht abgelegt. Die
       Zähler werden nach Ablauf des Zeitfensters entfernt. Darüber hinaus gelten
-      die üblichen Protokolle des Webservers.
+      die üblichen Protokolle des Webservers. Sie enthalten je Abruf Zeitpunkt,
+      IP-Adresse, aufgerufene Adresse und Kennung der Liste, nicht aber deren
+      Inhalt. Wie lange der Hoster sie aufbewahrt, steht in dessen Bedingungen;
+      der Betrieb dieser Anwendung wertet sie nicht aus.
+    </p>
+    <p>
+      Der Freundeskreis hinterlässt darin eine Spur, die einzelne Aufrufe nicht
+      hinterlassen. Beim Öffnen ruft der Browser jede gesammelte Liste einzeln
+      ab. Im Protokoll stehen diese Abrufe nebeneinander, mit derselben Adresse
+      im selben Augenblick. Die Inhalte sind daraus nicht ablesbar, die
+      Zusammengehörigkeit der Listen schon.
     </p>
 
     <h3 class="settings-sub">Keine Cookies, kein Tracking</h3>
@@ -170,13 +181,34 @@
       entfernen.
     </p>
     <p>
-      Dasselbe gilt für die selbst angelegten Listen: Wer eine Liste anlegt oder
-      über ihren Bearbeiten-Link öffnet, findet sie auf der Startseite dieses
-      Browsers wieder. Dafür hält der lokale Speicher den Bearbeiten-Link samt
+      Dasselbe gilt für die selbst angelegten Listen und Freundeskreise: Wer
+      eine Liste oder einen Freundeskreis anlegt oder über den zugehörigen Link
+      öffnet, findet beides auf der Startseite dieses Browsers wieder. Dafür hält der lokale Speicher den Bearbeiten-Link samt
       Schlüssel fest — dieselbe Angabe, die ohnehin im Verlauf des Browsers
       steht. Sie verlässt das Gerät nicht und verschwindet mit
       <em>Zwischenspeicher löschen</em>. Auf fremden oder geteilten Geräten ist
       das ein Grund, diesen Punkt nach der Benutzung aufzurufen.
+    </p>
+
+    <h3 class="settings-sub">Freundeskreis</h3>
+    <p>
+      Ein Freundeskreis sammelt die Ansehen-Links mehrerer Listen und zeigt
+      deren Gegenstände in einer gemeinsamen Übersicht. Er ist selbst eine
+      verschlüsselte Liste und liegt genauso auf dem Server wie jede andere.
+      Was er enthält, sind Kennung und Schlüssel der gesammelten Listen sowie
+      die Namen, die Du ihnen gibst, und nichts davon kann der Betrieb lesen.
+      Gegenstände, Titel und Kontaktangaben der gesammelten Listen werden bei
+      jedem Öffnen frisch geholt und nirgends abgelegt.
+    </p>
+    <p>
+      Hier verarbeitest Du Angaben über andere Personen. Der Datensatz einer
+      Liste auf dem Server besteht aus Version, Nachweis-Hash, Revision,
+      Anlage- und Änderungszeit und dem verschlüsselten Inhalt. Eine
+      Verknüpfung zwischen zwei Listen entsteht dort nicht, und es ist auch
+      niemand hinterlegt, der sich benachrichtigen ließe. Die Personen, deren
+      Listen in einem Freundeskreis stehen, erfahren davon deshalb nichts. Wer
+      seinen Ansehen-Link zurückziehen möchte, löscht die Liste über den
+      eigenen Bearbeiten-Link oder legt sie unter einem neuen Link an.
     </p>
 
     <h3 class="settings-sub">Spracheingabe</h3>
@@ -227,7 +259,10 @@
       Eine Liste lässt sich jederzeit über den Bearbeiten-Link selbst löschen,
       dann wird die Datei auf dem Server entfernt. Listen, die ein Jahr lang
       nicht mehr geändert wurden, werden automatisch gelöscht; das erledigt ein
-      Wartungsskript, das täglich läuft. Die Zähler der Mengenbegrenzung werden
+      Wartungsskript, das täglich läuft. Maßgeblich ist der letzte
+      Schreibvorgang, nicht der letzte Aufruf: Ein Freundeskreis, den jemand
+      täglich öffnet, aber ein Jahr lang nicht ergänzt, fällt unter diese
+      Frist. Die Zähler der Mengenbegrenzung werden
       nach einer Stunde entfernt.
     </p>
     <p>
