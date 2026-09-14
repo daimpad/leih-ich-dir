@@ -31,7 +31,11 @@
   --surface-alt: #F4F0E8;
   --ink:         #1B1813;
   --muted:       #6B6459;
-  --faint:       #968F83;
+  /* 4,95:1 auf --paper, 5,19:1 auf --surface, 4,57:1 auf --surface-alt.
+     Der vorige Wert #968F83 kam auf 3,05, 3,20 und 2,82 und fiel damit
+     unter die Schwelle von 4,5:1 — und zwar fuer jede Notiz, jeden
+     Zeitstempel und jeden Platzhalter im Formular. */
+  --faint:       #736C60;
   --line:        #EAE3D8;
   --line-firm:   #D9D0C1;
 
@@ -92,7 +96,7 @@
     --surface-alt: #2A251E;
     --ink:         #F7F3EA;
     --muted:       #B6AE9F;
-    --faint:       #8C8577;
+    --faint:       #978F80;
     --line:        #322C24;
     --line-firm:   #453E33;
     --green:       #3FCE96;
@@ -115,7 +119,7 @@
   --surface-alt: #2A251E;
   --ink:         #F7F3EA;
   --muted:       #B6AE9F;
-  --faint:       #8C8577;
+  --faint:       #978F80;
   --line:        #322C24;
   --line-firm:   #453E33;
   --green:       #3FCE96;
@@ -556,7 +560,10 @@ header.site { padding-block: var(--s-4); }
   box-shadow: var(--shadow);
 }
 .keybox__title { font-size: 1.6rem; color: var(--amber); }
-.keybox .hint { color: var(--amber); opacity: .85; margin-top: var(--s-2); }
+/* Ohne Deckkraft: .85 druecke den Hinweis auf 3,55:1, ohne sie steht er
+   bei 4,63:1. Leiser wird er ueber die Groesse, nicht ueber die Deckkraft —
+   Deckkraft kostet Kontrast, Groesse nicht. */
+.keybox .hint { color: var(--amber); margin-top: var(--s-2); }
 /* Nebenbemerkung, kein zweiter Hinweis: klein und in einer Zeile, damit sie
    dem Link daneben nicht das Gewicht nimmt. */
 .keybox .keybox__remember { font-size: .74rem; margin-top: var(--s-1); }
