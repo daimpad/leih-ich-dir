@@ -227,6 +227,20 @@ Ladezeit: Ein Aufruf von `fonts.gstatic.com` würde die IP-Adresse jeder
 Besucherin an einen Dritten übertragen, und die Content Security Policy
 unterbindet das ohnehin.
 
+### Schmuckbild
+
+Am oberen Rand hängt eine Katzenpfote, die ihre eigene Leihliste hält —
+Wollknäuel, Fischgräte, Futternapf, Maus. Sie steht bei 14 Prozent Deckkraft
+hinter dem Inhalt, bleibt beim Blättern stehen (`position: fixed`) und nimmt
+keine Klicks an. Unter 64 rem Fensterbreite entfällt sie, weil neben der
+660 Pixel breiten Spalte dann kein Platz mehr ist.
+
+Ein fest gesetztes Element liegt ohne Zutun über dem Inhalt: Es eröffnet
+einen eigenen Stapelzusammenhang und steht damit vor allem, was nicht selbst
+positioniert ist. Statt es mit `z-index: -1` hinter den Grund des Körpers zu
+schieben, wo es unsichtbar wäre, bekommen Kopfleiste, Inhalt und Fußzeile
+eine eigene Ebene darüber.
+
 ## Runden, Abzeichen und Stufen
 
 Die Anwendung feiert nicht jede Handlung, sondern jede Premiere. Eine Funktion
@@ -295,7 +309,8 @@ weniger Bewegung, nicht weniger Anerkennung.
 ├── api.php                       Flat-File-Backend, optional mit KI-Proxy
 ├── .htaccess                     Sicherheits-Header, Sperren für Punktdateien
 ├── assets/
-│   └── fonts/                    WOFF2-Teilmengen und ihre @font-face-Regeln
+│   ├── fonts/                    WOFF2-Teilmengen und ihre @font-face-Regeln
+│   └── pics/pfote.svg            Schmuckbild: eine Pfote mit ihrer Leihliste
 ├── data/                         Laufzeitdaten, nicht im Repository
 │   ├── .htaccess                 verbietet jeden HTTP-Zugriff
 │   ├── .ai-key                   optionaler Schlüssel für den KI-Proxy

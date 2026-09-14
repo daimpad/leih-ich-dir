@@ -852,6 +852,40 @@ header.site { padding-block: var(--s-4); }
 .buch-abz b { display: block; font-weight: 600; }
 .buch-abz span { display: block; color: var(--muted); font-size: .9rem; }
 
+/* == 11b · Schmuckbild ================================================= *
+ *
+ * Eine Katzenpfote, die ihre eigene Leihliste haelt — Wollknaeuel,
+ * Fischgraete, Futternapf, Maus. Sie haengt am oberen Rand und bleibt beim
+ * Blaettern stehen, weil position: fixed genau das tut.
+ *
+ * Sie liegt hinter dem Inhalt. Ein fest gesetztes Element wuerde sonst
+ * darueber malen: Es eroeffnet einen eigenen Stapelzusammenhang und stuende
+ * ohne weiteres Zutun vor allem, was nicht selbst positioniert ist. Statt es
+ * mit z-index: -1 hinter den Grund des Koerpers zu schieben — dort waere es
+ * unsichtbar — bekommen Kopf, Inhalt und Fuss eine eigene Ebene darueber.
+ * ===================================================================== */
+
+.deko {
+  position: fixed; top: 0; z-index: 0;
+  right: max(0px, calc(50vw - 33rem));
+  width: 13rem; height: auto;
+  opacity: .14;
+  pointer-events: none;
+  user-select: none;
+}
+header.site, main, .site-footer, .toast-region, .klappe { position: relative; z-index: 1; }
+
+/* Im Dunkeln traegt das helle Beige weiter, es darf deshalb leiser sein. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .deko { opacity: .10; }
+}
+:root[data-theme="dark"] .deko { opacity: .10; }
+
+/* Unter dieser Breite steht die Pfote im Text statt neben ihm. */
+@media (max-width: 64rem) {
+  .deko { display: none; }
+}
+
 /* == 12 · Telefon ====================================================== */
 
 @media (max-width: 46rem) {

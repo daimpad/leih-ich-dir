@@ -144,7 +144,8 @@
       ['einstellungen.html', 'text/html'],
       ['assets/fonts/fonts.css', 'text/css'],
       ['assets/fonts/ranchers-400.woff2', 'font/woff2'],
-      ['assets/fonts/inter-400.woff2', 'font/woff2']
+      ['assets/fonts/inter-400.woff2', 'font/woff2'],
+      ['assets/pics/pfote.svg', 'image/svg+xml']
     ];
     return files.reduce(function (chain, entry) {
       return chain.then(function () {
