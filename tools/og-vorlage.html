@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Vorlage für das Vorschaubild</title>
+<!--
+  Vorlage für assets/pics/og.png, das Bild der Link-Vorschau.
+
+  Diese Datei gehört nicht zur ausgelieferten Anwendung. Sie wird einmalig
+  mit einem Browser auf 1200 mal 630 Punkte abgelichtet; das Ergebnis liegt
+  als PNG im Projekt. So braucht die Anwendung selbst keinen Bauschritt, und
+  das Bild lässt sich trotzdem jederzeit aus dem Quelltext neu erzeugen.
+  Die Anleitung steht in tools/README-og.md.
+
+  Farben und Schriften stammen aus style.css und assets/fonts/fonts.css,
+  damit das Vorschaubild dieselbe Sprache spricht wie die Seite.
+-->
+<link rel="stylesheet" href="../assets/fonts/fonts.css">
+<style>
+  :root {
+    --paper: #FCF9F4;
+    --surface: #FFFFFF;
+    --surface-alt: #F4F0E8;
+    --ink: #1B1813;
+    --muted: #6B6459;
+    --line: #EAE3D8;
+    --green: #0F7A55;
+    --display: 'Ranchers', 'Zilla Slab', Georgia, sans-serif;
+    --sans: 'Inter', system-ui, sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { width: 1200px; height: 630px; background: var(--paper); color: var(--ink); }
+
+  .blatt {
+    position: relative; width: 1200px; height: 630px; overflow: hidden;
+    display: flex; align-items: center; gap: 44px;
+    padding: 0 76px;
+    background: linear-gradient(160deg, var(--surface) 0%, var(--surface-alt) 100%);
+  }
+  /* Das Punktraster der Startseite, damit das Bild erkennbar zur Seite gehört. */
+  .blatt::before {
+    content: ""; position: absolute; inset: 0;
+    background-image: radial-gradient(currentColor 2px, transparent 2px);
+    background-size: 34px 34px; opacity: .05;
+  }
+  .wort { position: relative; flex: 1 1 auto; min-width: 0; }
+  h1 {
+    font-family: var(--display); font-weight: 400;
+    font-size: 132px; line-height: 1.02; letter-spacing: 0;
+  }
+  h1 em { font-style: normal; color: var(--green); }
+  .satz {
+    font-family: var(--sans); font-weight: 400;
+    font-size: 34px; line-height: 1.35; color: var(--muted);
+    margin-top: 26px; max-width: 15em;
+  }
+  .fuss {
+    font-family: var(--sans); font-weight: 600;
+    font-size: 27px; color: var(--green); margin-top: 38px;
+    letter-spacing: .01em;
+  }
+  /* Die Pfote steht ganz im Bild: Am Rand einer Vorschaukarte laese sich ein
+     angeschnittenes Ohr wie ein Fehler, nicht wie eine Geste. */
+  .bild { position: relative; flex: 0 0 auto; width: 292px; height: auto; margin-top: 8px; }
+</style>
+</head>
+<body>
+  <div class="blatt">
+    <div class="wort">
+      <h1>Leih <em>ich</em> Dir.</h1>
+      <p class="satz">Zeig Deinen Freund:innen, was sie bei Dir ausleihen können.</p>
+      <p class="fuss">leihichdir.de</p>
+    </div>
+    <img class="bild" src="../assets/pics/pfote.svg" alt="">
+  </div>
+</body>
+</html>
