@@ -359,7 +359,6 @@ header.site { padding-block: var(--s-4); }
   font-family: var(--display); font-weight: 400; font-size: 1.6rem;
 }
 .fold > summary::-webkit-details-marker { display: none; }
-.fold > summary .ico { color: var(--muted); }
 .fold > summary .fold-sub {
   margin-left: auto; color: var(--faint); text-align: right;
   font-family: var(--sans); font-size: .92rem;
@@ -436,6 +435,21 @@ header.site { padding-block: var(--s-4); }
 }
 
 .hero-body { position: relative; }
+
+/* Das Bild steht neben Ueberschrift und Satz, nicht neben dem ganzen
+   Rahmen: Die vier Auszeichnungen darunter brauchen die volle Breite,
+   sonst brechen sie in zwei Reihen um. */
+.hero-top { display: flex; align-items: flex-start; gap: var(--s-5); }
+.hero-sagt { flex: 1 1 auto; min-width: 0; }
+
+/* Die Pfote mit ihrer eigenen Leihliste, in voller Farbe: Sie erklaert,
+   wofuer die Liste da ist, und ist damit kein Schmuck. Sie greift von oben
+   ueber den Rand des Rahmens herein. */
+.hero-bild {
+  flex: 0 0 auto;
+  width: 9.5rem; height: auto;
+  margin-top: calc(var(--s-5) * -1 - var(--s-2));
+}
 /* Der Aufruf im Rahmen selbst. Er steht unter den Auszeichnungen: erst die
    Zusage, dann die Handlung. */
 .hero-act { margin-top: var(--s-5); }
@@ -852,44 +866,13 @@ header.site { padding-block: var(--s-4); }
 .buch-abz b { display: block; font-weight: 600; }
 .buch-abz span { display: block; color: var(--muted); font-size: .9rem; }
 
-/* == 11b · Schmuckbild ================================================= *
- *
- * Eine Katzenpfote, die ihre eigene Leihliste haelt — Wollknaeuel,
- * Fischgraete, Futternapf, Maus. Sie haengt am oberen Rand und bleibt beim
- * Blaettern stehen, weil position: fixed genau das tut.
- *
- * Sie liegt hinter dem Inhalt. Ein fest gesetztes Element wuerde sonst
- * darueber malen: Es eroeffnet einen eigenen Stapelzusammenhang und stuende
- * ohne weiteres Zutun vor allem, was nicht selbst positioniert ist. Statt es
- * mit z-index: -1 hinter den Grund des Koerpers zu schieben — dort waere es
- * unsichtbar — bekommen Kopf, Inhalt und Fuss eine eigene Ebene darueber.
- * ===================================================================== */
-
-.deko {
-  position: fixed; top: 0; z-index: 0;
-  right: max(0px, calc(50vw - 33rem));
-  width: 13rem; height: auto;
-  opacity: .14;
-  pointer-events: none;
-  user-select: none;
-}
-header.site, main, .site-footer, .toast-region, .klappe { position: relative; z-index: 1; }
-
-/* Im Dunkeln traegt das helle Beige weiter, es darf deshalb leiser sein. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .deko { opacity: .10; }
-}
-:root[data-theme="dark"] .deko { opacity: .10; }
-
-/* Unter dieser Breite steht die Pfote im Text statt neben ihm. */
-@media (max-width: 64rem) {
-  .deko { display: none; }
-}
-
 /* == 12 · Telefon ====================================================== */
 
 @media (max-width: 46rem) {
   /* Untereinander, und die Pfeile drehen sich mit. */
+  /* Nebeneinander wird der Text zu schmal; das Bild tritt zurueck. */
+  .hero-bild { display: none; }
+
   .steps { grid-template-columns: 1fr; gap: var(--s-5); }
   .steps li + li::before {
     top: calc(var(--s-5) * -1); left: 50%; width: 1.2rem; height: var(--s-5);
