@@ -256,6 +256,7 @@
       'request.headline': '{item} anfragen',
       'request.mail': 'Per E-Mail anfragen',
       'request.share': 'Anfrage teilen',
+      'request.call': 'Anrufen',
       'request.copy': 'Anfragetext kopieren',
       'request.copied': 'Anfragetext kopiert.',
       'request.subject': 'Leihanfrage: {item}',
@@ -267,10 +268,13 @@
       'settings.back': 'Zurück zur Liste',
       'settings.backStart': 'Zurück zur Startseite',
       'contact.headline': 'Kontakt',
-      'contact.sub': 'Name und E-Mail für Anfragen',
+      'contact.sub': 'Name, E-Mail und Telefon für Anfragen',
       'contact.name': 'Dein Name',
       'contact.namePlaceholder': '',
       'contact.nameHint': 'Steht über der Liste und in der Anrede, wenn jemand anfragt.',
+      'contact.phone': 'Telefon, freiwillig',
+      'contact.phonePlaceholder': '+49 …',
+      'contact.phoneHint': 'Erscheint als Anrufen-Schaltfläche, wenn jemand einen Gegenstand anfragt. Wer lieber schreibt, lässt das Feld leer.',
       'contact.hint': 'Diese Angaben werden mitverschlüsselt und nur für die Anfrage-Schaltflächen Deiner Freunde genutzt.',
       'settings.themeHeadline': 'Erscheinungsbild',
       'settings.themeSystem': 'Wie das System',
@@ -304,10 +308,8 @@
       'voice.apply': 'Übernehmen',
       'voice.listening': 'Hört zu …',
       'voice.processing': 'Wird ausgewertet …',
-      'voice.hintLocal': 'Zerlegung findet im Browser statt. Ein Gemini-Schlüssel in den Einstellungen liefert bessere Ergebnisse.',
       'voice.hintAi': 'Gemini strukturiert den Text. Er wird dazu an Google übertragen.',
       'voice.hintProxy': 'Die Strukturierung übernimmt der Server dieser Anwendung.',
-      'voice.hintNoSpeech': 'Dieser Browser kennt keine Spracherkennung. Eintippen und Übernehmen funktioniert trotzdem.',
       'voice.added': '{n} Gegenstände übernommen.',
       'voice.added_1': 'Ein Gegenstand übernommen.',
       'voice.none': 'Daraus ließ sich kein Gegenstand ableiten.',
@@ -538,6 +540,7 @@
       'request.headline': 'Ask for {item}',
       'request.mail': 'Ask by e-mail',
       'request.share': 'Share request',
+      'request.call': 'Call',
       'request.copy': 'Copy request text',
       'request.copied': 'Request text copied.',
       'request.subject': 'Borrowing request: {item}',
@@ -549,10 +552,13 @@
       'settings.back': 'Back to the list',
       'settings.backStart': 'Back to the start page',
       'contact.headline': 'Contact',
-      'contact.sub': 'Name and e-mail for requests',
+      'contact.sub': 'Name, e-mail and phone for requests',
       'contact.name': 'Your name',
       'contact.namePlaceholder': '',
       'contact.nameHint': 'Shown above the list and in the greeting when somebody asks.',
+      'contact.phone': 'Phone, optional',
+      'contact.phonePlaceholder': '+49 …',
+      'contact.phoneHint': 'Appears as a call button when somebody asks about an item. Leave it empty if you would rather be written to.',
       'contact.hint': 'These details are encrypted along with the list and only feed the request buttons your friends see.',
       'settings.themeHeadline': 'Appearance',
       'settings.themeSystem': 'Follow the system',
@@ -586,10 +592,8 @@
       'voice.apply': 'Apply',
       'voice.listening': 'Listening …',
       'voice.processing': 'Processing …',
-      'voice.hintLocal': 'Splitting happens in your browser. A Gemini key in the settings gives better results.',
       'voice.hintAi': 'Gemini structures the text. It is sent to Google for that.',
       'voice.hintProxy': 'This application\u2019s server handles the structuring.',
-      'voice.hintNoSpeech': 'This browser has no speech recognition. Typing and Apply still works.',
       'voice.added': '{n} items added.',
       'voice.added_1': 'One item added.',
       'voice.none': 'No item could be derived from that.',
@@ -981,7 +985,7 @@
     return {
       v: SCHEMA_VERSION,
       title: '',
-      contact: { name: '', email: '' },
+      contact: { name: '', email: '', phone: '' },
       showBorrower: false,
       items: []
     };
@@ -996,9 +1000,7 @@
     if (raw.contact && typeof raw.contact === 'object') {
       doc.contact.name = typeof raw.contact.name === 'string' ? raw.contact.name.slice(0, 60) : '';
       doc.contact.email = typeof raw.contact.email === 'string' ? raw.contact.email : '';
-      /* Eine frueher gepflegte Telefonnummer wird nicht mehr uebernommen:
-         Die Anfrage laeuft jetzt ueber die Weitergabe des Geraets und ist
-         damit an keinen Dienst gebunden. */
+      doc.contact.phone = typeof raw.contact.phone === 'string' ? raw.contact.phone.slice(0, 40) : '';
     }
     if (Array.isArray(raw.items)) {
       doc.items = raw.items.filter(function (it) {
@@ -1204,6 +1206,7 @@
       $('#linkEdit').value = editLink();
       if (document.activeElement !== $('#cfgName')) { $('#cfgName').value = state.doc.contact.name; }
       if (document.activeElement !== $('#cfgEmail')) { $('#cfgEmail').value = state.doc.contact.email; }
+      if (document.activeElement !== $('#cfgPhone')) { $('#cfgPhone').value = state.doc.contact.phone; }
       $('#cfgShowBorrower').checked = state.doc.showBorrower;
     }
 
@@ -1658,9 +1661,11 @@
     var subject = t('request.subject', { item: item.name });
     var body = requestBody(item);
     var email = (state.doc.contact.email || '').trim();
+    var phone = (state.doc.contact.phone || '').trim();
 
     /* Hat die Besitzerin eine Adresse hinterlegt, ist das ihr Weg, und der
-       traegt deshalb die Flaeche. Sonst fuehrt die Weitergabe des Geraets. */
+       traegt deshalb die Flaeche. Danach kommt das Telefon, zuletzt die
+       Weitergabe des Geraets. Genau einer fuehrt. */
     if (email) {
       var mail = el('a', 'btn btn--primary');
       mail.href = 'mailto:' + encodeURIComponent(email) +
@@ -1672,14 +1677,25 @@
       nodes.push(mail);
     }
 
+    if (phone) {
+      /* tel: nimmt keine Leerzeichen und keine Klammern. Was die Besitzerin
+         schreibt, bleibt sichtbar; gewaehlt wird die bereinigte Fassung. */
+      var call = el('a', email ? 'btn' : 'btn btn--primary');
+      call.href = 'tel:' + phone.replace(/[^\d+]/g, '');
+      call.rel = 'noopener';
+      call.appendChild(icon('phone'));
+      call.appendChild(el('span', null, t('request.call')));
+      nodes.push(call);
+    }
+
     if (canShare()) {
-      var share = el('button', email ? 'btn' : 'btn btn--primary');
+      var share = el('button', (email || phone) ? 'btn' : 'btn btn--primary');
       share.type = 'button';
       share.appendChild(icon('share'));
       share.appendChild(el('span', null, t('request.share')));
       share.addEventListener('click', function () { nativeShare({ text: body }); });
       nodes.push(share);
-    } else if (!email) {
+    } else if (!email && !phone) {
       var copy = el('button', 'btn btn--primary');
       copy.type = 'button';
       copy.textContent = t('request.copy');
@@ -2959,14 +2975,16 @@
     var proxyNote = $('#aiProxyNote');
     if (proxyNote) { proxyNote.hidden = !aiProxyAvailable(); }
 
+    /* Die Zeile spricht nur, wenn wirklich etwas das Geraet verlaesst.
+       Bleibt die Zerlegung im Browser, gibt es nichts zu sagen — und ein
+       leerer Kasten unter dem Feld waere schlechter als keiner. */
     var node = $('#voiceHint');
     if (!node) { return; }
-    var parts = [];
-    if (!speechSupported()) { parts.push(t('voice.hintNoSpeech')); }
-    if (getAiKey()) { parts.push(t('voice.hintAi')); }
-    else if (aiProxyAvailable()) { parts.push(t('voice.hintProxy')); }
-    else { parts.push(t('voice.hintLocal')); }
-    node.textContent = parts.join(' ');
+    var text = '';
+    if (getAiKey()) { text = t('voice.hintAi'); }
+    else if (aiProxyAvailable()) { text = t('voice.hintProxy'); }
+    node.textContent = text;
+    node.hidden = !text;
   }
 
   function setListening(active) {
@@ -3168,6 +3186,7 @@
 
     $('#cfgName').addEventListener('input', function () { state.doc.contact.name = this.value; touch(); });
     $('#cfgEmail').addEventListener('input', function () { state.doc.contact.email = this.value.trim(); touch(); });
+    $('#cfgPhone').addEventListener('input', function () { state.doc.contact.phone = this.value.trim(); touch(); });
     $('#cfgShowBorrower').addEventListener('change', function () { state.doc.showBorrower = this.checked; touch(); });
 
     /* Delegation für die Inventarliste */
