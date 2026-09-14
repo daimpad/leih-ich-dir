@@ -398,9 +398,9 @@ header.site { padding-block: var(--s-4); }
 
 /* == 7 · Startseite ==================================================== */
 
-/* Der Hero ist ein Rahmen um drei Dinge: die Zusage, den Satz und die vier
-   Auszeichnungen. Der Grund ist gemalt und nicht geladen — zwei weiche
-   Farbkreise und ein feines Punktraster, alles aus Verläufen. */
+/* Der Hero ist ein Rahmen um die Zusage, den Satz und den Aufruf. Der Grund
+   ist gemalt und nicht geladen — ein weicher Farbkreis und ein feines
+   Punktraster, alles aus Verläufen. */
 .hero { padding-block: var(--s-3) 0; }
 
 .hero-panel {
@@ -411,17 +411,12 @@ header.site { padding-block: var(--s-4); }
   padding: clamp(var(--s-5), 4vw, var(--s-6)) clamp(var(--s-5), 3vw, var(--s-6));
 }
 
-/* Die beiden Farbkreise liegen hinter dem Text und tragen nichts vor. */
+/* Der Farbkreis liegt hinter dem Text und traegt nichts vor. Der gruene
+   Kreis oben rechts ist entfallen: Gruen fuehrt in dieser Anwendung die
+   Handlung an, im Grund des Rahmens sagt es nichts. */
 .hero-glow { position: absolute; inset: 0; pointer-events: none; }
-.hero-glow::before,
 .hero-glow::after {
   content: ""; position: absolute; border-radius: 50%; filter: blur(60px);
-}
-.hero-glow::before {
-  width: 20rem; height: 20rem; right: -7rem; top: -8rem;
-  background: var(--green); opacity: .13;
-}
-.hero-glow::after {
   width: 14rem; height: 14rem; left: -7rem; bottom: -9rem;
   background: var(--amber); opacity: .06;
 }
