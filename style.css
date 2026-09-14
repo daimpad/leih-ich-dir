@@ -450,6 +450,20 @@ header.site { padding-block: var(--s-4); }
   width: 9.5rem; height: auto;
   margin-top: calc(var(--s-5) * -1 - var(--s-2));
 }
+
+/* Die Farben der Zeichnung. Sie stehen hier und nicht in der Datei, weil das
+   SVG im Dokument steht — nur so erreicht es der Hell/Dunkel-Wechsel. Der
+   Strich bleibt im Beige der Vorlage, das Blatt der Liste nimmt die Farbe der
+   Karte an: im Hellen weiss wie bisher, im Dunkeln kein greller Block mehr. */
+.hero-bild { color: var(--surface); }
+.hero-bild .cls-1,
+.hero-bild .cls-4,
+.hero-bild .cls-5 { fill: #C7AC91; }
+.hero-bild .cls-2,
+.hero-bild .cls-3 { fill: currentColor; }
+.hero-bild .cls-4,
+.hero-bild .cls-5 { stroke: #C7AC91; stroke-miterlimit: 10; }
+.hero-bild .cls-5 { stroke-width: .75px; }
 /* Der Aufruf im Rahmen selbst. Er steht unter den Auszeichnungen: erst die
    Zusage, dann die Handlung. */
 .hero-act { margin-top: var(--s-5); }

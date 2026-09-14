@@ -238,6 +238,21 @@ Sie hängt über den oberen Rand des Rahmens hinaus, wie eine Pfote, die von
 oben hereingreift. Unter 46 rem Fensterbreite entfällt sie, weil daneben
 kein Platz für den Text bleibt.
 
+Die Zeichnung steht als `<svg>` im Dokument, nicht in einem `<img>`. Ein
+nachgeladenes SVG ist ein eigenes Dokument: Das Stylesheet der Seite reicht
+nicht hinein, `currentColor` fiele dort auf Schwarz zurück. Im Dokument
+dagegen greift `style.css` auf die Pfade zu, und das Blatt der Liste nimmt
+über `currentColor` die Farbe der Karte an — im Hellen weiß wie bisher, im
+Dunkeln kein greller Block. Das gilt auch, wenn die Wahl im Kopf der Seite
+der Systemvorgabe widerspricht; eine Mediaabfrage in der Datei könnte das
+nicht.
+
+Die Klassennamen `cls-1` bis `cls-5` stammen aus dem Zeichenprogramm, ihre
+Farben stehen in `style.css`. Der Stilblock des SVG bleibt im Dokument weg,
+weil die CSP kein `<style>` in der Seite zulässt. Die Vorlage liegt weiter
+als `assets/pics/pfote.svg` und ist für sich allein lesbar; wer die Zeichnung
+ändert, pflegt beide Stellen.
+
 ## Runden, Abzeichen und Stufen
 
 Die Anwendung feiert nicht jede Handlung, sondern jede Premiere. Eine Funktion
