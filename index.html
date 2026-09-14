@@ -97,6 +97,31 @@
   damit die Striche über currentColor dem Erscheinungsbild folgen.
 -->
 <svg class="sprite" aria-hidden="true" focusable="false">
+  <!-- Die beiden Arten von Liste. Sie muessen sich auf einen Blick und in
+       16 Punkten Groesse unterscheiden, deshalb sind sie verschieden gebaut
+       und nicht nur verschieden gefuellt: ein Blatt mit Zeilen gegen einen
+       Ring mit Perlen. -->
+  <symbol id="i-leihliste" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <rect x="12" y="8" width="40" height="48"/>
+    <rect x="19" y="19" width="5" height="5" fill="currentColor" stroke="none"/>
+    <path d="M30 21.5 L45 21.5"/>
+    <rect x="19" y="30" width="5" height="5" fill="currentColor" stroke="none"/>
+    <path d="M30 32.5 L45 32.5"/>
+    <rect x="19" y="41" width="5" height="5" fill="currentColor" stroke="none"/>
+    <path d="M30 43.5 L45 43.5"/>
+  </symbol>
+  <!-- Drei Koepfe und zwei Schultern: eine Gruppe, gebaut aus Kreisen und
+       geraden Strecken wie der ganze uebrige Satz. Gegen einen Ring mit
+       Perlen entschieden, der sich als Fadenkreuz las, und gegen drei
+       ueberlappende Blaetter, die neben dem Blatt oben zu aehnlich waeren.
+       Unterscheidbarkeit auf einen Blick ist hier der Zweck. -->
+  <symbol id="i-kreis" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <circle cx="13" cy="24" r="7" fill="currentColor" stroke="none"/>
+    <circle cx="32" cy="18" r="8" fill="currentColor" stroke="none"/>
+    <circle cx="51" cy="24" r="7" fill="currentColor" stroke="none"/>
+    <path d="M6 52 L6 40 L26 40 L26 52"/>
+    <path d="M38 52 L38 40 L58 40 L58 52"/>
+  </symbol>
   <symbol id="i-handover" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
     <rect x="4" y="20" width="18" height="20"/>
     <rect x="38" y="20" width="18" height="20"/>
@@ -328,7 +353,6 @@
          und ein feines Punktraster, alles aus Verläufen. -->
     <div class="hero">
       <div class="hero-panel">
-        <div class="hero-glow" aria-hidden="true"></div>
         <div class="hero-body">
           <div class="hero-top">
             <div class="hero-sagt">
@@ -338,7 +362,7 @@
                    Reihe: Sonst bliebe neben dem Bild eine leere Flaeche. -->
               <p class="hero-act">
                 <button type="button" id="btnCreateHero" class="btn btn--primary btn--lg" data-create
-                        data-i18n="start.create">Neue Liste anlegen</button>
+                        data-i18n="start.create">Leihliste anlegen</button>
               </p>
             </div>
             <!-- Das Bild sagt, wofuer die Liste da ist: eine Pfote haelt ihre
@@ -389,10 +413,19 @@
       <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.crypto">Verschlüsselt</span></li>
     </ul>
 
-    <!-- Drei Schritte in einer Reihe, mit Pfeilen dazwischen. Schmal
+    <!-- Zwei Kaesten, weil es zwei Arten von Liste gibt. Jeder traegt sein
+         Zeichen in der Ueberschrift: Wer die Seite ueberfliegt, soll ohne
+         Lesen sehen, dass hier zwei verschiedene Dinge erklaert werden.
+         Drei Schritte in einer Reihe, mit Pfeilen dazwischen. Schmal
          untereinander, die Pfeile drehen sich dann mit. -->
     <section class="howto">
-      <h2 data-i18n="steps.headline">So geht’s</h2>
+      <h2 class="howto__head">
+        <span class="howto__mark" aria-hidden="true">
+          <svg class="ico" focusable="false"><use href="#i-leihliste"/></svg>
+        </span>
+        <span data-i18n="steps.headline">So geht’s: eine eigene Leihliste einstellen</span>
+      </h2>
+      <p class="hint howto__lead" data-i18n="steps.lead"></p>
       <ol class="steps">
         <li>
           <span class="step-no" aria-hidden="true">1</span>
@@ -410,6 +443,48 @@
           <p data-i18n="steps.threeText">Freunde sehen, was gerade frei ist, und fragen mit einem Klick an.</p>
         </li>
       </ol>
+      <p class="actions spaced-lg">
+        <button type="button" class="btn btn--primary" data-create
+                data-i18n="start.create">Leihliste anlegen</button>
+      </p>
+    </section>
+
+    <!-- Der Freundeskreis. Dieselbe Bauform, damit der Vergleich leicht
+         faellt, aber ein eigenes Zeichen und ein eigener Aufruf: Der zweite
+         Knopf traegt bewusst nicht die volle Farbe, weil eine eigene Liste
+         der Anfang ist und der Kreis der zweite Schritt. -->
+    <section class="howto">
+      <h2 class="howto__head">
+        <span class="howto__mark howto__mark--kreis" aria-hidden="true">
+          <svg class="ico" focusable="false"><use href="#i-kreis"/></svg>
+        </span>
+        <span data-i18n="circleSteps.headline">So geht’s: Leihlisten zum eigenen Freundeskreis hinzufügen</span>
+      </h2>
+      <p class="hint howto__lead" data-i18n="circleSteps.lead"></p>
+      <ol class="steps">
+        <li>
+          <span class="step-no step-no--kreis" aria-hidden="true">1</span>
+          <h3 data-i18n="circleSteps.one">Ansehen-Link bekommen</h3>
+          <p data-i18n="circleSteps.oneText"></p>
+        </li>
+        <li>
+          <span class="step-no step-no--kreis" aria-hidden="true">2</span>
+          <h3 data-i18n="circleSteps.two">In den Kreis aufnehmen</h3>
+          <p data-i18n="circleSteps.twoText"></p>
+        </li>
+        <li>
+          <span class="step-no step-no--kreis" aria-hidden="true">3</span>
+          <h3 data-i18n="circleSteps.three">An einer Stelle suchen</h3>
+          <p data-i18n="circleSteps.threeText"></p>
+        </li>
+      </ol>
+      <div class="note spaced-lg">
+        <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-info"/></svg>
+        <div><p data-i18n="circleSteps.honest"></p></div>
+      </div>
+      <p class="actions spaced-lg">
+        <button type="button" id="btnStartCircle" class="btn" data-i18n="circle.startNew">Freundeskreis anlegen</button>
+      </p>
     </section>
 
     <!-- Auf diesem Gerät gemerkte Listen. Sie stehen unter dem Aufruf: Wer
@@ -422,17 +497,10 @@
          traegt kein Geheimnis, und wer weder Deutsch noch Englisch liest,
          soll ihn uebersetzen koennen. -->
     <section class="mine" id="mineBox" hidden translate="no">
-      <h2 data-i18n="mine.headline">Deine Listen auf diesem Gerät</h2>
+      <h2 data-i18n="mine.headline">Auf diesem Gerät gemerkt</h2>
+      <p class="hint" data-i18n="mine.hint"></p>
       <ul id="mineList"></ul>
     </section>
-
-    <!-- Der zweite Einstieg in den Freundeskreis. Er steht hier, weil der
-         erste in der Liste eines Freundes sitzt und den noch nicht erreicht,
-         wer gerade zum ersten Mal hier ist. renderMine() schaltet ihn vor
-         seiner vorzeitigen Rueckkehr. -->
-    <p class="actions spaced-lg" id="startCircleRow" hidden>
-      <button type="button" id="btnStartCircle" class="linkbtn" data-i18n="circle.startNew">Freundeskreis anlegen</button>
-    </p>
 
 
   </section>

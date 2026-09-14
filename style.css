@@ -26,7 +26,12 @@
 
 :root {
   /* Flächen und Schrift */
-  --paper:       #FCF9F4;
+  /* Ein helles Gruen als Grund der Seite. Gepruefte Folgen: --muted kommt
+     darauf auf 5,4:1 und --ink auf 16,2:1, beide also weiter ueber der
+     Schwelle. --green-soft (#E4F3EC) liegt dem Grund dagegen so nahe, dass
+     es darauf verschwindet; wo eine Flaeche in dieser Farbe unmittelbar auf
+     dem Grund steht, traegt sie deshalb eine Linie. */
+  --paper:       #E8FAE9;
   --surface:     #FFFFFF;
   --surface-alt: #F4F0E8;
   --ink:         #1B1813;
@@ -191,6 +196,18 @@ button, input, textarea, select { font: inherit; color: inherit; }
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* Der Notbehelf zum Kopieren (legacyCopy) haengt ein Textfeld an den Koerper,
+   waehlt es aus und nimmt es sofort wieder weg. Die Klasse stand im Skript,
+   eine Regel dazu gab es nicht: Das Feld lag also in voller Breite am Ende
+   der Seite. Sichtbar wurde das bisher nur deshalb nicht, weil alles in
+   einem Zug geschieht und der Browser dazwischen nicht zeichnet.
+   Nicht display: none und nicht visibility: hidden, beide machen die Auswahl
+   unmoeglich; kein style-Attribut, das verwirft die Richtlinie. */
+.offscreen {
+  position: fixed; top: 0; left: -9999px;
+  width: 1px; height: 1px; opacity: 0; pointer-events: none;
 }
 
 /* Der Sprung in den Inhalt: für die Tastatur da, für die Maus unsichtbar. */
@@ -439,30 +456,15 @@ header.site { padding-block: var(--s-4); }
    Punktraster, alles aus Verläufen. */
 .hero { padding-block: var(--s-3) 0; }
 
+/* Der Rahmen steht flach: eine Flaeche, eine Linie, sonst nichts. Verlauf,
+   Schatten, Punktraster und der bernsteinfarbene Lichtfleck sind entfallen.
+   Auf dem gruenen Grund der Seite traegt die weisse Flaeche allein, und jede
+   weitere Ebene machte den Rahmen nur unruhiger. */
 .hero-panel {
   position: relative; overflow: hidden;
   border: 1px solid var(--line); border-radius: 24px;
-  background: linear-gradient(160deg, var(--surface) 0%, var(--surface-alt) 100%);
-  box-shadow: var(--shadow);
+  background: var(--surface);
   padding: clamp(var(--s-5), 4vw, var(--s-6)) clamp(var(--s-5), 3vw, var(--s-6));
-}
-
-/* Der Farbkreis liegt hinter dem Text und traegt nichts vor. Der gruene
-   Kreis oben rechts ist entfallen: Gruen fuehrt in dieser Anwendung die
-   Handlung an, im Grund des Rahmens sagt es nichts. */
-.hero-glow { position: absolute; inset: 0; pointer-events: none; }
-.hero-glow::after {
-  content: ""; position: absolute; border-radius: 50%; filter: blur(60px);
-  width: 14rem; height: 14rem; left: -7rem; bottom: -9rem;
-  background: var(--amber); opacity: .06;
-}
-
-/* Punktraster, zwei Pixel gross, in der Textfarbe und kaum sichtbar. */
-.hero-panel::before {
-  content: ""; position: absolute; inset: 0; pointer-events: none;
-  background-image: radial-gradient(currentColor 1px, transparent 1px);
-  background-size: 18px 18px;
-  opacity: .05;
 }
 
 .hero-body { position: relative; }
@@ -524,6 +526,30 @@ header.site { padding-block: var(--s-4); }
 .howto { margin-top: var(--s-7); }
 .howto h2 { font-size: clamp(1.8rem, 4vw, 2.4rem); }
 
+/* Die Ueberschrift traegt das Zeichen ihrer Art. Es steht davor und nicht
+   darueber: So bleibt der Zusammenhang auch dann sichtbar, wenn die
+   Ueberschrift auf dem Telefon in drei Zeilen umbricht. */
+.howto__head { display: flex; align-items: center; gap: var(--s-4); }
+.howto__head > span:last-child { min-width: 0; }
+.howto__mark {
+  flex: 0 0 auto; width: 3.2rem; height: 3.2rem; border-radius: var(--r-btn);
+  display: grid; place-items: center;
+  /* Die Linie ist nicht Schmuck: --green-soft und der Grund der Seite liegen
+     zu nah beieinander, ohne sie loeste sich die Kachel auf. */
+  background: var(--green-soft); color: var(--green-ink);
+  border: 1px solid var(--line-firm);
+}
+/* Der Kreis bekommt einen eigenen Grund. Nicht Bernstein, das heisst in
+   dieser Anwendung verliehen, und nicht Rot: Beides waere eine Aussage, die
+   hier niemand macht. */
+.howto__mark--kreis { background: var(--surface-alt); color: var(--ink); }
+.howto__mark .ico { width: 1.9rem; height: 1.9rem; }
+.howto__lead { margin-top: var(--s-3); max-width: 60ch; }
+@media (max-width: 34rem) {
+  .howto__mark { width: 2.6rem; height: 2.6rem; }
+  .howto__mark .ico { width: 1.5rem; height: 1.5rem; }
+}
+
 .steps {
   list-style: none; padding: 0; margin-top: var(--s-5);
   display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-5);
@@ -546,6 +572,8 @@ header.site { padding-block: var(--s-4); }
   display: grid; place-items: center; font-size: 1rem; font-weight: 600;
   margin-bottom: var(--s-3);
 }
+/* Dieselbe Unterscheidung wie oben, eine Stufe kleiner. */
+.step-no--kreis { background: var(--surface-alt); color: var(--ink); border: 1px solid var(--line-firm); }
 .steps h3 { font-size: 1.05rem; }
 .steps p { color: var(--muted); font-size: .88rem; margin-top: .25rem; }
 
@@ -562,7 +590,22 @@ header.site { padding-block: var(--s-4); }
 /* Ohne min-width: 0 waechst ein Flex-Kind ueber seinen Platz hinaus; ein
    langer Listenname schoebe die Seite dann waagerecht auf. */
 .mine .name { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; font-weight: 500; }
-.mine .when { color: var(--faint); font-size: .85rem; }
+.mine .when { color: var(--faint); font-size: .85rem; flex: 0 0 auto; }
+/* Das Zeichen der Art, als runde Marke wie in der Inventarzeile. Es sagt
+   dasselbe wie die Marke daneben, nur schneller. */
+.mine .kind {
+  flex: 0 0 auto; width: 2.1rem; height: 2.1rem; border-radius: 999px;
+  display: grid; place-items: center;
+  background: var(--green-soft); color: var(--green-ink);
+}
+.mine .kind--kreis { background: var(--surface-alt); color: var(--ink); }
+.mine .kind .ico { width: 1.2rem; height: 1.2rem; }
+.mine .chip { flex: 0 0 auto; }
+/* Schmal hat der Name Vorrang. Das Datum entfaellt zuerst: Die Art der Liste
+   ist die Angabe, nach der hier gesucht wird, das Datum der Beiwert. */
+@media (max-width: 26rem) {
+  .mine .when { display: none; }
+}
 
 /* Der Zugang. Eigene Farbe, weil er kein Bericht ist, sondern eine
    Aufforderung: Wer diesen Link verliert, verliert die Liste. */
@@ -721,10 +764,33 @@ header.site { padding-block: var(--s-4); }
 .modal__body { padding: var(--s-3) var(--s-5) var(--s-5); overflow-y: auto; min-height: 0; }
 .modal__foot {
   display: flex; align-items: center; justify-content: space-between; gap: var(--s-3);
+  /* Umbrechen duerfen: Der Fuss der Anfrage traegt bis zu vier Elemente
+     (Schliessen, E-Mail, Anrufen, Teilen). Ohne diese Zeile legte der
+     Flex-Kasten sie in eine einzige Reihe und liess sie rechts aus dem
+     Fenster herauslaufen. Gemessen bei 320, 360, 390 und 430 Punkten: Der
+     Fuss brauchte jedesmal 572 Punkte, das Fenster war 282 bis 392 breit.
+     Aufgefallen ist das nicht, weil ein <dialog> in der obersten Ebene liegt
+     und die Seite davon keinen Rollbalken bekommt — die beiden letzten
+     Schaltflaechen standen einfach ausserhalb und liessen sich nicht
+     beruehren. */
+  flex-wrap: wrap;
   padding: var(--s-4) var(--s-5); background: var(--surface-alt);
   border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
 }
 .modal__foot .spacer { flex: 1 1 auto; }
+
+/* Der Fuss der Anfrage stellt seine Handlungen untereinander, und zwar in
+   jeder Breite, nicht erst auf dem Telefon. Der Grund ist kein Bildschirm,
+   sondern das Fenster selbst: .modal ist hoechstens 26rem breit, innen
+   bleiben rund 368 Punkte, und allein "Per E-Mail anfragen" und "Anrufen"
+   brauchen zusammen 344. Mit einer dritten Handlung geht die Reihe an keinem
+   Geraet auf, auch nicht am grossen Schirm.
+   Die Reihenfolge ergibt sich aus dem Markup, nur Schliessen wandert ans
+   Ende: Der Daumen liegt unten, und dort gehoert die Handlung hin, die die
+   Nutzerin sucht, nicht das Verlassen. */
+.modal__foot--stack { flex-direction: column; align-items: stretch; }
+.modal__foot--stack .spacer { display: none; }
+.modal__foot--stack > .btn--ghost { order: 2; }
 
 .modal-state { display: flex; align-items: center; gap: var(--s-3); font-size: .95rem; }
 .modal-state .item-badge { width: 1.8rem; height: 1.8rem; }
@@ -747,7 +813,14 @@ header.site { padding-block: var(--s-4); }
 
 /* == 11 · Fußzeile ===================================================== */
 
-.site-footer { border-top: 1px solid var(--line); margin-top: var(--s-7); padding-block: var(--s-5) var(--s-7); }
+/* Der Fuss steht auf eigenem Grund und nicht auf dem Papierton der Seite:
+   Damit ist er als Abschluss erkennbar, ohne eine Linie zu brauchen, die
+   quer durch das Bild geht. Ueber das Merkmal und nicht ueber #FFFFFF, sonst
+   bliebe er im dunklen Erscheinungsbild weiss. */
+.site-footer {
+  background: var(--surface); border-top: 1px solid var(--line);
+  margin-top: var(--s-7); padding-block: var(--s-5) var(--s-7);
+}
 .footer-row {
   display: flex; align-items: baseline; justify-content: space-between;
   gap: var(--s-3) var(--s-5); flex-wrap: wrap;
@@ -1037,17 +1110,43 @@ header.site { padding-block: var(--s-4); }
  * ===================================================================== */
 
 @media (pointer: coarse) {
-  .ctl-square, .modal__x, .info, .btn--sm, .btn--lg, .chip--level { position: relative; }
+  /* .linkbtn und .tab kamen dazu: Gemessen bei 320 und 390 Punkten war
+     "Mehrere auf einmal" 132 mal 22, "Freundeskreis anlegen" 171 mal 25 und
+     ein Reiter im Teilen-Kasten 94 mal 39 gross. Alle drei sind eigene
+     Bedienelemente und keine Verweise im Fliesstext, fuer die die Ausnahme
+     der Richtlinie gilt. */
+  .ctl-square, .modal__x, .info, .btn--sm, .btn--lg, .chip--level,
+  .linkbtn, .tab { position: relative; }
   .ctl-square::after,
   .modal__x::after,
   .info::after,
   .btn--sm::after,
   .btn--lg::after,
-  .chip--level::after {
+  .chip--level::after,
+  .linkbtn::after,
+  .tab::after {
     content: ""; position: absolute;
     top: 50%; left: 50%; transform: translate(-50%, -50%);
     width: max(100%, 44px); height: max(100%, 44px);
   }
+
+  /* Hier Polsterung statt Ueberlagerung: Die Zeilen der Erscheinungswahl
+     stossen ohne Abstand aneinander und sind 25 Punkte hoch, ein Fehlgriff
+     traf also die Nachbarzeile. Zwei Ueberlagerungen wuerden sich ueber-
+     schneiden, und dann gewaenne die spaetere im Dokument. Gemeint ist
+     ohnehin die ganze Zeile, deshalb waechst sie wirklich. */
+  .check { padding-block: .6rem; }
+
+  /* Dasselbe im Fuss: vier Verweise nebeneinander, jeder 25 Punkte hoch und
+     "Ueber" nur 37 breit. Sie brechen um, deshalb muss die Reihe wirklich
+     wachsen und nicht nur der Trefferbereich; eine Ueberlagerung reichte in
+     die Nachbarreihe hinein. min-width wirkt, weil .footer-nav ein
+     Flex-Kasten ist und seine Kinder damit zu Bloecken werden. */
+  .footer-nav a { padding-block: .6rem; min-width: 44px; text-align: center; }
+
+  /* Die Ueberschrift des Fensters ist im Bearbeiten-Modus ein Eingabefeld
+     und blieb mit 39 Punkten darunter. */
+  .modal-title-input { min-height: 44px; }
 
   /* Ein Feld unter 16 Punkten laesst iOS Safari beim Antippen in die Seite
      zoomen und nicht wieder heraus. Am Schreibtisch bleibt der Link schmal. */
