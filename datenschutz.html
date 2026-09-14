@@ -118,7 +118,24 @@
       Rechner verlassen. Der Server speichert ausschließlich diese
       unlesbaren Zeichenketten. Der Schlüssel steht hinter dem Rautezeichen der
       Adresse und wird von Browsern nicht an den Server übertragen. Der Betrieb
-      kann die Inhalte daher nicht einsehen.
+      kann die Inhalte daher nicht einsehen. Das gilt auch für die Vorschaukarte,
+      die Messenger und soziale Netze beim Teilen eines Links zeigen: Sie
+      entsteht aus einem Abruf der Startseite, und der Teil hinter dem
+      Rautezeichen erreicht dabei keinen Server.
+    </p>
+    <p>
+      Die Kehrseite gehört dazu: Der Link selbst <em>enthält</em> den Schlüssel.
+      Wer ihn über einen Weg verschickt, der nicht seinerseits
+      Ende-zu-Ende-verschlüsselt ist, gibt ihn dessen Betreiber preis. Das ist
+      der Bauart geschuldet und lässt sich nicht abstellen.
+    </p>
+    <p>
+      Ebenfalls außerhalb unserer Kontrolle liegt die Übersetzungsfunktion des
+      Browsers. Sie arbeitet nicht auf dem Gerät, sondern schickt den gelesenen
+      Text an den Dienst des Browserherstellers. Die Bereiche, in denen
+      entschlüsselte Listeninhalte stehen, sind deshalb mit
+      <code>translate=&quot;no&quot;</code> ausgezeichnet; Browser, die sich
+      daran halten, übersetzen sie nicht und übertragen sie folglich auch nicht.
     </p>
 
     <h3 class="settings-sub">Zugriffsdaten</h3>

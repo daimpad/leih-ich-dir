@@ -86,6 +86,7 @@ Ehrliche Einordnung, denn Verschlüsselung ersetzt kein Rechtemanagement:
 - Der Server kennt zwar keine Inhalte, aber Metadaten: Größe des Chiffrats, Zeitpunkte, Revisionszähler.
 - Ein kompromittierter Server könnte manipuliertes JavaScript ausliefern. Diesem Angriff ist jede Web-Anwendung mit Client-Verschlüsselung ausgesetzt; er lässt sich nur durch Prüfung des ausgelieferten Codes eingrenzen.
 - Gleichzeitige Änderungen an zwei Bearbeiten-Links: Der Server erkennt den Konflikt über den Revisionszähler, der Client schreibt danach seinen Stand fort (*last write wins*).
+- Die Übersetzungsfunktion des Browsers ist eine Übertragung an Dritte: Sie liest Textknoten aus und schickt sie an den Dienst des Browserherstellers. Die Bereiche mit entschlüsseltem Inhalt tragen deshalb `translate="no"`; Browser, die sich daran halten, lassen sie stehen. Erzwingen lässt es sich nicht.
 - Die Spracheingabe steht außerhalb dieser Zusage. Gesprochenes Audio und der erkannte Text verlassen das Gerät, sobald die Spracherkennung des Browsers oder die KI genutzt wird. Der Abschnitt zur Spracheingabe sagt genau, wann das passiert und wie es sich abstellen lässt.
 
 ## Spracheingabe und KI-Strukturierung

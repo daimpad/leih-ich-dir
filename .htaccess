@@ -20,7 +20,11 @@ DirectoryIndex index.html
     Header always set X-Content-Type-Options "nosniff"
     Header always set X-Frame-Options "DENY"
     Header always set Referrer-Policy "no-referrer"
-    Header always set Permissions-Policy "geolocation=(), camera=(), microphone=(), payment=()"
+    # microphone=(self), nicht (): Die leere Liste verbietet den Zugriff jeder
+    # Herkunft, der eigenen eingeschlossen — und die Anwendung bietet unter
+    # #btnMic eine Spracheingabe an. Fremde Rahmen bleiben draussen, dafuer
+    # sorgt schon frame-ancestors 'none'.
+    Header always set Permissions-Policy "geolocation=(), camera=(), microphone=(self), payment=()"
     Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'self'; connect-src 'self' https://generativelanguage.googleapis.com; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
     # HSTS erst aktivieren, wenn HTTPS dauerhaft eingerichtet ist:
     # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
@@ -40,12 +44,16 @@ DirectoryIndex index.html
 # Projektinterne Dateien und Verzeichnisse aus dem Repository sperren
 RedirectMatch 404 (?i)/(\.git|\.github|tools|tests|CONTRIBUTING\.md|README\.md|LICENSE)(/|$)
 
-# HTTPS erzwingen (aktivieren, sobald ein Zertifikat vorliegt)
-# <IfModule mod_rewrite.c>
-#     RewriteEngine On
-#     RewriteCond %{HTTPS} !=on
-#     RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
-# </IfModule>
+# HTTPS erzwingen. Ueber http laeuft die Anwendung ohnehin nicht: Ohne
+# sicheren Kontext fehlt crypto.subtle. Schwerer wiegt das andere: Eine ueber
+# http ausgelieferte Seite laesst sich unterwegs veraendern, und wer sie
+# veraendert, laesst sich location.hash vorlesen — darin steht der Schluessel.
+# Die Ende-zu-Ende-Zusage haengt daran, dass die Seite unveraendert ankommt.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+</IfModule>
 
 # Komprimierung. Text geht sonst roh ueber die Leitung: index.html allein
 # schrumpft von 112 auf 34 Kilobyte, app.js von 141 auf 34. Brotli zuerst,
@@ -66,8 +74,12 @@ RedirectMatch 404 (?i)/(\.git|\.github|tools|tests|CONTRIBUTING\.md|README\.md|L
     <FilesMatch "\.(html|js|css)$">
         Header set Cache-Control "no-cache, must-revalidate"
     </FilesMatch>
-    # Die Schriftdateien tragen ihren Stand im Namen und ändern sich nicht.
+    # Dreissig Tage, ohne 'immutable'. Die Namen tragen entgegen der frueheren
+    # Annahme keinen Stand — inter-400.woff2 heisst so, gleich welchen Inhalts.
+    # Mit 'immutable' fragt der Browser ein Jahr lang nicht einmal nach, auch
+    # nicht beim Neuladen mit gedrueckter Umschalttaste; ein ausgetauschter
+    # Schnitt kaeme dann nicht an.
     <FilesMatch "\.woff2$">
-        Header set Cache-Control "public, max-age=31536000, immutable"
+        Header set Cache-Control "public, max-age=2592000"
     </FilesMatch>
 </IfModule>
