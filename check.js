@@ -246,10 +246,23 @@
     /* 'art' sagt, wer die Anfrage beantwortet: Eine PHP-Datei reicht jeder
        Aufbau an Apache weiter, eine statische Datei nicht unbedingt. Genau
        diese Trennung macht den Befund am Ende moeglich. */
+    /* 'art' sagt, was ein gesperrter Pfad beweist. Nicht jede Sperre stammt
+       aus der .htaccess, und der Befund am Ende haengt daran.
+       'beweis': eine gewoehnliche lesbare Datei in einem gewoehnlichen
+       Verzeichnis. Sie ist nur gesperrt, wenn der RedirectMatch aus der
+       .htaccess im Wurzelverzeichnis oder tools/.htaccess greift.
+       'dynamisch': tests/api-test.php und tools/purge.php verweigern den
+       Dienst selbst, sobald sie nicht auf der Kommandozeile laufen, und
+       antworten dann mit 403. Ein 403 beweist hier nichts; erst ein 404
+       stammt vom RedirectMatch.
+       'sonst': data/, data/lists/ und .git/config koennen auch ohne jede
+       .htaccess gesperrt sein — ein Server ohne Verzeichnisliste antwortet
+       auf einen Ordner mit 403, und Punktdateien sperren viele Aufbauten von
+       sich aus. Sie werden geprueft, taugen aber nicht als Beleg. */
     var paths = [
-      ['data/', 'ordner'], ['data/lists/', 'ordner'], ['.git/config', 'statisch'],
+      ['data/', 'sonst'], ['data/lists/', 'sonst'], ['.git/config', 'sonst'],
       ['tests/api-test.php', 'dynamisch'], ['tools/purge.php', 'dynamisch'],
-      ['tools/og-vorlage.html', 'statisch']
+      ['tools/og-vorlage.html', 'beweis']
     ];
     return paths.reduce(function (chain, eintrag) {
       var path = eintrag[0], art = eintrag[1];
@@ -260,9 +273,19 @@
             detail = 'Status 200, die gesamte Repository-Historie liegt offen';
           }
           var zu = r.status !== 200;
-          if (zu) { sperrenGreifen = true; }
-          if (art === 'dynamisch') { zu ? dynamischGesperrt++ : dynamischOffen++; }
-          if (art === 'statisch') { zu ? statischGesperrt++ : statischOffen++; }
+          if (art === 'dynamisch' && r.status === 403) {
+            detail += ', das ist die Selbstsperre des Skripts und kein Beleg fuer die .htaccess';
+          }
+          if (art === 'beweis') {
+            zu ? (sperrenGreifen = true, statischGesperrt++) : statischOffen++;
+          }
+          /* Nur ein 404 stammt vom RedirectMatch, nicht die Selbstsperre. */
+          if (art === 'dynamisch' && zu && r.status !== 403) {
+            sperrenGreifen = true;
+            dynamischGesperrt++;
+          } else if (art === 'dynamisch') {
+            dynamischOffen++;
+          }
           check(LEVEL_MUST, 'gesperrt: ' + path, zu, detail);
         });
       });

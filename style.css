@@ -649,7 +649,11 @@ header.site { padding-block: var(--s-4); }
 .items-head .checked { color: var(--faint); font-size: .88rem; }
 
 .addrow { display: flex; gap: var(--s-2); align-items: stretch; }
-.addrow #addName { flex: 1 1 8rem; min-width: 0; }
+/* Auf .input und nicht auf #addName: Die Zeile im Freundeskreis benutzt
+   dieselbe Klasse, und ohne min-width: 0 traegt ein Eingabefeld als
+   Flex-Kind seine Standardbreite von rund 20 Zeichen als Mindestmass mit
+   sich herum. Bei 320 Punkten schob es die Schaltflaeche daneben hinaus. */
+.addrow .input { flex: 1 1 8rem; min-width: 0; }
 /* Der Verweis steht unter der Schaltflaeche, nicht unter dem Feld: Er ist
    die Alternative zum Hinzufuegen, nicht eine Angabe zum Namen. */
 .addhint {
@@ -1080,9 +1084,13 @@ header.site { padding-block: var(--s-4); }
     content: ""; position: absolute; inset: 0 calc(var(--s-4) * -1);
     background: var(--surface); border-top: 1px solid var(--line); z-index: -1;
   }
-  .addrow .btn span:not(.sr-only) { display: none; }
-  .addrow .btn { width: 2.9rem; padding-inline: 0; }
-  .addrow .btn .ico { width: 1.3rem; height: 1.3rem; }
+  /* Nur im Inventar. Dort tragen die beiden Schaltflaechen ein Zeichen und
+     koennen ihr Wort schmal ablegen; die Zeile im Freundeskreis hat kein
+     Zeichen, und "Aufnehmen" lief bei 2,9rem Breite ueber beide Raender
+     hinaus, links bis in das Eingabefeld daneben. */
+  .addbox .addrow .btn span:not(.sr-only) { display: none; }
+  .addbox .addrow .btn { width: 2.9rem; padding-inline: 0; }
+  .addbox .addrow .btn .ico { width: 1.3rem; height: 1.3rem; }
 
   .footer-nav { gap: var(--s-2) var(--s-4); }
   .toast-region { width: calc(100vw - 2rem); }
