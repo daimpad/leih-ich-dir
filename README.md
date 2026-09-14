@@ -19,7 +19,7 @@ oder Kontaktdaten.
 | **Ende-zu-Ende-verschlüsselt** | AES-GCM-256 über die Web Crypto API, Schlüssel nur im URL-Fragment |
 | **Zwei Linkarten** | ein geheimer Bearbeiten-Link, ein konstanter Ansehen-Link für Freunde |
 | **Live-Daten** | der Ansehen-Link lädt den aktuellen Stand und aktualisiert sich selbsttätig |
-| **Zweisprachig** | Deutsch und Englisch, automatische Erkennung plus manuelle Umschaltung |
+| **Zweisprachig** | Deutsch als Standard, Englisch über den Schalter in der Kopfleiste; die Wahl bleibt im Browser |
 | **Hell und dunkel** | folgt dem System, lässt sich in der Kopfleiste und auf der Einstellungsseite übersteuern |
 | **Ruhig stellbar** | Konfetti und Gesichter folgen `prefers-reduced-motion` und lassen sich zusätzlich in den Einstellungen abschalten |
 | **Autovervollständigung** | 29 typische Leih-Gegenstände über ein natives `<datalist>`-Element |

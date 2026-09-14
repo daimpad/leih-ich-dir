@@ -639,6 +639,10 @@ header.site { padding-block: var(--s-4); }
 .item-name { display: block; font-weight: 500; overflow-wrap: anywhere; }
 .item-state { display: block; color: var(--amber); font-size: .85rem; }
 .item-note { display: block; color: var(--faint); font-size: .85rem; overflow-wrap: anywhere; }
+/* Der Weg zu den Details, in Worten neben dem Pfeil. Schmal entfaellt er:
+   Dort braucht der Name der Sache den Platz, und der Pfeil bleibt. */
+.item-more { color: var(--muted); font-size: .85rem; flex: 0 0 auto; white-space: nowrap; }
+@media (max-width: 30rem) { .item-more { display: none; } }
 .item-chev { color: var(--faint); flex: 0 0 auto; }
 
 /* Ansehen-Modus: die Anfrage steht in der Zeile, nicht hinter ihr. */
@@ -669,8 +673,11 @@ header.site { padding-block: var(--s-4); }
      des Fensters unerreichbar: Es waechst ueber den Schirm hinaus, und ein
      <dialog> rollt von sich aus nicht. */
   max-height: calc(100dvh - 2rem);
-  display: flex; flex-direction: column;
 }
+/* Nur im geoeffneten Zustand. Ein <dialog> ohne open traegt vom Browser
+   display: none; ein display hier ohne [open] hebt das auf, und das leere
+   Fenster stuende sichtbar unter der Fusszeile. */
+.modal[open] { display: flex; flex-direction: column; }
 .modal::backdrop { background: rgba(27, 24, 19, .38); }
 .modal__head { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-5) var(--s-5) var(--s-2); }
 .modal__title { font-size: 1.5rem; flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
