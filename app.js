@@ -337,6 +337,7 @@
 
       /* -- Das Spielerische ------------------------------------------- */
 
+      'items.updatedLabel': 'Zuletzt gespeichert: {date}',
       'items.emptyHead': 'Noch nichts drin',
       'items.emptyEg': 'Zum Beispiel',
       'item.longOut': '{name} ist seit {n} Tagen unterwegs. Ein kurzer Anruf wäre kein Drama.',
@@ -617,6 +618,7 @@
 
       /* -- The playful part ------------------------------------------- */
 
+      'items.updatedLabel': 'Last saved: {date}',
       'items.emptyHead': 'Nothing here yet',
       'items.emptyEg': 'For example',
       'item.longOut': '{name} has been out for {n} days. A short call would not be a drama.',
@@ -1219,10 +1221,13 @@
   }
 
   /**
-   * Die Zeile unter dem Titel. Sie sagt im Bearbeiten-Modus, wie viel in der
-   * Liste steht und wann zuletzt gespeichert wurde; im Ansehen-Modus, von wem
-   * die Liste ist und was gerade frei ist — die einzige Zahl, die Freunde
-   * wirklich interessiert.
+   * Die Zeile unter dem Titel und der Zeitstempel im Kopf des Inventars.
+   *
+   * Die Zeile gilt nur noch dem Ansehen-Modus: von wem die Liste ist und was
+   * gerade frei ist — die einzige Zahl, die Freunde wirklich interessiert.
+   * Wer selbst bearbeitet, weiss beides und bekommt dort nichts zu lesen.
+   * Fuer ihn steht allein der Zeitpunkt des letzten Schreibens neben der
+   * Ueberschrift des Inventars.
    */
   function renderMeta() {
     /* Der Satz ueber der Liste gilt nur noch dem Freund: Wessen Liste das
@@ -1245,7 +1250,14 @@
     if (stamp) {
       var zeigen = state.mode === 'edit' && !!state.updated;
       stamp.hidden = !zeigen;
-      stamp.textContent = zeigen ? formatDate(state.updated) : '';
+      var wann = zeigen ? formatDate(state.updated) : '';
+      stamp.textContent = wann;
+      /* Sichtbar steht dort nur Datum und Uhrzeit. Vorgelesen waere das eine
+         Zahl ohne Zusammenhang, zumal die gleich aussehende Angabe daneben
+         etwas anderes bedeutet — deshalb traegt der Knoten die Beschriftung,
+         die der Text nicht zeigt. */
+      if (wann) { stamp.setAttribute('aria-label', t('items.updatedLabel', { date: wann })); }
+      else { stamp.removeAttribute('aria-label'); }
     }
   }
 
@@ -3157,6 +3169,15 @@
       if (!this.checked) { return; }
       $('#keyBox').hidden = true;
       feierZugang();
+    });
+
+    /* Ein Ankreuzfeld hoert auf die Leertaste, nicht auf die Eingabetaste.
+       Die Schaltflaeche davor konnte beides; das bleibt so. */
+    $('#chkKeyDone').addEventListener('keydown', function (ev) {
+      if (ev.key !== 'Enter' || this.checked) { return; }
+      ev.preventDefault();
+      this.checked = true;
+      this.dispatchEvent(new Event('change', { bubbles: true }));
     });
 
     $('#modalClose').addEventListener('click', closeItemModal);
