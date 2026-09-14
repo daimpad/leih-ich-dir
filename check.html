@@ -10,10 +10,15 @@
 <title>Abnahme · LeihIchDir</title>
 <link rel="canonical" href="https://leihichdir.de/check.html">
 <!-- Das Zeichen der Anwendung. Das SVG folgt Hell und Dunkel, die .ico-Datei
-     ist fuer aeltere Browser da, das PNG fuer den Startbildschirm unter iOS. -->
-<link rel="icon" href="assets/pics/favicon.svg" type="image/svg+xml">
-<link rel="icon" href="favicon.ico" sizes="16x16 32x32">
-<link rel="apple-touch-icon" href="assets/pics/apple-touch-icon.png">
+     ist fuer aeltere Browser und stille Wurzelabrufe da, die PNG-Fassungen
+     fuer Suchergebnisse und den Startbildschirm. Die Pfade tragen bewusst
+     keinen fuehrenden Schraegstrich: Die Oberflaechen-Vorschau liegt unter
+     einem Unterverzeichnis, dort zeigte /favicon.svg ins Leere. -->
+<link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="shortcut icon" href="favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
 <!-- Die Farbe der Browserleiste auf Telefonen, getrennt fuer Hell und Dunkel. -->
 <meta name="theme-color" content="#FCF9F4" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#16130F" media="(prefers-color-scheme: dark)">
@@ -42,6 +47,17 @@
 <header class="site">
   <div class="shell bar">
     <a class="brand" href="./">
+      <!-- Die Bildmarke, dieselbe Pfote wie im Zeichen der Anwendung und in der
+           Zeichnung im Hero. Sie steht im Dokument und nicht in einem <img>,
+           damit sie ueber currentColor dem Erscheinungsbild folgt. -->
+      <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <ellipse cx="14" cy="26" rx="4.5" ry="6.4" transform="rotate(-24 14 26)"/>
+        <ellipse cx="26" cy="20" rx="4.8" ry="6.6" transform="rotate(-6 26 20)"/>
+        <ellipse cx="38" cy="20" rx="4.8" ry="6.6" transform="rotate(6 38 20)"/>
+        <ellipse cx="50" cy="26" rx="4.5" ry="6.4" transform="rotate(24 50 26)"/>
+        <path d="M32 33c8.8 0 16 5.8 16 12.8S40.8 57 32 57s-16-4.2-16-11.2S23.2 33 32 33z"/>
+      </svg>
+      <!-- Die farbige Silbe haelt den Namen zusammen. -->
       <span class="brand-word">Leih<span class="brand-ich">Ich</span>Dir</span>
     </a>
     <div class="bar-controls">

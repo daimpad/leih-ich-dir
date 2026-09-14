@@ -243,6 +243,9 @@ header.site { padding-block: var(--s-4); }
   text-decoration: none; color: inherit; margin-right: auto;
 }
 .brand-word { font-size: 1.45rem; }
+/* Die Bildmarke links vom Namen. Sie nimmt die Farbe der farbigen Silbe auf,
+   damit Zeichen und Wort als ein Ding gelesen werden. */
+.brand-mark { width: 1.7rem; height: 1.7rem; flex: 0 0 auto; fill: var(--green); }
 .brand-ich { color: var(--green); }
 
 .bar-controls { display: flex; align-items: center; gap: var(--s-2); }

@@ -95,7 +95,9 @@ if (str_starts_with($base, 'https://')) {
 
 echo "\nKopfzeilen\n";
 $h = $home['headers'];
-line('MUSS', 'Content-Security-Policy gesetzt', isset($h['content-security-policy']));
+$kopfzeilenFehlen = !isset($h['content-security-policy']);
+line('MUSS', 'Content-Security-Policy gesetzt', !$kopfzeilenFehlen,
+    $kopfzeilenFehlen ? 'die Ursache steht am Ende unter Befund' : '');
 line('SOLL', 'X-Content-Type-Options nosniff', ($h['x-content-type-options'] ?? '') === 'nosniff');
 line('SOLL', 'Referrer-Policy no-referrer', ($h['referrer-policy'] ?? '') === 'no-referrer');
 line('SOLL', 'X-Frame-Options DENY', strtoupper($h['x-frame-options'] ?? '') === 'DENY');
@@ -118,9 +120,14 @@ foreach ([
     ['/assets/fonts/inter-400.woff2', 'font/woff2'],
     ['/assets/pics/pfote.svg', 'image/svg+xml'],
     ['/assets/pics/og.png', 'image/png'],
-    ['/assets/pics/favicon.svg', 'image/svg+xml'],
-    ['/assets/pics/apple-touch-icon.png', 'image/png'],
+    ['/favicon.svg', 'image/svg+xml'],
+    ['/favicon-96x96.png', 'image/png'],
+    ['/apple-touch-icon.png', 'image/png'],
     ['/favicon.ico', 'image'],
+    ['/site.webmanifest', 'json'],
+    ['/assets/pics/icon-192.png', 'image/png'],
+    ['/assets/pics/icon-512.png', 'image/png'],
+    ['/assets/pics/icon-maskable-512.png', 'image/png'],
     ['/robots.txt', 'text/plain'],
     ['/sitemap.xml', 'xml'],
 ] as [$path, $type]) {
@@ -132,6 +139,7 @@ foreach ([
 
 /* -- Was nicht erreichbar sein darf ---------------------------------------- */
 
+$sperrenGreifen = false;
 echo "\nAbschottung\n";
 foreach ([
     '/data/',
@@ -143,7 +151,32 @@ foreach ([
     '/tools/icon-vorlage.html',
 ] as $path) {
     $res = fetch($base . $path);
+    if ($res['status'] !== 200) { $sperrenGreifen = true; }
     line('MUSS', 'gesperrt: ' . $path, $res['status'] !== 200, 'Status ' . $res['status']);
+}
+
+/* -- Schlussfolgerung ------------------------------------------------------ *
+ *
+ * Fehlen die Kopfzeilen, greifen aber die Sperren, dann wird die .htaccess
+ * gelesen: RedirectMatch und Require all denied stehen in derselben Datei und
+ * brauchen dasselbe AllowOverride wie Header. Dann fehlt nicht AllowOverride,
+ * sondern das Modul mod_headers — der ganze Block steht in
+ * <IfModule mod_headers.c> und wird ohne das Modul stillschweigend
+ * uebersprungen. Genau diese Stille macht den Fehler so schwer zu finden.
+ * ------------------------------------------------------------------------- */
+
+if ($kopfzeilenFehlen) {
+    echo "\nBefund\n";
+    if (!empty($sperrenGreifen)) {
+        line('MUSS', 'Ursache der fehlenden Kopfzeilen', false,
+            'Die .htaccess wird gelesen, sonst waeren die Sperren oben nicht wirksam. '
+            . 'Es fehlt das Apache-Modul mod_headers. In Plesk unter Tools & Einstellungen, '
+            . 'Apache-Webserver, headers anhaken; danach erneut pruefen.');
+    } else {
+        line('MUSS', 'Ursache der fehlenden Kopfzeilen', false,
+            'Weder Kopfzeilen noch Sperren greifen: Die .htaccess wird gar nicht '
+            . 'ausgewertet. Im Virtual Host fehlt AllowOverride All.');
+    }
 }
 
 /* -- Schnittstelle und Schreibrechte --------------------------------------- */
