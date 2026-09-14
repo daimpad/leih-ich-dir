@@ -1104,11 +1104,6 @@
       var node = document.getElementById(id);
       if (node) { node.hidden = (id !== name); }
     });
-    /* Die Startseite steht in drei Spalten und braucht mehr Breite als eine
-       Liste von Gegenstaenden, die schmal besser zu lesen ist. */
-    var main = document.getElementById('main');
-    if (main) { main.classList.toggle('page--wide', name === 'viewStart'); }
-
     /* Ein Wechsel der Ansicht ist ein Ortswechsel und beginnt deshalb oben.
        Der Browser behaelt den Rollstand sonst bei, weil das Dokument
        dasselbe bleibt: Wer die Schaltflaeche am Fuss der Startseite bedient,
