@@ -320,15 +320,19 @@
 
     <!-- 1 · Titel der Liste -->
     <div class="titleblock">
-      <h1 id="listTitleRead" hidden></h1>
-      <label class="title-edit" hidden id="listTitleEditWrap">
-        <span class="sr-only" data-i18n="list.titleLabel">Titel der Liste</span>
-        <input type="text" id="listTitleInput" class="input title-input" maxlength="80"
-               data-i18n-placeholder="list.titlePlaceholder" placeholder="Titel der Liste">
-      </label>
+      <!-- Titel und Speicherzustand in einer Zeile: Der Zustand gehoert zum
+           Titel, nicht zu den Angaben darunter. -->
+      <div class="titlerow">
+        <h1 id="listTitleRead" hidden></h1>
+        <label class="title-edit" hidden id="listTitleEditWrap">
+          <span class="sr-only" data-i18n="list.titleLabel">Titel der Liste, freiwillig</span>
+          <input type="text" id="listTitleInput" class="input title-input" maxlength="80"
+                 data-i18n-placeholder="list.titlePlaceholder" placeholder="Titel der Liste">
+        </label>
+        <span id="saveState" class="chip chip--ok chip--sm" role="status" aria-live="polite" hidden></span>
+      </div>
       <p class="titlemeta">
         <span id="listMeta"></span>
-        <span id="saveState" class="chip chip--ok" role="status" aria-live="polite" hidden></span>
         <button type="button" id="levelChip" class="chip chip--level" hidden></button>
       </p>
     </div>
@@ -348,10 +352,16 @@
       <!-- Hinzufügen steht in der Liste, nicht daneben. Am Telefon bleibt die
            Zeile beim Blättern oben stehen; eine schwebende Schaltfläche
            erübrigt sich damit. -->
-      <form class="addbox" id="addForm" hidden autocomplete="off">
+      <!-- novalidate: Die Pruefung macht diese Anwendung selbst. Der Browser
+           zeigte sonst eine eigene, unuebersetzte Blase und brach die
+           Absendung ab, bevor die eigene Warnung erscheinen konnte. -->
+      <form class="addbox" id="addForm" hidden autocomplete="off" novalidate>
+        <label class="field__label" for="addName">
+          <span data-i18n="add.nameLabel">Gegenstand</span><span class="req" aria-hidden="true">*</span>
+          <span class="sr-only" data-i18n="form.required">Pflichtfeld</span>
+        </label>
         <div class="addrow">
-          <label class="sr-only" for="addName" data-i18n="add.nameLabel">Gegenstand</label>
-          <input type="text" id="addName" class="input" list="itemSuggestions" required maxlength="80"
+          <input type="text" id="addName" class="input" list="itemSuggestions" required aria-required="true" maxlength="80"
                  data-i18n-placeholder="add.namePlaceholder" placeholder="Was verleihst Du?">
           <button type="button" id="btnMic" class="btn btn--icon" aria-pressed="false" hidden>
             <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-voice"/></svg>
@@ -363,14 +373,18 @@
           </button>
         </div>
         <p class="addhint">
-          <button type="button" id="btnBulk" class="linkbtn" data-i18n="voice.bulk">Mehrere auf einmal</button>
           <span id="voiceState" class="voicestate" role="status" aria-live="polite"></span>
+          <button type="button" id="btnBulk" class="linkbtn" data-i18n="voice.bulk">Mehrere auf einmal</button>
         </p>
         <datalist id="itemSuggestions"></datalist>
 
         <div class="voicebox" id="voiceBox" hidden>
-          <label class="sr-only" for="voiceText" data-i18n="voice.textLabel">Erkannter Text</label>
-          <textarea id="voiceText" class="textarea voice-text" rows="2" maxlength="1500"
+          <label class="field__label" for="voiceText">
+            <span data-i18n="voice.textLabel">Erkannter Text</span><span class="req" aria-hidden="true">*</span>
+            <span class="sr-only" data-i18n="form.required">Pflichtfeld</span>
+          </label>
+          <textarea id="voiceText" class="textarea voice-text" rows="6" maxlength="1500"
+                    aria-required="true"
                     data-i18n-placeholder="voice.placeholder"
                     placeholder="Mehrere Sachen am Stück sprechen oder eintippen"></textarea>
           <div class="voicerow">
