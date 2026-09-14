@@ -32,15 +32,20 @@ Seitenverhältnis ändert, muss die Angaben `og:image:width` und
 
 ## Die Rasterzeichen
 
-`assets/pics/favicon.svg` ist die Vorlage für alle Zeichen. Browser, die SVG
+`favicon.svg` im Wurzelverzeichnis ist die Vorlage für alle Zeichen. Browser, die SVG
 als Favicon lesen, nehmen sie direkt; für die übrigen liegen zwei Rasterdateien
 bereit:
 
-- `assets/pics/apple-touch-icon.png`, 180 × 180, für den Startbildschirm unter
-  iOS — deckend, ohne Alphakanal und ohne runde Ecken, weil iOS seine eigene
-  Maske anlegt.
-- `favicon.ico` im Wurzelverzeichnis, mit 16 × 16 und 32 × 32 darin, für den
-  stillen Abruf durch Browser und fremde Abholer.
+- `apple-touch-icon.png`, 180 × 180, für den Startbildschirm unter iOS —
+  deckend, ohne Alphakanal und ohne runde Ecken, weil iOS seine eigene Maske
+  anlegt.
+- `favicon-96x96.png` für Suchergebnisse.
+- `favicon.ico` mit 16 × 16 und 32 × 32 darin, für den stillen Abruf durch
+  Browser und fremde Abholer.
+- `assets/pics/icon-192.png` und `icon-512.png` für das Manifest, dazu
+  `icon-maskable-512.png`: Android schneidet ein maskable Symbol auf einen
+  Kreis zu und garantiert nur die inneren 80 Prozent, die Pfote steht darin
+  deshalb kleiner.
 
 Beide entstehen aus `tools/icon-vorlage.html`, die dieselbe Geometrie trägt wie
 die SVG-Datei. **Wer die Pfote ändert, muss beide Stellen nachziehen.** Die
