@@ -1,4 +1,4 @@
-# Das Vorschaubild neu erzeugen
+# Vorschaubild und Zeichen neu erzeugen
 
 `assets/pics/og.png` ist das Bild, das Messenger und soziale Netze zeigen,
 wenn jemand einen Link auf leihichdir.de einfügt. Es liegt fertig im
@@ -29,3 +29,20 @@ await p.screenshot({ path: 'assets/pics/og.png' });
 1200 × 630 ist das Maß, das die verbreiteten Dienste erwarten. Wer das
 Seitenverhältnis ändert, muss die Angaben `og:image:width` und
 `og:image:height` in den Seitenköpfen mitziehen.
+
+## Die Rasterzeichen
+
+`assets/pics/favicon.svg` ist die Vorlage für alle Zeichen. Browser, die SVG
+als Favicon lesen, nehmen sie direkt; für die übrigen liegen zwei Rasterdateien
+bereit:
+
+- `assets/pics/apple-touch-icon.png`, 180 × 180, für den Startbildschirm unter
+  iOS — deckend, ohne Alphakanal und ohne runde Ecken, weil iOS seine eigene
+  Maske anlegt.
+- `favicon.ico` im Wurzelverzeichnis, mit 16 × 16 und 32 × 32 darin, für den
+  stillen Abruf durch Browser und fremde Abholer.
+
+Beide entstehen aus `tools/icon-vorlage.html`, die dieselbe Geometrie trägt wie
+die SVG-Datei. **Wer die Pfote ändert, muss beide Stellen nachziehen.** Die
+Rasterdateien wie beim Vorschaubild mit einem Browser ablichten; die `.ico`
+ist ein schlichter Behälter, in dem seit Vista ein PNG stehen darf.

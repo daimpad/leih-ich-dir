@@ -47,6 +47,18 @@ RedirectMatch 404 (?i)/(\.git|\.github|tools|tests|CONTRIBUTING\.md|README\.md|L
 #     RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
 # </IfModule>
 
+# Komprimierung. Text geht sonst roh ueber die Leitung: index.html allein
+# schrumpft von 112 auf 34 Kilobyte, app.js von 141 auf 34. Brotli zuerst,
+# weil es enger packt; wo das Modul fehlt, greift Deflate.
+<IfModule mod_brotli.c>
+    AddOutputFilterByType BROTLI_COMPRESS text/html text/css text/plain text/xml \
+        application/javascript application/json image/svg+xml
+</IfModule>
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml \
+        application/javascript application/json image/svg+xml
+</IfModule>
+
 # Keine Zwischenspeicherung der Anwendungsdateien, damit Aktualisierungen greifen
 <IfModule mod_headers.c>
     <FilesMatch "\.(html|js|css)$">

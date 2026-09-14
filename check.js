@@ -145,7 +145,13 @@
       ['assets/fonts/fonts.css', 'text/css'],
       ['assets/fonts/ranchers-400.woff2', 'font/woff2'],
       ['assets/fonts/inter-400.woff2', 'font/woff2'],
-      ['assets/pics/pfote.svg', 'image/svg+xml']
+      ['assets/pics/pfote.svg', 'image/svg+xml'],
+      ['assets/pics/og.png', 'image/png'],
+      ['assets/pics/favicon.svg', 'image/svg+xml'],
+      ['assets/pics/apple-touch-icon.png', 'image/png'],
+      ['favicon.ico', 'image'],
+      ['robots.txt', 'text/plain'],
+      ['sitemap.xml', 'xml']
     ];
     return files.reduce(function (chain, entry) {
       return chain.then(function () {

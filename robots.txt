@@ -1,0 +1,23 @@
+# leihichdir.de
+#
+# Indexiert werden soll, was Inhalt traegt: die Startseite und die drei
+# Seiten daneben. Bedienung und Abnahme gehoeren nicht in einen Suchindex,
+# die Schnittstelle und die Ablage erst recht nicht.
+#
+# Die Listen selbst stehen hier nicht, weil sie keine eigenen Adressen
+# haben: Sie leben im Fragment hinter dem # und erreichen keinen Server.
+
+# Einstellungen und Abnahme stehen hier bewusst NICHT: Sie tragen ein
+# noindex im Kopf, und ein Verbot hier wuerde genau das verhindern — wer die
+# Seite nicht abrufen darf, liest auch ihr noindex nicht und traegt die
+# Adresse notfalls ohne Beschreibung in den Index ein. Entweder das eine
+# oder das andere, nie beides.
+
+User-agent: *
+Allow: /
+Disallow: /api.php
+Disallow: /data/
+Disallow: /tools/
+Disallow: /tests/
+
+Sitemap: https://leihichdir.de/sitemap.xml

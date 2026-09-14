@@ -6,8 +6,42 @@
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy"
       content="default-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
-<title>Datenschutz · leihichdir.de</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%23FFFEE5'/><g fill='none' stroke='%23000' stroke-width='4' stroke-linecap='square'><rect x='4' y='20' width='18' height='20'/><rect x='38' y='20' width='18' height='20'/><path d='M24 30 L34 30'/></g><path d='M32 25 L38 30 L32 35 Z' fill='%2300FF9C'/></svg>">
+<title>Datenschutz · LeihIchDir</title>
+<meta name="description" content="Welche Daten LeihIchDir verarbeitet, auf welcher Rechtsgrundlage, wie lange sie bleiben und welche Rechte Du hast.">
+<link rel="canonical" href="https://leihichdir.de/datenschutz.html">
+<!-- Das Zeichen der Anwendung. Das SVG folgt Hell und Dunkel, die .ico-Datei
+     ist fuer aeltere Browser da, das PNG fuer den Startbildschirm unter iOS. -->
+<link rel="icon" href="assets/pics/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="assets/pics/apple-touch-icon.png">
+<!-- Die Farbe der Browserleiste auf Telefonen, getrennt fuer Hell und Dunkel. -->
+<meta name="theme-color" content="#FCF9F4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16130F" media="(prefers-color-scheme: dark)">
+<!-- Vorschau beim Teilen. Die Adressen muessen absolut sein: Der Dienst, der
+     die Karte baut, kennt keinen Kontext, aus dem er relative aufloesen
+     koennte. Eine geteilte Liste steht im Fragment hinter dem #; das sendet
+     der Browser nie mit, der Dienst sieht also dieselbe Karte wie hier und
+     nie den Inhalt einer Liste. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="LeihIchDir">
+<meta property="og:locale" content="de_DE">
+<meta property="og:url" content="https://leihichdir.de/datenschutz.html">
+<meta property="og:title" content="Datenschutz · LeihIchDir">
+<meta property="og:description" content="Welche Daten LeihIchDir verarbeitet, auf welcher Rechtsgrundlage und wie lange.">
+<meta property="og:image" content="https://leihichdir.de/assets/pics/og.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Die Wortmarke Leih ich Dir. neben einer Katzenpfote, die eine Liste mit Wollknäuel, Fischgräte, Futternapf, Maus, Federangel und Milch hält.">
+<!-- Ohne diese Angabe zeigen Slack, Discord und X ein Randbildchen statt der grossen Karte. -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Datenschutz · LeihIchDir">
+<meta name="twitter:description" content="Welche Daten LeihIchDir verarbeitet, auf welcher Rechtsgrundlage und wie lange.">
+<meta name="twitter:image" content="https://leihichdir.de/assets/pics/og.png">
+<meta name="twitter:image:alt" content="Die Wortmarke Leih ich Dir. neben einer Katzenpfote, die eine Liste mit Wollknäuel, Fischgräte, Futternapf, Maus, Federangel und Milch hält.">
+<!-- Die beiden Schriften, die sofort zu sehen sind, werden vorab geholt. -->
+<link rel="preload" href="assets/fonts/ranchers-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/fonts/fonts.css">
 <link rel="stylesheet" href="style.css">
 <script src="theme.js"></script>
@@ -26,6 +60,7 @@
   </symbol>
 </svg>
 
+<a class="skiplink" href="#main" data-i18n="a11y.skip">Zum Inhalt springen</a>
 <header class="site">
   <div class="shell bar">
     <a class="brand" href="./">
@@ -39,7 +74,7 @@
   </div>
 </header>
 
-<main class="shell page">
+<main id="main" class="shell page">
 
   <div class="titleblock">
     <h1>Datenschutz</h1>

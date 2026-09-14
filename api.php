@@ -110,6 +110,9 @@ function respond(int $code, array $data): never
     header('Cache-Control: no-store');
     header('X-Content-Type-Options: nosniff');
     header('Referrer-Policy: no-referrer');
+    /* Die Schnittstelle gehört in keinen Suchindex. Sie gibt nur Chiffrate
+       aus, und ein Treffer darauf wäre für niemanden von Nutzen. */
+    header('X-Robots-Tag: noindex, nofollow');
     echo json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     exit;
 }

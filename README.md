@@ -21,6 +21,7 @@ oder Kontaktdaten.
 | **Live-Daten** | der Ansehen-Link lädt den aktuellen Stand und aktualisiert sich selbsttätig |
 | **Zweisprachig** | Deutsch und Englisch, automatische Erkennung plus manuelle Umschaltung |
 | **Hell und dunkel** | folgt dem System, lässt sich in der Kopfleiste und auf der Einstellungsseite übersteuern |
+| **Ruhig stellbar** | Konfetti und Gesichter folgen `prefers-reduced-motion` und lassen sich zusätzlich in den Einstellungen abschalten |
 | **Autovervollständigung** | 29 typische Leih-Gegenstände über ein natives `<datalist>`-Element |
 | **Ein Eintrag, ein Fenster** | verfügbar bleibt schmucklos, verliehen trägt Name und Datum in der Zeile |
 | **Anfragen** | steht bei Freunden in der Zeile: vorformulierter Text, weitergegeben über das Gerät oder per `mailto:` |
@@ -28,6 +29,7 @@ oder Kontaktdaten.
 | **Gemerkte Listen** | eigene Listen stehen auf der Startseite dieses Browsers und über einen Verweis in der Kopfleiste, rein lokal und ohne Konto |
 | **Spracheingabe** | Gegenstände unterwegs einsprechen, Zerlegung im Browser oder wahlweise per Gemini |
 | **Erscheinungsbild** | eigenständig in `style.css`, Schriften mitgeliefert, keine fremden Server |
+| **Auffindbar** | Titel, Beschreibungen, Open Graph, `robots.txt` und `sitemap.xml`; strukturierte Angaben als JSON-LD |
 | **Ohne Abhängigkeiten** | pures PHP, HTML, CSS, Vanilla JS, kein Framework, kein Bauschritt, keine Datenbank |
 
 ## Funktionsweise der Verschlüsselung

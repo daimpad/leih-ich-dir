@@ -279,7 +279,7 @@
       'settings.themeLight': 'Hell',
       'settings.themeDark': 'Dunkel',
       'settings.cacheHeadline': 'Zwischenspeicher',
-      'settings.cacheHint': 'Entfernt alles, was diese Anwendung in diesem Browser ablegt: Sprache, Erscheinungsbild, KI-Schlüssel, Töne, die gemerkten Listen, Deine Runden und Abzeichen und im Vorschaumodus die lokal gehaltenen Listen. Deine Liste auf dem Server und Deine Links bleiben unberührt.',
+      'settings.cacheHint': 'Entfernt alles, was diese Anwendung in diesem Browser ablegt: Sprache, Erscheinungsbild, KI-Schlüssel, Töne, die Ruhigstellung, die gemerkten Listen, Deine Runden und Abzeichen und im Vorschaumodus die lokal gehaltenen Listen. Deine Liste auf dem Server und Deine Links bleiben unberührt.',
       'settings.cacheClear': 'Zwischenspeicher löschen',
       'settings.cacheConfirm': 'Alles löschen, was diese Anwendung in diesem Browser ablegt? Die Liste auf dem Server bleibt bestehen.',
       'settings.cacheDone': 'Zwischenspeicher geleert.',
@@ -436,6 +436,10 @@
       'settings.soundLabel': 'Kleine Töne beim Verleihen und Zurückbekommen',
       'settings.soundHint': 'Standardmäßig aus. Vier kurze Töne, sonst nichts. Beim Einschalten hörst Du gleich einen davon. Der Schalter gilt nur für diesen Browser.',
       'settings.soundOn': 'Töne sind an.',
+      'settings.motionHeadline': 'Bewegung',
+      'settings.motionLabel': 'Bewegte Anteile ruhigstellen',
+      'settings.motionHint': 'Konfetti, aufpoppende Gesichter und das Aufklappen entfallen dann; alles erscheint sofort. Der Schalter gilt nur für diesen Browser.',
+      'settings.motionSystem': 'Dein System verlangt bereits wenig Bewegung. Die Anwendung folgt dem, unabhängig von diesem Schalter.',
 
       'footer.imprint': 'Impressum',
       'footer.privacy': 'Datenschutz',
@@ -564,7 +568,7 @@
       'settings.themeDark': 'Dark',
       'settings.cacheHeadline': 'Local data',
       'settings.cacheClear': 'Clear local data',
-      'settings.cacheHint': 'Removes everything this application stores in this browser: language, appearance, AI key, sounds, the remembered lists, your rounds and badges, and in preview mode the locally held lists. Your list on the server and your links stay untouched.',
+      'settings.cacheHint': 'Removes everything this application stores in this browser: language, appearance, AI key, sounds, the motion setting, the remembered lists, your rounds and badges, and in preview mode the locally held lists. Your list on the server and your links stay untouched.',
       'settings.cacheConfirm': 'Remove everything this application stores in this browser? The list on the server stays.',
       'settings.cacheDone': 'Local data cleared.',
       'settings.dangerHeadline': 'Delete list',
@@ -720,6 +724,10 @@
       'settings.soundLabel': 'Small sounds when lending and getting things back',
       'settings.soundHint': 'Off by default. Four short sounds, nothing else. Switching it on plays one right away. The switch applies to this browser only.',
       'settings.soundOn': 'Sounds are on.',
+      'settings.motionHeadline': 'Motion',
+      'settings.motionLabel': 'Calm the moving parts',
+      'settings.motionHint': 'Confetti, popping faces and the unfolding are dropped; everything appears at once. The switch applies to this browser only.',
+      'settings.motionSystem': 'Your system already asks for reduced motion. The application follows that, regardless of this switch.',
 
       'footer.imprint': 'Imprint',
       'footer.privacy': 'Privacy',
@@ -1230,13 +1238,15 @@
     var titleWrap = $('#listTitleEditWrap');
     var titleInput = $('#listTitleInput');
     titleWrap.hidden = !isEdit;
-    titleRead.hidden = isEdit;
-    if (isEdit) {
-      if (document.activeElement !== titleInput) { titleInput.value = state.doc.title; }
-    } else {
-      titleRead.textContent = state.doc.title || t('list.untitled');
-    }
-    document.title = (state.doc.title || t('list.untitled')) + ' · leih-ich-dir';
+    /* Die Ueberschrift bleibt in beiden Modi im Dokument. Im Bearbeiten-Modus
+       steht daneben das Feld mit demselben Text, deshalb wird sie dort nur
+       unsichtbar — verborgen waere die Seite ohne Ebene 1, und wer per
+       Ueberschriftensprung navigiert, erfuehre nie, welche Liste offen ist. */
+    titleRead.hidden = false;
+    titleRead.classList.toggle('sr-only', isEdit);
+    titleRead.textContent = state.doc.title || t('list.untitled');
+    if (isEdit && document.activeElement !== titleInput) { titleInput.value = state.doc.title; }
+    document.title = (state.doc.title || t('list.untitled')) + ' · LeihIchDir';
 
     /* Bereiche, die nur im Bearbeitenmodus sichtbar sind */
     $('#shareBox').hidden = !isEdit;
@@ -1477,11 +1487,17 @@
       var row = el('div', 'itemrow' + (lent ? ' items-read-lent' : ''));
       row.appendChild(statusBadge(item));
       row.appendChild(text);
+      /* Frei oder verliehen traegt im Ansehen-Modus sonst allein die Farbe.
+         Vorgelesen klaenge eine Liste aus zehn Sachen wie zehnmal dasselbe. */
+      row.appendChild(el('span', 'sr-only', statusLabel(item)));
       if (!lent) {
         var ask = el('button', 'btn btn--primary btn--sm item-ask');
         ask.type = 'button';
         ask.setAttribute('data-act', 'ask');
         ask.textContent = t('item.ask');
+        /* Sonst heissen alle Schaltflaechen der Liste gleich. Der sichtbare
+           Text bleibt Anfragen, der Name bekommt den Gegenstand dazu. */
+        ask.appendChild(el('span', 'sr-only', ' ' + item.name));
         row.appendChild(ask);
       }
       li.appendChild(row);
@@ -2017,6 +2033,7 @@
 
   var LS_SPIEL = 'lid.spiel';
   var LS_TON   = 'lid.ton';
+  var LS_RUHIG = 'lid.ruhig';
 
   var LANG_AUS   = 30;     // ab so vielen Tagen traegt die Marke das geduldige Gesicht
   var LANG_NOTIZ = 60;     // ab hier sagt die Anwendung einmal je Sitzung etwas
@@ -2094,6 +2111,11 @@
   }
 
   function ruhig() {
+    /* Die Systemvorgabe zuerst. Wer sie nicht gesetzt hat, aber trotzdem auf
+       Bewegung reagiert, braucht einen Schalter in der Anwendung selbst — fuer
+       die Toene, die weit weniger stoeren, gibt es laengst einen. */
+    try { if (localStorage.getItem(LS_RUHIG) === '1') { return true; } }
+    catch (e) { /* privater Modus: dann eben nur die Systemvorgabe */ }
     return typeof window.matchMedia === 'function' &&
            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
@@ -3439,6 +3461,25 @@
           else { localStorage.removeItem(LS_TON); }
         } catch (e) { /* privater Modus: dann eben nicht */ }
         if (this.checked) { ton('heim'); toast(t('settings.soundOn')); }
+      });
+    }
+
+    var ruhe = $('#cfgRuhig');
+    if (ruhe) {
+      var vorgabe = typeof window.matchMedia === 'function' &&
+                    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var gesetzt = false;
+      try { gesetzt = localStorage.getItem(LS_RUHIG) === '1'; } catch (e) { /* egal */ }
+      ruhe.checked = gesetzt || vorgabe;
+      /* Verlangt das System schon Ruhe, ist der Haken gesetzt und unveraenderlich:
+         Die Anwendung wuerde die Vorgabe ohnehin nicht uebergehen. */
+      ruhe.disabled = vorgabe;
+      if (vorgabe) { $('#ruhigVorgabe').hidden = false; }
+      ruhe.addEventListener('change', function () {
+        try {
+          if (this.checked) { localStorage.setItem(LS_RUHIG, '1'); }
+          else { localStorage.removeItem(LS_RUHIG); }
+        } catch (e) { /* privater Modus: dann eben nicht */ }
       });
     }
 
