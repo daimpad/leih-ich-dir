@@ -227,6 +227,58 @@ Ladezeit: Ein Aufruf von `fonts.gstatic.com` würde die IP-Adresse jeder
 Besucherin an einen Dritten übertragen, und die Content Security Policy
 unterbindet das ohnehin.
 
+## Runden, Abzeichen und Stufen
+
+Die Anwendung feiert nicht jede Handlung, sondern jede Premiere. Eine Funktion
+`laut(n)` in `app.js` übersetzt einen Zähler in vier Lautstärkestufen:
+
+| Stufe | Wann | Was passiert |
+| --- | --- | --- |
+| 4 | erstes Mal, 10., 25., 50., 100., jedes Abzeichen, jeder Stufenaufstieg | Konfetti, Klappe, Meldung, Ton |
+| 3 | zweites und drittes Mal | Klappe und Meldung |
+| 2 | viertes bis neuntes Mal | Meldung mit Gesicht, Bewegung an der Zeile |
+| 1 | ab dem zehnten Mal | nur die Bewegung, kein Wort |
+
+Damit steht die Dramaturgie an einer Stelle statt verteilt über zwanzig
+Aufrufe: Die erste Minute ist laut, weil alles zum ersten Mal geschieht, und
+nach zwanzig Einträgen ist von derselben Mechanik ein Augenzwinkern übrig.
+
+Gezählt wird nicht der Besitz, sondern die vollendete **Runde** — gebucht beim
+Zurückbekommen, nie beim Verleihen. Wer drei Dinge hat, die ständig unterwegs
+sind, steht damit höher als jemand mit vierzig Dingen im Schrank. Wer binnen
+dreißig Sekunden zurückschaltet, hat sich verklickt: Dann wird nichts gezählt
+und nichts gefeiert.
+
+Sechs Stufen (1, 3, 8, 16, 30, 55 Runden) und elf Abzeichen liegen unter
+`lid.spiel` im localStorage dieses Browsers, rund 300 Byte. Sie erreichen
+weder den Server noch das verschlüsselte Dokument noch die Freunde; auf dem
+Gerät eines Freundes wird überhaupt nichts gezählt. Beim Gerätewechsel fängt
+das Gedächtnis bei null an — das ist der Preis dafür, dass es kein Konto gibt.
+
+Es gibt bewusst keinen Fortschrittsbalken, keine angekündigte nächste
+Schwelle, keine verschlossenen Abzeichenkacheln, keine Strähnen und keinen
+Verfall. Eine offene Anerkennung ohne Druck ist etwas anderes als ein Spiel
+mit Verlustangst.
+
+**Die Gesichter** sind keine Zierde neben der Zeile, sondern die Zustandsmarke
+selbst: `i-face-frei` auf grünem Grund, `i-face-weg` auf bernsteinfarbenem, und
+ab dreißig Tagen Leihdauer `i-face-lang`. Das ist das einzige Element, das bei
+fünfzig Gegenständen nicht lauter wird, sondern nützlicher — und es überlebt
+`prefers-reduced-motion` vollständig, weil es keine Bewegung braucht.
+
+**Töne** entstehen über die Web Audio API, ohne eine einzige Datei: Der
+Richtlinie fehlt `media-src`, es greift `default-src 'self'`, und `data:` ist
+allein für Bilder freigegeben. Vier Klänge unter einer Viertelsekunde,
+standardmäßig aus, Schalter in den Einstellungen.
+
+**Ruhig bleibt es** auf der Startseite, die das Vertrauensversprechen trägt,
+beim Freund im Ansehen-Modus, in den neun Sekunden nach einem Löschen, die dem
+Rückweg gehören, und in jeder Fehlermeldung.
+
+Unter `prefers-reduced-motion` bleiben Abzeichen, Stufen, Klappe und Meldungen
+vollständig erhalten; fort ist allein die Bewegung. Die Einstellung sagt
+weniger Bewegung, nicht weniger Anerkennung.
+
 ## Repository-Struktur
 
 ```

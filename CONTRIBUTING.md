@@ -104,7 +104,13 @@ Sichtbare Texte folgen diesen Regeln:
 - Kurze Hauptsätze, konkret vor allgemein.
 - Keine Gedankenstriche im Fließtext, dort steht ein Komma. Bei Paaren aus
   Label und Wert steht ein Mittelpunkt.
-- Keine Ausrufezeichen.
+- Keine Ausrufezeichen. Zwei eng gefasste Ausnahmen, beide nur innerhalb der
+  Listenansicht: die Überschrift des Zugangskastens, weil ein verlorener
+  Bearbeiten-Link die Liste kostet, und die Klappenzeilen der höchsten
+  Feierstufe, also der Stufenaufstieg und die laut gefeierte Heimkehr. Von den
+  rund dreißig Feiertexten tragen zwei eines. Startseite, Einstellungen,
+  Hinweise, Abzeichentexte, Rundenbuch und jede Fehlermeldung bleiben ohne.
+  Ein Ausrufezeichen, das überall steht, ruft nirgends mehr.
 - Deutsches Wort vor Anglizismus, wo es eines gibt: Schaltfläche statt Button.
 - Keine Werbewörter.
 

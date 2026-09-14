@@ -66,6 +66,15 @@
      Linienfarbe folgt, ohne eine Datei nachzuladen. */
   --pfeil: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M8 32 L52 32 M36 16 L52 32 L36 48' fill='none' stroke='%23000' stroke-width='6' stroke-linecap='square'/%3E%3C/svg%3E");
 
+  /* Bewegungsmerkmale. Ein gemeinsames Vokabular statt fuenfzehn einzeln
+     gewaehlter Kurven: Was federt, federt ueberall gleich. */
+  --takt-tipp:  120ms;   /* Druckpunkt unter dem Finger */
+  --takt-kurz:  200ms;   /* Loslassen, kleine Zustandswechsel */
+  --takt-fall:  280ms;   /* eine Zeile faellt an ihren Platz */
+  --takt-lang:  460ms;   /* die Heimkehr, der laengste Weg */
+  --feder:      cubic-bezier(.34, 1.56, .64, 1);   /* mit Ueberschwingen */
+  --feder-sanft: cubic-bezier(.22, 1, .36, 1);     /* ohne */
+
   --sans:    'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --slab:    'Zilla Slab', Georgia, serif;
   --mono:    'Space Mono', ui-monospace, 'SF Mono', Menlo, monospace;
@@ -537,7 +546,7 @@ button, input, textarea, select { font: inherit; color: inherit; }
   display: grid; place-items: center;
   background: var(--green-soft); color: var(--green-ink);
 }
-.item-badge .ico { width: 1rem; height: 1rem; }
+.item-badge .ico { width: 1.3rem; height: 1.3rem; }
 .item--lent .item-badge { background: var(--amber-soft); color: var(--amber); }
 
 .item-text { flex: 1 1 auto; min-width: 0; }
@@ -607,7 +616,8 @@ button, input, textarea, select { font: inherit; color: inherit; }
   background: var(--ink); color: var(--paper);
   border-radius: var(--r-btn); padding: .8rem 1rem; box-shadow: var(--shadow-lift);
 }
-.toast__body { flex: 1 1 auto; font-size: .95rem; }
+.toast__body { flex: 1 1 auto; font-size: .95rem; display: flex; align-items: center; gap: var(--s-2); }
+.toast__face { width: 1.4rem; height: 1.4rem; flex: 0 0 auto; }
 .toast__act {
   flex: 0 0 auto; background: none; border: 0; cursor: pointer; padding: .2rem .4rem;
   color: var(--paper); font-weight: 600; text-decoration: underline;
@@ -632,6 +642,182 @@ button, input, textarea, select { font: inherit; color: inherit; }
 .footer-claim a { color: var(--ink); text-decoration: none; font-weight: 700; }
 .footer-claim a:hover { color: var(--green); }
 .footer-claim span[aria-hidden] { color: var(--line-firm); }
+
+/* == 11a · Druckpunkt, Gesichter, Klappe, Konfetti =================== *
+ *
+ * Alles Verspielte sitzt hier an einer Stelle. Zwei Regeln haben es
+ * bestimmt:
+ *
+ * 1. Die Sammelregel am Dateiende schaltet unter prefers-reduced-motion
+ *    jede Animation ab. Was ohne seine Animation unsichtbar sein soll,
+ *    muss deshalb im Grundzustand unsichtbar sein — das gilt fuer die
+ *    Konfettischnipsel. Was dagegen bleiben soll, darf seine Lage nicht
+ *    aus einer Animation beziehen — das gilt fuer die Klappe.
+ * 2. Die Mitte der Klappe kommt aus transform, ihre Bewegung aus der
+ *    eigenstaendigen Eigenschaft translate. Beide zusammen, sonst
+ *    ueberschriebe die eine die andere.
+ * ===================================================================== */
+
+/* Der Druckpunkt. Keine Feier, sondern Bedienung: Er nutzt sich nie ab und
+   gilt als einziges Stueck auch auf der ruhigen Startseite. */
+.btn, .ctl-square, .seg button, .tab, .itemrow, .modal__x, .chip--level {
+  transition: transform var(--takt-kurz) var(--feder),
+              background-color var(--takt-kurz) ease,
+              border-color var(--takt-kurz) ease,
+              color var(--takt-kurz) ease;
+}
+.btn:active, .ctl-square:active, .seg button:active,
+.tab:active, .itemrow:active, .modal__x:active, .chip--level:active {
+  transform: translateY(1px) scale(.97);
+  transition-duration: var(--takt-tipp);
+}
+
+/* Eine Zeile faellt an ihren Platz: von oben, gestaucht, und dehnt sich beim
+   Aufkommen. Die Marke schnappt 80 ms spaeter hinterher. */
+@keyframes lid-fall {
+  0%   { opacity: 0; transform: translateY(-10px) scaleY(.72); }
+  60%  { opacity: 1; transform: translateY(0)     scaleY(1.06); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes lid-schnapp {
+  0%   { transform: scale(0); }
+  65%  { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+/* Hinaus: angestossen nach rechts und zurueck. */
+@keyframes lid-raus {
+  0%   { transform: none; }
+  45%  { transform: translateX(8px); }
+  100% { transform: none; }
+}
+/* Heim: von rechts herein, mit Ueberschwingen ueber den eigenen Platz. */
+@keyframes lid-heim {
+  0%   { opacity: .4; transform: translateX(28px); }
+  70%  { opacity: 1;  transform: translateX(-6px); }
+  100% { opacity: 1;  transform: none; }
+}
+@keyframes lid-einschlag {
+  0%   { transform: scale(0); }
+  60%  { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+/* Das Augenzwinkern am unteren Ende der Kurve: sieben Grad und zurueck. */
+@keyframes lid-kipp {
+  0%   { transform: rotate(0); }
+  40%  { transform: rotate(-7deg); }
+  70%  { transform: rotate(3deg); }
+  100% { transform: rotate(0); }
+}
+@keyframes lid-weg-kipp {
+  0%   { transform: rotate(0); }
+  55%  { transform: rotate(18deg); }
+  100% { transform: rotate(0); }
+}
+
+.lid-fall  { animation: lid-fall var(--takt-fall) var(--feder) both; }
+.lid-fall  .item-badge { animation: lid-schnapp var(--takt-kurz) var(--feder) 80ms both; }
+.lid-raus  { animation: lid-raus 320ms var(--feder-sanft) both; }
+.lid-raus  .item-badge { animation: lid-weg-kipp 320ms var(--feder-sanft) both; }
+.lid-heim  { animation: lid-heim var(--takt-lang) var(--feder) both; }
+.lid-heim  .item-badge { animation: lid-einschlag 340ms var(--feder) both; }
+.lid-kipp  .item-badge { animation: lid-kipp 300ms var(--feder-sanft) both; }
+
+/* Die Klappe — der Bildkanal. Sie zeigt, sie spricht nicht: Wort und Bild
+   laufen getrennt, damit toast() seine einzige Meldung behaelt. */
+.klappe {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: calc(var(--s-5) + 6.2rem); z-index: 59;
+  width: min(20rem, calc(100vw - 2rem));
+  display: flex; align-items: center; gap: var(--s-3);
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line-firm); border-radius: var(--r-btn);
+  padding: .7rem 1rem; box-shadow: var(--shadow-lift);
+  pointer-events: none;
+}
+.klappe__face { width: 2.6rem; height: 2.6rem; flex: 0 0 auto; color: var(--green); }
+.klappe__text { font-family: var(--display); font-weight: 400; font-size: 1.25rem; line-height: 1.15; }
+.klappe--jubel .klappe__face { color: var(--amber); }
+@keyframes lid-klappe {
+  0%   { opacity: 0; translate: 0 14px; }
+  70%  { opacity: 1; translate: 0 -4px; }
+  100% { opacity: 1; translate: 0 0; }
+}
+.klappe.is-an { animation: lid-klappe 260ms var(--feder) both; }
+
+/* Das Konfetti. Achtzehn vorbereitete Regeln statt einer Leinwand: Damit
+   schaltet die Sammelregel am Dateiende es ohne eine Zeile JavaScript ab,
+   denn der Grundzustand ist unsichtbar. */
+.konfetti { position: fixed; inset: 0; z-index: 58; pointer-events: none; overflow: hidden; }
+.konfetti i {
+  position: absolute; top: -6vh; width: 9px; height: 14px;
+  opacity: 0; display: block;
+}
+@keyframes lid-konf {
+  0%   { opacity: 1; transform: translateY(0) rotate(0); }
+  80%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(112vh) rotate(540deg); }
+}
+.konfetti i:nth-child(1) { left: 4%; background: var(--green); animation: lid-konf 1450ms linear 0ms both; }
+.konfetti i:nth-child(2) { left: 11%; background: var(--green-ink); animation: lid-konf 1220ms linear 80ms both; }
+.konfetti i:nth-child(3) { left: 18%; background: var(--amber); animation: lid-konf 1600ms linear 40ms both; }
+.konfetti i:nth-child(4) { left: 25%; background: var(--line-firm); animation: lid-konf 1330ms linear 160ms both; }
+.konfetti i:nth-child(5) { left: 32%; background: var(--green); animation: lid-konf 1510ms linear 20ms both; }
+.konfetti i:nth-child(6) { left: 39%; background: var(--green-ink); animation: lid-konf 1280ms linear 200ms both; }
+.konfetti i:nth-child(7) { left: 46%; background: var(--amber); animation: lid-konf 1390ms linear 110ms both; }
+.konfetti i:nth-child(8) { left: 53%; background: var(--line-firm); animation: lid-konf 1570ms linear 60ms both; }
+.konfetti i:nth-child(9) { left: 60%; background: var(--green); animation: lid-konf 1240ms linear 180ms both; }
+.konfetti i:nth-child(10) { left: 67%; background: var(--green-ink); animation: lid-konf 1460ms linear 30ms both; }
+.konfetti i:nth-child(11) { left: 74%; background: var(--amber); animation: lid-konf 1350ms linear 140ms both; }
+.konfetti i:nth-child(12) { left: 81%; background: var(--line-firm); animation: lid-konf 1590ms linear 90ms both; }
+.konfetti i:nth-child(13) { left: 88%; background: var(--green); animation: lid-konf 1300ms linear 210ms both; }
+.konfetti i:nth-child(14) { left: 94%; background: var(--green-ink); animation: lid-konf 1420ms linear 50ms both; }
+.konfetti i:nth-child(15) { left: 8%; background: var(--amber); animation: lid-konf 1530ms linear 170ms both; }
+.konfetti i:nth-child(16) { left: 50%; background: var(--line-firm); animation: lid-konf 1260ms linear 120ms both; }
+.konfetti i:nth-child(17) { left: 71%; background: var(--green); animation: lid-konf 1480ms linear 70ms both; }
+.konfetti i:nth-child(18) { left: 29%; background: var(--green-ink); animation: lid-konf 1360ms linear 190ms both; }
+
+/* Der Stufenchip. Er ist eine Schaltflaeche und muss deshalb zuruecksetzen,
+   was .chip als Textbaustein mitbringt. */
+.chip--level {
+  background: var(--surface-alt); color: var(--ink);
+  border: 1px solid var(--line); cursor: pointer;
+  display: inline-flex; align-items: center; gap: .35rem;
+  font-size: .82rem; font-family: inherit;
+}
+.chip--level:hover { border-color: var(--line-firm); }
+.chip--level:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 999px; }
+.chip--level .ico { width: 1rem; height: 1rem; }
+@keyframes lid-huepf {
+  0%, 100% { transform: translateY(0); }
+  40%      { transform: translateY(-6px); }
+  70%      { transform: translateY(2px); }
+}
+.chip--level.is-neu { animation: lid-huepf 420ms var(--feder) both; }
+
+/* Der leere Kasten — bisher die kaelteste Stelle der Anwendung. */
+.empty-face { width: 4rem; height: 4rem; color: var(--faint); display: block; margin: 0 auto var(--s-3); }
+.empty-head { font-size: 1.6rem; color: var(--ink); margin-bottom: var(--s-2); }
+.empty-eg { margin-top: var(--s-4); font-size: .9rem; }
+.empty-eg__label { color: var(--muted); }
+.empty-eg__list { display: inline; }
+.empty-eg__list button {
+  background: none; border: 0; padding: 0 .15rem; cursor: pointer;
+  color: var(--green-ink); text-decoration: underline; text-underline-offset: .18em;
+  font: inherit;
+}
+.empty-eg__list button:hover { color: var(--green); }
+
+/* Das Rundenbuch nutzt dasselbe Fenster wie ein Gegenstand. */
+.buch-stufe { font-family: var(--display); font-weight: 400; font-size: 2rem; line-height: 1.1; }
+.buch-zahlen { display: flex; flex-wrap: wrap; gap: var(--s-4); margin-top: var(--s-3); }
+.buch-zahl { display: flex; flex-direction: column; }
+.buch-zahl b { font-size: 1.4rem; font-weight: 600; }
+.buch-zahl span { font-size: .82rem; color: var(--muted); }
+.buch-liste { margin-top: var(--s-5); display: grid; gap: var(--s-3); }
+.buch-abz { display: flex; align-items: flex-start; gap: var(--s-3); }
+.buch-abz .item-badge { flex: 0 0 auto; }
+.buch-abz b { display: block; font-weight: 600; }
+.buch-abz span { display: block; color: var(--muted); font-size: .9rem; }
 
 /* == 12 · Telefon ====================================================== */
 
@@ -681,6 +867,9 @@ button, input, textarea, select { font: inherit; color: inherit; }
 
   .footer-nav { gap: var(--s-2) var(--s-4); }
   .toast-region { width: calc(100vw - 2rem); }
+  .klappe { bottom: calc(var(--s-5) + 7.4rem); }
+  .klappe__face { width: 2.2rem; height: 2.2rem; }
+  .klappe__text { font-size: 1.1rem; }
 }
 
 
