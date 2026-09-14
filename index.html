@@ -120,6 +120,11 @@
     <path d="M32 32 L43 32"/>
   </symbol>
   <!-- Winkel: „dahinter steckt mehr". Pfeil hinaus: verliehen. -->
+  <symbol id="i-info" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter">
+    <circle cx="32" cy="32" r="24"/>
+    <path d="M32 29 L32 45"/>
+    <circle cx="32" cy="20" r="3" fill="currentColor" stroke="none"/>
+  </symbol>
   <symbol id="i-chev" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter">
     <path d="M26 16 L42 32 L26 48"/>
   </symbol>
@@ -147,6 +152,11 @@
       <button type="button" id="btnTheme" class="ctl-square" data-theme-toggle>
         <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-moon" id="themeIconUse"/></svg>
       </button>
+      <!-- Die Einstellungen sind eine eigene Seite. Der Verweis nimmt das
+           Fragment mit, damit dort auch die offene Liste bekannt ist. -->
+      <a id="lnkSettings" class="ctl-square" href="einstellungen.html" data-i18n-label="settings.headline">
+        <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gear"/></svg>
+      </a>
     </div>
   </div>
 </header>
@@ -164,25 +174,22 @@
   <section id="viewStart" class="view" hidden>
 
     <div class="hero">
-      <h1><span data-i18n="hero.a">Leih</span> <mark data-i18n="hero.b">ich</mark> <span data-i18n="hero.c">dir.</span></h1>
-      <p class="lead" data-i18n="hero.lead">
-        Eine Liste deiner Sachen, die du an Freunde verleihst. Ohne Konto, und
-        lesen können sie nur du und die, denen du den Link gibst.
-      </p>
-      <!-- Die Aufforderung steht über der Falz. Was sie erklärt, steht darunter. -->
+      <h1><span data-i18n="hero.a">Leih</span> <mark data-i18n="hero.b">ich</mark> <span data-i18n="hero.c">Dir.</span></h1>
+      <p class="lead" data-i18n="hero.lead">Versende Deine Liste an Leihgegenständen an andere.</p>
+
+      <!-- Vier Zusagen, jede mit einem Haken. Sie stehen zwischen der Zusage
+           und der Aufforderung, weil sie beides verbindet. -->
+      <ul class="trust" data-i18n-label="trust.label" aria-label="Eigenschaften">
+        <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.tracking">Kein Tracking</span></li>
+        <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.account">Keine Registrierung</span></li>
+        <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.ads">Keine Werbung</span></li>
+        <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.crypto">Ende-zu-Ende verschlüsselt</span></li>
+      </ul>
+
       <p class="actions">
         <button type="button" id="btnCreate" class="btn btn--primary btn--lg" data-i18n="start.create">Neue Liste anlegen</button>
-        <small data-i18n="start.createHint">dauert einen Klick</small>
       </p>
     </div>
-
-    <ul class="trust" data-i18n-label="trust.label" aria-label="Eigenschaften">
-      <li class="chip" data-i18n="trust.tracking">Kein Tracking</li>
-      <li class="chip" data-i18n="trust.account">Ohne Konto</li>
-      <li class="chip" data-i18n="trust.ads">Keine Werbung</li>
-      <li class="chip" data-i18n="trust.crypto">Ende-zu-Ende verschlüsselt</li>
-      <li class="chip" data-i18n="trust.source">Quelloffen</li>
-    </ul>
 
     <!-- Auf diesem Gerät gemerkte Listen. Rein lokal, kein Konto, und nur
          sichtbar, wenn es etwas zu zeigen gibt. -->
@@ -225,27 +232,6 @@
   <!-- ==================================================================== -->
   <section id="viewList" class="view" hidden>
 
-    <!-- Der Zugang. Erscheint einmal, direkt nach dem Anlegen, und bleibt
-         stehen, bis er ausdrücklich bestätigt wurde. Wer ihn verliert,
-         verliert die Liste; deshalb ist er hier kein Beiwerk. -->
-    <section class="card" id="keyBox" hidden>
-      <h2 class="card__title" data-i18n="key.headline">Deine Liste ist angelegt</h2>
-      <p class="hint" data-i18n="key.body">
-        Dieser Link ist dein einziger Zugang. Er steht nirgends sonst — auch wir kennen ihn nicht.
-      </p>
-      <div class="spaced-lg linkrow">
-        <label class="sr-only" for="keyLink" data-i18n="key.label">Bearbeiten-Link</label>
-        <input type="text" id="keyLink" class="input mono" readonly>
-        <button type="button" class="btn btn--primary" data-copy="keyLink" data-i18n="share.copy">Kopieren</button>
-      </div>
-      <p class="hint" id="keyRemember" data-i18n="key.remember">
-        Auf diesem Gerät gemerkt — beim nächsten Besuch findest du die Liste auf der Startseite wieder.
-      </p>
-      <p class="spaced-lg actions">
-        <button type="button" id="btnKeyDone" class="btn" data-i18n="key.done">Ich habe den Link gesichert</button>
-      </p>
-    </section>
-
     <!-- 1 · Titel der Liste -->
     <div class="titleblock">
       <h1 id="listTitleRead" hidden></h1>
@@ -259,6 +245,24 @@
         <span id="saveState" class="chip chip--ok" role="status" aria-live="polite" hidden></span>
       </p>
     </div>
+
+    <!-- Der Zugang. Erscheint einmal, direkt nach dem Anlegen, und bleibt
+         stehen, bis er ausdrücklich bestätigt wurde. Wer ihn verliert,
+         verliert die Liste; deshalb ist er hier kein Beiwerk. -->
+    <section class="keybox" id="keyBox" hidden>
+      <h2 class="keybox__title" data-i18n="key.headline">Bewahre diesen Link auf!</h2>
+      <div class="spaced-lg linkrow">
+        <label class="sr-only" for="keyLink" data-i18n="key.label">Bearbeiten-Link</label>
+        <input type="text" id="keyLink" class="input mono" readonly>
+        <button type="button" class="btn btn--primary" data-copy="keyLink" data-i18n="share.copy">Kopieren</button>
+      </div>
+      <p class="hint" id="keyRemember" data-i18n="key.remember">
+        Auf diesem Gerät gemerkt — beim nächsten Besuch findest du die Liste auf der Startseite wieder.
+      </p>
+      <p class="spaced-lg actions">
+        <button type="button" id="btnKeyDone" class="btn" data-i18n="key.done">Ich habe den Link gesichert</button>
+      </p>
+    </section>
 
     <!-- 2 · Inventar, mit dem Hinzufügen darin -->
     <section class="card" id="inventoryBox">
@@ -312,52 +316,7 @@
       </div>
     </section>
 
-    <!-- 3 · Link weitergeben, nur im Bearbeitenmodus -->
-    <section class="card" id="shareBox" hidden>
-      <h2 class="card__title" data-i18n="share.headline">Link weitergeben</h2>
-
-      <div class="spaced-lg tabs" role="tablist">
-        <button type="button" class="tab" role="tab" id="tabBtnView"
-                aria-selected="true" aria-controls="tabView" data-tab="View"
-                data-i18n="share.tabView">Ansehen</button>
-        <button type="button" class="tab" role="tab" id="tabBtnEdit"
-                aria-selected="false" aria-controls="tabEdit" data-tab="Edit"
-                data-i18n="share.tabEdit">Bearbeiten</button>
-      </div>
-
-      <div class="tabpanel" id="tabView" role="tabpanel" aria-labelledby="tabBtnView">
-        <p class="hint" data-i18n="share.viewHint">
-          Diesen Link sehen deine Freunde. Ändern lässt sich damit nichts.
-        </p>
-        <div class="spaced linkrow">
-          <label class="sr-only" for="linkView" data-i18n="share.viewLabel">Ansehen-Link für Freunde</label>
-          <input type="text" id="linkView" class="input mono" readonly>
-          <button type="button" class="btn btn--primary" id="btnShareView" hidden>
-            <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-share"/></svg>
-            <span data-i18n="share.send">Teilen</span>
-          </button>
-          <button type="button" class="btn" data-copy="linkView" data-i18n="share.copy">Kopieren</button>
-        </div>
-      </div>
-
-      <div class="tabpanel" id="tabEdit" role="tabpanel" aria-labelledby="tabBtnEdit" hidden>
-        <p class="hint" data-i18n="share.editHint">
-          Dieser Link ist dein Zugang. Gib ihn niemandem und speichere ihn als Lesezeichen.
-        </p>
-        <div class="spaced linkrow">
-          <label class="sr-only" for="linkEdit" data-i18n="share.editLabel">Bearbeiten-Link, geheim</label>
-          <input type="password" id="linkEdit" class="input mono" readonly>
-          <button type="button" class="btn" id="btnRevealEdit" data-i18n="share.reveal">Zeigen</button>
-          <button type="button" class="btn" data-copy="linkEdit" data-i18n="share.copy">Kopieren</button>
-        </div>
-      </div>
-
-      <p class="spaced-lg hint" data-i18n="share.hint">
-        Der Schlüssel steht hinter dem Rautezeichen und wird technisch nie an den Server übertragen.
-      </p>
-    </section>
-
-    <!-- 4 · Kontakt, zugeklappt: erst nötig, wenn jemand anfragen soll -->
+    <!-- 3 · Kontakt, zugeklappt: erst nötig, wenn jemand anfragen soll -->
     <details class="fold" id="contactBox" hidden>
       <summary>
         <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-user"/></svg>
@@ -371,7 +330,7 @@
         <div class="spaced-lg field">
           <label class="field__label" for="cfgName" data-i18n="contact.name">Dein Name</label>
           <input type="text" id="cfgName" class="input" maxlength="60" autocomplete="name"
-                 data-i18n-placeholder="contact.namePlaceholder" placeholder="zum Beispiel Damian">
+                 data-i18n-placeholder="contact.namePlaceholder" placeholder="">
           <small class="hint" data-i18n="contact.nameHint">
             Steht über der Liste und in der Anrede, wenn jemand anfragt.
           </small>
@@ -390,85 +349,56 @@
       </div>
     </details>
 
-    <!-- 5 · Einstellungen, zugeklappt, nur im Bearbeitenmodus -->
-    <details class="fold settings" id="settingsBox" hidden>
-      <summary>
-        <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gear"/></svg>
-        <span data-i18n="settings.headline">Einstellungen</span>
-        <span class="fold-sub" data-i18n="settings.sub">Erscheinungsbild, Schlüssel, Liste löschen</span>
-      </summary>
-      <div class="fold__body">
+    <!-- 4 · Link weitergeben, nur im Bearbeitenmodus -->
+    <section class="card" id="shareBox" hidden>
+      <div class="card__head">
+        <h2 class="card__title" data-i18n="share.headline">Link weitergeben</h2>
+        <!-- Auskunft auf Zuruf: der Satz zur Technik steht im Titel des
+             Zeichens und erscheint beim Zeigen. -->
+        <span class="info" tabindex="0" role="note" id="shareInfo"
+              data-i18n-title="share.hint" data-i18n-label="share.hint"
+              title="Der Schlüssel steht hinter dem Rautezeichen und wird technisch nie an den Server übertragen.">
+          <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-info"/></svg>
+        </span>
+      </div>
 
-        <h3 data-i18n="settings.themeHeadline">Erscheinungsbild</h3>
-        <p class="hint" data-i18n="settings.themeHint">
-          Gilt für diesen Browser, nicht für die Liste.
+      <div class="spaced-lg tabs" role="tablist">
+        <button type="button" class="tab" role="tab" id="tabBtnView"
+                aria-selected="true" aria-controls="tabView" data-tab="View"
+                data-i18n="share.tabView">Ansehen</button>
+        <button type="button" class="tab" role="tab" id="tabBtnEdit"
+                aria-selected="false" aria-controls="tabEdit" data-tab="Edit"
+                data-i18n="share.tabEdit">Bearbeiten</button>
+      </div>
+
+      <div class="tabpanel" id="tabView" role="tabpanel" aria-labelledby="tabBtnView">
+        <p class="hint" data-i18n="share.viewHint">
+          Diesen Link sehen deine Freunde. Ändern lässt sich damit nichts.
         </p>
-        <div class="spaced field themechoice">
-          <label class="check check--radio">
-            <input type="radio" name="cfgTheme" value="system" checked>
-            <span class="check__box" aria-hidden="true"></span>
-            <span data-i18n="settings.themeSystem">Wie das System</span>
-          </label>
-          <label class="check check--radio">
-            <input type="radio" name="cfgTheme" value="light">
-            <span class="check__box" aria-hidden="true"></span>
-            <span data-i18n="settings.themeLight">Hell</span>
-          </label>
-          <label class="check check--radio">
-            <input type="radio" name="cfgTheme" value="dark">
-            <span class="check__box" aria-hidden="true"></span>
-            <span data-i18n="settings.themeDark">Dunkel</span>
-          </label>
-        </div>
-
-        <hr>
-
-        <h3 data-i18n="settings.cacheHeadline">Zwischenspeicher</h3>
-        <p class="hint" data-i18n="settings.cacheHint">
-          Entfernt alles, was diese Anwendung in diesem Browser ablegt: Sprache,
-          Erscheinungsbild, KI-Schlüssel, die gemerkten Listen und im Vorschaumodus
-          die lokal gehaltenen Listen. Deine Liste auf dem Server und deine Links
-          bleiben unberührt.
-        </p>
-        <div class="spaced field">
-          <button type="button" id="btnClearCache" class="btn">
-            <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-refresh"/></svg>
-            <span data-i18n="settings.cacheClear">Zwischenspeicher löschen</span>
+        <div class="spaced linkrow">
+          <label class="sr-only" for="linkView" data-i18n="share.viewLabel">Ansehen-Link für Freunde</label>
+          <input type="text" id="linkView" class="input mono" readonly>
+          <button type="button" class="btn" id="btnShareView" hidden>
+            <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-share"/></svg>
+            <span data-i18n="share.send">Teilen</span>
           </button>
-        </div>
-
-        <hr>
-
-        <h3 data-i18n="settings.aiHeadline">Sprache und KI-Strukturierung</h3>
-        <p class="hint" data-i18n="settings.aiHint">
-          Ohne Schlüssel zerlegt der Browser den gesprochenen Text selbst. Mit einem eigenen
-          Gemini-Schlüssel übernimmt das die KI, dann verlässt der gesprochene Text dein Gerät.
-        </p>
-        <div class="spaced field">
-          <label class="field__label" for="cfgAiKey" data-i18n="settings.aiKey">Gemini-API-Schlüssel, optional</label>
-          <input type="password" id="cfgAiKey" class="input mono" autocomplete="off" spellcheck="false"
-                 maxlength="200" placeholder="AIza">
-          <small class="hint" data-i18n="settings.aiKeyHint">
-            Bleibt ausschließlich in diesem Browser. Er wird weder auf den Server übertragen
-            noch in die Liste aufgenommen und gilt daher nicht für deine Freunde.
-          </small>
-        </div>
-        <p id="aiProxyNote" class="hint" hidden data-i18n="settings.aiProxy"></p>
-
-        <hr>
-
-        <h3 data-i18n="settings.dangerHeadline">Liste löschen</h3>
-        <p class="hint" data-i18n="settings.dangerHint">
-          Die Liste wird unwiderruflich vom Server entfernt. Beide Links laufen danach ins Leere.
-        </p>
-        <div class="spaced field">
-          <button type="button" id="btnDeleteList" class="btn btn--danger">
-            <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-trash"/></svg>
-            <span data-i18n="settings.delete">Liste endgültig löschen</span>
-          </button>
+          <button type="button" class="btn btn--primary" data-copy="linkView" data-i18n="share.copy">Kopieren</button>
         </div>
       </div>
-    </details>
+
+      <div class="tabpanel" id="tabEdit" role="tabpanel" aria-labelledby="tabBtnEdit" hidden>
+        <p class="hint" data-i18n="share.editHint">
+          Dieser Link ist dein Zugang. Gib ihn niemandem und speichere ihn als Lesezeichen.
+        </p>
+        <div class="spaced linkrow">
+          <label class="sr-only" for="linkEdit" data-i18n="share.editLabel">Bearbeiten-Link, geheim</label>
+          <input type="password" id="linkEdit" class="input mono" readonly>
+          <button type="button" class="btn" id="btnRevealEdit" data-i18n="share.reveal">Zeigen</button>
+          <button type="button" class="btn btn--primary" data-copy="linkEdit" data-i18n="share.copy">Kopieren</button>
+        </div>
+      </div>
+
+    </section>
 
   </section>
 
@@ -488,16 +418,17 @@
 </main>
 
 <footer class="site-footer">
-  <div class="shell">
+  <div class="shell footer-row">
     <nav class="footer-nav" aria-label="Rechtliches">
+      <a href="ueber.html" data-i18n="footer.about">Über</a>
       <a href="impressum.html" data-i18n="footer.imprint">Impressum</a>
       <a href="datenschutz.html" data-i18n="footer.privacy">Datenschutz</a>
-      <a href="ueber.html" data-i18n="footer.about">Über</a>
-      <a href="https://nozilla.de" rel="noopener">nozilla<span class="footer-claim">Gute digitale Dienste.</span></a>
     </nav>
-    <p class="txt-sm muted">
-      <span data-i18n="footer.text">Freie Software, MIT-Lizenz, Ende-zu-Ende-verschlüsselt.</span>
-      <a href="https://github.com/daimpad/leih-ich-dir" rel="noopener">GitHub</a>
+    <!-- Der Zusatz des Hauses, in der Anzeigeschrift und in einer Zeile. -->
+    <p class="footer-claim">
+      <a href="https://nozilla.de" rel="noopener">nozilla.</a>
+      <span aria-hidden="true">|</span>
+      <span>Gute digitale Dienste ❤</span>
     </p>
   </div>
 </footer>

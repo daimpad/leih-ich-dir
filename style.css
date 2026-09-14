@@ -242,8 +242,9 @@ button, input, textarea, select { font: inherit; color: inherit; }
 .linkbtn {
   background: none; border: 0; padding: 0; cursor: pointer;
   color: var(--green-ink); font-weight: 500; font-size: inherit;
+  text-decoration: underline; text-underline-offset: .18em;
 }
-.linkbtn:hover { color: var(--green); text-decoration: underline; }
+.linkbtn:hover { color: var(--green); }
 
 .actions { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; }
 
@@ -297,6 +298,16 @@ button, input, textarea, select { font: inherit; color: inherit; }
   padding: var(--s-5) var(--s-5); margin-bottom: var(--s-3); box-shadow: var(--shadow);
 }
 .card__title { font-size: 1.2rem; }
+.card__head { display: flex; align-items: center; gap: var(--s-2); }
+
+/* Auskunft auf Zuruf: das Zeichen trägt den Satz im Titel, sichtbar beim
+   Zeigen und beim Tasten. */
+.info {
+  display: inline-grid; place-items: center; cursor: help;
+  width: 1.6rem; height: 1.6rem; border-radius: 999px; color: var(--faint);
+}
+.info:hover, .info:focus-visible { color: var(--green); background: var(--green-soft); }
+.info .ico { width: 1rem; height: 1rem; }
 .card__title + .hint { margin-top: var(--s-1); }
 
 /* Aufklapper: zugeklappt eine Zeile, aufgeklappt eine Karte. */
@@ -346,7 +357,11 @@ button, input, textarea, select { font: inherit; color: inherit; }
 .hero .actions { margin-top: var(--s-6); }
 .hero .actions small { color: var(--faint); font-size: .9rem; }
 
-.trust { display: flex; flex-wrap: wrap; gap: var(--s-2); list-style: none; padding: 0; margin-top: var(--s-6); }
+/* Vier Zusagen mit Haken. Der Haken ist grün, weil er dasselbe sagt wie in
+   der Liste: hier ist etwas in Ordnung. */
+.trust { list-style: none; padding: 0; margin-top: var(--s-5); display: grid; gap: var(--s-2); }
+.trust li { display: flex; align-items: center; gap: var(--s-3); color: var(--muted); }
+.trust .ico { width: 1.05rem; height: 1.05rem; color: var(--green); }
 
 .steps { list-style: none; padding: 0; margin-top: var(--s-6); display: grid; gap: var(--s-2); }
 .steps li {
@@ -374,6 +389,17 @@ button, input, textarea, select { font: inherit; color: inherit; }
 .mine a:hover { background: var(--surface-alt); }
 .mine .name { flex: 1 1 auto; font-weight: 500; }
 .mine .when { color: var(--faint); font-size: .85rem; }
+
+/* Der Zugang. Eigene Farbe, weil er kein Bericht ist, sondern eine
+   Aufforderung: Wer diesen Link verliert, verliert die Liste. */
+.keybox {
+  background: var(--amber-soft); border: 1px solid var(--amber);
+  border-radius: var(--r-card); padding: var(--s-5); margin-bottom: var(--s-3);
+  box-shadow: var(--shadow);
+}
+.keybox__title { font-size: 1.2rem; color: var(--amber); }
+.keybox .hint { color: var(--amber); opacity: .85; margin-top: var(--s-2); }
+.keybox .input { background: var(--surface); border-color: var(--amber); }
 
 /* == 8 · Liste ========================================================= */
 
@@ -488,16 +514,32 @@ button, input, textarea, select { font: inherit; color: inherit; }
 /* == 11 · Fußzeile ===================================================== */
 
 .site-footer { border-top: 1px solid var(--line); margin-top: var(--s-7); padding-block: var(--s-5) var(--s-7); }
-.footer-nav { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-5); margin-bottom: var(--s-3); }
+.footer-row {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--s-3) var(--s-5); flex-wrap: wrap;
+}
+.footer-nav { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-5); }
 .footer-nav a { color: var(--muted); text-decoration: none; }
 .footer-nav a:hover { color: var(--ink); text-decoration: underline; }
-.footer-claim { display: block; color: var(--faint); font-size: .85rem; }
-.site-footer p { color: var(--faint); font-size: .88rem; }
+
+/* Der Zusatz des Hauses steht in der Anzeigeschrift und in einer Zeile. */
+.footer-claim {
+  font-family: var(--slab); font-size: .95rem; color: var(--muted);
+  display: flex; align-items: baseline; gap: .45rem; white-space: nowrap;
+}
+.footer-claim a { color: var(--ink); text-decoration: none; font-weight: 700; }
+.footer-claim a:hover { color: var(--green); }
+.footer-claim span[aria-hidden] { color: var(--line-firm); }
 
 /* == 12 · Telefon ====================================================== */
 
 @media (max-width: 34rem) {
   .shell { padding-inline: var(--s-4); }
+
+  /* Schmal steht der Zusatz unter den Verweisen statt neben ihnen. */
+  .footer-row { flex-direction: column; align-items: flex-start; }
+  .footer-claim { white-space: normal; flex-wrap: wrap; }
+  .keybox { padding: var(--s-4); }
   .card, .fold__body { padding: var(--s-4); }
   .fold > summary { padding: var(--s-4); }
   .hero h1 { font-size: 2.4rem; }

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Einstellungen · leihichdir.de</title>
+<meta name="description" content="Erscheinungsbild, Zwischenspeicher und KI-Schlüssel des Leih-Katalogs.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%23FFFEE5'/><g fill='none' stroke='%23000' stroke-width='4' stroke-linecap='square'><rect x='4' y='20' width='18' height='20'/><rect x='38' y='20' width='18' height='20'/><path d='M24 30 L34 30'/></g><path d='M32 25 L38 30 L32 35 Z' fill='%2300FF9C'/></svg>">
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+</head>
+<!-- app.js erkennt die Seite hieran und richtet nur die Einstellungen ein. -->
+<body data-page="settings">
+
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <symbol id="i-moon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M38 8 L22 18 L18 32 L22 46 L38 56 L30 45 L28 32 L30 19 Z" fill="currentColor" stroke="none"/>
+    <rect x="44" y="20" width="7" height="7" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="i-sun" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <circle cx="32" cy="32" r="11" fill="currentColor" stroke="none"/>
+    <path d="M32 6 L32 14"/><path d="M32 50 L32 58"/><path d="M6 32 L14 32"/><path d="M50 32 L58 32"/>
+    <path d="M14 14 L20 20"/><path d="M44 44 L50 50"/><path d="M50 14 L44 20"/><path d="M20 44 L14 50"/>
+  </symbol>
+  <symbol id="i-refresh" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M22 13 L48 13 L48 46 L14 46 L14 27"/>
+    <path d="M7 28 L14 17 L21 28 Z" fill="currentColor"/>
+  </symbol>
+  <symbol id="i-trash" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M9 19 L55 19"/>
+    <rect x="16" y="19" width="32" height="35"/>
+    <rect x="26" y="10" width="12" height="9"/>
+    <path d="M27 28 L27 45"/>
+    <path d="M37 28 L37 45"/>
+  </symbol>
+  <symbol id="i-chev" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M26 16 L42 32 L26 48"/>
+  </symbol>
+</svg>
+
+<a class="skiplink" href="#main" data-i18n="a11y.skip">Zum Inhalt springen</a>
+
+<header class="site">
+  <div class="shell bar">
+    <a class="brand" id="lnkHome" href="./">
+      <img class="brand-logo" src="assets/pics/logo.svg" alt="" width="330" height="87">
+      <span class="brand-word">leihichdir</span>
+    </a>
+    <div class="bar-controls">
+      <button type="button" id="btnLang" class="ctl-square">EN</button>
+      <button type="button" id="btnTheme" class="ctl-square" data-theme-toggle>
+        <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-moon" id="themeIconUse"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="shell page">
+
+  <div class="titleblock">
+    <h1 data-i18n="settings.headline">Einstellungen</h1>
+    <p class="titlemeta" data-i18n="settings.pageHint">
+      Diese Angaben gelten für diesen Browser, nicht für deine Listen.
+    </p>
+  </div>
+
+  <section class="card">
+    <h2 class="card__title" data-i18n="settings.themeHeadline">Erscheinungsbild</h2>
+    <div class="spaced field themechoice">
+      <label class="check check--radio">
+        <input type="radio" name="cfgTheme" value="system" checked>
+        <span class="check__box" aria-hidden="true"></span>
+        <span data-i18n="settings.themeSystem">Wie das System</span>
+      </label>
+      <label class="check check--radio">
+        <input type="radio" name="cfgTheme" value="light">
+        <span class="check__box" aria-hidden="true"></span>
+        <span data-i18n="settings.themeLight">Hell</span>
+      </label>
+      <label class="check check--radio">
+        <input type="radio" name="cfgTheme" value="dark">
+        <span class="check__box" aria-hidden="true"></span>
+        <span data-i18n="settings.themeDark">Dunkel</span>
+      </label>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 class="card__title" data-i18n="settings.aiHeadline">Sprache und KI-Strukturierung</h2>
+    <p class="hint" data-i18n="settings.aiHint">
+      Ohne Schlüssel zerlegt der Browser den gesprochenen Text selbst. Mit einem eigenen
+      Gemini-Schlüssel übernimmt das die KI, dann verlässt der gesprochene Text dein Gerät.
+    </p>
+    <div class="spaced field">
+      <label class="field__label" for="cfgAiKey" data-i18n="settings.aiKey">Gemini-API-Schlüssel, optional</label>
+      <input type="password" id="cfgAiKey" class="input mono" autocomplete="off" spellcheck="false"
+             maxlength="200" placeholder="AIza">
+      <small class="hint" data-i18n="settings.aiKeyHint">
+        Bleibt ausschließlich in diesem Browser. Er wird weder auf den Server übertragen
+        noch in die Liste aufgenommen und gilt daher nicht für deine Freunde.
+      </small>
+    </div>
+    <p id="aiProxyNote" class="hint" hidden data-i18n="settings.aiProxy"></p>
+  </section>
+
+  <section class="card">
+    <h2 class="card__title" data-i18n="settings.cacheHeadline">Zwischenspeicher</h2>
+    <p class="hint" data-i18n="settings.cacheHint">
+      Entfernt alles, was diese Anwendung in diesem Browser ablegt: Sprache,
+      Erscheinungsbild, KI-Schlüssel, die gemerkten Listen und im Vorschaumodus
+      die lokal gehaltenen Listen. Deine Liste auf dem Server und deine Links
+      bleiben unberührt.
+    </p>
+    <div class="spaced field">
+      <button type="button" id="btnClearCache" class="btn">
+        <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-refresh"/></svg>
+        <span data-i18n="settings.cacheClear">Zwischenspeicher löschen</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Erscheint nur, wenn die Seite über eine offene Liste aufgerufen wurde:
+       Ohne den Bearbeiten-Link im Fragment gibt es hier nichts zu löschen. -->
+  <section class="card" id="dangerBox" hidden>
+    <h2 class="card__title" data-i18n="settings.dangerHeadline">Liste löschen</h2>
+    <p class="hint" data-i18n="settings.dangerHint">
+      Die Liste wird unwiderruflich vom Server entfernt. Beide Links laufen danach ins Leere.
+    </p>
+    <div class="spaced field">
+      <button type="button" id="btnDeleteList" class="btn btn--danger">
+        <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-trash"/></svg>
+        <span data-i18n="settings.delete">Liste endgültig löschen</span>
+      </button>
+    </div>
+  </section>
+
+  <p class="actions">
+    <a class="btn" id="lnkBack" href="./" data-i18n="settings.back">Zurück zur Liste</a>
+  </p>
+
+</main>
+
+<footer class="site-footer">
+  <div class="shell footer-row">
+    <nav class="footer-nav" aria-label="Rechtliches">
+      <a href="ueber.html" data-i18n="footer.about">Über</a>
+      <a href="impressum.html" data-i18n="footer.imprint">Impressum</a>
+      <a href="datenschutz.html" data-i18n="footer.privacy">Datenschutz</a>
+    </nav>
+    <p class="footer-claim">
+      <a href="https://nozilla.de" rel="noopener">nozilla.</a>
+      <span aria-hidden="true">|</span>
+      <span>Gute digitale Dienste ❤</span>
+    </p>
+  </div>
+</footer>
+
+<div class="toast-region" id="toastRegion" aria-live="polite">
+  <div class="toast" id="toast" hidden>
+    <div class="toast__body" id="toastText"></div>
+    <button type="button" class="toast__act" id="toastAct" hidden></button>
+  </div>
+</div>
+
+<script src="app.js" defer></script>
+</body>
+</html>
