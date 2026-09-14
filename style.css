@@ -450,6 +450,20 @@ header.site { padding-block: var(--s-4); }
   width: 9.5rem; height: auto;
   margin-top: calc(var(--s-5) * -1 - var(--s-2));
 }
+
+/* Die Farben der Zeichnung. Sie stehen hier und nicht in der Datei, weil das
+   SVG im Dokument steht — nur so erreicht es der Hell/Dunkel-Wechsel. Der
+   Strich bleibt im Beige der Vorlage, das Blatt der Liste nimmt die Farbe der
+   Karte an: im Hellen weiss wie bisher, im Dunkeln kein greller Block mehr. */
+.hero-bild { color: var(--surface); }
+.hero-bild .cls-1,
+.hero-bild .cls-4,
+.hero-bild .cls-5 { fill: #C7AC91; }
+.hero-bild .cls-2,
+.hero-bild .cls-3 { fill: currentColor; }
+.hero-bild .cls-4,
+.hero-bild .cls-5 { stroke: #C7AC91; stroke-miterlimit: 10; }
+.hero-bild .cls-5 { stroke-width: .75px; }
 /* Der Aufruf im Rahmen selbst. Er steht unter den Auszeichnungen: erst die
    Zusage, dann die Handlung. */
 .hero-act { margin-top: var(--s-5); }
@@ -462,7 +476,7 @@ header.site { padding-block: var(--s-4); }
 /* Vier Zusagen mit Haken, als Plaketten auf dem Grund. Der Haken ist grün,
    weil er dasselbe sagt wie in der Liste: hier ist etwas in Ordnung. */
 .trust {
-  list-style: none; padding: 0; margin-top: var(--s-5);
+  list-style: none; padding: 0; margin-top: var(--s-6);
   display: flex; flex-wrap: wrap; gap: var(--s-2);
 }
 .trust li {
@@ -503,13 +517,6 @@ header.site { padding-block: var(--s-4); }
 }
 .steps h3 { font-size: 1.05rem; }
 .steps p { color: var(--muted); font-size: .88rem; margin-top: .25rem; }
-
-/* Der Aufruf am Ende, in voller Grösse und in der Mitte. */
-.cta { margin-top: var(--s-7); display: grid; place-items: center; }
-.btn--xl {
-  padding: 1.1rem 2.4rem; font-size: 1.2rem; border-radius: 16px;
-  box-shadow: var(--shadow-lift);
-}
 
 /* Eigene Listen, auf diesem Gerät gemerkt. */
 .mine { margin-top: var(--s-7); }
@@ -884,8 +891,8 @@ header.site { padding-block: var(--s-4); }
   .shell { padding-inline: var(--s-4); }
   .hero-panel { border-radius: 22px; }
   .trust li { font-size: .88rem; }
-  .btn--xl { padding: 1rem 1.8rem; font-size: 1.1rem; width: 100%; }
-  .cta { display: block; }
+  /* Schmal nimmt der Aufruf die ganze Zeile: Daneben steht ohnehin nichts. */
+  .hero-act .btn { width: 100%; }
   /* Im Kopf bleibt vom Knopf das Zeichen. */
   .ctl-label { display: none; }
   .ctl-wide { padding-inline: 0; width: 2.4rem; }

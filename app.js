@@ -167,7 +167,7 @@
       'hero.a': 'Leih',
       'hero.b': 'ich',
       'hero.c': 'Dir.',
-      'hero.lead': 'Erstelle eine Liste von Gegenständen, die Du verleihen möchtest, und versende sie an Deine Freunde.',
+      'hero.lead': 'Zeig Deinen Freund:innen, was sie bei Dir ausleihen können!',
 
       'trust.label': 'Eigenschaften',
       'trust.tracking': 'Kostenlos',
@@ -451,7 +451,7 @@
       'hero.a': 'Borrow',
       'hero.b': 'it',
       'hero.c': 'from me.',
-      'hero.lead': 'Make a list of the things you are happy to lend, and send it to your friends.',
+      'hero.lead': 'Show your friends what they can borrow from you!',
 
       'trust.label': 'Properties',
       'trust.tracking': 'Free',
