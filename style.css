@@ -318,7 +318,15 @@ header.site { padding-block: var(--s-4); }
   border: 1px solid var(--line); border-radius: var(--r-btn);
 }
 .input::placeholder, .textarea::placeholder { color: var(--faint); }
-.input:focus, .textarea:focus { background: var(--surface); border-color: var(--green); outline: none; box-shadow: 0 0 0 3px var(--green-soft); }
+/* Ein echter outline statt eines gefaerbten Rahmens. Im Kontrastmodus von
+   Windows verwirft der Browser die eigenen Farben und zeichnet den outline
+   selbst — einen border-color und einen box-shadow saehe dort niemand. Der
+   weiche Ring bleibt als Fuellung daneben stehen. */
+.input:focus, .textarea:focus {
+  background: var(--surface); border-color: var(--green);
+  outline: 2px solid var(--focus); outline-offset: 2px;
+  box-shadow: 0 0 0 3px var(--green-soft);
+}
 .textarea { resize: vertical; min-height: 4.5rem; }
 
 .field { display: block; margin-bottom: var(--s-4); }

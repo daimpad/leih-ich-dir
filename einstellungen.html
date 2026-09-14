@@ -154,6 +154,27 @@
   </section>
 
   <section class="card">
+    <h2 class="card__title" data-i18n="settings.motionHeadline">Bewegung</h2>
+    <div class="spaced field">
+      <label class="check">
+        <input type="checkbox" id="cfgRuhig">
+        <span class="check__box" aria-hidden="true"></span>
+        <span data-i18n="settings.motionLabel">Bewegte Anteile ruhigstellen</span>
+      </label>
+      <small class="hint" data-i18n="settings.motionHint">
+        Konfetti, aufpoppende Gesichter und das Aufklappen entfallen dann; alles
+        erscheint sofort. Der Schalter gilt nur für diesen Browser.
+      </small>
+      <!-- Erscheint nur, wenn das System schon wenig Bewegung verlangt. Dann
+           ist der Haken gesetzt und unveränderlich. -->
+      <small class="hint" id="ruhigVorgabe" hidden data-i18n="settings.motionSystem">
+        Dein System verlangt bereits wenig Bewegung. Die Anwendung folgt dem,
+        unabhängig von diesem Schalter.
+      </small>
+    </div>
+  </section>
+
+  <section class="card">
     <h2 class="card__title" data-i18n="settings.cacheHeadline">Zwischenspeicher</h2>
     <p class="hint" data-i18n="settings.cacheHint">
       Entfernt alles, was diese Anwendung in diesem Browser ablegt: Sprache,
