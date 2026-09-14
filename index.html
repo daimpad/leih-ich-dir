@@ -63,10 +63,6 @@
   <symbol id="i-check" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
     <path d="M12 34 L26 48 L52 16"/>
   </symbol>
-  <symbol id="i-user" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
-    <circle cx="31" cy="21" r="10" fill="currentColor"/>
-    <path d="M13 50 L17 40 L31 36 L45 40 L49 50"/>
-  </symbol>
   <symbol id="i-share" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
     <path d="M10 22 L10 50 L40 50 L40 32"/>
     <path d="M28 32 L45 15"/>
@@ -206,12 +202,6 @@
 
 <a class="skiplink" href="#main" data-i18n="a11y.skip">Zum Inhalt springen</a>
 
-<!-- Schmuckbild: die Pfote haengt am oberen Seitenrand und bleibt beim
-     Blaettern stehen. Sie traegt nichts zur Bedienung bei, deshalb ist sie
-     fuer die Vorlesestimme nicht vorhanden und nimmt keine Klicks an. Auf
-     schmalen Geraeten ist daneben kein Platz; dort entfaellt sie. -->
-<img class="deko" src="assets/pics/pfote.svg" alt="" aria-hidden="true" width="207" height="339">
-
 <header class="site">
   <div class="shell bar">
     <a class="brand" href="./">
@@ -261,8 +251,17 @@
       <div class="hero-panel">
         <div class="hero-glow" aria-hidden="true"></div>
         <div class="hero-body">
-          <h1><span data-i18n="hero.a">Leih</span> <mark data-i18n="hero.b">ich</mark> <span data-i18n="hero.c">Dir.</span></h1>
-          <p class="lead" data-i18n="hero.lead">Erstelle eine Liste von Gegenständen, die Du verleihen möchtest, und versende sie an Deine Freunde.</p>
+          <div class="hero-top">
+            <div class="hero-sagt">
+              <h1><span data-i18n="hero.a">Leih</span> <mark data-i18n="hero.b">ich</mark> <span data-i18n="hero.c">Dir.</span></h1>
+              <p class="lead" data-i18n="hero.lead">Erstelle eine Liste von Gegenständen, die Du verleihen möchtest, und versende sie an Deine Freunde.</p>
+            </div>
+            <!-- Das Bild sagt, wofuer die Liste da ist: eine Pfote haelt ihre
+                 eigene. Es traegt die Aussage mit, deshalb steht es in voller
+                 Farbe und nicht als blasser Grund. -->
+            <img class="hero-bild" src="assets/pics/pfote.svg" alt=""
+                 aria-hidden="true" width="207" height="339">
+          </div>
 
           <ul class="trust" data-i18n-label="trust.label" aria-label="Eigenschaften">
             <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.tracking">Kostenlos</span></li>
@@ -418,8 +417,9 @@
 
     <!-- 3 · Kontakt, zugeklappt: erst nötig, wenn jemand anfragen soll -->
     <details class="fold" id="contactBox" hidden>
+      <!-- Ohne Zeichen: Inventar und Link weitergeben tragen auch keines,
+           und ein einzelnes hier waere eine Ausnahme ohne Grund. -->
       <summary>
-        <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-user"/></svg>
         <span data-i18n="contact.headline">Kontakt</span>
         <span class="fold-sub" data-i18n="contact.sub">Name, E-Mail und Telefon für Anfragen</span>
       </summary>
