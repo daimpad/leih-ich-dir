@@ -120,14 +120,14 @@ foreach ([
     ['/assets/fonts/inter-400.woff2', 'font/woff2'],
     ['/assets/pics/pfote.svg', 'image/svg+xml'],
     ['/assets/pics/og.png', 'image/png'],
-    ['/favicon.svg', 'image/svg+xml'],
-    ['/favicon-96x96.png', 'image/png'],
-    ['/apple-touch-icon.png', 'image/png'],
+    ['/assets/pics/logo.svg', 'image/svg+xml'],
+    ['/assets/favicon/favicon.svg', 'image/svg+xml'],
+    ['/assets/favicon/favicon-96x96.png', 'image/png'],
+    ['/assets/favicon/apple-touch-icon.png', 'image/png'],
+    ['/assets/favicon/web-app-manifest-192x192.png', 'image/png'],
+    ['/assets/favicon/web-app-manifest-512x512.png', 'image/png'],
     ['/favicon.ico', 'image'],
     ['/site.webmanifest', 'json'],
-    ['/assets/pics/icon-192.png', 'image/png'],
-    ['/assets/pics/icon-512.png', 'image/png'],
-    ['/assets/pics/icon-maskable-512.png', 'image/png'],
     ['/robots.txt', 'text/plain'],
     ['/sitemap.xml', 'xml'],
 ] as [$path, $type]) {
@@ -148,7 +148,6 @@ foreach ([
     '/tests/api-test.php',
     '/tools/purge.php',
     '/tools/og-vorlage.html',
-    '/tools/icon-vorlage.html',
 ] as $path) {
     $res = fetch($base . $path);
     if ($res['status'] !== 200) { $sperrenGreifen = true; }
