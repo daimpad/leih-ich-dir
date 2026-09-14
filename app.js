@@ -167,7 +167,7 @@
       'hero.a': 'Leih',
       'hero.b': 'ich',
       'hero.c': 'Dir.',
-      'hero.lead': 'Versende Deine Liste an Leihgegenständen an andere.',
+      'hero.lead': 'Erstelle eine Liste von Gegenständen, die Du verleihen möchtest, und versende sie an Deine Freunde.',
 
       'trust.label': 'Eigenschaften',
       'trust.tracking': 'Kostenlos',
@@ -449,7 +449,7 @@
       'hero.a': 'Borrow',
       'hero.b': 'it',
       'hero.c': 'from me.',
-      'hero.lead': 'Send your list of things to lend to other people.',
+      'hero.lead': 'Make a list of the things you are happy to lend, and send it to your friends.',
 
       'trust.label': 'Properties',
       'trust.tracking': 'Free',
@@ -2520,10 +2520,16 @@
    * 10 · Laden, Anlegen, Aktualisieren
    * ===================================================================== */
 
+  /** Setzt beide Aufrufe der Startseite gemeinsam. */
+  function createButtons(disabled, text) {
+    $$('[data-create]').forEach(function (btn) {
+      btn.disabled = disabled;
+      btn.textContent = text;
+    });
+  }
+
   function createList() {
-    var btn = $('#btnCreate');
-    btn.disabled = true;
-    btn.textContent = t('start.creating');
+    createButtons(true, t('start.creating'));
 
     var id = randomHex(16);
     var token = randomToken(24);
@@ -2561,8 +2567,7 @@
         $('#keyRemember').hidden = !mineWorks();
       });
     }).catch(function (err) {
-      btn.disabled = false;
-      btn.textContent = t('start.create');
+      createButtons(false, t('start.create'));
       toast(t('error.' + (err && err.code ? err.code : 'network')));
     });
   }
@@ -3120,7 +3125,9 @@
       processVoiceText($('#voiceText').value);
     });
 
-    $('#btnCreate').addEventListener('click', createList);
+    $$('[data-create]').forEach(function (btn) {
+      btn.addEventListener('click', createList);
+    });
     $('#btnRefresh').addEventListener('click', function () { refresh(true); });
 
     $('#addForm').addEventListener('submit', function (ev) {
