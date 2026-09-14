@@ -1,488 +1,533 @@
-/*!
- * Leih-Katalog · leihichdir.de
- * -----------------------------------------------------------------------------
- * Anwendungsschicht über dem Erscheinungsbild von nozilla.
+/* =====================================================================
+ * Leih-Katalog · Erscheinungsbild
  *
- * Grundlage ist vendor/nozilla-ci/design-system.css. Diese Datei erfindet keine
- * Farben, Schriftgrößen oder Abstände, sondern greift ausschließlich auf die
- * Marken --nz-* zu. Wer hier einen Zahlenwert einträgt, der nicht aus dem
- * Erscheinungsbild stammt, hebt die Abgleichbarkeit auf.
+ * Eigenständig: diese Datei ist die gesamte Gestaltung der Anwendung.
+ * Es wird kein fremdes Stylesheet eingebunden, und keine Farbe steht
+ * außerhalb der Merkmale in :root — wer das Aussehen ändern will, ändert
+ * dort und nirgends sonst.
  *
- * Die Hausregeln, die hier tragen:
- *   Regel 1   Fließtext steht auf weißer Fläche, nie auf dem Papierton
- *   Regel 2   auf dem Papierton stehen Überschriften, Labels, Navigation
- *   Regel 3   Signalgrün ist Aktionsfarbe, keine Flächen
- *   Regel 12  unter dem Titel steht eine Subline auf dem Papierton
- *   Regel 16  es gibt genau zwei Linien, durchgezogen und gestrichelt, je 2px
- *   Regel 19  Bedienelemente der Kopfleiste sind gleiche Quadrate
- *   Regel 29  beim Zeigen reagiert nur, was ein Ziel ist
- *
- * Aufbau: 1 Gerüst · 2 Kopf und Fuß · 3 Titelblock · 4 Bausteine · 5 Inventar
- *         6 Spracheingabe · 7 Schmal
- */
+ * Aufbau
+ *   1 · Merkmale (hell und dunkel)
+ *   2 · Grundlage
+ *   3 · Gerüst und Kopfleiste
+ *   4 · Schaltflächen
+ *   5 · Felder
+ *   6 · Karten, Aufklapper, Hinweise
+ *   7 · Startseite
+ *   8 · Liste: Titel, Inventar, Zeilen
+ *   9 · Teilen und Kontakt
+ *  10 · Fenster, Meldungen
+ *  11 · Fußzeile
+ *  12 · Telefon
+ * ===================================================================== */
 
-/* == 1 · Gerüst ========================================================== */
+/* == 1 · Merkmale ====================================================== */
 
-/* Mehrere Bausteine des Erscheinungsbilds setzen display (inline-flex, flex).
-   Das überstimmt die Voreinstellung des Browsers für das Attribut hidden.
-   Die Anwendung schaltet ihre Ansichten aber genau darüber, deshalb bekommt
-   hidden hier wieder Vorrang. */
+:root {
+  /* Flächen und Schrift */
+  --paper:       #FCF9F4;
+  --surface:     #FFFFFF;
+  --surface-alt: #F4F0E8;
+  --ink:         #1B1813;
+  --muted:       #6B6459;
+  --faint:       #968F83;
+  --line:        #EAE3D8;
+  --line-firm:   #D9D0C1;
+
+  /* Grün heißt frei und führt die Handlung an. */
+  --green:       #0F7A55;
+  --green-ink:   #0A5C3F;
+  --green-soft:  #E4F3EC;
+  --on-green:    #FFFFFF;
+
+  /* Bernstein heißt verliehen. */
+  --amber:       #96601A;
+  --amber-soft:  #FAEFDC;
+
+  /* Rot bleibt dem Zerstörenden vorbehalten. */
+  --danger:      #A8321F;
+  --danger-soft: #FBEAE6;
+
+  --focus:       #0F7A55;
+
+  --r-card: 18px;
+  --r-btn:  12px;
+  --r-row:  14px;
+
+  --shadow:      0 1px 2px rgba(27, 24, 19, .05), 0 10px 26px -18px rgba(27, 24, 19, .5);
+  --shadow-lift: 0 2px 4px rgba(27, 24, 19, .06), 0 18px 40px -22px rgba(27, 24, 19, .55);
+
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
+  --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 64px;
+
+  --shell: 44rem;
+
+  --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --slab: 'Zilla Slab', Georgia, serif;
+  --mono: 'Space Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+/* Dunkel: erst nach Systemvorgabe, dann nach ausdrücklicher Wahl. Die
+   Reihenfolge entscheidet, deshalb steht die Wahl hinter der Vorgabe. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:       #16130F;
+    --surface:     #211D17;
+    --surface-alt: #2A251E;
+    --ink:         #F7F3EA;
+    --muted:       #B6AE9F;
+    --faint:       #8C8577;
+    --line:        #322C24;
+    --line-firm:   #453E33;
+    --green:       #3FCE96;
+    --green-ink:   #7BE2BA;
+    --green-soft:  #13291F;
+    --on-green:    #0B1A13;
+    --amber:       #E7B25C;
+    --amber-soft:  #2C2317;
+    --danger:      #EC7B67;
+    --danger-soft: #2E1A16;
+    --focus:       #3FCE96;
+    --shadow:      0 1px 2px rgba(0, 0, 0, .5), 0 10px 26px -18px rgba(0, 0, 0, .9);
+    --shadow-lift: 0 2px 6px rgba(0, 0, 0, .55), 0 18px 40px -22px rgba(0, 0, 0, .95);
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper:       #16130F;
+  --surface:     #211D17;
+  --surface-alt: #2A251E;
+  --ink:         #F7F3EA;
+  --muted:       #B6AE9F;
+  --faint:       #8C8577;
+  --line:        #322C24;
+  --line-firm:   #453E33;
+  --green:       #3FCE96;
+  --green-ink:   #7BE2BA;
+  --green-soft:  #13291F;
+  --on-green:    #0B1A13;
+  --amber:       #E7B25C;
+  --amber-soft:  #2C2317;
+  --danger:      #EC7B67;
+  --danger-soft: #2E1A16;
+  --focus:       #3FCE96;
+  --shadow:      0 1px 2px rgba(0, 0, 0, .5), 0 10px 26px -18px rgba(0, 0, 0, .9);
+  --shadow-lift: 0 2px 6px rgba(0, 0, 0, .55), 0 18px 40px -22px rgba(0, 0, 0, .95);
+}
+
+/* == 2 · Grundlage ===================================================== */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { color-scheme: light dark; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Eigene Bausteine setzen display; ohne dieses Gewicht bliebe Verborgenes
+   sichtbar. Das ist keine Zierde, sondern Voraussetzung. */
 [hidden] { display: none !important; }
 
-/* Der Symbolsatz wird nie gezeigt, nur über <use> herangezogen. */
-.sprite {
-  position: absolute;
-  width: 0;
-  height: 0;
-  overflow: hidden;
+h1, h2, h3, h4 { margin: 0; font-weight: 600; line-height: 1.2; letter-spacing: -.02em; }
+p, ul, ol { margin: 0; }
+img, svg { max-width: 100%; }
+
+a { color: var(--green-ink); text-underline-offset: .18em; }
+a:hover { color: var(--green); }
+
+button, input, textarea, select { font: inherit; color: inherit; }
+
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 
-/* Schmaler als der Container des Erscheinungsbilds: Diese Anwendung ist eine
-   einspaltige Liste, und eine Zeile Fließtext soll lesbar bleiben. */
-.shell {
-  width: 100%;
-  max-width: 46rem;
-  margin-inline: auto;
-  padding-inline: var(--nz-space-4);
-}
-
-.page {
-  padding-top: var(--nz-space-6);
-  padding-bottom: var(--nz-space-9);
-}
-
-/* Abstand zwischen den Bausteinen einer Ansicht. */
-.view > * + * { margin-top: var(--nz-space-5); }
-
+/* Der Sprung in den Inhalt: für die Tastatur da, für die Maus unsichtbar. */
 .skiplink {
-  position: absolute;
-  left: -9999px;
-  top: 0;
-  z-index: 70;
-  background: var(--nz-surface);
-  border: var(--nz-stroke-rule) solid var(--nz-line);
-  padding: var(--nz-space-3) var(--nz-space-4);
+  position: absolute; left: var(--s-4); top: -4rem; z-index: 100;
+  background: var(--surface); color: var(--ink); text-decoration: none;
+  border: 1px solid var(--line-firm); border-radius: var(--r-btn);
+  padding: .6rem 1rem; box-shadow: var(--shadow-lift);
 }
-.skiplink:focus { left: var(--nz-space-3); top: var(--nz-space-3); }
+.skiplink:focus { top: var(--s-3); }
 
-/* Zeichen des Hauses. Die Strichfarbe folgt dem Text, die grüne Stelle bleibt. */
-.ico {
-  width: 1.35em;
-  height: 1.35em;
-  flex: none;
-  display: inline-block;
-  vertical-align: -0.25em;
-}
-.ico-brand { width: 1.9rem; height: 1.9rem; }
+/* Abstand nach oben. Zwei Stufen genügen, und sie stehen hier statt im
+   Markup: eingebettete Angaben verstoßen gegen die eigene Richtlinie
+   (style-src 'self') und werden vom Browser verworfen. */
+.spaced    { margin-top: var(--s-3); }
+.spaced-lg { margin-top: var(--s-4); }
 
-/* Wortmarke. Das Zeichen kommt aus assets/pics/logo.svg und bleibt dort
-   unveraendert; es wird als Bild eingebunden, nicht eingebettet. Die Hoehe
-   fuehrt, die Breite ergibt sich aus dem Seitenverhaeltnis 330:87. */
-.brand-logo {
-  height: 2.4rem;
-  width: auto;
-  display: block;
+.muted { color: var(--muted); }
+.txt-sm { font-size: .9rem; }
+.mono { font-family: var(--mono); }
+.lead { font-size: 1.12rem; color: var(--muted); }
+.hint { color: var(--muted); font-size: .92rem; }
+
+/* Kleine Auszeichnung in Versalien, für Zustände wie „gespeichert". */
+.tag {
+  font-size: .78rem; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--muted); font-weight: 500;
 }
 
-.mono { font-family: var(--nz-font-mono); font-size: var(--nz-text-sm); }
+.ico { width: 1.15em; height: 1.15em; flex: 0 0 auto; display: block; }
+.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
-/* == 2 · Kopf und Fuß ==================================================== */
+/* == 3 · Gerüst und Kopfleiste ========================================= */
 
-/* Regel 2: die Kopfleiste steht auf dem Papierton, ohne eigene Fläche. */
-.site { padding-block: var(--nz-space-4); }
+.shell { max-width: var(--shell); margin: 0 auto; padding-inline: var(--s-5); }
+.page { padding-block: var(--s-4) var(--s-7); }
 
-.bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--nz-space-4);
-}
+.site-header { padding-block: var(--s-4); }
+.bar { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); }
 
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--nz-space-3);
-  text-decoration: none;
-}
-.brand-word {
-  font-family: var(--nz-font-display);
-  font-weight: 700;
-  font-size: var(--nz-text-lg);
-  letter-spacing: -0.02em;
-}
-.brand:hover { text-decoration: underline; text-decoration-color: var(--nz-signal); }
+.brand { display: flex; align-items: center; gap: var(--s-2); text-decoration: none; color: inherit; }
+.brand-logo { height: 2rem; width: auto; display: block; }
+.brand-word { font-size: 1.12rem; font-weight: 600; letter-spacing: -.02em; }
 
-.bar-controls { display: flex; align-items: center; gap: var(--nz-space-3); }
+.bar-controls { display: flex; align-items: center; gap: var(--s-2); }
 
-/* Regel 19: Quadrat in Höhe der Leiste, weiße Fläche, durchgezogene Linie,
-   harter Schatten. Es zeigt das Ziel, nicht den Zustand. */
 .ctl-square {
-  width: 44px;
-  height: 44px;
-  display: grid;
-  place-items: center;
-  font-family: var(--nz-font-mono);
-  font-weight: 700;
-  font-size: var(--nz-text-xs);
-  letter-spacing: 0.12em;
-  background: var(--nz-surface);
-  color: var(--nz-text);
-  border: var(--nz-stroke-rule) solid var(--nz-line);
-  box-shadow: var(--nz-shadow-sm);
-  cursor: pointer;
+  height: 2.4rem; min-width: 2.4rem; padding-inline: var(--s-3);
+  display: inline-grid; place-items: center;
+  background: var(--surface); color: var(--muted);
+  border: 1px solid var(--line); border-radius: 999px;
+  box-shadow: var(--shadow); cursor: pointer;
+  font-size: .82rem; font-weight: 500; letter-spacing: .04em;
 }
-.ctl-square:hover { box-shadow: var(--nz-shadow-md); }
-.ctl-square .ico { width: 1.4rem; height: 1.4rem; vertical-align: middle; }
-.ctl-square:focus-visible { outline: var(--nz-stroke-strong) solid var(--nz-focus); outline-offset: 3px; }
+.ctl-square:hover { color: var(--ink); border-color: var(--line-firm); }
 
-.site-footer {
-  padding-block: var(--nz-space-5) var(--nz-space-6);
-  color: var(--nz-text-muted);
+/* == 4 · Schaltflächen ================================================= */
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
+  padding: .68rem 1.15rem; border-radius: var(--r-btn); cursor: pointer;
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); box-shadow: var(--shadow);
+  font-weight: 500; text-decoration: none; text-align: center;
 }
-.site-footer p { margin: 0; }
+.btn:hover { border-color: var(--line-firm); color: var(--ink); }
+.btn:disabled { opacity: .5; cursor: default; }
 
-/* Waagerechte Leiste. Regel 16 laesst nur zwei Linien zu, deshalb trennt hier
-   der Abstand und nicht ein Strich. */
-.footer-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--nz-space-3) var(--nz-space-5);
-  align-items: baseline;
-  margin-bottom: var(--nz-space-3);
-  font-family: var(--nz-font-mono);
-  font-weight: 700;
-  font-size: var(--nz-text-xs);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+.btn--primary {
+  background: var(--green); border-color: var(--green); color: var(--on-green); font-weight: 600;
 }
-.footer-nav a { color: var(--nz-text); text-decoration: none; }
-.footer-nav a:hover { text-decoration: underline; text-decoration-color: var(--nz-signal); text-decoration-thickness: 2px; }
-.footer-claim {
-  text-transform: none;
-  letter-spacing: 0;
-  font-weight: 400;
-  color: var(--nz-text-muted);
-}
-.footer-claim::before { content: " · "; }
+.btn--primary:hover { background: var(--green-ink); border-color: var(--green-ink); color: var(--on-green); }
 
-/* Auswahl des Erscheinungsbilds: die drei Moeglichkeiten stehen nebeneinander,
-   solange der Platz reicht. */
-.themechoice { display: flex; flex-wrap: wrap; gap: var(--nz-space-3) var(--nz-space-5); }
+.btn--lg { padding: .95rem 1.7rem; font-size: 1.05rem; border-radius: 14px; }
+.btn--sm { padding: .42rem .8rem; font-size: .9rem; border-radius: 10px; }
 
-/* == 3 · Titelblock ====================================================== */
+/* Leise: trägt keine Fläche, nur Text. Für alles Beiläufige. */
+.btn--ghost { background: none; border-color: transparent; box-shadow: none; color: var(--muted); }
+.btn--ghost:hover { background: var(--surface-alt); border-color: transparent; }
 
-/* Regel 10: keine Trennlinie unter der Überschrift.
-   Regel 12: die Subline steht auf dem Papierton, mit Abstand nach unten. */
-.titleblock { margin-bottom: var(--nz-space-6); }
-.titleblock h1 { margin-bottom: var(--nz-space-4); }
-.titleblock .nz-lead { max-width: 34ch; color: var(--nz-text); margin: 0; }
+/* Zerstörend, und deshalb bewusst leise: Rot allein genügt als Warnung,
+   eine Fläche dazu würde die Handlung zur ersten Wahl machen. */
+.btn--danger { background: none; border-color: transparent; box-shadow: none; color: var(--danger); }
+.btn--danger:hover { background: var(--danger-soft); border-color: transparent; color: var(--danger); }
 
-.title-edit { display: block; }
-.title-input {
-  font-family: var(--nz-font-display);
-  font-weight: 700;
-  font-size: var(--nz-text-xl);
-  letter-spacing: -0.02em;
-}
+.btn--icon { width: 2.9rem; padding-inline: 0; flex: 0 0 auto; }
+.btn--icon .ico { width: 1.3rem; height: 1.3rem; }
+.btn[aria-pressed="true"] { background: var(--green-soft); border-color: var(--green); color: var(--green-ink); }
 
-.titlemeta {
-  display: flex;
-  align-items: baseline;
-  gap: var(--nz-space-3);
-  flex-wrap: wrap;
-  margin: var(--nz-space-3) 0 0;
-}
-.savestate-error { color: var(--nz-c-danger); }
-
-/* == 3b · Startseite ===================================================== */
-
-/* Hero. Kein Kunstgriff, nur Schriftgrad und Luft: Das Erscheinungsbild sagt
-   „fancy through craft, not effects". */
-.hero { margin-bottom: var(--nz-space-7); }
-.hero h1 { margin: 0 0 var(--nz-space-5); }
-.hero .nz-lead { max-width: 32ch; margin: 0; color: var(--nz-text); }
-
-/* Vertrauensanker auf dem Papierton. Ohne Zeichen: Jedes Zeichen des Hauses
-   steht für genau eine Sache, und für diese fünf gibt es keine. */
-.trust {
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--nz-space-2);
-  margin: 0 0 var(--nz-space-6);
-  padding: 0;
-}
-
-/* Die Schrittzahl steht nach Regel 27 schwarz mit weißer Schrift. Grün sagt
-   „hier kann man klicken", und eine Schrittzahl kann man nicht klicken.
-   Über die Marken gedreht gilt das im dunklen Erscheinungsbild sinngemäß. */
-.steps { list-style: none; margin: 0 0 var(--nz-space-5); padding: 0; }
-.steps li {
-  display: flex;
-  gap: var(--nz-space-4);
-  padding-block: var(--nz-space-4);
-  border-top: var(--nz-stroke-rule) dashed var(--nz-line);
-}
-.steps li:first-child { border-top: 0; padding-top: 0; }
-.step-no {
-  flex: none;
-  width: 36px;
-  height: 36px;
-  display: grid;
-  place-items: center;
-  background: var(--nz-line);
-  color: var(--nz-bg);
-  font-family: var(--nz-font-mono);
-  font-weight: 700;
-  font-size: var(--nz-text-sm);
-}
-.steps h3 { font-size: var(--nz-text-lg); margin: 0 0 var(--nz-space-1); }
-.steps p { margin: 0; color: var(--nz-text-muted); }
-
-/* == 4 · Bausteine ======================================================= */
-
-.actions { margin: 0; }
-
-/* Hinweisfeld. Die breite Kante links gehört nach Regel 24 nur Hinweisen. */
-.note .ico { margin-top: 2px; }
-.note p { margin: 0; }
-
-.points { list-style: none; margin: 0 0 var(--nz-space-5); padding: 0; }
-.points li {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--nz-space-3);
-  margin-bottom: var(--nz-space-3);
-}
-.points li:last-child { margin-bottom: 0; }
-.points .ico { margin-top: 3px; }
-
-.tabpanel { padding-top: var(--nz-space-4); }
-
-.linkrow { display: flex; gap: var(--nz-space-2); flex-wrap: wrap; }
-.linkrow .nz-input { flex: 1 1 16rem; min-width: 0; }
-
-.addrow { display: flex; gap: var(--nz-space-2); flex-wrap: wrap; }
-.addrow #addName { flex: 1 1 11rem; }
-
-.addhint {
-  display: flex;
-  align-items: baseline;
-  gap: var(--nz-space-3);
-  flex-wrap: wrap;
-  margin: var(--nz-space-3) 0 0;
-}
-
-/* Eine Schaltfläche, die wie ein Verweis aussieht: Sie öffnet nur einen
-   Bereich, dafür wäre eine Schaltfläche im Haussinn zu laut. */
 .linkbtn {
-  font-family: var(--nz-font-mono);
-  font-weight: 700;
-  font-size: var(--nz-text-xs);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  background: none;
-  border: 0;
-  padding: 0;
-  color: var(--nz-text);
-  cursor: pointer;
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 3px;
+  background: none; border: 0; padding: 0; cursor: pointer;
+  color: var(--green-ink); font-weight: 500; font-size: inherit;
 }
-.linkbtn:hover { text-decoration-color: var(--nz-signal); }
-.addrow #addNote { flex: 1 1 9rem; }
+.linkbtn:hover { color: var(--green); text-decoration: underline; }
 
-/* Aufklapper der Einstellungen. Der Baustein bleibt der des Hauses. */
-.settings summary {
-  display: flex;
-  align-items: center;
-  gap: var(--nz-space-3);
-  cursor: pointer;
-  font-family: var(--nz-font-display);
-  font-weight: 700;
-  font-size: var(--nz-text-lg);
-  letter-spacing: -0.015em;
+.actions { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; }
+
+/* == 5 · Felder ======================================================== */
+
+.input, .textarea {
+  width: 100%; padding: .7rem .9rem;
+  background: var(--surface-alt); color: var(--ink);
+  border: 1px solid var(--line); border-radius: var(--r-btn);
 }
-.settings[open] summary { margin-bottom: var(--nz-space-4); }
-.settings-sub {
-  font-family: var(--nz-font-display);
-  font-weight: 700;
-  font-size: var(--nz-text-lg);
-  margin: 0 0 var(--nz-space-2);
+.input::placeholder, .textarea::placeholder { color: var(--faint); }
+.input:focus, .textarea:focus { background: var(--surface); border-color: var(--green); outline: none; box-shadow: 0 0 0 3px var(--green-soft); }
+.textarea { resize: vertical; min-height: 4.5rem; }
+
+.field { display: block; margin-bottom: var(--s-4); }
+.field:last-child { margin-bottom: 0; }
+.field__label { display: block; color: var(--muted); font-size: .88rem; margin-bottom: var(--s-1); font-weight: 500; }
+.field .hint { margin-top: var(--s-1); font-size: .87rem; }
+
+/* Kästchen und Knöpfe, ohne eigenes Widget: das native Element bleibt,
+   es wird nur unsichtbar und die Marke daneben übernimmt die Anzeige. */
+.check { display: flex; align-items: flex-start; gap: var(--s-3); cursor: pointer; }
+.check input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.check__box {
+  flex: 0 0 auto; width: 1.25rem; height: 1.25rem; margin-top: .15rem;
+  border: 1px solid var(--line-firm); border-radius: 6px; background: var(--surface);
+  display: grid; place-items: center;
+}
+.check--radio .check__box { border-radius: 999px; }
+.check input:checked + .check__box { background: var(--green); border-color: var(--green); }
+.check input:checked + .check__box::after {
+  content: ""; width: .5rem; height: .5rem; border-radius: 2px; background: var(--on-green);
+}
+.check--radio input:checked + .check__box::after { border-radius: 999px; }
+.check input:focus-visible + .check__box { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* Zweistellige Wahl: frei oder verliehen. Zwei Schaltflächen nebeneinander,
+   die tragende trägt Farbe. */
+.seg { display: flex; gap: var(--s-2); }
+.seg button {
+  flex: 1 1 0; padding: .55rem; border-radius: 10px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface-alt); color: var(--muted);
+}
+.seg button[aria-pressed="true"] { background: var(--green-soft); border-color: var(--green); color: var(--green-ink); font-weight: 600; }
+.seg button.is-lent[aria-pressed="true"] { background: var(--amber-soft); border-color: var(--amber); color: var(--amber); }
+
+/* == 6 · Karten, Aufklapper, Hinweise ================================== */
+
+.card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card);
+  padding: var(--s-5) var(--s-5); margin-bottom: var(--s-3); box-shadow: var(--shadow);
+}
+.card__title { font-size: 1.2rem; }
+.card__title + .hint { margin-top: var(--s-1); }
+
+/* Aufklapper: zugeklappt eine Zeile, aufgeklappt eine Karte. */
+.fold {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card);
+  margin-bottom: var(--s-3); box-shadow: var(--shadow);
+}
+.fold > summary {
+  display: flex; align-items: center; gap: var(--s-3); cursor: pointer;
+  padding: var(--s-4) var(--s-5); font-weight: 600; list-style: none;
+}
+.fold > summary::-webkit-details-marker { display: none; }
+.fold > summary .ico { color: var(--muted); }
+.fold > summary .fold-sub { margin-left: auto; color: var(--faint); font-weight: 400; font-size: .92rem; text-align: right; }
+.fold[open] > summary { border-bottom: 1px solid var(--line); }
+.fold__body { padding: var(--s-5); }
+.fold__body hr { border: 0; border-top: 1px solid var(--line); margin: var(--s-5) 0; }
+.fold h3 { font-size: 1rem; margin-bottom: var(--s-1); }
+
+.note {
+  display: flex; gap: var(--s-3); align-items: flex-start;
+  background: var(--surface-alt); border: 1px solid var(--line);
+  border-radius: var(--r-card); padding: var(--s-4); margin-bottom: var(--s-3);
+  color: var(--muted); font-size: .95rem;
+}
+.note .ico { color: var(--muted); margin-top: .18rem; }
+.note--warn { background: var(--amber-soft); border-color: var(--amber); color: var(--amber); }
+.note--warn .ico { color: var(--amber); }
+
+.chip {
+  display: inline-block; padding: .2rem .7rem; border-radius: 999px;
+  background: var(--surface-alt); color: var(--muted); font-size: .82rem; white-space: nowrap;
+}
+.chip--ok { background: var(--green-soft); color: var(--green-ink); }
+
+.empty {
+  border: 1px dashed var(--line-firm); border-radius: var(--r-row);
+  padding: var(--s-6) var(--s-4); text-align: center; color: var(--muted);
 }
 
-/* == 5 · Inventar ======================================================== */
+/* == 7 · Startseite ==================================================== */
 
-.items-head {
-  display: flex;
-  align-items: center;
-  gap: var(--nz-space-3);
-  flex-wrap: wrap;
-  margin-bottom: var(--nz-space-4);
+.hero { padding-block: var(--s-3) 0; }
+.hero h1 { font-size: clamp(2.4rem, 7vw, 3.6rem); letter-spacing: -.035em; }
+.hero h1 mark { background: none; color: var(--green); }
+.hero .lead { margin-top: var(--s-4); max-width: 30rem; font-size: 1.18rem; }
+.hero .actions { margin-top: var(--s-6); }
+.hero .actions small { color: var(--faint); font-size: .9rem; }
+
+.trust { display: flex; flex-wrap: wrap; gap: var(--s-2); list-style: none; padding: 0; margin-top: var(--s-6); }
+
+.steps { list-style: none; padding: 0; margin-top: var(--s-6); display: grid; gap: var(--s-2); }
+.steps li {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card);
+  box-shadow: var(--shadow); padding: var(--s-4) var(--s-5);
+  display: grid; grid-template-columns: 2rem 1fr; gap: var(--s-3);
 }
-.items-head .nz-card__title { margin: 0; }
-.items-head .nz-btn { margin-left: auto; }
+.step-no {
+  width: 1.8rem; height: 1.8rem; border-radius: 999px;
+  background: var(--green-soft); color: var(--green-ink);
+  display: grid; place-items: center; font-size: .9rem; font-weight: 600;
+}
+.steps h3 { font-size: 1.02rem; }
+.steps p { color: var(--muted); font-size: .95rem; margin-top: .1rem; }
 
-.items { list-style: none; margin: 0; padding: 0; }
+/* Eigene Listen, auf diesem Gerät gemerkt. */
+.mine { margin-top: var(--s-6); }
+.mine h2 { font-size: 1.05rem; margin-bottom: var(--s-3); }
+.mine ul { list-style: none; padding: 0; display: grid; gap: var(--s-2); }
+.mine a {
+  display: flex; align-items: center; gap: var(--s-3); text-decoration: none; color: inherit;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-row);
+  padding: .7rem .9rem; box-shadow: var(--shadow);
+}
+.mine a:hover { background: var(--surface-alt); }
+.mine .name { flex: 1 1 auto; font-weight: 500; }
+.mine .when { color: var(--faint); font-size: .85rem; }
 
-/* Regel 16: gestrichelt 2px in der Textfarbe, wo eine Grenze angedeutet wird. */
-.item { border-top: var(--nz-stroke-rule) dashed var(--nz-line); }
-.item:first-child { border-top: 0; }
+/* == 8 · Liste ========================================================= */
 
-/* Die ganze Zeile ist das Ziel. Sie ist deshalb eine Schaltfläche, aber keine
-   im Sinne von Regel 17: keine Fläche, kein Rahmen, nur eine Zeile. Auf das
-   Zeigen antwortet sie mit der grünen Unterstreichung, die das Erscheinungsbild
-   auch seinem Aufklapper gibt, nicht mit einem Schatten. */
+.titleblock { margin-bottom: var(--s-5); }
+.titleblock h1 { font-size: 1.8rem; }
+.title-input {
+  font-size: 1.8rem; font-weight: 600; letter-spacing: -.02em;
+  padding: .3rem .6rem; margin-left: -.6rem; background: none; border-color: transparent;
+}
+.title-input:hover { background: var(--surface-alt); }
+.titlemeta { display: flex; align-items: center; flex-wrap: wrap; gap: var(--s-2); margin-top: var(--s-2); color: var(--faint); font-size: .92rem; }
+
+.items-head { display: flex; align-items: center; gap: var(--s-3); margin-bottom: var(--s-4); }
+.items-head .card__title { flex: 1 1 auto; }
+.items-head .checked { color: var(--faint); font-size: .88rem; }
+
+.addrow { display: flex; gap: var(--s-2); align-items: stretch; }
+.addrow #addName { flex: 1 1 8rem; min-width: 0; }
+.addhint { display: flex; align-items: baseline; gap: var(--s-3); flex-wrap: wrap; margin-top: var(--s-2); font-size: .9rem; }
+.voicestate { color: var(--green-ink); }
+
+.items { list-style: none; padding: 0; margin-top: var(--s-4); display: grid; gap: var(--s-2); }
+
 .itemrow {
-  display: flex;
-  align-items: center;
-  gap: var(--nz-space-3);
-  width: 100%;
-  padding: var(--nz-space-4) var(--nz-space-1);
-  background: none;
-  border: 0;
-  font: inherit;
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
+  width: 100%; display: flex; align-items: center; gap: var(--s-3); text-align: left;
+  padding: .7rem .85rem; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-row);
 }
-.itemrow .ico { color: var(--nz-text); }
-.item-name { font-weight: 600; overflow-wrap: anywhere; min-width: 0; }
-.itemrow:hover .item-name {
-  text-decoration: underline;
-  text-decoration-color: var(--nz-signal);
-  text-decoration-thickness: 3px;
-  text-underline-offset: 3px;
+.itemrow:hover { background: var(--surface-alt); border-color: var(--line-firm); }
+
+.item-badge {
+  flex: 0 0 auto; width: 2.1rem; height: 2.1rem; border-radius: 999px;
+  display: grid; place-items: center;
+  background: var(--green-soft); color: var(--green-ink);
 }
-.itemrow:focus-visible { outline: var(--nz-stroke-strong) solid var(--nz-focus); outline-offset: -3px; }
+.item-badge .ico { width: 1rem; height: 1rem; }
+.item--lent .item-badge { background: var(--amber-soft); color: var(--amber); }
 
-/* Hinzufügen steht in der Liste, oberhalb der Einträge. */
-.addbox {
-  padding-bottom: var(--nz-space-4);
-  border-bottom: var(--nz-stroke-rule) dashed var(--nz-line);
-  margin-bottom: var(--nz-space-2);
+.item-text { flex: 1 1 auto; min-width: 0; }
+.item-name { display: block; font-weight: 500; overflow-wrap: anywhere; }
+.item-state { display: block; color: var(--amber); font-size: .85rem; }
+.item-note { display: block; color: var(--faint); font-size: .85rem; overflow-wrap: anywhere; }
+.item-chev { color: var(--faint); flex: 0 0 auto; }
+
+/* Ansehen-Modus: die Anfrage steht in der Zeile, nicht hinter ihr. */
+.items--read .itemrow { cursor: default; }
+.items--read .itemrow:hover { background: var(--surface); border-color: var(--line); }
+.item-ask { flex: 0 0 auto; }
+.item--lent.items-read-lent { background: var(--surface-alt); }
+
+/* == 9 · Teilen und Kontakt ============================================ */
+
+.linkrow { display: flex; gap: var(--s-2); align-items: stretch; flex-wrap: wrap; }
+.linkrow .input { flex: 1 1 12rem; min-width: 0; font-size: .84rem; }
+
+.tabs { display: flex; gap: var(--s-2); margin-bottom: var(--s-4); }
+.tab {
+  padding: .45rem .9rem; border-radius: 999px; cursor: pointer;
+  background: var(--surface-alt); border: 1px solid transparent; color: var(--muted); font-size: .92rem;
+}
+.tab[aria-selected="true"] { background: var(--green-soft); border-color: var(--green); color: var(--green-ink); font-weight: 600; }
+
+/* == 10 · Fenster und Meldungen ======================================== */
+
+.modal {
+  width: min(26rem, calc(100vw - 2rem)); padding: 0; border: 0;
+  border-radius: 20px; background: var(--surface); color: var(--ink);
+  box-shadow: var(--shadow-lift);
+}
+.modal::backdrop { background: rgba(27, 24, 19, .38); }
+.modal__head { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-5) var(--s-5) var(--s-2); }
+.modal__title { font-size: 1.2rem; flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+
+/* Die Ueberschrift als Feld: sie sieht aus wie Text, bis man sie anfasst. */
+.modal-title-input {
+  font-size: 1.2rem; font-weight: 600; letter-spacing: -.02em;
+  padding: .25rem .5rem; margin-left: -.5rem;
+  background: none; border-color: transparent;
+}
+.modal-title-input:hover { background: var(--surface-alt); }
+.modal__x {
+  flex: 0 0 auto; width: 2.2rem; height: 2.2rem; display: grid; place-items: center;
+  background: none; border: 0; border-radius: 999px; cursor: pointer; color: var(--muted);
+}
+.modal__x:hover { background: var(--surface-alt); color: var(--ink); }
+.modal__body { padding: var(--s-3) var(--s-5) var(--s-5); }
+.modal__foot {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s-3);
+  padding: var(--s-4) var(--s-5); background: var(--surface-alt);
+  border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
+}
+.modal__foot .spacer { flex: 1 1 auto; }
+
+.modal-state { display: flex; align-items: center; gap: var(--s-3); font-size: .95rem; }
+.modal-state .item-badge { width: 1.8rem; height: 1.8rem; }
+
+.toast-region {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: var(--s-5); z-index: 60; width: min(26rem, calc(100vw - 2rem));
+}
+.toast {
+  display: flex; align-items: center; gap: var(--s-3);
+  background: var(--ink); color: var(--paper);
+  border-radius: var(--r-btn); padding: .8rem 1rem; box-shadow: var(--shadow-lift);
+}
+.toast__body { flex: 1 1 auto; font-size: .95rem; }
+.toast__act {
+  flex: 0 0 auto; background: none; border: 0; cursor: pointer; padding: .2rem .4rem;
+  color: var(--paper); font-weight: 600; text-decoration: underline;
 }
 
-/* Fenster zu einem Gegenstand */
-.modal-status {
-  display: flex;
-  align-items: center;
-  gap: var(--nz-space-3);
-  font-weight: 600;
-}
-.nz-modal__foot { flex-wrap: wrap; }
-.statusbtn { justify-content: flex-start; }
+/* == 11 · Fußzeile ===================================================== */
 
-/* Schwebende Schaltfläche, Regel 15. Grün, weil sie eine Aktion ist, und
-   quadratisch, weil der Radius im Haus immer null ist. */
-.fab {
-  position: fixed;
-  right: var(--nz-space-5);
-  bottom: var(--nz-space-5);
-  z-index: 50;
-  width: 56px;
-  height: 56px;
-  display: grid;
-  place-items: center;
-  background: var(--nz-signal);
-  color: var(--nz-on-signal);
-  border: var(--nz-stroke-rule) solid var(--nz-line);
-  box-shadow: var(--nz-shadow-md);
-  cursor: pointer;
-}
-.fab .ico { width: 1.75rem; height: 1.75rem; }
-.fab:hover { box-shadow: var(--nz-shadow-lg); }
-.fab:focus-visible { outline: var(--nz-stroke-strong) solid var(--nz-focus); outline-offset: 3px; }
+.site-footer { border-top: 1px solid var(--line); margin-top: var(--s-7); padding-block: var(--s-5) var(--s-7); }
+.footer-nav { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-5); margin-bottom: var(--s-3); }
+.footer-nav a { color: var(--muted); text-decoration: none; }
+.footer-nav a:hover { color: var(--ink); text-decoration: underline; }
+.footer-claim { display: block; color: var(--faint); font-size: .85rem; }
+.site-footer p { color: var(--faint); font-size: .88rem; }
 
-/* Die Meldungen weichen der schwebenden Schaltfläche aus. */
-.nz-toast-region { bottom: calc(var(--nz-space-5) + 56px + var(--nz-space-3)); }
-
-/* == 6 · Spracheingabe =================================================== */
-
-.voicebox {
-  margin-top: var(--nz-space-5);
-  padding-top: var(--nz-space-5);
-  border-top: var(--nz-stroke-rule) dashed var(--nz-line);
-}
-.voicerow {
-  display: flex;
-  align-items: center;
-  gap: var(--nz-space-3);
-  flex-wrap: wrap;
-}
-.voicerow + .voice-text { margin-top: var(--nz-space-3); }
-.voice-text + .voicerow { margin-top: var(--nz-space-3); }
-.voice-text { min-height: 4.5rem; font-size: var(--nz-text-sm); }
-.voicerow .nz-field__hint { flex: 1 1 14rem; margin: 0; }
-
-.voicestate { color: var(--nz-text-muted); }
-.voicestate-error { color: var(--nz-c-danger); }
-
-/* Aufnahme läuft: die Schaltfläche wird zur lauten, grünen Fassung, und ein
-   hartes Quadrat blinkt. Kein Schein, kein Weichzeichner, Regel des Hauses. */
-.is-listening { background: var(--nz-signal); color: var(--nz-on-signal); }
-.voicestate .nz-dot { margin-right: var(--nz-space-2); animation: blink 1s steps(1, end) infinite; }
-@keyframes blink { 50% { opacity: 0; } }
-
-/* == 7 · Abnahmeseite ==================================================== */
-
-.check-group {
-  font-family: var(--nz-font-mono);
-  font-weight: 700;
-  font-size: var(--nz-text-xs);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--nz-text-muted);
-  margin: var(--nz-space-5) 0 var(--nz-space-2);
-}
-#results > .check-group:first-child { margin-top: 0; }
-.check-state { white-space: nowrap; }
-.check-state.savestate-error { color: var(--nz-c-danger); }
-
-/* == 8 · Schmal ========================================================== */
+/* == 12 · Telefon ====================================================== */
 
 @media (max-width: 34rem) {
-  .shell { padding-inline: var(--nz-space-3); }
+  .shell { padding-inline: var(--s-4); }
+  .card, .fold__body { padding: var(--s-4); }
+  .fold > summary { padding: var(--s-4); }
+  .hero h1 { font-size: 2.4rem; }
+  .hero .lead { font-size: 1.06rem; }
+  .titleblock h1, .title-input { font-size: 1.5rem; }
 
-  /* Auf schmalen Geraeten teilen sich Marke und Bedienelemente die Zeile.
-     Mit dem zweiten Quadrat wird es eng, deshalb weicht zuerst das Abzeichen:
-     Es sagt nur, wo gespeichert wird, und der Hinweisstreifen sagt das ohnehin.
-     Die Quadrate bleiben 44 Pixel gross, das ist die Grenze fuer Fingerbedienung. */
-  .brand-logo { height: 2rem; }
-  .brand-word { font-size: var(--nz-text-base); }
-  #storageBadge { display: none; }
+  /* Der Aufklapper-Zusatz rutscht unter den Namen statt ihn zu drängen. */
+  .fold > summary { flex-wrap: wrap; }
+  .fold > summary .fold-sub { margin-left: 0; flex-basis: 100%; text-align: left; }
 
-  /* Unter 336 Pixeln reicht auch das nicht, dann wird die Marke kleiner. */
-  @media (max-width: 21rem) {
-    .brand-logo { height: 1.6rem; }
-    .brand-word { font-size: var(--nz-text-sm); }
+  /* Die Eingabe bleibt beim Blättern am unteren Rand erreichbar. Damit
+     erübrigt sich eine zusätzlich schwebende Schaltfläche. */
+  .addbox { position: sticky; top: 0; z-index: 20; background: var(--surface); padding-block: var(--s-3); }
+  .addbox::before {
+    content: ""; position: absolute; inset: 0 calc(var(--s-4) * -1);
+    background: var(--surface); border-top: 1px solid var(--line); z-index: -1;
   }
+  .addrow .btn span:not(.sr-only) { display: none; }
+  .addrow .btn { width: 2.9rem; padding-inline: 0; }
+  .addrow .btn .ico { width: 1.3rem; height: 1.3rem; }
 
-  /* Regel 20: automatische Silbentrennung greift nur auf schmalen Bildschirmen. */
-  .titleblock h1 { hyphens: auto; }
+  .footer-nav { gap: var(--s-2) var(--s-4); }
+  .toast-region { width: calc(100vw - 2rem); }
+}
 
-  .addrow .nz-btn,
-  .voicerow > .nz-btn { width: 100%; }
-
-  .addrow .nz-btn { width: 100%; }
-  .fab { right: var(--nz-space-3); bottom: var(--nz-space-3); }
-
-  .nz-toast-region { left: var(--nz-space-3); right: var(--nz-space-3); max-width: none; }
-  .nz-toast { min-width: 0; }
-
-  /* Fußzeile: zwei Spalten statt einer gedrängten Zeile, der Zusatz von
-     nozilla rückt darunter. */
-  .footer-nav {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--nz-space-3) var(--nz-space-4);
-  }
-  .footer-nav a:last-child { grid-column: 1 / -1; }
-  .footer-claim { display: block; }
-  .footer-claim::before { content: ""; }
+/* Sehr schmal: die Wortmarke weicht, das Zeichen bleibt. */
+@media (max-width: 21rem) {
+  .brand-word { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .voicestate .nz-dot { animation: none; }
+  * { transition: none !important; animation: none !important; }
 }

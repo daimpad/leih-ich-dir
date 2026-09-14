@@ -41,8 +41,8 @@
     rows.push({ level: level, name: name, state: state, detail: detail || '' });
 
     var li = el('li', 'item');
-    var badge = el('span', 'nz-badge');
-    var dot = el('span', 'nz-dot' + (state === 'ok' ? '' : (state === 'offen' ? ' nz-dot--muted' : ' nz-dot--danger')));
+    var badge = el('span', 'chip');
+    var dot = el('span', 'dot' + (state === 'ok' ? '' : (state === 'offen' ? ' dot--muted' : ' dot--danger')));
     badge.appendChild(dot);
     badge.appendChild(el('span', null, level));
     li.appendChild(badge);
@@ -52,7 +52,7 @@
     if (detail) { main.appendChild(el('span', 'item-note', detail)); }
     li.appendChild(main);
 
-    li.appendChild(el('span', 'nz-label check-state' + (state === 'ok' ? '' : ' savestate-error'), state));
+    li.appendChild(el('span', 'tag check-state' + (state === 'ok' ? '' : ' savestate-error'), state));
     groupNode.appendChild(li);
   }
 
@@ -140,7 +140,6 @@
     var files = [
       ['style.css', 'text/css'],
       ['app.js', 'javascript'],
-      ['vendor/nozilla-ci/design-system.css', 'text/css'],
       ['assets/fonts/fonts.css', 'text/css'],
       ['assets/fonts/inter-400.woff2', 'font/woff2'],
       ['assets/pics/logo.svg', 'image/svg+xml']
@@ -239,7 +238,7 @@
       if (r.state === 'fehlt' && r.level === LEVEL_SHOULD) { should++; }
     });
     var node = $('#summary');
-    node.className = 'nz-field__hint' + (must > 0 ? ' savestate-error' : '');
+    node.className = 'hint' + (must > 0 ? ' savestate-error' : '');
     if (must === 0 && should === 0) {
       node.textContent = 'Alles in Ordnung. ' + rows.length + ' Punkte geprueft.';
     } else if (must === 0) {

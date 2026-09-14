@@ -12,9 +12,8 @@
 <title>Leih-Katalog · leihichdir.de</title>
 <meta name="description" content="Verleihe dein Inventar an Freunde. Ende-zu-Ende-verschlüsselt, ohne Konto. Lend your inventory to friends. End-to-end encrypted, no account.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%23FFFEE5'/><g fill='none' stroke='%23000' stroke-width='4' stroke-linecap='square'><rect x='4' y='20' width='18' height='20'/><rect x='38' y='20' width='18' height='20'/><path d='M24 30 L34 30'/></g><path d='M32 25 L38 30 L32 35 Z' fill='%2300FF9C'/></svg>">
-<!-- 1. Schriften des Hauses, selbst ausgeliefert · 2. Erscheinungsbild · 3. Anwendungsschicht -->
+<!-- Schriften selbst ausgeliefert, danach die eigene Gestaltung. Nichts wird von fremden Servern geladen. -->
 <link rel="stylesheet" href="assets/fonts/fonts.css">
-<link rel="stylesheet" href="vendor/nozilla-ci/design-system.css">
 <link rel="stylesheet" href="style.css">
 <!-- Ohne defer und vor dem Koerper: verhindert ein Aufblitzen des falschen Erscheinungsbilds. -->
 <script src="theme.js"></script>
@@ -27,67 +26,55 @@
   damit die Striche über currentColor dem Erscheinungsbild folgen.
 -->
 <svg class="sprite" aria-hidden="true" focusable="false">
-  <defs>
-    <g id="g-sign"><rect x="54" y="54" width="6" height="6" fill="#00FF9C" stroke="none"/></g>
-  </defs>
   <symbol id="i-handover" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
     <rect x="4" y="20" width="18" height="20"/>
     <rect x="38" y="20" width="18" height="20"/>
     <path d="M24 30 L34 30"/>
-    <path d="M32 25 L38 30 L32 35 Z" fill="#00FF9C"/>
-    <use href="#g-sign"/>
+    <path d="M32 25 L38 30 L32 35 Z" fill="currentColor"/>
   </symbol>
   <symbol id="i-voice" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
     <rect x="7" y="28" width="6" height="8" fill="currentColor" stroke="none"/>
     <rect x="17" y="21" width="6" height="22" fill="currentColor" stroke="none"/>
-    <rect x="27" y="15" width="6" height="34" fill="#00FF9C" stroke="none"/>
+    <rect x="27" y="15" width="6" height="34" fill="currentColor" stroke="none"/>
     <rect x="37" y="23" width="6" height="18" fill="currentColor" stroke="none"/>
     <rect x="47" y="30" width="6" height="5" fill="currentColor" stroke="none"/>
-    <use href="#g-sign"/>
   </symbol>
   <symbol id="i-encrypt" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
     <rect x="5" y="15" width="19" height="30"/>
     <rect x="31" y="16" width="6" height="6" fill="currentColor" stroke="none"/>
-    <rect x="40" y="16" width="6" height="6" fill="#00FF9C" stroke="none"/>
+    <rect x="40" y="16" width="6" height="6" fill="currentColor" stroke="none"/>
     <rect x="34" y="25" width="6" height="6" fill="currentColor" stroke="none"/>
     <rect x="44" y="27" width="6" height="6" fill="currentColor" stroke="none"/>
-    <rect x="31" y="34" width="6" height="6" fill="#00FF9C" stroke="none"/>
+    <rect x="31" y="34" width="6" height="6" fill="currentColor" stroke="none"/>
     <rect x="42" y="36" width="6" height="6" fill="currentColor" stroke="none"/>
     <rect x="35" y="43" width="6" height="6" fill="currentColor" stroke="none"/>
-    <use href="#g-sign"/>
   </symbol>
   <symbol id="i-key" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
     <circle cx="16" cy="31" r="9"/>
-    <circle cx="16" cy="31" r="3.4" fill="#00FF9C" stroke="none"/>
+    <circle cx="16" cy="31" r="3.4" fill="currentColor" stroke="none"/>
     <path d="M25 31 L50 31"/>
     <path d="M42 31 L42 40"/>
     <path d="M48 31 L48 37"/>
-    <use href="#g-sign"/>
   </symbol>
   <symbol id="i-mail" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
     <rect x="8" y="16" width="44" height="30"/>
-    <path d="M8 16 L30 34 L52 16 Z" fill="#00FF9C"/>
-    <use href="#g-sign"/>
+    <path d="M8 16 L30 34 L52 16 Z" fill="currentColor"/>
   </symbol>
   <symbol id="i-check" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
     <path d="M12 34 L26 48 L52 16"/>
-    <use href="#g-sign"/>
   </symbol>
   <symbol id="i-user" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
-    <circle cx="31" cy="21" r="10" fill="#00FF9C"/>
+    <circle cx="31" cy="21" r="10" fill="currentColor"/>
     <path d="M13 50 L17 40 L31 36 L45 40 L49 50"/>
-    <use href="#g-sign"/>
   </symbol>
   <symbol id="i-share" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
     <path d="M10 22 L10 50 L40 50 L40 32"/>
     <path d="M28 32 L45 15"/>
-    <path d="M34 10 L50 10 L50 26 Z" fill="#00FF9C"/>
-    <use href="#g-sign"/>
+    <path d="M34 10 L50 10 L50 26 Z" fill="currentColor"/>
   </symbol>
   <symbol id="i-close" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
     <path d="M14 14 L50 50"/>
     <path d="M50 14 L14 50"/>
-    <use href="#g-sign"/>
   </symbol>
   <symbol id="i-trash" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
     <path d="M9 19 L55 19"/>
@@ -95,50 +82,50 @@
     <rect x="26" y="10" width="12" height="9"/>
     <path d="M27 28 L27 45"/>
     <path d="M37 28 L37 45"/>
-    <use href="#g-sign"/>
   </symbol>
   <symbol id="i-plus" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
     <path d="M32 12 L32 52"/>
     <path d="M12 32 L52 32"/>
-    <use href="#g-sign"/>
   </symbol>
   <symbol id="i-gear" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
     <circle cx="31" cy="31" r="14"/>
-    <circle cx="31" cy="31" r="5" fill="#00FF9C" stroke="none"/>
+    <circle cx="31" cy="31" r="5" fill="currentColor" stroke="none"/>
     <path d="M45 31 L51 31"/><path d="M31 45 L31 51"/><path d="M17 31 L11 31"/><path d="M31 17 L31 11"/>
     <path d="M41 41 L45 45"/><path d="M21 41 L17 45"/><path d="M21 21 L17 17"/><path d="M41 21 L45 17"/>
-    <use href="#g-sign"/>
   </symbol>
   <symbol id="i-warning" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
     <path d="M32 8 L54 50 L10 50 Z"/>
     <path d="M32 24 L32 37"/>
     <circle cx="32" cy="44" r="2.6" fill="currentColor" stroke="none"/>
-    <use href="#g-sign"/>
   </symbol>
   <symbol id="i-refresh" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
     <path d="M22 13 L48 13 L48 46 L14 46 L14 27"/>
-    <path d="M7 28 L14 17 L21 28 Z" fill="#00FF9C"/>
-    <use href="#g-sign"/>
+    <path d="M7 28 L14 17 L21 28 Z" fill="currentColor"/>
   </symbol>
   <!-- Mond und Sonne gibt es im Erscheinungsbild noch nicht. Nach dessen
        Regeln gezeichnet: Kanten, eine gruene Stelle, die Signatur bei 54,54.
        Gehoeren bei naechster Gelegenheit in daimpad/nozilla-ci nachgetragen. -->
   <symbol id="i-moon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
     <path d="M38 8 L22 18 L18 32 L22 46 L38 56 L30 45 L28 32 L30 19 Z" fill="currentColor" stroke="none"/>
-    <rect x="44" y="20" width="7" height="7" fill="#00FF9C" stroke="none"/>
-    <use href="#g-sign"/>
+    <rect x="44" y="20" width="7" height="7" fill="currentColor" stroke="none"/>
   </symbol>
   <symbol id="i-sun" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
-    <circle cx="32" cy="32" r="11" fill="#00FF9C" stroke="none"/>
+    <circle cx="32" cy="32" r="11" fill="currentColor" stroke="none"/>
     <path d="M32 6 L32 14"/><path d="M32 50 L32 58"/><path d="M6 32 L14 32"/><path d="M50 32 L58 32"/>
     <path d="M14 14 L20 20"/><path d="M44 44 L50 50"/><path d="M50 14 L44 20"/><path d="M20 44 L14 50"/>
-    <use href="#g-sign"/>
   </symbol>
   <symbol id="i-clock" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
     <circle cx="32" cy="32" r="21"/>
     <path d="M32 32 L32 19"/>
     <path d="M32 32 L43 32"/>
-    <use href="#g-sign"/>
+  </symbol>
+  <!-- Winkel: „dahinter steckt mehr". Pfeil hinaus: verliehen. -->
+  <symbol id="i-chev" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M26 16 L42 32 L26 48"/>
+  </symbol>
+  <symbol id="i-out" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M18 46 L44 20"/>
+    <path d="M26 18 L46 18 L46 38"/>
   </symbol>
 </svg>
 
@@ -152,7 +139,7 @@
       <span class="brand-word">leihichdir</span>
     </a>
     <div class="bar-controls">
-      <span id="storageBadge" class="nz-badge" hidden></span>
+      <span id="storageBadge" class="chip" hidden></span>
       <!-- Regel 19: Bedienelement der Kopfleiste als Quadrat, weiße Fläche,
            durchgezogene Linie, harter Schatten. Es zeigt das Ziel, nicht den Zustand. -->
       <button type="button" id="btnLang" class="ctl-square">EN</button>
@@ -166,76 +153,70 @@
 
 <main id="main" class="shell page">
 
-  <!-- Hinweisfeld, Regel 24: die breite Kante links gehört Hinweisen. -->
-  <div id="previewBanner" class="nz-alert nz-alert--warn note" hidden>
+  <div id="previewBanner" class="note note--warn" hidden>
     <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-warning"/></svg>
-    <div><p class="nz-alert__body" data-i18n="banner.preview"></p></div>
+    <div><p class="note__body" data-i18n="banner.preview"></p></div>
   </div>
 
   <!-- ==================================================================== -->
   <!-- Startansicht                                                         -->
   <!-- ==================================================================== -->
-  <section id="viewStart" class="view view--start" hidden>
+  <section id="viewStart" class="view" hidden>
 
-    <!-- Hero. Der grüne Marker sitzt nach Vorgabe des Hauses auf einem Wort,
-         nicht auf einem Satz. -->
     <div class="hero">
-      <h1 class="nz-display"><span data-i18n="hero.a">Leih</span> <mark data-i18n="hero.b">ich</mark> <span data-i18n="hero.c">dir.</span></h1>
-      <p class="nz-lead" data-i18n="hero.lead">
-        Eine Liste deiner Gegenstände, die du an Freunde verleihst. Ohne Konto,
-        ohne Tracking, und lesen können sie nur du und deine Freunde.
+      <h1><span data-i18n="hero.a">Leih</span> <mark data-i18n="hero.b">ich</mark> <span data-i18n="hero.c">dir.</span></h1>
+      <p class="lead" data-i18n="hero.lead">
+        Eine Liste deiner Sachen, die du an Freunde verleihst. Ohne Konto, und
+        lesen können sie nur du und die, denen du den Link gibst.
+      </p>
+      <!-- Die Aufforderung steht über der Falz. Was sie erklärt, steht darunter. -->
+      <p class="actions">
+        <button type="button" id="btnCreate" class="btn btn--primary btn--lg" data-i18n="start.create">Neue Liste anlegen</button>
+        <small data-i18n="start.createHint">dauert einen Klick</small>
       </p>
     </div>
 
-    <!-- Vertrauensanker. Keine Zeichen: Jedes Zeichen des Hauses steht für
-         genau eine Sache, und für diese fünf gibt es keine. -->
-    <ul class="trust" aria-label="Eigenschaften">
-      <li class="nz-badge" data-i18n="trust.tracking">Kein Tracking</li>
-      <li class="nz-badge" data-i18n="trust.account">Ohne Konto</li>
-      <li class="nz-badge" data-i18n="trust.ads">Keine Werbung</li>
-      <li class="nz-badge" data-i18n="trust.crypto">Verschlüsselt</li>
-      <li class="nz-badge" data-i18n="trust.source">Open Source</li>
+    <ul class="trust" data-i18n-label="trust.label" aria-label="Eigenschaften">
+      <li class="chip" data-i18n="trust.tracking">Kein Tracking</li>
+      <li class="chip" data-i18n="trust.account">Ohne Konto</li>
+      <li class="chip" data-i18n="trust.ads">Keine Werbung</li>
+      <li class="chip" data-i18n="trust.crypto">Ende-zu-Ende verschlüsselt</li>
+      <li class="chip" data-i18n="trust.source">Quelloffen</li>
     </ul>
 
-    <!-- Drei Schritte. Die Zahlen stehen nach Regel 27 schwarz mit weißer
-         Schrift: Grün sagt „hier kann man klicken", eine Schrittzahl nicht. -->
-    <section class="nz-card nz-card--raised">
-      <h2 class="nz-card__title" data-i18n="steps.headline">In drei Schritten</h2>
-      <ol class="steps">
-        <li>
-          <span class="step-no" aria-hidden="true">1</span>
-          <div>
-            <h3 data-i18n="steps.one">Liste anlegen</h3>
-            <p data-i18n="steps.oneText">Ein Klick, und du hast zwei Links: einen geheimen zum Bearbeiten und einen zum Weitergeben.</p>
-          </div>
-        </li>
-        <li>
-          <span class="step-no" aria-hidden="true">2</span>
-          <div>
-            <h3 data-i18n="steps.two">Gegenstände eintragen</h3>
-            <p data-i18n="steps.twoText">Tippen oder einsprechen. Erst nur den Namen, alles Weitere steht hinter dem Eintrag.</p>
-          </div>
-        </li>
-        <li>
-          <span class="step-no" aria-hidden="true">3</span>
-          <div>
-            <h3 data-i18n="steps.three">Link weitergeben</h3>
-            <p data-i18n="steps.threeText">Freunde sehen, was gerade frei ist, und fragen mit einem Klick an.</p>
-          </div>
-        </li>
-      </ol>
-      <p class="actions">
-        <button type="button" id="btnCreate" class="nz-btn nz-btn--primary nz-btn--lg" data-i18n="start.create">Neue Liste anlegen</button>
+    <!-- Auf diesem Gerät gemerkte Listen. Rein lokal, kein Konto, und nur
+         sichtbar, wenn es etwas zu zeigen gibt. -->
+    <section class="mine" id="mineBox" hidden>
+      <h2 data-i18n="mine.headline">Deine Listen auf diesem Gerät</h2>
+      <ul id="mineList"></ul>
+      <p class="hint" data-i18n="mine.hint">
+        Nur in diesem Browser gemerkt. Der Bearbeiten-Link bleibt dein einziger Zugang.
       </p>
     </section>
 
-    <div class="nz-alert note">
-      <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-key"/></svg>
-      <div><p class="nz-alert__body" data-i18n="start.hint">
-        Der Bearbeiten-Link ist dein einziger Zugang. Speichere ihn als Lesezeichen,
-        er lässt sich nicht wiederherstellen.
-      </p></div>
-    </div>
+    <ol class="steps">
+      <li>
+        <span class="step-no" aria-hidden="true">1</span>
+        <div>
+          <h3 data-i18n="steps.one">Liste anlegen</h3>
+          <p data-i18n="steps.oneText">Du bekommst zwei Links: einen geheimen zum Bearbeiten, einen zum Weitergeben.</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-no" aria-hidden="true">2</span>
+        <div>
+          <h3 data-i18n="steps.two">Sachen eintragen</h3>
+          <p data-i18n="steps.twoText">Tippen oder einsprechen. Erst nur der Name, alles Weitere hinter dem Eintrag.</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-no" aria-hidden="true">3</span>
+        <div>
+          <h3 data-i18n="steps.three">Link weitergeben</h3>
+          <p data-i18n="steps.threeText">Freunde sehen, was frei ist, und fragen mit einem Tipper an.</p>
+        </div>
+      </li>
+    </ol>
 
   </section>
 
@@ -244,220 +225,248 @@
   <!-- ==================================================================== -->
   <section id="viewList" class="view" hidden>
 
+    <!-- Der Zugang. Erscheint einmal, direkt nach dem Anlegen, und bleibt
+         stehen, bis er ausdrücklich bestätigt wurde. Wer ihn verliert,
+         verliert die Liste; deshalb ist er hier kein Beiwerk. -->
+    <section class="card" id="keyBox" hidden>
+      <h2 class="card__title" data-i18n="key.headline">Deine Liste ist angelegt</h2>
+      <p class="hint" data-i18n="key.body">
+        Dieser Link ist dein einziger Zugang. Er steht nirgends sonst — auch wir kennen ihn nicht.
+      </p>
+      <div class="spaced-lg linkrow">
+        <label class="sr-only" for="keyLink" data-i18n="key.label">Bearbeiten-Link</label>
+        <input type="text" id="keyLink" class="input mono" readonly>
+        <button type="button" class="btn btn--primary" data-copy="keyLink" data-i18n="share.copy">Kopieren</button>
+      </div>
+      <p class="hint" id="keyRemember" data-i18n="key.remember">
+        Auf diesem Gerät gemerkt — beim nächsten Besuch findest du die Liste auf der Startseite wieder.
+      </p>
+      <p class="spaced-lg actions">
+        <button type="button" id="btnKeyDone" class="btn" data-i18n="key.done">Ich habe den Link gesichert</button>
+      </p>
+    </section>
+
     <!-- 1 · Titel der Liste -->
     <div class="titleblock">
       <h1 id="listTitleRead" hidden></h1>
       <label class="title-edit" hidden id="listTitleEditWrap">
-        <span class="nz-sr-only" data-i18n="list.titleLabel">Titel der Liste</span>
-        <input type="text" id="listTitleInput" class="nz-input title-input" maxlength="80"
+        <span class="sr-only" data-i18n="list.titleLabel">Titel der Liste</span>
+        <input type="text" id="listTitleInput" class="input title-input" maxlength="80"
                data-i18n-placeholder="list.titlePlaceholder" placeholder="Titel der Liste">
       </label>
       <p class="titlemeta">
-        <span id="listMeta" class="nz-small nz-muted"></span>
-        <span id="saveState" class="nz-label" role="status" aria-live="polite"></span>
+        <span id="listMeta"></span>
+        <span id="saveState" class="chip chip--ok" role="status" aria-live="polite" hidden></span>
       </p>
     </div>
 
     <!-- 2 · Inventar, mit dem Hinzufügen darin -->
-    <section class="nz-card nz-card--raised" id="inventoryBox">
+    <section class="card" id="inventoryBox">
       <div class="items-head">
-        <h2 class="nz-card__title" data-i18n="items.headline">Inventar</h2>
-        <span id="itemsCount" class="nz-badge"></span>
-        <button type="button" id="btnRefresh" class="nz-btn nz-btn--sm" hidden>
+        <h2 class="card__title" data-i18n="items.headline">Inventar</h2>
+        <span id="checkedAt" class="checked"></span>
+        <button type="button" id="btnRefresh" class="btn btn--ghost btn--icon" hidden>
           <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-refresh"/></svg>
-          <span data-i18n="items.refresh">Aktualisieren</span>
+          <span class="sr-only" data-i18n="items.refresh">Aktualisieren</span>
         </button>
       </div>
 
-      <!-- Hinzufügen steht in der Liste, nicht daneben. Nur der Name, alles
-           Weitere steht im Fenster hinter dem Eintrag. -->
+      <!-- Hinzufügen steht in der Liste, nicht daneben. Am Telefon bleibt die
+           Zeile beim Blättern oben stehen; eine schwebende Schaltfläche
+           erübrigt sich damit. -->
       <form class="addbox" id="addForm" hidden autocomplete="off">
         <div class="addrow">
-          <label class="nz-sr-only" for="addName" data-i18n="add.nameLabel">Gegenstand</label>
-          <input type="text" id="addName" class="nz-input" list="itemSuggestions" required maxlength="80"
-                 data-i18n-placeholder="add.namePlaceholder" placeholder="zum Beispiel Bohrmaschine">
-          <!-- Das Mikrofon steht neben der Schaltfläche und erscheint nur,
-               wenn der Browser Spracherkennung mitbringt. -->
-          <button type="button" id="btnMic" class="nz-btn nz-btn--icon" aria-pressed="false" hidden>
+          <label class="sr-only" for="addName" data-i18n="add.nameLabel">Gegenstand</label>
+          <input type="text" id="addName" class="input" list="itemSuggestions" required maxlength="80"
+                 data-i18n-placeholder="add.namePlaceholder" placeholder="Was verleihst du?">
+          <button type="button" id="btnMic" class="btn btn--icon" aria-pressed="false" hidden>
             <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-voice"/></svg>
-            <span class="nz-sr-only micbtn-label" data-i18n="voice.start">Einsprechen</span>
+            <span class="sr-only micbtn-label" data-i18n="voice.start">Einsprechen</span>
           </button>
-          <button type="submit" class="nz-btn nz-btn--primary">
+          <button type="submit" class="btn btn--primary">
             <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-plus"/></svg>
             <span data-i18n="add.submit">Hinzufügen</span>
           </button>
         </div>
         <p class="addhint">
           <button type="button" id="btnBulk" class="linkbtn" data-i18n="voice.bulk">Mehrere auf einmal</button>
-          <span id="voiceState" class="nz-label voicestate" role="status" aria-live="polite"></span>
+          <span id="voiceState" class="voicestate" role="status" aria-live="polite"></span>
         </p>
-        <!-- Native Autovervollständigung, kein eigenes Dropdown-Widget. -->
         <datalist id="itemSuggestions"></datalist>
 
-        <!-- Spracheingabe -->
         <div class="voicebox" id="voiceBox" hidden>
-          <label class="nz-sr-only" for="voiceText" data-i18n="voice.textLabel">Erkannter Text</label>
-          <textarea id="voiceText" class="nz-textarea voice-text" rows="2" maxlength="1500"
+          <label class="sr-only" for="voiceText" data-i18n="voice.textLabel">Erkannter Text</label>
+          <textarea id="voiceText" class="textarea voice-text" rows="2" maxlength="1500"
                     data-i18n-placeholder="voice.placeholder"
-                    placeholder="Mehrere Gegenstände am Stück sprechen oder eintippen"></textarea>
+                    placeholder="Mehrere Sachen am Stück sprechen oder eintippen"></textarea>
           <div class="voicerow">
-            <button type="button" id="btnVoiceApply" class="nz-btn nz-btn--sm" data-i18n="voice.apply">Übernehmen</button>
-            <small class="nz-field__hint" id="voiceHint"></small>
+            <button type="button" id="btnVoiceApply" class="btn btn--sm" data-i18n="voice.apply">Übernehmen</button>
+            <small class="hint" id="voiceHint"></small>
           </div>
         </div>
       </form>
 
       <ul id="itemList" class="items"></ul>
-      <div id="itemsEmpty" class="nz-empty" hidden>
-        <p class="nz-empty__body" id="itemsEmptyText"></p>
+      <div id="itemsEmpty" class="empty" hidden>
+        <p id="itemsEmptyText"></p>
       </div>
     </section>
 
-    <!-- 3 · Link teilen, nur im Bearbeitenmodus -->
-    <section class="nz-card nz-card--raised" id="shareBox" hidden>
-      <h2 class="nz-card__title" data-i18n="share.headline">Link teilen</h2>
+    <!-- 3 · Link weitergeben, nur im Bearbeitenmodus -->
+    <section class="card" id="shareBox" hidden>
+      <h2 class="card__title" data-i18n="share.headline">Link weitergeben</h2>
 
-      <div class="nz-tabs" role="tablist">
-        <button type="button" class="nz-tab" role="tab" id="tabBtnView"
+      <div class="spaced-lg tabs" role="tablist">
+        <button type="button" class="tab" role="tab" id="tabBtnView"
                 aria-selected="true" aria-controls="tabView" data-tab="View"
                 data-i18n="share.tabView">Ansehen</button>
-        <button type="button" class="nz-tab" role="tab" id="tabBtnEdit"
+        <button type="button" class="tab" role="tab" id="tabBtnEdit"
                 aria-selected="false" aria-controls="tabEdit" data-tab="Edit"
                 data-i18n="share.tabEdit">Bearbeiten</button>
       </div>
 
       <div class="tabpanel" id="tabView" role="tabpanel" aria-labelledby="tabBtnView">
-        <p class="nz-field__hint" data-i18n="share.viewHint">
-          Diesen Link geben deine Freunde weiter. Er zeigt die Liste, ändern lässt sich damit nichts.
+        <p class="hint" data-i18n="share.viewHint">
+          Diesen Link sehen deine Freunde. Ändern lässt sich damit nichts.
         </p>
-        <div class="linkrow">
-          <label class="nz-sr-only" for="linkView" data-i18n="share.viewLabel">Ansehen-Link für Freunde</label>
-          <input type="text" id="linkView" class="nz-input mono" readonly>
-          <button type="button" class="nz-btn nz-btn--sm nz-btn--primary" id="btnShareView" hidden>
+        <div class="spaced linkrow">
+          <label class="sr-only" for="linkView" data-i18n="share.viewLabel">Ansehen-Link für Freunde</label>
+          <input type="text" id="linkView" class="input mono" readonly>
+          <button type="button" class="btn btn--primary" id="btnShareView" hidden>
             <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-share"/></svg>
             <span data-i18n="share.send">Teilen</span>
           </button>
-          <button type="button" class="nz-btn nz-btn--sm" data-copy="linkView" data-i18n="share.copy">Kopieren</button>
+          <button type="button" class="btn" data-copy="linkView" data-i18n="share.copy">Kopieren</button>
         </div>
       </div>
 
       <div class="tabpanel" id="tabEdit" role="tabpanel" aria-labelledby="tabBtnEdit" hidden>
-        <p class="nz-field__hint" data-i18n="share.editHint">
+        <p class="hint" data-i18n="share.editHint">
           Dieser Link ist dein Zugang. Gib ihn niemandem und speichere ihn als Lesezeichen.
         </p>
-        <div class="linkrow">
-          <label class="nz-sr-only" for="linkEdit" data-i18n="share.editLabel">Bearbeiten-Link, geheim</label>
-          <input type="password" id="linkEdit" class="nz-input mono" readonly>
-          <button type="button" class="nz-btn nz-btn--sm" id="btnRevealEdit" data-i18n="share.reveal">Zeigen</button>
-          <button type="button" class="nz-btn nz-btn--sm" data-copy="linkEdit" data-i18n="share.copy">Kopieren</button>
+        <div class="spaced linkrow">
+          <label class="sr-only" for="linkEdit" data-i18n="share.editLabel">Bearbeiten-Link, geheim</label>
+          <input type="password" id="linkEdit" class="input mono" readonly>
+          <button type="button" class="btn" id="btnRevealEdit" data-i18n="share.reveal">Zeigen</button>
+          <button type="button" class="btn" data-copy="linkEdit" data-i18n="share.copy">Kopieren</button>
         </div>
       </div>
 
-      <p class="nz-field__hint" data-i18n="share.hint">
+      <p class="spaced-lg hint" data-i18n="share.hint">
         Der Schlüssel steht hinter dem Rautezeichen und wird technisch nie an den Server übertragen.
       </p>
     </section>
 
-    <!-- 4 · Kontakt, nur im Bearbeitenmodus -->
-    <section class="nz-card nz-card--raised" id="contactBox" hidden>
-      <h2 class="nz-card__title" data-i18n="contact.headline">Kontakt</h2>
-      <p class="nz-field__hint" data-i18n="contact.hint">
-        Diese Angaben werden mitverschlüsselt und nur für die Anfrage-Schaltflächen deiner Freunde genutzt.
-      </p>
-      <div class="nz-field">
-        <label class="nz-field__label" for="cfgName" data-i18n="contact.name">Dein Name</label>
-        <input type="text" id="cfgName" class="nz-input" maxlength="60" autocomplete="name"
-               data-i18n-placeholder="contact.namePlaceholder" placeholder="zum Beispiel Damian">
-        <small class="nz-field__hint" data-i18n="contact.nameHint">
-          Steht über der Liste und in der Anrede, wenn jemand anfragt.
-        </small>
+    <!-- 4 · Kontakt, zugeklappt: erst nötig, wenn jemand anfragen soll -->
+    <details class="fold" id="contactBox" hidden>
+      <summary>
+        <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-user"/></svg>
+        <span data-i18n="contact.headline">Kontakt</span>
+        <span class="fold-sub" data-i18n="contact.sub">Name und E-Mail für Anfragen</span>
+      </summary>
+      <div class="fold__body">
+        <p class="hint" data-i18n="contact.hint">
+          Diese Angaben werden mitverschlüsselt und nur für die Anfrage-Schaltflächen deiner Freunde genutzt.
+        </p>
+        <div class="spaced-lg field">
+          <label class="field__label" for="cfgName" data-i18n="contact.name">Dein Name</label>
+          <input type="text" id="cfgName" class="input" maxlength="60" autocomplete="name"
+                 data-i18n-placeholder="contact.namePlaceholder" placeholder="zum Beispiel Damian">
+          <small class="hint" data-i18n="contact.nameHint">
+            Steht über der Liste und in der Anrede, wenn jemand anfragt.
+          </small>
+        </div>
+        <div class="field">
+          <label class="field__label" for="cfgEmail" data-i18n="settings.email">E-Mail für Anfragen</label>
+          <input type="email" id="cfgEmail" class="input" maxlength="120" placeholder="name@example.org">
+        </div>
+        <div class="field">
+          <label class="check">
+            <input type="checkbox" id="cfgShowBorrower">
+            <span class="check__box" aria-hidden="true"></span>
+            <span data-i18n="settings.showBorrower">Namen der Ausleihenden auch im Ansehen-Link zeigen</span>
+          </label>
+        </div>
       </div>
-      <div class="nz-field">
-        <label class="nz-field__label" for="cfgEmail" data-i18n="settings.email">E-Mail für Anfragen</label>
-        <input type="email" id="cfgEmail" class="nz-input" maxlength="120" placeholder="name@example.org">
-      </div>
-      <div class="nz-field">
-        <label class="nz-check">
-          <input type="checkbox" id="cfgShowBorrower">
-          <span class="nz-check__box" aria-hidden="true"></span>
-          <span data-i18n="settings.showBorrower">Namen der Ausleihenden auch im Ansehen-Link zeigen</span>
-        </label>
-      </div>
-    </section>
+    </details>
 
     <!-- 5 · Einstellungen, zugeklappt, nur im Bearbeitenmodus -->
-    <details class="nz-card settings" id="settingsBox" hidden>
+    <details class="fold settings" id="settingsBox" hidden>
       <summary>
         <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gear"/></svg>
         <span data-i18n="settings.headline">Einstellungen</span>
+        <span class="fold-sub" data-i18n="settings.sub">Erscheinungsbild, Schlüssel, Liste löschen</span>
       </summary>
+      <div class="fold__body">
 
-      <h3 class="settings-sub" data-i18n="settings.themeHeadline">Erscheinungsbild</h3>
-      <p class="nz-field__hint" data-i18n="settings.themeHint">
-        Gilt für diesen Browser, nicht für die Liste.
-      </p>
-      <div class="nz-field themechoice">
-        <label class="nz-check nz-check--radio">
-          <input type="radio" name="cfgTheme" value="system" checked>
-          <span class="nz-check__box" aria-hidden="true"></span>
-          <span data-i18n="settings.themeSystem">Wie das System</span>
-        </label>
-        <label class="nz-check nz-check--radio">
-          <input type="radio" name="cfgTheme" value="light">
-          <span class="nz-check__box" aria-hidden="true"></span>
-          <span data-i18n="settings.themeLight">Hell</span>
-        </label>
-        <label class="nz-check nz-check--radio">
-          <input type="radio" name="cfgTheme" value="dark">
-          <span class="nz-check__box" aria-hidden="true"></span>
-          <span data-i18n="settings.themeDark">Dunkel</span>
-        </label>
-      </div>
+        <h3 data-i18n="settings.themeHeadline">Erscheinungsbild</h3>
+        <p class="hint" data-i18n="settings.themeHint">
+          Gilt für diesen Browser, nicht für die Liste.
+        </p>
+        <div class="spaced field themechoice">
+          <label class="check check--radio">
+            <input type="radio" name="cfgTheme" value="system" checked>
+            <span class="check__box" aria-hidden="true"></span>
+            <span data-i18n="settings.themeSystem">Wie das System</span>
+          </label>
+          <label class="check check--radio">
+            <input type="radio" name="cfgTheme" value="light">
+            <span class="check__box" aria-hidden="true"></span>
+            <span data-i18n="settings.themeLight">Hell</span>
+          </label>
+          <label class="check check--radio">
+            <input type="radio" name="cfgTheme" value="dark">
+            <span class="check__box" aria-hidden="true"></span>
+            <span data-i18n="settings.themeDark">Dunkel</span>
+          </label>
+        </div>
 
-      <hr>
+        <hr>
 
-      <h3 class="settings-sub" data-i18n="settings.cacheHeadline">Zwischenspeicher</h3>
-      <p class="nz-field__hint" data-i18n="settings.cacheHint">
-        Entfernt alles, was diese Anwendung in diesem Browser ablegt: Sprache,
-        Erscheinungsbild, KI-Schlüssel und im Vorschaumodus die lokal gehaltenen Listen.
-        Deine Liste auf dem Server und deine Links bleiben unberührt.
-      </p>
-      <div class="nz-field">
-        <button type="button" id="btnClearCache" class="nz-btn">
-          <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-refresh"/></svg>
-          <span data-i18n="settings.cacheClear">Zwischenspeicher löschen</span>
-        </button>
-      </div>
+        <h3 data-i18n="settings.cacheHeadline">Zwischenspeicher</h3>
+        <p class="hint" data-i18n="settings.cacheHint">
+          Entfernt alles, was diese Anwendung in diesem Browser ablegt: Sprache,
+          Erscheinungsbild, KI-Schlüssel, die gemerkten Listen und im Vorschaumodus
+          die lokal gehaltenen Listen. Deine Liste auf dem Server und deine Links
+          bleiben unberührt.
+        </p>
+        <div class="spaced field">
+          <button type="button" id="btnClearCache" class="btn">
+            <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-refresh"/></svg>
+            <span data-i18n="settings.cacheClear">Zwischenspeicher löschen</span>
+          </button>
+        </div>
 
-      <hr>
+        <hr>
 
-      <h3 class="settings-sub" data-i18n="settings.aiHeadline">Sprache und KI-Strukturierung</h3>
-      <p class="nz-field__hint" data-i18n="settings.aiHint">
-        Ohne Schlüssel zerlegt der Browser den gesprochenen Text selbst. Mit einem eigenen
-        Gemini-Schlüssel übernimmt das die KI, dann verlässt der gesprochene Text dein Gerät.
-      </p>
-      <div class="nz-field">
-        <label class="nz-field__label" for="cfgAiKey" data-i18n="settings.aiKey">Gemini-API-Schlüssel, optional</label>
-        <input type="password" id="cfgAiKey" class="nz-input mono" autocomplete="off" spellcheck="false"
-               maxlength="200" placeholder="AIza">
-        <small class="nz-field__hint" data-i18n="settings.aiKeyHint">
-          Bleibt ausschließlich in diesem Browser. Er wird weder auf den Server übertragen
-          noch in die Liste aufgenommen und gilt daher nicht für deine Freunde.
-        </small>
-      </div>
-      <p id="aiProxyNote" class="nz-field__hint" hidden data-i18n="settings.aiProxy"></p>
+        <h3 data-i18n="settings.aiHeadline">Sprache und KI-Strukturierung</h3>
+        <p class="hint" data-i18n="settings.aiHint">
+          Ohne Schlüssel zerlegt der Browser den gesprochenen Text selbst. Mit einem eigenen
+          Gemini-Schlüssel übernimmt das die KI, dann verlässt der gesprochene Text dein Gerät.
+        </p>
+        <div class="spaced field">
+          <label class="field__label" for="cfgAiKey" data-i18n="settings.aiKey">Gemini-API-Schlüssel, optional</label>
+          <input type="password" id="cfgAiKey" class="input mono" autocomplete="off" spellcheck="false"
+                 maxlength="200" placeholder="AIza">
+          <small class="hint" data-i18n="settings.aiKeyHint">
+            Bleibt ausschließlich in diesem Browser. Er wird weder auf den Server übertragen
+            noch in die Liste aufgenommen und gilt daher nicht für deine Freunde.
+          </small>
+        </div>
+        <p id="aiProxyNote" class="hint" hidden data-i18n="settings.aiProxy"></p>
 
-      <hr>
+        <hr>
 
-      <h3 class="settings-sub" data-i18n="settings.dangerHeadline">Liste löschen</h3>
-      <p class="nz-field__hint" data-i18n="settings.dangerHint">
-        Die Liste wird unwiderruflich vom Server entfernt. Beide Links laufen danach ins Leere.
-      </p>
-      <div class="nz-field">
-        <button type="button" id="btnDeleteList" class="nz-btn nz-btn--danger">
-          <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-trash"/></svg>
-          <span data-i18n="settings.delete">Liste endgültig löschen</span>
-        </button>
+        <h3 data-i18n="settings.dangerHeadline">Liste löschen</h3>
+        <p class="hint" data-i18n="settings.dangerHint">
+          Die Liste wird unwiderruflich vom Server entfernt. Beide Links laufen danach ins Leere.
+        </p>
+        <div class="spaced field">
+          <button type="button" id="btnDeleteList" class="btn btn--danger">
+            <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-trash"/></svg>
+            <span data-i18n="settings.delete">Liste endgültig löschen</span>
+          </button>
+        </div>
       </div>
     </details>
 
@@ -469,10 +478,10 @@
   <section id="viewError" class="view" hidden>
     <div class="titleblock">
       <h1 data-i18n="error.headline">Das hat nicht geklappt</h1>
-      <p class="nz-lead" id="errorText"></p>
+      <p class="lead" id="errorText"></p>
     </div>
     <p class="actions">
-      <a class="nz-btn" href="./" data-i18n="error.back">Zur Startseite</a>
+      <a class="btn" href="./" data-i18n="error.back">Zur Startseite</a>
     </p>
   </section>
 
@@ -486,37 +495,35 @@
       <a href="ueber.html" data-i18n="footer.about">Über</a>
       <a href="https://nozilla.de" rel="noopener">nozilla<span class="footer-claim">Gute digitale Dienste.</span></a>
     </nav>
-    <p class="nz-small nz-muted">
+    <p class="txt-sm muted">
       <span data-i18n="footer.text">Freie Software, MIT-Lizenz, Ende-zu-Ende-verschlüsselt.</span>
       <a href="https://github.com/daimpad/leih-ich-dir" rel="noopener">GitHub</a>
     </p>
   </div>
 </footer>
 
-<!-- Schwebende Schaltflaeche zum Hinzufuegen. Nach Regel 15 gehoert sie unten
-     rechts; sie fuehrt zum Eingabefeld im Inventar und setzt den Fokus dorthin. -->
-<button type="button" id="fabAdd" class="fab" hidden>
-  <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-plus"/></svg>
-  <span class="nz-sr-only" data-i18n="add.submit">Hinzufügen</span>
-</button>
-
 <!-- Fenster zu einem Gegenstand. Inhalt und Fussleiste baut app.js, je nachdem
      ob bearbeitet oder nur gelesen wird. -->
-<dialog class="nz-modal" id="itemModal" aria-labelledby="modalTitle">
-  <div class="nz-modal__head">
-    <h2 class="nz-modal__title" id="modalTitle"></h2>
-    <button type="button" class="nz-modal__x" id="modalClose">
+<!-- Der Name steht im Kopf und ist dort zugleich das Eingabefeld; die
+     Beschriftung des Fensters setzt app.js deshalb von Hand. -->
+<dialog class="modal" id="itemModal">
+  <div class="modal__head">
+    <h2 class="modal__title" id="modalTitle"></h2>
+    <button type="button" class="modal__x" id="modalClose">
       <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-close"/></svg>
-      <span class="nz-sr-only" data-i18n="modal.close">Schließen</span>
+      <span class="sr-only" data-i18n="modal.close">Schließen</span>
     </button>
   </div>
-  <div class="nz-modal__body" id="modalBody"></div>
-  <div class="nz-modal__foot" id="modalFoot"></div>
+  <div class="modal__body" id="modalBody"></div>
+  <div class="modal__foot" id="modalFoot"></div>
 </dialog>
 
-<div class="nz-toast-region" id="toastRegion" aria-live="polite">
-  <div class="nz-toast nz-toast--signal" id="toast" hidden>
-    <div class="nz-toast__body" id="toastText"></div>
+<!-- Meldung mit Platz fuer eine Gegenhandlung: geloeschte Eintraege lassen
+     sich hier zurueckholen, statt vorher abgefragt zu werden. -->
+<div class="toast-region" id="toastRegion" aria-live="polite">
+  <div class="toast" id="toast" hidden>
+    <div class="toast__body" id="toastText"></div>
+    <button type="button" class="toast__act" id="toastAct" hidden></button>
   </div>
 </div>
 
