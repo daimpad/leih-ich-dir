@@ -116,13 +116,31 @@
     <p id="aiProxyNote" class="hint" hidden data-i18n="settings.aiProxy"></p>
   </section>
 
+  <!-- Die Toene. Standardmaessig aus: Ein Ton, der unaufgefordert spielt,
+       kann in der Bahn oder nachts peinlich werden. Beim Einschalten
+       erklingt gleich einer, damit die Wahl nicht blind getroffen wird. -->
+  <section class="card">
+    <h2 class="card__title" data-i18n="settings.soundHeadline">Töne</h2>
+    <div class="spaced field">
+      <label class="check">
+        <input type="checkbox" id="cfgSound">
+        <span class="check__box" aria-hidden="true"></span>
+        <span data-i18n="settings.soundLabel">Kleine Töne beim Verleihen und Zurückbekommen</span>
+      </label>
+      <small class="hint" data-i18n="settings.soundHint">
+        Standardmäßig aus. Vier kurze Töne, sonst nichts. Beim Einschalten hörst Du
+        gleich einen davon. Der Schalter gilt nur für diesen Browser.
+      </small>
+    </div>
+  </section>
+
   <section class="card">
     <h2 class="card__title" data-i18n="settings.cacheHeadline">Zwischenspeicher</h2>
     <p class="hint" data-i18n="settings.cacheHint">
       Entfernt alles, was diese Anwendung in diesem Browser ablegt: Sprache,
-      Erscheinungsbild, KI-Schlüssel, die gemerkten Listen und im Vorschaumodus
-      die lokal gehaltenen Listen. Deine Liste auf dem Server und Deine Links
-      bleiben unberührt.
+      Erscheinungsbild, KI-Schlüssel, Töne, die gemerkten Listen, Deine Runden
+      und Abzeichen und im Vorschaumodus die lokal gehaltenen Listen. Deine
+      Liste auf dem Server und Deine Links bleiben unberührt.
     </p>
     <div class="spaced field">
       <button type="button" id="btnClearCache" class="btn">

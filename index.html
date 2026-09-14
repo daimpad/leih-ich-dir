@@ -143,6 +143,61 @@
     <path d="M18 46 L44 20"/>
     <path d="M26 18 L46 18 L46 38"/>
   </symbol>
+
+  <!-- Die acht Gesichter. Gleiche Bauart wie alle anderen Zeichen des Hauses:
+       Kreis als Kopf, gefuellte Rechtecke als Augen, eckige Linienzuege als
+       Mund. Keine Rundungen, keine zweite Farbe — die Farbe kommt von der
+       Marke, in der sie sitzen. -->
+  <symbol id="i-face-frei" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <circle cx="32" cy="32" r="24"/>
+    <rect x="21" y="24" width="6" height="6" fill="currentColor" stroke="none"/>
+    <rect x="37" y="24" width="6" height="6" fill="currentColor" stroke="none"/>
+    <path d="M21 38 L26 43 L38 43 L43 38"/>
+  </symbol>
+  <symbol id="i-face-weg" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <circle cx="32" cy="32" r="24"/>
+    <rect x="28" y="22" width="6" height="6" fill="currentColor" stroke="none"/>
+    <rect x="40" y="22" width="6" height="6" fill="currentColor" stroke="none"/>
+    <rect x="27" y="38" width="8" height="8" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="i-face-lang" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <circle cx="32" cy="32" r="24"/>
+    <path d="M18 27 L28 27"/>
+    <path d="M36 27 L46 27"/>
+    <path d="M22 42 L42 42"/>
+  </symbol>
+  <symbol id="i-face-jubel" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <circle cx="32" cy="32" r="24"/>
+    <path d="M18 27 L24 21 L30 27"/>
+    <path d="M34 27 L40 21 L46 27"/>
+    <path d="M18 37 L46 37 L40 49 L24 49 Z" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="i-face-heim" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <circle cx="32" cy="32" r="24"/>
+    <path d="M17 26 L23 19 L29 26"/>
+    <path d="M35 26 L41 19 L47 26"/>
+    <path d="M18 36 L24 46 L40 46 L46 36"/>
+    <rect x="11" y="34" width="6" height="6" fill="currentColor" stroke="none"/>
+    <rect x="47" y="34" width="6" height="6" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="i-face-zwink" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <circle cx="32" cy="32" r="24"/>
+    <rect x="21" y="24" width="6" height="6" fill="currentColor" stroke="none"/>
+    <path d="M36 26 L46 26"/>
+    <path d="M21 39 L28 45 L42 41"/>
+  </symbol>
+  <symbol id="i-face-schreck" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <circle cx="32" cy="32" r="24"/>
+    <rect x="20" y="22" width="8" height="8" fill="currentColor" stroke="none"/>
+    <rect x="36" y="22" width="8" height="8" fill="currentColor" stroke="none"/>
+    <rect x="27" y="36" width="10" height="12"/>
+  </symbol>
+  <symbol id="i-face-wart" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <circle cx="32" cy="32" r="24"/>
+    <rect x="21" y="24" width="6" height="6" fill="currentColor" stroke="none"/>
+    <rect x="37" y="24" width="6" height="6" fill="currentColor" stroke="none"/>
+    <path d="M22 42 L28 44 L41 39"/>
+  </symbol>
 </svg>
 
 <a class="skiplink" href="#main" data-i18n="a11y.skip">Zum Inhalt springen</a>
@@ -262,6 +317,7 @@
       <p class="titlemeta">
         <span id="listMeta"></span>
         <span id="saveState" class="chip chip--ok" role="status" aria-live="polite" hidden></span>
+        <button type="button" id="levelChip" class="chip chip--level" hidden></button>
       </p>
     </div>
 
@@ -330,8 +386,18 @@
       </form>
 
       <ul id="itemList" class="items"></ul>
+      <!-- Der leere Kasten ist die erste Begegnung mit einer Liste. Das
+           Gesicht wartet, die Vorschlaege nehmen die Arbeit ab, und
+           #itemsEmptyText bleibt als Knoten bestehen: renderItems()
+           beschreibt ihn bei jedem Zeichnen. -->
       <div id="itemsEmpty" class="empty" hidden>
+        <svg class="empty-face" aria-hidden="true" focusable="false"><use href="#i-face-wart"/></svg>
+        <h3 class="empty-head" data-i18n="items.emptyHead">Noch nichts drin</h3>
         <p id="itemsEmptyText"></p>
+        <p class="empty-eg" id="itemsEmptyEg" hidden>
+          <span class="empty-eg__label" data-i18n="items.emptyEg">Zum Beispiel</span>
+          <span class="empty-eg__list" id="itemsEmptyList"></span>
+        </p>
       </div>
     </section>
 
@@ -470,6 +536,13 @@
 
 <!-- Meldung mit Platz fuer eine Gegenhandlung: geloeschte Eintraege lassen
      sich hier zurueckholen, statt vorher abgefragt zu werden. -->
+<!-- Bild und Wort laufen getrennt: toast() haelt genau eine Meldung, und ein
+     zweiter sprechender Bereich waere einer zu viel. Die Klappe zeigt nur. -->
+<div class="klappe" id="klappe" hidden aria-hidden="true">
+  <svg class="klappe__face" focusable="false"><use href="#i-face-jubel" id="klappeUse"/></svg>
+  <span class="klappe__text" id="klappeText"></span>
+</div>
+
 <div class="toast-region" id="toastRegion" aria-live="polite">
   <div class="toast" id="toast" hidden>
     <div class="toast__body" id="toastText"></div>

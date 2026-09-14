@@ -229,8 +229,8 @@
       'items.refresh': 'Aktualisieren',
       'items.count': '{n} Gegenstände',
       'items.count_1': '1 Gegenstand',
-      'items.empty': 'Noch nichts eingetragen. Füge oben Deinen ersten Gegenstand hinzu.',
-      'items.emptyView': 'Diese Liste ist im Moment leer.',
+      'items.empty': 'Was liegt bei Dir herum und wird kaum benutzt?',
+      'items.emptyView': 'In dieser Liste steht im Moment nichts.',
       'items.checked': 'zuletzt geprüft vor {n} Min.',
       'items.checkedNow': 'gerade geprüft',
 
@@ -277,7 +277,7 @@
       'settings.themeLight': 'Hell',
       'settings.themeDark': 'Dunkel',
       'settings.cacheHeadline': 'Zwischenspeicher',
-      'settings.cacheHint': 'Entfernt alles, was diese Anwendung in diesem Browser ablegt: Sprache, Erscheinungsbild, KI-Schlüssel und im Vorschaumodus die lokal gehaltenen Listen. Deine Liste auf dem Server und Deine Links bleiben unberührt.',
+      'settings.cacheHint': 'Entfernt alles, was diese Anwendung in diesem Browser ablegt: Sprache, Erscheinungsbild, KI-Schlüssel, Töne, die gemerkten Listen, Deine Runden und Abzeichen und im Vorschaumodus die lokal gehaltenen Listen. Deine Liste auf dem Server und Deine Links bleiben unberührt.',
       'settings.cacheClear': 'Zwischenspeicher löschen',
       'settings.cacheConfirm': 'Alles löschen, was diese Anwendung in diesem Browser ablegt? Die Liste auf dem Server bleibt bestehen.',
       'settings.cacheDone': 'Zwischenspeicher geleert.',
@@ -335,6 +335,105 @@
       'error.toolarge': 'Die Liste ist zu groß für den Server.',
       'error.ratelimit': 'Zu viele neue Listen in kurzer Zeit. Bitte später erneut versuchen.',
       'error.exists': 'Diese Listen-Kennung ist bereits vergeben. Bitte erneut versuchen.',
+
+
+      /* -- Das Spielerische ------------------------------------------- */
+
+      'items.emptyHead': 'Noch nichts drin',
+      'items.emptyEg': 'Zum Beispiel',
+      'item.longOut': '{name} ist seit {n} Tagen unterwegs. Ein kurzer Anruf wäre kein Drama.',
+
+      'spiel.badge': 'Abzeichen · {name}',
+      'spiel.level': 'Stufe {n}: {name}!',
+      'spiel.levelText': '{n} Sachen sind gekommen und wieder gegangen.',
+
+      'key.klappe': 'Abzeichen · Schlüsselmeister',
+      'key.feier': 'Der Link liegt sicher. Trag ein, was Du verleihst.',
+
+      'add.k1': 'Der Erste',
+      'add.k2': 'Zwei. Das wird eine Liste',
+      'add.k3': 'Und noch einer',
+      'add.k25': 'Fünfundzwanzig',
+      'add.s1': '{name} ist jetzt aktenkundig.',
+      'add.s2': '{name} liegt bereit.',
+      'add.s3': '{name} gehört ab jetzt zum Angebot.',
+      'add.s4': '{name} ist eingezogen.',
+      'add.s5': 'Notiert: {name}.',
+      'add.s6': '{name} steht im Regal.',
+      'add.s25': 'Fünfundzwanzig Sachen. Dein Regal ächzt.',
+
+      'sonder.bohr': 'Eine Bohrmaschine. Das halbe Haus wird sich freuen.',
+      'sonder.waffel': 'Ein Waffeleisen. Ab jetzt bist Du sonntags gefragt.',
+      'sonder.zelt': 'Ein Zelt. Damit verleihst Du ein Wochenende.',
+      'sonder.leiter': 'Eine Leiter. Merk Dir gut, wer sie holt.',
+      'sonder.brett': 'Ein Brettspiel. Bitte mit allen Teilen zurück.',
+      'sonder.beamer': 'Ein Beamer. Damit verleihst Du Kinoabende.',
+      'sonder.rasen': 'Ein Rasenmäher. Der lauteste Gegenstand in Deiner Liste.',
+
+      'raus.k1': 'Abzeichen · Aus dem Haus',
+      'raus.k2': 'Unterwegs',
+      'raus.s1': '{name} ist unterwegs. Gute Reise.',
+      'raus.s2': '{name} macht Ausgang.',
+      'raus.s3': 'Weg ist {name}. Wiederkommen ist eingeplant.',
+      'raus.s4': '{name} arbeitet jetzt woanders.',
+
+      'heim.k': 'Wieder da!',
+      'heim.sWer': '{who} bringt {name} zurück. {n} Tage unterwegs.',
+      'heim.sHeute': '{who} bringt {name} zurück, noch am selben Tag.',
+      'heim.sTage': '{name} ist wieder da. {n} Tage unterwegs.',
+      'heim.sPlain': '{name} ist wieder da.',
+      'heim.sKurz': 'Wieder da. {name} hat es überstanden.',
+
+      'weiter.k2': 'Weitergesagt',
+      'weiter.s2': 'Link kopiert. Jetzt wissen andere, was bei Dir steht.',
+      'weiter.s3': 'Link kopiert. Jetzt kann jemand fragen.',
+      'share.copiedEdit': 'Gut verwahrt.',
+
+      'stufe.1': 'Erste Runde',
+      'stufe.2': 'Kurzer Draht',
+      'stufe.3': 'Dachboden mit Auftrag',
+      'stufe.4': 'Ehrenamt für alles',
+      'stufe.5': 'Kreisverleihamt',
+      'stufe.6': 'Wandelnde Leihstation',
+
+      'abz.schluessel': 'Schlüsselmeister',
+      'abz.schluessel.text': 'Der Link liegt sicher. Den Rest kannst Du Dir aussuchen.',
+      'abz.erster': 'Der Erste',
+      'abz.erster.text': 'Einer ist immer der erste. Beim zweiten geht es schneller.',
+      'abz.sortiment': 'Kleines Sortiment',
+      'abz.sortiment.text': 'Zehn Sachen. Da findet jeder etwas.',
+      'abz.aushaus': 'Aus dem Haus',
+      'abz.aushaus.text': 'Zum ersten Mal ist etwas unterwegs. Es kommt wieder, fast immer.',
+      'abz.heimkehr': 'Heimkehr',
+      'abz.heimkehr.text': 'Einmal raus, einmal zurück. Genau darum geht es hier.',
+      'abz.bumerang': 'Bumerang',
+      'abz.bumerang.text': 'Zehnmal raus, zehnmal zurück. Deine Sachen haben Heimweh.',
+      'abz.tagesflug': 'Tagesausflug',
+      'abz.tagesflug.text': 'Raus und rein am selben Tag. Das nennt man Vertrauen.',
+      'abz.langeratem': 'Langer Atem',
+      'abz.langeratem.text': 'Vier Wochen unterwegs, und es kam zurück. Frag nicht, wo es war.',
+      'abz.allesda': 'Alles wieder da',
+      'abz.allesda.text': 'Nichts unterwegs, alles wieder im Regal. Ein guter Stand.',
+      'abz.kleinfein': 'Klein und fein',
+      'abz.kleinfein.text': 'Drei Sachen, die wirklich rausgehen. Mehr braucht es nicht.',
+      'abz.tueroeffner': 'Türöffner',
+      'abz.tueroeffner.text': 'Der Link ist raus. Wer draufschaut, bleibt Dein Geheimnis, auch vor uns.',
+
+      'buch.title': 'Rundenbuch',
+      'buch.open': 'Rundenbuch öffnen, Stufe {name}',
+      'buch.none': 'Noch keine Runde',
+      'buch.dinge': 'eingetragen',
+      'buch.unterwegs': 'unterwegs',
+      'buch.runden': 'Runden',
+      'buch.weiter': 'weitergegeben',
+      'buch.rest': 'Es gibt noch {n} weitere Abzeichen. Die kommen von selbst.',
+      'buch.first': 'Noch keine Abzeichen. Das erste kommt mit dem ersten Gegenstand.',
+      'buch.local': 'Diese Zahlen stehen nur in diesem Browser. Sie gehen nie an den Server und nie in Deine Liste. Auf einem anderen Gerät fängst Du bei null an.',
+
+      'settings.soundHeadline': 'Töne',
+      'settings.soundLabel': 'Kleine Töne beim Verleihen und Zurückbekommen',
+      'settings.soundHint': 'Standardmäßig aus. Vier kurze Töne, sonst nichts. Beim Einschalten hörst Du gleich einen davon. Der Schalter gilt nur für diesen Browser.',
+      'settings.soundOn': 'Töne sind an.',
 
       'footer.imprint': 'Impressum',
       'footer.privacy': 'Datenschutz',
@@ -412,8 +511,8 @@
       'items.refresh': 'Refresh',
       'items.count': '{n} items',
       'items.count_1': '1 item',
-      'items.empty': 'Nothing here yet. Add your first item above.',
-      'items.emptyView': 'This list is empty at the moment.',
+      'items.empty': 'What is lying around at your place, barely ever used?',
+      'items.emptyView': 'There is nothing in this list at the moment.',
       'items.checked': 'checked {n} min ago',
       'items.checkedNow': 'just checked',
 
@@ -461,7 +560,7 @@
       'settings.themeDark': 'Dark',
       'settings.cacheHeadline': 'Local data',
       'settings.cacheClear': 'Clear local data',
-      'settings.cacheHint': 'Removes everything this application stores in this browser: language, appearance, AI key, and in preview mode the locally held lists. Your list on the server and your links stay untouched.',
+      'settings.cacheHint': 'Removes everything this application stores in this browser: language, appearance, AI key, sounds, the remembered lists, your rounds and badges, and in preview mode the locally held lists. Your list on the server and your links stay untouched.',
       'settings.cacheConfirm': 'Remove everything this application stores in this browser? The list on the server stays.',
       'settings.cacheDone': 'Local data cleared.',
       'settings.dangerHeadline': 'Delete list',
@@ -518,6 +617,105 @@
       'error.toolarge': 'The list is too large for the server.',
       'error.ratelimit': 'Too many new lists in a short time. Please try again later.',
       'error.exists': 'This list id is already taken. Please try again.',
+
+
+      /* -- The playful part ------------------------------------------- */
+
+      'items.emptyHead': 'Nothing here yet',
+      'items.emptyEg': 'For example',
+      'item.longOut': '{name} has been out for {n} days. A short call would not be a drama.',
+
+      'spiel.badge': 'Badge · {name}',
+      'spiel.level': 'Level {n}: {name}!',
+      'spiel.levelText': '{n} things went out and came back.',
+
+      'key.klappe': 'Badge · Keeper of the key',
+      'key.feier': 'The link is safe. Now add what you lend out.',
+
+      'add.k1': 'The first one',
+      'add.k2': 'Two. This is becoming a list',
+      'add.k3': 'And another',
+      'add.k25': 'Twenty-five',
+      'add.s1': '{name} is on the record now.',
+      'add.s2': '{name} is ready to go.',
+      'add.s3': '{name} is part of the offer from now on.',
+      'add.s4': '{name} has moved in.',
+      'add.s5': 'Noted: {name}.',
+      'add.s6': '{name} is on the shelf.',
+      'add.s25': 'Twenty-five things. Your shelf is creaking.',
+
+      'sonder.bohr': 'A drill. Half the neighbourhood will be pleased.',
+      'sonder.waffel': 'A waffle iron. Expect visitors on Sundays.',
+      'sonder.zelt': 'A tent. You are lending out a weekend.',
+      'sonder.leiter': 'A ladder. Remember well who picks it up.',
+      'sonder.brett': 'A board game. Please return it with all the pieces.',
+      'sonder.beamer': 'A projector. You are lending out film nights.',
+      'sonder.rasen': 'A lawn mower. The loudest item on your list.',
+
+      'raus.k1': 'Badge · Out of the house',
+      'raus.k2': 'On the road',
+      'raus.s1': '{name} is on its way. Safe travels.',
+      'raus.s2': '{name} is out for the day.',
+      'raus.s3': '{name} is gone. Coming back is part of the plan.',
+      'raus.s4': '{name} is working somewhere else now.',
+
+      'heim.k': 'Back again!',
+      'heim.sWer': '{who} brings {name} back. Out for {n} days.',
+      'heim.sHeute': '{who} brings {name} back, on the very same day.',
+      'heim.sTage': '{name} is back. Out for {n} days.',
+      'heim.sPlain': '{name} is back.',
+      'heim.sKurz': 'Back again. {name} survived it.',
+
+      'weiter.k2': 'Passed on',
+      'weiter.s2': 'Link copied. Now others know what you have.',
+      'weiter.s3': 'Link copied. Now someone can ask.',
+      'share.copiedEdit': 'Kept safe.',
+
+      'stufe.1': 'First round',
+      'stufe.2': 'On speed dial',
+      'stufe.3': 'Attic on duty',
+      'stufe.4': 'Volunteer for everything',
+      'stufe.5': 'District lending office',
+      'stufe.6': 'Walking lending library',
+
+      'abz.schluessel': 'Keeper of the key',
+      'abz.schluessel.text': 'The link is safe. The rest is up to you.',
+      'abz.erster': 'The first one',
+      'abz.erster.text': 'Someone has to be first. The second one is quicker.',
+      'abz.sortiment': 'A small range',
+      'abz.sortiment.text': 'Ten things. Everyone will find something.',
+      'abz.aushaus': 'Out of the house',
+      'abz.aushaus.text': 'Something is out for the first time. It comes back, almost always.',
+      'abz.heimkehr': 'Homecoming',
+      'abz.heimkehr.text': 'Out once, back once. That is what this is about.',
+      'abz.bumerang': 'Boomerang',
+      'abz.bumerang.text': 'Ten times out, ten times back. Your things are homesick.',
+      'abz.tagesflug': 'Day trip',
+      'abz.tagesflug.text': 'Out and back on the same day. That is called trust.',
+      'abz.langeratem': 'Long breath',
+      'abz.langeratem.text': 'Four weeks out, and it came back. Do not ask where it was.',
+      'abz.allesda': 'All back home',
+      'abz.allesda.text': 'Nothing out, everything on the shelf. A good state of affairs.',
+      'abz.kleinfein': 'Small and good',
+      'abz.kleinfein.text': 'Three things that really go out. No more needed.',
+      'abz.tueroeffner': 'Door opener',
+      'abz.tueroeffner.text': 'The link is out. Who looks at it stays your secret, even from us.',
+
+      'buch.title': 'Round book',
+      'buch.open': 'Open the round book, level {name}',
+      'buch.none': 'No round yet',
+      'buch.dinge': 'listed',
+      'buch.unterwegs': 'out',
+      'buch.runden': 'rounds',
+      'buch.weiter': 'passed on',
+      'buch.rest': 'There are {n} more badges. They come by themselves.',
+      'buch.first': 'No badges yet. The first comes with the first item.',
+      'buch.local': 'These numbers live in this browser only. They never reach the server and never enter your list. On another device you start at zero.',
+
+      'settings.soundHeadline': 'Sounds',
+      'settings.soundLabel': 'Small sounds when lending and getting things back',
+      'settings.soundHint': 'Off by default. Four short sounds, nothing else. Switching it on plays one right away. The switch applies to this browser only.',
+      'settings.soundOn': 'Sounds are on.',
 
       'footer.imprint': 'Imprint',
       'footer.privacy': 'Privacy',
@@ -935,10 +1133,17 @@
    * @param {string} msg
    * @param {{label: string, run: function}=} action
    */
-  function toast(msg, action) {
+  function toast(msg, action, gesicht) {
     var node = $('#toast');
     var act = $('#toastAct');
-    $('#toastText').textContent = msg;
+    var body = $('#toastText');
+    body.textContent = '';
+    if (gesicht) {
+      var ico = icon(gesicht);
+      ico.setAttribute('class', 'ico toast__face');
+      body.appendChild(ico);
+    }
+    body.appendChild(document.createTextNode(msg));
     clearTimeout(toastTimer);
 
     if (action) {
@@ -1067,8 +1272,42 @@
 
     $('#itemsEmpty').hidden = items.length > 0;
     $('#itemsEmptyText').textContent = t(state.mode === 'edit' ? 'items.empty' : 'items.emptyView');
+    renderEmptyHints(items.length === 0 && state.mode === 'edit');
     renderMeta();
     renderChecked();
+    updateLevelChip();
+  }
+
+  /**
+   * Drei anklickbare Vorschlaege im leeren Kasten. Sie tragen nichts ein,
+   * sondern schreiben das Wort ins Feld und setzen den Schreibzeiger dahinter
+   * — ein Fehlgriff richtet damit nichts an. Sie beschleunigen genau die
+   * Phase, die am laengsten dauert, und verschwinden danach fuer immer.
+   */
+  var EMPTY_EG = [0, 8, 23];   // Bohrmaschine, Bollerwagen, Waffeleisen
+
+  function renderEmptyHints(zeigen) {
+    var box = $('#itemsEmptyEg');
+    var liste = $('#itemsEmptyList');
+    if (!box || !liste) { return; }
+    box.hidden = !zeigen;
+    if (!zeigen) { return; }
+    liste.textContent = '';
+    EMPTY_EG.forEach(function (idx, i) {
+      var eintrag = CATALOG[idx];
+      if (!eintrag) { return; }
+      var wort = eintrag[lang] || eintrag.de;
+      if (i > 0) { liste.appendChild(document.createTextNode(' · ')); }
+      var b = el('button', null, wort);
+      b.type = 'button';
+      b.addEventListener('click', function () {
+        var feld = $('#addName');
+        feld.value = wort;
+        feld.focus();
+        try { feld.setSelectionRange(wort.length, wort.length); } catch (e) { /* egal */ }
+      });
+      liste.appendChild(b);
+    });
   }
 
   /**
@@ -1105,12 +1344,20 @@
 
   function statusLabel(item) { return t(item.status === 'lent' ? 'item.lent' : 'item.available'); }
 
-  /** Die runde Marke links in der Zeile. Sie traegt die einzige Aussage, die
-      sich auf einen Blick lesen lassen muss: frei oder nicht. */
+  /**
+   * Die runde Marke links in der Zeile. Sie traegt die einzige Aussage, die
+   * sich auf einen Blick lesen lassen muss: frei oder nicht. Die Farbe sagt
+   * es weiterhin, das Gesicht traegt den Ton — und ab dreissig Tagen wird aus
+   * dem Hinterherschauen ein geduldiges Warten. Das ist als einziges Stueck
+   * des Verspielten eine echte Auskunft: Es wird bei fuenfzig Gegenstaenden
+   * nicht lauter, sondern nuetzlicher.
+   */
   function statusBadge(item) {
     var lent = item.status === 'lent';
     var badge = el('span', 'item-badge');
-    badge.appendChild(icon(lent ? 'out' : 'check'));
+    var tage = lent ? tageSeit(item.since) : null;
+    badge.appendChild(icon(!lent ? 'face-frei'
+      : (tage !== null && tage >= LANG_AUS ? 'face-lang' : 'face-weg')));
     return badge;
   }
 
@@ -1369,8 +1616,13 @@
 
   function closeItemModal() {
     var dialog = $('#itemModal');
-    if (dialog.close) { dialog.close(); } else { dialog.removeAttribute('open'); }
+    var hatteClose = !!dialog.close;
+    if (hatteClose) { dialog.close(); } else { dialog.removeAttribute('open'); }
     modalItemId = null;
+    /* Ohne dialog.close() feuert kein close-Ereignis; dann holt dieser Weg
+       die aufgeschobene Feier nach. Zweimal schadet nicht, die Warteschlange
+       leert sich beim ersten Mal. */
+    if (!hatteClose) { feierNachholen(); }
   }
 
   /* ------------------------------------------------------------------ *
@@ -1525,16 +1777,18 @@
   function addItem(name, note) {
     name = (name || '').trim();
     if (!name) { return; }
-    state.doc.items.unshift({
+    var neu = {
       id: randomHex(6),
       name: name.slice(0, 120),
       note: (note || '').trim().slice(0, 200),
       status: 'available',
       borrower: '',
       since: ''
-    });
+    };
+    state.doc.items.unshift(neu);
     touch();
     render();
+    feierAdd(neu.id, neu.name);
   }
 
   function findItem(id) {
@@ -1544,19 +1798,48 @@
     return null;
   }
 
+  /**
+   * Der Zustandswechsel, und damit die halbe und die ganze Runde.
+   *
+   * Gezaehlt wird die Runde beim Zurueckkommen, nie beim Hinausgehen. Wer
+   * binnen einer halben Minute wieder zurueckschaltet, hat sich verklickt:
+   * Dann wird nichts gezaehlt, nichts gefeiert und die halbe Runde
+   * zurueckgenommen.
+   */
   function toggleItem(id) {
     var item = findItem(id);
     if (!item) { return; }
+    var g = spielRead();
+    var name = item.name;
+
     if (item.status === 'available') {
       item.status = 'lent';
-      item.since = new Date().toISOString().slice(0, 10);
-    } else {
-      item.status = 'available';
-      item.borrower = '';
-      item.since = '';
+      item.since = heuteIso();
+      rausTs[id] = Date.now();
+      touch();
+      render();
+      feierRaus(id, name);
+      return;
     }
+
+    /* Name und Dauer eine Zeile retten, bevor beides fort ist. Danach steht
+       nichts mehr davon im Dokument, und das ist richtig so. */
+    var wer = (item.borrower || '').trim();
+    var dauer = tageSeit(item.since);
+    var fehlklick = rausTs[id] && (Date.now() - rausTs[id]) < FEHLKLICK;
+    delete rausTs[id];
+
+    item.status = 'available';
+    item.borrower = '';
+    item.since = '';
     touch();
     render();
+
+    if (fehlklick) {
+      if (g.raus > 0) { g.raus -= 1; spielSave(); }
+      return;
+    }
+    feierHeim(id, name, wer, dauer);
   }
 
   /**
@@ -1578,6 +1861,11 @@
     touch();
     render();
 
+    /* Die neun Sekunden gehoeren dem Rueckweg und niemandem sonst: Solange
+       die Meldung steht, schweigt jede Feier. */
+    undoOffen = true;
+    setTimeout(function () { undoOffen = false; }, UNDO_MS + 200);
+
     toast(t('item.deleted', { name: removed.name }), {
       label: t('item.undo'),
       run: function () {
@@ -1587,8 +1875,645 @@
         state.doc.items.splice(at, 0, removed);
         touch();
         render();
+        undoOffen = false;
+        markRow(removed.id, 'lid-heim');
       }
+    }, 'face-schreck');
+  }
+
+
+  /* ===================================================================== *
+   * 9a · Das Spielerische
+   *
+   * Zwei Festlegungen tragen alles Weitere.
+   *
+   * Erstens wird nicht jede Handlung gefeiert, sondern jede Premiere:
+   * `laut(n)` uebersetzt einen Zaehler in vier Lautstaerkestufen, von
+   * Konfetti beim ersten Mal bis zur Marke, die beim fuenfzigsten nur noch
+   * kippt. Die Dramaturgie steht damit an einer Stelle und nicht verteilt
+   * ueber zwanzig Aufrufe.
+   *
+   * Zweitens wird nicht Besitz gezaehlt, sondern die vollendete Runde: Sie
+   * wird beim Zurueckbekommen gebucht, nie beim Verleihen. Wer drei Dinge
+   * hat, die staendig unterwegs sind, steht damit hoeher als jemand mit
+   * vierzig Dingen im Schrank.
+   *
+   * Alles liegt im localStorage dieses Browsers. Nichts davon erreicht den
+   * Server, das verschluesselte Dokument oder die Freunde — auf deren
+   * Geraeten wird ueberhaupt nichts gezaehlt.
+   * ===================================================================== */
+
+  var LS_SPIEL = 'lid.spiel';
+  var LS_TON   = 'lid.ton';
+
+  var LANG_AUS   = 30;     // ab so vielen Tagen traegt die Marke das geduldige Gesicht
+  var LANG_NOTIZ = 60;     // ab hier sagt die Anwendung einmal je Sitzung etwas
+  var FEHLKLICK  = 30000;  // hin und binnen dieser Frist zurueck: zaehlt nicht
+  var STUFEN     = [1, 3, 8, 16, 30, 55];
+  var JUBILAEEN  = [10, 25, 50, 100];
+
+  var spiel = null;        // zwischengehaltener Stand
+  var spielOk = true;      // ob der letzte Schreibversuch getragen hat
+  var rausTs = {};         // Gegenstand -> Zeitpunkt des Hinausgehens
+  var undoOffen = false;   // laeuft gerade eine Meldung mit Rueckweg?
+  var langGesagt = false;  // der Hinweis auf lange Ausgeliehenes, einmal je Sitzung
+
+  function heuteIso() { return new Date().toISOString().slice(0, 10); }
+
+  function spielLeer() {
+    return { v: 1, dinge: 0, raus: 0, heim: 0, weiter: 0, listen: 0, tage: 0, stufe: 0, rot: {}, abz: {} };
+  }
+
+  function spielRead() {
+    if (spiel) { return spiel; }
+    var raw = null;
+    try { raw = localStorage.getItem(LS_SPIEL); } catch (e) { spielOk = false; }
+    var got = null;
+    if (raw) { try { got = JSON.parse(raw); } catch (e) { got = null; } }
+    spiel = spielLeer();
+    if (got && typeof got === 'object') {
+      ['dinge', 'raus', 'heim', 'weiter', 'listen', 'tage', 'stufe'].forEach(function (k) {
+        if (typeof got[k] === 'number' && got[k] >= 0) { spiel[k] = got[k]; }
+      });
+      if (got.rot && typeof got.rot === 'object') { spiel.rot = got.rot; }
+      if (got.abz && typeof got.abz === 'object') { spiel.abz = got.abz; }
+    }
+    return spiel;
+  }
+
+  /**
+   * Schreibt den Stand zurueck. Im Vorschaumodus teilt sich das Gedaechtnis
+   * den Speicher mit den Listen selbst; der Platz kann also spaeter ausgehen,
+   * nicht nur beim Start. Deshalb wird bei jedem Schreiben neu geurteilt und
+   * das Ergebnis nicht ein fuer alle Mal gemerkt.
+   */
+  function spielSave() {
+    try {
+      localStorage.setItem(LS_SPIEL, JSON.stringify(spielRead()));
+      spielOk = true;
+    } catch (e) {
+      spielOk = false;
+    }
+    return spielOk;
+  }
+
+  /** Ohne tragfaehigen Speicher wird weiter reagiert, aber kein Gedaechtnis
+      versprochen: kein Chip, kein Rundenbuch, keine Stufen. */
+  function spielWorks() { return spielOk; }
+
+  /** Reihum durch einen Satzvorrat, damit sich keiner wiederholt, bevor alle
+      an der Reihe waren. */
+  function reihum(key, n) {
+    var g = spielRead();
+    var i = (g.rot[key] || 0) % n;
+    g.rot[key] = (i + 1) % n;
+    spielSave();
+    return i + 1;
+  }
+
+  /** Tage seit einem Datum. Null, wenn keines gesetzt ist; nie negativ, denn
+      das Feld laesst sich von Hand auch in die Zukunft setzen. */
+  function tageSeit(iso) {
+    if (!iso) { return null; }
+    var t0 = Date.parse(iso + 'T00:00:00');
+    if (isNaN(t0)) { return null; }
+    var d = Math.floor((Date.now() - t0) / 86400000);
+    return d < 0 ? 0 : d;
+  }
+
+  function ruhig() {
+    return typeof window.matchMedia === 'function' &&
+           window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  /* -- Der Lautstaerkeregler ---------------------------------------------- */
+
+  /**
+   * Vier Stufen aus einem Zaehler.
+   *   4 · Konfetti, Klappe, Meldung, Ton
+   *   3 · Klappe und Meldung
+   *   2 · Meldung mit Gesicht und die Bewegung an der Zeile
+   *   1 · nur die Bewegung, kein Wort
+   */
+  function laut(n) {
+    if (n <= 0) { return 0; }
+    if (n === 1) { return 4; }
+    if (JUBILAEEN.indexOf(n) !== -1) { return 4; }
+    if (n > 100 && n % 100 === 0) { return 4; }
+    if (n <= 3) { return 3; }
+    if (n <= 9) { return 2; }
+    return 1;
+  }
+
+  /* -- Die drei Kanaele --------------------------------------------------- */
+
+  var klappeTimer = null;
+
+  /** Der Bildkanal. Er zeigt und spricht nicht: toast() haelt genau eine
+      Meldung, und ein zweiter sprechender Bereich waere einer zu viel. */
+  function klappe(gesicht, text) {
+    var box = $('#klappe');
+    if (!box) { return; }
+    var use = $('#klappeUse');
+    if (use) { use.setAttribute('href', '#i-face-' + gesicht); }
+    $('#klappeText').textContent = text;
+    box.classList.toggle('klappe--jubel', gesicht === 'jubel' || gesicht === 'heim');
+    box.hidden = false;
+    /* Neustart der Einfahrt erzwingen, ohne eingebettete Stile zu setzen —
+       die verwirft die Richtlinie dieser Seite stillschweigend. */
+    box.classList.remove('is-an');
+    void box.offsetWidth;
+    box.classList.add('is-an');
+    clearTimeout(klappeTimer);
+    klappeTimer = setTimeout(function () {
+      box.hidden = true;
+      box.classList.remove('is-an');
+    }, 1600);
+  }
+
+  /**
+   * Achtzehn Schnipsel, als vorbereitete Regeln im Stilblatt. Der Grundzustand
+   * ist unsichtbar; wer Bewegung abbestellt hat, sieht deshalb nichts, ohne
+   * dass hier eine Abfrage noetig waere. Die Ebene wird nach der Feier wieder
+   * entfernt und liegt nicht dauerhaft ueber der Seite.
+   */
+  function konfetti() {
+    if (ruhig()) { return; }
+    var alt = document.getElementById('konfetti');
+    if (alt && alt.parentNode) { alt.parentNode.removeChild(alt); }
+    var box = el('div', 'konfetti');
+    box.id = 'konfetti';
+    box.setAttribute('aria-hidden', 'true');
+    for (var i = 0; i < 18; i++) { box.appendChild(document.createElement('i')); }
+    document.body.appendChild(box);
+    setTimeout(function () {
+      if (box.parentNode) { box.parentNode.removeChild(box); }
+    }, 1900);
+  }
+
+  /** Bewegung an einer einzelnen Zeile. Sie wird nach dem Zeichnen gesetzt,
+      denn renderItems() baut die Liste jedes Mal neu auf. */
+  function markRow(id, art) {
+    if (ruhig()) { return; }
+    var row = document.querySelector('.item[data-id="' + id + '"]');
+    if (!row) { return; }
+    row.classList.add(art);
+    setTimeout(function () { row.classList.remove(art); }, 700);
+  }
+
+  /* -- Die Toene ---------------------------------------------------------- */
+
+  var audioCtx = null;
+
+  var TOENE = {
+    plopp: [{ f: 660, bis: 880, ms: 90,  ab: 0 }],
+    weg:   [{ f: 392, ms: 120, ab: 0 }],
+    heim:  [{ f: 587, ms: 90,  ab: 0 }, { f: 880, ms: 90, ab: 110 }],
+    tada:  [{ f: 523, ms: 80,  ab: 0 }, { f: 659, ms: 80, ab: 80 }, { f: 784, ms: 110, ab: 160 }]
+  };
+
+  function tonAn() {
+    try { return localStorage.getItem(LS_TON) === '1'; } catch (e) { return false; }
+  }
+
+  /**
+   * Klang ohne eine einzige Datei. Der Richtlinie dieser Seite fehlt
+   * media-src, es greift default-src 'self', und data: ist allein fuer Bilder
+   * freigegeben — eine Tondatei waere also entweder neuer Ballast im
+   * Verzeichnis oder schlicht blockiert. Ein Oszillator an einem Verstaerker
+   * faellt gar nicht erst unter die Richtlinie.
+   *
+   * Die Huellkurve ist der ganze Unterschied zwischen weich und knackend:
+   * ohne den kurzen Anstieg klickt jeder Ton hoerbar, ohne den exponentiellen
+   * Abfall bricht er ab, statt zu verklingen.
+   */
+  function ton(name) {
+    if (!tonAn()) { return; }
+    var seq = TOENE[name];
+    if (!seq) { return; }
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) { return; }
+      if (!audioCtx) { audioCtx = new AC(); }
+      if (audioCtx.state === 'suspended' && audioCtx.resume) { audioCtx.resume(); }
+      var t0 = audioCtx.currentTime;
+      seq.forEach(function (s) {
+        var start = t0 + s.ab / 1000;
+        var dauer = s.ms / 1000;
+        var osc = audioCtx.createOscillator();
+        var amp = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(s.f, start);
+        if (s.bis) { osc.frequency.linearRampToValueAtTime(s.bis, start + dauer); }
+        amp.gain.setValueAtTime(0, start);
+        amp.gain.linearRampToValueAtTime(0.07, start + 0.008);
+        amp.gain.exponentialRampToValueAtTime(0.0001, start + dauer);
+        osc.connect(amp);
+        amp.connect(audioCtx.destination);
+        osc.start(start);
+        osc.stop(start + dauer + 0.02);
+      });
+    } catch (e) { /* kein Ton ist kein Fehler */ }
+  }
+
+  /* -- Die Feier ---------------------------------------------------------- */
+
+  var feierWartet = null;
+
+  /**
+   * Die einzige Tuer. Alles Laute geht hier hindurch, damit es genau eine
+   * Stelle gibt, an der die Sperren sitzen:
+   *
+   * - Nur im Bearbeiten-Modus. Auf dem Geraet eines Freundes wird nicht
+   *   gefeiert und nichts gezaehlt; er hat nichts geleistet, er ist
+   *   eingeladen.
+   * - Nie ueber einer offenen Meldung mit Rueckweg. Die neun Sekunden nach
+   *   einem Loeschen gehoeren dem Rueckgaengig und niemandem sonst.
+   */
+  function feier(o) {
+    if (state.mode !== 'edit') { return; }
+    if (undoOffen) { return; }
+    var stufe = o.stufe || 0;
+    if (stufe <= 0) { return; }
+    if (stufe >= 4) { konfetti(); }
+    if (stufe >= 3 && o.klappe) { klappe(o.gesicht || 'jubel', o.klappe); }
+    if (stufe >= 2 && o.toast) { toast(o.toast); }
+    if (stufe >= 4 || (stufe >= 2 && o.tonImmer)) { ton(o.ton || 'tada'); }
+  }
+
+  /**
+   * Das Umschalten frei/verliehen ist ausschliesslich aus dem geoeffneten
+   * Fenster erreichbar, und ein mit showModal() geoeffnetes Fenster liegt
+   * ueber allem — Klappe, Meldung und Konfetti waeren dahinter unsichtbar.
+   * Die Feier wartet deshalb, bis das Fenster zu ist.
+   */
+  function feierSpaeter(o) {
+    var dialog = $('#itemModal');
+    if (!dialog || !dialog.open) { feier(o); if (o.zeile) { markRow(o.zeile.id, o.zeile.art); } return; }
+    feierWartet = o;
+  }
+
+  function feierNachholen() {
+    var o = feierWartet;
+    feierWartet = null;
+    if (!o) { return; }
+    setTimeout(function () {
+      if (o.zeile) { markRow(o.zeile.id, o.zeile.art); }
+      feier(o);
+    }, 140);
+  }
+
+  /* -- Stufen und Abzeichen ----------------------------------------------- */
+
+  function stufeFuer(heim) {
+    var n = 0;
+    for (var i = 0; i < STUFEN.length; i++) { if (heim >= STUFEN[i]) { n = i + 1; } }
+    return n;
+  }
+
+  /**
+   * Die zehn Abzeichen, in der Reihenfolge ihrer Bedeutung. Geprueft wird auf
+   * Erreichen, nicht auf Gleichheit: Die Spracheingabe traegt mehrere
+   * Gegenstaende in einem Rutsch ein, ein Zaehler springt dann von 0 auf 12,
+   * und ein Abzeichen an der Schwelle 10 fiele bei einer Gleichheitspruefung
+   * nie.
+   *
+   * Es wird hoechstens eines je Handlung verliehen. Was noch offen ist,
+   * kommt beim naechsten Mal — das ist zugleich die bessere Dramaturgie, denn
+   * zwei Feiern uebereinander sind keine zwei Feiern.
+   */
+  var ABZEICHEN = [
+    { k: 'heimkehr',   z: 'handover',  p: function (g, c) { return g.heim >= 1; } },
+    { k: 'bumerang',   z: 'face-heim', p: function (g, c) { return g.heim >= 10; } },
+    { k: 'langeratem', z: 'clock',     p: function (g, c) { return c.dauer !== null && c.dauer !== undefined && c.dauer >= 30; } },
+    { k: 'tagesflug',  z: 'refresh',   p: function (g, c) { return c.dauer === 0; } },
+    { k: 'allesda',    z: 'check',     p: function (g, c) { return c.zurueck && g.heim >= 3 && !offeneLeihen(); } },
+    { k: 'kleinfein',  z: 'face-frei', p: function (g, c) { return g.heim >= 3 && state.doc && state.doc.items.length > 0 && state.doc.items.length <= 5; } },
+    { k: 'aushaus',    z: 'out',       p: function (g, c) { return g.raus >= 1; } },
+    { k: 'tueroeffner', z: 'share',    p: function (g, c) { return g.weiter >= 1; } },
+    { k: 'schluessel', z: 'key',       p: function (g, c) { return g.listen >= 1; } },
+    { k: 'erster',     z: 'plus',      p: function (g, c) { return g.dinge >= 1; } },
+    { k: 'sortiment',  z: 'list',      p: function (g, c) { return g.dinge >= 10; } }
+  ];
+
+  function offeneLeihen() {
+    if (!state.doc) { return false; }
+    return state.doc.items.some(function (it) { return it.status === 'lent'; });
+  }
+
+  /**
+   * Verleiht hoechstens ein Abzeichen und meldet, ob es eines war. Die
+   * Aufrufstellen fragen das ab: Traegt ein Abzeichen bereits die Feier,
+   * bleibt die gewoehnliche aus.
+   *
+   * @param {{dauer: (number|null), zurueck: boolean, stumm: boolean}=} ctx
+   * @return {boolean}
+   */
+  function pruefeAbzeichen(ctx) {
+    if (state.mode !== 'edit') { return false; }
+    var c = ctx || {};
+    var g = spielRead();
+    for (var i = 0; i < ABZEICHEN.length; i++) {
+      var a = ABZEICHEN[i];
+      if (g.abz[a.k]) { continue; }
+      if (!a.p(g, c)) { continue; }
+      g.abz[a.k] = heuteIso();
+      spielSave();
+      feierSpaeter({
+        stufe: 4,
+        gesicht: 'jubel',
+        klappe: t('spiel.badge', { name: t('abz.' + a.k) }),
+        /* Hat der Augenblick einen eigenen Satz — den Namen des Gegenstands,
+           den der Zurueckbringerin —, gehoert der in die Meldung. Der Text
+           des Abzeichens spricht nur, wenn sonst niemand spricht. */
+        toast: c.stumm ? '' : (c.toast || t('abz.' + a.k + '.text')),
+        ton: 'tada',
+        zeile: c.zeile
+      });
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Der Aufstieg. `g.stufe` haelt fest, bis wohin gefeiert wurde, nicht
+   * welche Stufe gilt — die rechnet sich jederzeit aus den Runden. So geht
+   * kein Aufstieg verloren, wenn im selben Augenblick ein Abzeichen faellt.
+   */
+  function pruefeStufe(ctx) {
+    if (state.mode !== 'edit') { return false; }
+    var g = spielRead();
+    var s = stufeFuer(g.heim);
+    if (s <= g.stufe) { return false; }
+    g.stufe = s;
+    spielSave();
+    feierSpaeter({
+      stufe: 4,
+      gesicht: 'heim',
+      klappe: t('spiel.level', { n: s, name: t('stufe.' + s) }),
+      toast: (ctx && ctx.toast) || t('spiel.levelText', { n: g.heim }),
+      ton: 'tada',
+      zeile: ctx && ctx.zeile
     });
+    return true;
+  }
+
+  /* -- Der Stufenchip und das Rundenbuch ---------------------------------- */
+
+  function updateLevelChip() {
+    var chip = $('#levelChip');
+    if (!chip) { return; }
+    var g = spielRead();
+    var s = stufeFuer(g.heim);
+    var zeigen = state.mode === 'edit' && spielWorks() && s > 0;
+    chip.hidden = !zeigen;
+    if (!zeigen) { return; }
+    chip.textContent = '';
+    chip.appendChild(icon('face-heim'));
+    chip.appendChild(el('span', null, t('stufe.' + s)));
+    chip.setAttribute('aria-label', t('buch.open', { name: t('stufe.' + s) }));
+  }
+
+  /**
+   * Das Rundenbuch nutzt dasselbe Fenster wie ein Gegenstand. Dessen
+   * Beschriftung fuer die Vorlesestimme traegt sonst noch den Namen des
+   * zuletzt geoeffneten Dings; sie wird deshalb ausdruecklich gesetzt.
+   */
+  function openRundenbuch() {
+    var g = spielRead();
+    var s = stufeFuer(g.heim);
+    modalItemId = null;
+
+    var dialog = $('#itemModal');
+    var head = $('#modalTitle');
+    head.textContent = '';
+    head.appendChild(el('span', 'buch-stufe', s > 0 ? t('stufe.' + s) : t('buch.none')));
+    dialog.setAttribute('aria-label', t('buch.title'));
+
+    var body = $('#modalBody');
+    body.textContent = '';
+
+    var zahlen = el('div', 'buch-zahlen');
+    [['dinge', state.doc ? state.doc.items.length : 0],
+     ['unterwegs', Math.max(0, g.raus - g.heim)],
+     ['runden', g.heim],
+     ['weiter', g.weiter]].forEach(function (paar) {
+      var z = el('div', 'buch-zahl');
+      z.appendChild(el('b', null, String(paar[1])));
+      z.appendChild(el('span', null, t('buch.' + paar[0])));
+      zahlen.appendChild(z);
+    });
+    body.appendChild(zahlen);
+
+    var liste = el('div', 'buch-liste');
+    var verliehen = 0;
+    ABZEICHEN.forEach(function (a) {
+      if (!g.abz[a.k]) { return; }
+      verliehen++;
+      var row = el('div', 'buch-abz');
+      var badge = el('span', 'item-badge');
+      badge.appendChild(icon(a.z));
+      row.appendChild(badge);
+      var txt = el('div');
+      txt.appendChild(el('b', null, t('abz.' + a.k)));
+      txt.appendChild(el('span', null, t('abz.' + a.k + '.text')));
+      txt.appendChild(el('span', null, formatDay(g.abz[a.k])));
+      row.appendChild(txt);
+      liste.appendChild(row);
+    });
+    body.appendChild(liste);
+
+    var offen = ABZEICHEN.length - verliehen;
+    body.appendChild(el('p', 'hint spaced-lg',
+      verliehen === 0 ? t('buch.first') : t('buch.rest', { n: offen })));
+    body.appendChild(el('p', 'hint', t('buch.local')));
+
+    var foot = $('#modalFoot');
+    foot.textContent = '';
+    foot.appendChild(el('span', 'spacer'));
+    var close = el('button', 'btn btn--primary');
+    close.type = 'button';
+    close.textContent = t('modal.done');
+    close.addEventListener('click', closeItemModal);
+    foot.appendChild(close);
+
+    openDialog();
+  }
+
+  /* -- Die Saetze --------------------------------------------------------- */
+
+  /**
+   * Sondersaetze nach Stichwort. Geprueft wird streng auf das erste Wort und
+   * auf Wortgrenzen: „Zeltheringe" darf nicht den Wochenend-Satz bekommen.
+   * Beide Sprachen stehen nebeneinander, weil der Katalog zweisprachig ist
+   * und jemand mit englischer Oberflaeche englische Namen eintraegt.
+   */
+  var SONDER = [
+    { k: 'bohr',   w: ['bohrmaschine', 'cordless drill', 'drill', 'akkuschrauber', 'power screwdriver'] },
+    { k: 'waffel', w: ['waffeleisen', 'waffle iron'] },
+    { k: 'zelt',   w: ['zelt', 'tent'] },
+    { k: 'leiter', w: ['leiter', 'ladder'] },
+    { k: 'brett',  w: ['brettspiel', 'board game'] },
+    { k: 'beamer', w: ['beamer', 'projektor', 'projector'] },
+    { k: 'rasen',  w: ['rasenmäher', 'rasenmaeher', 'lawn mower'] }
+  ];
+
+  function sonderSatz(name) {
+    var n = String(name || '').toLowerCase().trim();
+    if (!n) { return null; }
+    for (var i = 0; i < SONDER.length; i++) {
+      for (var j = 0; j < SONDER[i].w.length; j++) {
+        var w = SONDER[i].w[j];
+        if (n === w || n.indexOf(w + ' ') === 0) { return t('sonder.' + SONDER[i].k); }
+      }
+    }
+    return null;
+  }
+
+  /* -- Die vier Momente --------------------------------------------------- */
+
+  /** Gegenstand eingetragen. Der haeufigste Weg der ganzen Anwendung, und
+      deshalb der, an dem die Abnutzungskurve am steilsten faellt. */
+  function feierAdd(id, name) {
+    var g = spielRead();
+    g.dinge += 1;
+    spielSave();
+    markRow(id, 'lid-fall');
+    var n = g.dinge;
+    var stufe = laut(n);
+
+    /* Der Satz zum Gegenstand steht fest, bevor ueber das Abzeichen
+       entschieden wird: Faellt eines, nimmt es die Klappe und laesst dem
+       Satz die Meldung. */
+    var sText = sonderSatz(name);
+    if (!sText) {
+      if (n === 25) { sText = t('add.s25', { name: name }); }
+      else { sText = t('add.s' + reihum('add', 6), { name: name }); }
+    }
+    if (pruefeAbzeichen({ toast: sText })) { return; }
+    if (stufe <= 1) { markRow(id, 'lid-kipp'); return; }
+    var kText = '';
+    if (n <= 3) { kText = t('add.k' + n); }
+    else if (n === 25) { kText = t('add.k25'); }
+    feier({ stufe: stufe, gesicht: 'frei', klappe: kText, toast: sText, ton: 'plopp', tonImmer: true });
+  }
+
+  /** Hinaus. Bewusst leiser als die Heimkehr: Verleihen ist ein Vorgang,
+      kein Sieg — und wer hier das Konfetti verschiesst, hat fuer den
+      eigentlichen Hoehepunkt nichts mehr uebrig. */
+  function feierRaus(id, name) {
+    var g = spielRead();
+    g.raus += 1;
+    spielSave();
+    var zeile = { id: id, art: 'lid-raus' };
+    var n = g.raus;
+    var stufe = laut(n);
+    var sText = n === 1 ? t('raus.s1', { name: name })
+                        : t('raus.s' + reihum('raus', 4), { name: name });
+    if (pruefeAbzeichen({ zeile: zeile, toast: sText })) { return; }
+    if (stufe <= 1) { feierSpaeter({ stufe: 0, zeile: zeile }); return; }
+    feierSpaeter({
+      stufe: stufe,
+      gesicht: 'weg',
+      klappe: n === 1 ? t('raus.k1') : t('raus.k2'),
+      toast: sText,
+      ton: 'weg',
+      tonImmer: true,
+      zeile: zeile
+    });
+  }
+
+  /**
+   * Die Heimkehr. Der Zweck der ganzen Anwendung, bisher die stummste Stelle
+   * darin — und der einzige Augenblick, in dem ein zweiter Mensch vorkommt.
+   * Sein Name wird genau dann genannt, wenn der Code ihn loescht: Die
+   * Anwendung fuehrt keine Akte ueber Freunde, sie sagt einmal, wer es war,
+   * und vergisst es dann.
+   */
+  function feierHeim(id, name, wer, dauer) {
+    var g = spielRead();
+    g.heim += 1;
+    if (typeof dauer === 'number') { g.tage += dauer; }
+    spielSave();
+    var zeile = { id: id, art: 'lid-heim' };
+
+    /* Die Rueckkehr faellt als einzige Handlung nie unter Stufe 2. */
+    var stufe = Math.max(2, laut(g.heim));
+    var satz;
+    if (stufe <= 2 && g.heim > 9) {
+      satz = t('heim.sKurz', { name: name });
+    } else if (wer && dauer === 0) {
+      satz = t('heim.sHeute', { who: wer, name: name });
+    } else if (wer && typeof dauer === 'number') {
+      satz = t('heim.sWer', { who: wer, name: name, n: dauer });
+    } else if (typeof dauer === 'number') {
+      satz = t('heim.sTage', { name: name, n: dauer });
+    } else {
+      satz = t('heim.sPlain', { name: name });
+    }
+
+    var ctx = { dauer: dauer, zurueck: true, zeile: zeile, toast: satz };
+    if (pruefeAbzeichen(ctx)) { return; }
+    if (pruefeStufe(ctx)) { return; }
+
+    feierSpaeter({
+      stufe: stufe,
+      gesicht: 'heim',
+      klappe: t('heim.k'),
+      toast: satz,
+      ton: 'heim',
+      tonImmer: true,
+      zeile: zeile
+    });
+  }
+
+  /** Der Link geht hinaus. Gefeiert wird nur, was wirklich weitergegeben
+      wurde — ein abgebrochenes Teilen bleibt stumm, und der Bearbeiten-Link
+      zaehlt nie mit: Er ist der geheime. */
+  function feierWeiter() {
+    if (state.mode !== 'edit') { return; }
+    var g = spielRead();
+    g.weiter += 1;
+    spielSave();
+    if (pruefeAbzeichen({})) { return; }
+    var n = g.weiter;
+    var stufe = laut(n);
+    if (stufe <= 1) { return; }
+    feier({
+      stufe: stufe,
+      gesicht: 'zwink',
+      klappe: n <= 3 ? t('weiter.k2') : '',
+      toast: n <= 3 ? t('weiter.s2') : t('weiter.s3'),
+      ton: 'tada'
+    });
+  }
+
+  /** Der Zugang ist gesichert: der Abschluss des Anlegens und die Stelle,
+      an der die Liste wirklich in die Hand uebergeht. */
+  function feierZugang() {
+    var g = spielRead();
+    g.listen += 1;
+    spielSave();
+    if (pruefeAbzeichen({})) { return; }
+    feier({ stufe: 4, gesicht: 'jubel', klappe: t('key.klappe'), toast: t('key.feier'), ton: 'tada' });
+  }
+
+  /** Einmal je Sitzung: Was sehr lange draussen ist, darf erwaehnt werden.
+      Keine Mahnung, eine Auskunft. */
+  function hinweisLangeDraussen() {
+    if (langGesagt || state.mode !== 'edit' || !state.doc) { return; }
+    var treffer = null;
+    state.doc.items.forEach(function (it) {
+      if (it.status !== 'lent') { return; }
+      var d = tageSeit(it.since);
+      if (d !== null && d >= LANG_NOTIZ && (!treffer || d > treffer.d)) { treffer = { name: it.name, d: d }; }
+    });
+    if (!treffer) { return; }
+    langGesagt = true;
+    setTimeout(function () {
+      if (undoOffen) { return; }
+      toast(t('item.longOut', { name: treffer.name, n: treffer.d }));
+    }, 1200);
   }
 
   /* ===================================================================== *
@@ -1667,6 +2592,7 @@
       if (state.mode === 'edit') { rememberList(); }
       render();
       if (state.mode === 'view') { startRefresh(); } else { stopRefresh(); }
+      hinweisLangeDraussen();
     }).catch(function (err) {
       showError(err && err.code ? err.code : 'network');
     });
@@ -2157,6 +3083,15 @@
       setVoiceState('', false);
       setVoiceOpen(false);
       toast(entries.length === 1 ? t('voice.added_1') : t('voice.added', { n: entries.length }));
+
+      /* In einem Rutsch mitzaehlen — und stumm feiern, damit die Meldung
+         ueber die eingetragene Menge nicht ueberschrieben wird. Geprueft
+         wird auf Erreichen, nicht auf Gleichheit: Der Zaehler springt hier
+         von null auf zwoelf. */
+      var g = spielRead();
+      g.dinge += entries.length;
+      spielSave();
+      pruefeAbzeichen({ stumm: true });
     });
   }
 
@@ -2195,19 +3130,32 @@
       $('#addName').focus();
     });
 
-    /* Der Zugang wird weggeräumt, wenn er ausdrücklich gesichert wurde. */
+    /* Der Zugang wird weggeräumt, wenn er ausdrücklich gesichert wurde. Das
+       ist der Abschluss des Anlegens und nicht das Anlegen selbst: Wer den
+       Bearbeiten-Link nicht bestaetigt hat, hat die Liste noch nicht in der
+       Hand — und ueber einer Warnung wird ohnehin nicht gefeiert. */
     $('#btnKeyDone').addEventListener('click', function () {
       $('#keyBox').hidden = true;
+      feierZugang();
     });
 
     $('#modalClose').addEventListener('click', closeItemModal);
-    $('#itemModal').addEventListener('close', function () { modalItemId = null; });
+    $('#itemModal').addEventListener('close', function () {
+      modalItemId = null;
+      feierNachholen();
+    });
+
+    $('#levelChip').addEventListener('click', openRundenbuch);
 
     $('#btnShareView').addEventListener('click', function () {
       nativeShare({
         title: state.doc.title || t('list.untitled'),
         text: t('share.message', { title: state.doc.title || t('list.untitled') }),
         url: viewLink()
+      }).then(function (ok) {
+        /* Ein Abbruch ist kein Fehler und keine Weitergabe: nativeShare()
+           unterscheidet beides bereits, es wurde bisher nur weggeworfen. */
+        if (ok) { feierWeiter(); }
       });
     });
 
@@ -2231,8 +3179,19 @@
 
     $$('[data-copy]').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        var input = document.getElementById(btn.getAttribute('data-copy'));
-        copyText(input.value).then(function (ok) { toast(t(ok ? 'share.copied' : 'share.copyfail')); });
+        var ziel = btn.getAttribute('data-copy');
+        var input = document.getElementById(ziel);
+        copyText(input.value).then(function (ok) {
+          if (!ok) { toast(t('share.copyfail')); return; }
+          /* Der Bearbeiten-Link ist der geheime. Er wird nie gezaehlt und nie
+             gefeiert — ihn weiterzugeben waere das Gegenteil dessen, was
+             gefeiert gehoert. */
+          if (ziel !== 'linkView') { toast(t('share.copiedEdit')); return; }
+          if (state.mode !== 'edit') { toast(t('share.copied')); return; }
+          var vorher = spielRead().weiter;
+          feierWeiter();
+          if (laut(vorher + 1) <= 1) { toast(t('share.copied')); }
+        });
       });
     });
 
@@ -2324,6 +3283,20 @@
       toast(t(value ? 'settings.aiKeySaved' : 'settings.aiKeyCleared'));
     });
     $('#btnClearCache').addEventListener('click', clearLocalData);
+
+    /* Der Tonschalter. Browser lassen Klang erst nach einer Beruehrung zu —
+       dieser Haken ist eine, also erklingt die Probe zuverlaessig. */
+    var sound = $('#cfgSound');
+    if (sound) {
+      sound.checked = tonAn();
+      sound.addEventListener('change', function () {
+        try {
+          if (this.checked) { localStorage.setItem(LS_TON, '1'); }
+          else { localStorage.removeItem(LS_TON); }
+        } catch (e) { /* privater Modus: dann eben nicht */ }
+        if (this.checked) { ton('heim'); toast(t('settings.soundOn')); }
+      });
+    }
 
     /* Wurde die Seite aus einer offenen Liste heraus aufgerufen, trägt das
        Fragment deren Bearbeiten-Link. Nur dann führt der Weg zurück, und nur
