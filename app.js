@@ -204,7 +204,8 @@
       'trust.ads': 'Ohne Login',
       'trust.crypto': 'Verschlüsselt',
 
-      'steps.headline': 'So geht\u2019s',
+      'steps.headline': 'So geht\u2019s: eine eigene Leihliste einstellen',
+      'steps.lead': 'Eine Liste der Dinge, die Du verleihst. Sie liegt verschlüsselt auf dem Server, und sehen kann sie, wer den Link von Dir bekommt.',
       'steps.one': 'Gegenstände eintragen',
       'steps.oneText': 'Tippen oder einsprechen. Erst nur der Name, alles Weitere steht hinter dem Eintrag.',
       'steps.two': 'Kontaktdetails angeben',
@@ -212,8 +213,18 @@
       'steps.three': 'Link weitergeben',
       'steps.threeText': 'Freunde sehen, was gerade frei ist, und fragen mit einem Klick an.',
 
-      'start.create': 'Neue Liste anlegen',
-      'start.creating': 'Liste wird angelegt …',
+      'start.create': 'Leihliste anlegen',
+      'start.creating': 'Leihliste wird angelegt …',
+
+      'circleSteps.headline': 'So geht\u2019s: Leihlisten zum eigenen Freundeskreis hinzufügen',
+      'circleSteps.lead': 'Ein Freundeskreis sammelt die Ansehen-Links mehrerer Leihlisten und zeigt alles daraus in einer Übersicht. Er ist selbst eine verschlüsselte Liste mit einem eigenen Link.',
+      'circleSteps.one': 'Ansehen-Link bekommen',
+      'circleSteps.oneText': 'Eine Freundin schickt Dir den Link zu ihrer Leihliste, so wie Du ihr Deinen schickst.',
+      'circleSteps.two': 'In den Kreis aufnehmen',
+      'circleSteps.twoText': 'Den Link einfügen und einen Namen dazu vergeben. Gespeichert werden Kennung und Schlüssel, keine Gegenstände.',
+      'circleSteps.three': 'An einer Stelle suchen',
+      'circleSteps.threeText': 'Alle Sachen aller gesammelten Listen stehen in einer Liste, durchsuchbar nach Gegenstand, Person und Notiz.',
+      'circleSteps.honest': 'Die Personen, deren Listen Du sammelst, erfahren davon nichts. Eine Benachrichtigung setzte voraus, dass festgehalten wird, wer welche Liste liest. Das hält diese Anwendung nicht fest.',
 
       'list.titleLabel': 'Titel der Liste, freiwillig',
       'list.titlePlaceholder': 'Titel der Liste',
@@ -223,7 +234,8 @@
       'list.free_1': '1 gerade frei',
       'list.newTitle': 'Meine Leihliste',
 
-      'mine.headline': 'Deine Listen auf diesem Gerät',
+      'mine.headline': 'Auf diesem Gerät gemerkt',
+      'mine.hint': 'Deine Leihlisten und Freundeskreise. Die Links dazu kennt nur dieser Browser.',
       'mine.link': 'Meine Listen',
 
       'key.headline': 'Bewahre diesen Link auf!',
@@ -287,6 +299,7 @@
       'request.call': 'Anrufen',
       'request.copy': 'Anfragetext kopieren',
       'request.copied': 'Anfragetext kopiert.',
+      'request.shared': 'Anfrage weitergegeben.',
       'request.subject': 'Leihanfrage: {item}',
       'request.body': 'Hallo, ich möchte {item} ausleihen. Passt das bei Dir?',
       'request.bodyNamed': 'Hallo {name}, ich möchte {item} ausleihen. Passt das bei Dir?',
@@ -371,6 +384,7 @@
       /* -- Freundeskreis ------------------------------------------------ */
 
       'circle.badge': 'Freundeskreis',
+      'list.badge': 'Leihliste',
       'circle.untitled': 'Freundeskreis',
       'circle.newTitle': 'Mein Freundeskreis',
       'circle.unnamed': 'Ohne Namen',
@@ -390,6 +404,8 @@
       'circle.none': 'Nichts gefunden',
       'circle.missing': '{n} Listen konnten nicht geladen werden',
       'circle.missing_1': '1 Liste konnte nicht geladen werden',
+      'circle.beyond': '{n} weitere Listen sind nicht dabei',
+      'circle.beyond_1': '1 weitere Liste ist nicht dabei',
       'circle.noHit': 'Nichts gefunden.',
       'circle.reset': 'Suche zurücksetzen',
       'circle.emptyNoneHead': 'Noch niemand dabei',
@@ -553,7 +569,8 @@
       'trust.ads': 'No login',
       'trust.crypto': 'Encrypted',
 
-      'steps.headline': 'How it works',
+      'steps.headline': 'How it works: set up your own lending list',
+      'steps.lead': 'A list of the things you lend out. It lives encrypted on the server, and whoever gets the link from you can see it.',
       'steps.one': 'Add your things',
       'steps.oneText': 'Type or speak. Just the name at first, everything else sits behind the entry.',
       'steps.two': 'Add your contact details',
@@ -561,8 +578,18 @@
       'steps.three': 'Pass the link on',
       'steps.threeText': 'Friends see what is free right now and ask with one click.',
 
-      'start.create': 'Create a new list',
-      'start.creating': 'Creating list …',
+      'start.create': 'Create a lending list',
+      'start.creating': 'Creating lending list …',
+
+      'circleSteps.headline': 'How it works: add lending lists to your own circle',
+      'circleSteps.lead': 'A circle of friends collects the view links of several lending lists and shows everything from them in one overview. It is an encrypted list of its own, with its own link.',
+      'circleSteps.one': 'Get a view link',
+      'circleSteps.oneText': 'A friend sends you the link to their lending list, just as you send them yours.',
+      'circleSteps.two': 'Add it to the circle',
+      'circleSteps.twoText': 'Paste the link and give it a name. The id and the key are stored, no things.',
+      'circleSteps.three': 'Search in one place',
+      'circleSteps.threeText': 'Everything from all collected lists sits in one list, searchable by thing, person and note.',
+      'circleSteps.honest': 'The people whose lists you collect are not told about it. A notice would require a record of who reads which list. This application keeps no such record.',
 
       'list.titleLabel': 'List title, optional',
       'list.titlePlaceholder': 'List title',
@@ -572,7 +599,8 @@
       'list.free_1': '1 free right now',
       'list.newTitle': 'My lending list',
 
-      'mine.headline': 'Your lists on this device',
+      'mine.headline': 'Remembered on this device',
+      'mine.hint': 'Your lending lists and circles. Only this browser knows the links.',
       'mine.link': 'My lists',
 
       'key.headline': 'Keep this link!',
@@ -636,6 +664,7 @@
       'request.call': 'Call',
       'request.copy': 'Copy request text',
       'request.copied': 'Request text copied.',
+      'request.shared': 'Request passed on.',
       'request.subject': 'Borrowing request: {item}',
       'request.body': 'Hi, I would like to borrow {item}. Does that work for you?',
       'request.bodyNamed': 'Hi {name}, I would like to borrow {item}. Does that work for you?',
@@ -720,6 +749,7 @@
       /* -- Circle of friends -------------------------------------------- */
 
       'circle.badge': 'Circle',
+      'list.badge': 'Lending list',
       'circle.untitled': 'Circle of friends',
       'circle.newTitle': 'My circle of friends',
       'circle.unnamed': 'No name',
@@ -739,6 +769,8 @@
       'circle.none': 'Nothing found',
       'circle.missing': '{n} lists could not be loaded',
       'circle.missing_1': '1 list could not be loaded',
+      'circle.beyond': '{n} further lists are not included',
+      'circle.beyond_1': '1 further list is not included',
       'circle.noHit': 'Nothing found.',
       'circle.reset': 'Clear the search',
       'circle.emptyNoneHead': 'Nobody here yet',
@@ -926,6 +958,14 @@
        oder 'circle' — ohne diese Zeile warf der Sprachwechsel dort in
        render() eine unbehandelte Ausnahme. Das galt schon vor dem
        Freundeskreis und faellt hier nur auf, weil er denselben Weg nimmt. */
+    /* Die beiden Schaltflaechen fuer Zeigen und Verbergen tragen ihre
+       Beschriftung aus dem Woerterbuch. applyStaticI18n setzt sie gerade auf
+       "Zeigen" zurueck, auch wenn der Link offen daliegt; dann stuende dort
+       das Gegenteil dessen, was ein Druck bewirkt. */
+    [['#btnRevealEdit', '#linkEdit'], ['#btnRevealCircle', '#circleLink']].forEach(function (paar) {
+      var knopf = $(paar[0]), feld = $(paar[1]);
+      if (knopf && feld) { knopf.textContent = t(feld.type === 'password' ? 'share.reveal' : 'share.hide'); }
+    });
     if (isSettingsPage()) { return; }
     /* Die Zeilen der Uebersicht tragen uebersetzten Text und werden nur einmal
        gebaut; sie muessen also neu entstehen. Geholt wird dabei nichts:
@@ -1463,9 +1503,16 @@
       es in dieser Anwendung nicht, und apiGet nimmt keinen; die Anfragen
       laufen also zu Ende, ihr Ergebnis landet nur nirgends mehr. */
   function kreisRaeumen() {
+    /* Zuerst schreiben, dann raeumen: Danach fehlen Schluessel und Nachweis. */
+    kreisFristEinloesen();
     kreisGen++;
     var liste = $('#circleItems');
     if (liste) { liste.textContent = ''; }
+    /* Der Aufklapper traegt die Namen der gesammelten Personen und ihren
+       Zustand. Er gehoert genauso geraeumt wie die Gegenstandsliste; ohne
+       diese Zeile blieben entschluesselte Fremdnamen im Dokument stehen. */
+    var freunde = $('#circleFriends');
+    if (freunde) { freunde.textContent = ''; }
     kreis.doc = null;
     kreis.eintraege = [];
     kreis.zeilen = [];
@@ -1525,6 +1572,16 @@
       act.hidden = true;
       act.onclick = null;
     }, action ? UNDO_MS : 3600);
+  }
+
+  /** Nimmt die Meldung vorzeitig weg. Gebraucht, wo die angebotene
+      Gegenhandlung nicht mehr moeglich ist. */
+  function toastSchliessen() {
+    clearTimeout(toastTimer);
+    var node = $('#toast'), act = $('#toastAct');
+    if (!node) { return; }
+    node.hidden = true;
+    if (act) { act.hidden = true; act.onclick = null; }
   }
 
   function setSaveState(kind) {
@@ -1735,19 +1792,21 @@
     list.textContent = '';
     box.hidden = mine.length === 0;
     updateMineLink();
-    /* Der Knopf steht VOR der vorzeitigen Rueckkehr: Sonst erreichte ihn
-       genau der Nutzer nie, fuer den er gedacht ist — wer noch nichts
-       gemerkt hat. */
-    var kreisRow = $('#startCircleRow');
-    if (kreisRow) { kreisRow.hidden = mine.some(function (it) { return it.kind === 'circle'; }); }
     if (!mine.length) { return; }
 
     mine.forEach(function (entry) {
+      var istKreis = entry.kind === 'circle';
       var li = el('li');
       var a = el('a');
       a.href = entry.hash;
-      a.appendChild(el('span', 'name', entry.title || t(entry.kind === 'circle' ? 'circle.untitled' : 'list.untitled')));
-      if (entry.kind === 'circle') { a.appendChild(el('span', 'chip chip--sm', t('circle.badge'))); }
+      /* Zeichen und Marke sagen dasselbe, und das mit Absicht: Das Zeichen
+         traegt den Blick, die Marke traegt die Vorlesestimme und die
+         Uebersetzung. Das Zeichen bleibt deshalb aria-hidden. */
+      var marke = el('span', 'kind' + (istKreis ? ' kind--kreis' : ''));
+      marke.appendChild(icon(istKreis ? 'kreis' : 'leihliste'));
+      a.appendChild(marke);
+      a.appendChild(el('span', 'name', entry.title || t(istKreis ? 'circle.untitled' : 'list.untitled')));
+      a.appendChild(el('span', 'chip chip--sm', t(istKreis ? 'circle.badge' : 'list.badge')));
       if (entry.ts) { a.appendChild(el('span', 'when', formatDay(new Date(entry.ts).toISOString().slice(0, 10)))); }
       a.appendChild(icon('chev'));
       li.appendChild(a);
@@ -2113,13 +2172,17 @@
       freunde++;
       if (e.fehler) { fehlt++; }
     }
+    /* Listen jenseits von MAX_FRIENDS stehen im Dokument, werden aber nicht
+       geholt. Sie sind kein Fehler und gehoeren deshalb nicht zu fehlt, aber
+       ohne sie behauptete die Zahl eine Vollstaendigkeit, die es nicht gibt. */
+    var drueber = Math.max(0, kreis.doc.friends.length - kreis.eintraege.length);
     $('#circleEmptyNone').hidden = !(kreis.doc.friends.length === 0);
     $('#circleEmptyAll').hidden  = !(freunde > 0 && kreis.zeilen.length === 0 && fehlt === 0);
     $('#circleEmptyHit').hidden  = !(teile && treffer === 0 && kreis.zeilen.length > 0);
-    renderKreisZahl(treffer, kreis.zeilen.length, !!teile, fehlt);
+    renderKreisZahl(treffer, kreis.zeilen.length, !!teile, fehlt, drueber);
   }
 
-  function renderKreisZahl(treffer, gesamt, gefragt, fehlt) {
+  function renderKreisZahl(treffer, gesamt, gefragt, fehlt, drueber) {
     var node = $('#circleCount');
     if (!node) { return; }
     var txt;
@@ -2129,6 +2192,7 @@
     /* Die Zahl gilt nur fuer das, was wirklich angekommen ist. Ohne diesen
        Zusatz behauptete sie eine Vollstaendigkeit, die es nicht gibt. */
     if (fehlt) { txt += ' · ' + (fehlt === 1 ? t('circle.missing_1') : t('circle.missing', { n: fehlt })); }
+    if (drueber) { txt += ' · ' + (drueber === 1 ? t('circle.beyond_1') : t('circle.beyond', { n: drueber })); }
     node.textContent = txt;
   }
 
@@ -2300,6 +2364,7 @@
   function buildModalFoot(item) {
     var foot = $('#modalFoot');
     foot.textContent = '';
+    foot.className = 'modal__foot';
 
     var del = el('button', 'btn btn--danger');
     del.type = 'button';
@@ -2346,6 +2411,9 @@
 
     var foot = $('#modalFoot');
     foot.textContent = '';
+    /* Die Klassenliste wird vollstaendig neu geschrieben, weil derselbe Knoten
+       auch den Bearbeiten-Fuss traegt und dort in einer Reihe stehen soll. */
+    foot.className = 'modal__foot modal__foot--stack';
     var close = el('button', 'btn btn--ghost');
     close.type = 'button';
     close.textContent = t('modal.close');
@@ -2425,7 +2493,12 @@
        Weitergabe des Geraets. Genau einer fuehrt. */
     if (email) {
       var mail = el('a', 'btn btn--primary');
-      mail.href = 'mailto:' + encodeURIComponent(email) +
+      /* Das @ bleibt stehen. encodeURIComponent macht daraus %40, und nach
+         RFC 6068 wird die Adresse vor dem Zerlegen nicht entschluesselt: Ein
+         addr-spec ohne @ ist keiner. Die meisten Programme kommen damit
+         zurecht, manche nicht, und der Preis dafuer waere eine Anfrage, die
+         nirgends ankommt. Alles Uebrige bleibt maskiert. */
+      mail.href = 'mailto:' + encodeURIComponent(email).replace(/%40/g, '@') +
         '?subject=' + encodeURIComponent(subject) +
         '&body=' + encodeURIComponent(body);
       mail.rel = 'noopener';
@@ -2436,9 +2509,14 @@
 
     if (phone) {
       /* tel: nimmt keine Leerzeichen und keine Klammern. Was die Besitzerin
-         schreibt, bleibt sichtbar; gewaehlt wird die bereinigte Fassung. */
+         schreibt, bleibt sichtbar; gewaehlt wird die bereinigte Fassung.
+         Der geklammerte Teil faellt ganz weg und nicht nur die Klammern:
+         "+49 (0) 221 …" ist die uebliche deutsche Schreibweise, und die Null
+         darin gilt genau dann nicht, wenn die Landesvorwahl davorsteht.
+         Bliebe sie stehen, waehlte das Telefon eine Nummer, die es nicht
+         gibt. */
       var call = el('a', email ? 'btn' : 'btn btn--primary');
-      call.href = 'tel:' + phone.replace(/[^\d+]/g, '');
+      call.href = 'tel:' + phone.replace(/\([^)]*\)/g, '').replace(/[^\d+]/g, '');
       call.rel = 'noopener';
       call.appendChild(icon('phone'));
       call.appendChild(el('span', null, t('request.call')));
@@ -2450,7 +2528,18 @@
       share.type = 'button';
       share.appendChild(icon('share'));
       share.appendChild(el('span', null, t('request.share')));
-      share.addEventListener('click', function () { nativeShare({ text: body }); });
+      share.addEventListener('click', function () {
+        /* Das Ergebnis wurde bisher weggeworfen. Nach einer Weitergabe hat
+           das Fenster seinen Zweck erfuellt: Es geht zu, und die Meldung
+           bestaetigt. Sie kaeme hinter dem offenen Fenster sonst gar nicht
+           zum Vorschein, denn ein <dialog> liegt in der obersten Ebene.
+           Ein Abbruch bleibt still und laesst alles stehen. */
+        nativeShare({ text: body }).then(function (ok) {
+          if (!ok) { return; }
+          closeItemModal();
+          toast(t('request.shared'));
+        });
+      });
       nodes.push(share);
     } else if (!email && !phone) {
       var copy = el('button', 'btn btn--primary');
@@ -3120,6 +3209,10 @@
 
     var foot = $('#modalFoot');
     foot.textContent = '';
+    /* Wie in den beiden anderen Fuessen die Klassenliste vollstaendig neu:
+       Der Knoten ist derselbe, und ohne diese Zeile erbte das Rundenbuch das
+       gestapelte Aussehen der Anfrage. */
+    foot.className = 'modal__foot';
     foot.appendChild(el('span', 'spacer'));
     var close = el('button', 'btn btn--primary');
     close.type = 'button';
@@ -3446,18 +3539,17 @@
     return kreisHolen(parsed, gen).then(function (doc) {
       if (gen !== kreisGen || !doc) { return; }
       rememberList();
-      kreis.eintraege = [];
+      /* Die Eintraege stehen vollstaendig, bevor der erste Abruf laeuft.
+         ladeKreis fuellt genau diese Objekte, deshalb gibt es am Ende nichts
+         zuzuweisen — und ein waehrend des Ladens aufgenommener Freund geht
+         nicht mehr verloren, wie es die frühere Zuweisung verursachte. */
+      kreis.eintraege = kreisEintraege(doc.friends.slice(0, MAX_FRIENDS));
       renderKreis();
-      return ladeKreis(doc.friends.slice(0, MAX_FRIENDS), function (e, pos) {
+      return ladeKreis(kreis.eintraege, function () {
         if (gen !== kreisGen) { return; }
-        kreis.eintraege[pos] = e;
         renderKreisListe();
-      }).then(function (eintraege) {
-        /* Derselbe Grund wie oben, eine Ebene hoeher: Das Promise.all eines
-           abgeloesten Durchlaufs loest trotzdem noch auf, und seine Eintraege
-           duerfen die des neuen nicht verdraengen. */
+      }).then(function () {
         if (gen !== kreisGen) { return; }
-        kreis.eintraege = eintraege;
         kreis.geprueftAm = Date.now();
         renderKreis();
       });
@@ -3478,10 +3570,18 @@
    * stehen. Vier ist kein gemessener Wert, sondern die Groessenordnung, die
    * ein einzelner Reiter einem geteilten Host zumuten darf.
    */
-  function ladeKreis(freunde, fortschritt) {
-    var eintraege = freunde.map(function (f) {
+  /** Die leeren Eintraege, bevor irgendetwas geholt ist. Sie entstehen
+      getrennt vom Holen, damit der Aufrufer sie sofort in kreis.eintraege
+      legen kann: Dann steht die Reihenfolge fest, ein waehrenddessen
+      aufgenommener Freund kann keinen Platz ueberschreiben, und der
+      Aufklapper zeigt von Anfang an, worauf gewartet wird. */
+  function kreisEintraege(freunde) {
+    return freunde.map(function (f) {
       return { freund: f, doc: null, fehler: null, status: 0, langsam: false };
     });
+  }
+
+  function ladeKreis(eintraege, fortschritt) {
     var naechster = 0;
 
     function holen(pos) {
@@ -3545,11 +3645,17 @@
    */
   function kreisSave() {
     if (!kreis.token || !kreis.doc) { return Promise.resolve(); }
+    /* Alles, was der Schreibvorgang braucht, wird hier festgehalten und nicht
+       spaeter aus kreis gelesen. Zwischen dem Verschluesseln und dem
+       Schreiben liegt ein Promise, und in dieser Zeit kann kreisRaeumen die
+       Felder geleert haben: Der Schreibvorgang ginge dann mit proof === null
+       hinaus und brachte ein 403 zurueck. */
+    var id = kreis.id, key = kreis.key, proof = kreis.proof, rev = kreis.rev;
     var snapshot = JSON.parse(JSON.stringify(kreis.doc));
     snapshot.v = SCHEMA_VERSION;
     snapshot.kind = 'circle';
-    return Crypt.encrypt(kreis.key, snapshot, kreis.id).then(function (payload) {
-      return Store.write(kreis.id, kreis.proof, kreis.rev, payload).then(function (res) {
+    return Crypt.encrypt(key, snapshot, id).then(function (payload) {
+      return Store.write(id, proof, rev, payload).then(function (res) {
         /* Bei Konflikt NICHT blind ueberschreiben wie save() es tut: Dort
            geht eine Aenderung an derselben Liste verloren, hier ginge der
            Ansehen-Link eines Freundes verloren, den es nur hier gab. Also
@@ -3560,7 +3666,13 @@
         return res;
       });
     }).then(function (res) {
-      if (res && res.status === 200) { kreis.rev = res.body.rev; return; }
+      /* Die Revision nur zurueckschreiben, wenn noch derselbe Kreis offen
+         ist. Sonst traegt ein spaet eintreffendes Ergebnis seine Zahl in ein
+         fremdes Dokument. */
+      if (res && res.status === 200) {
+        if (kreis.id === id) { kreis.rev = res.body.rev; }
+        return;
+      }
       toast(t('error.' + mapError(res)));
     }).catch(function (err) {
       toast(t('error.' + (err && err.code ? err.code : 'network')));
@@ -3622,12 +3734,16 @@
     feld.value = '';
     $('#circleAddName').value = '';
     kreisSave();
+    /* Der Eintrag steht sofort in der Liste und traegt bis zur Antwort seinen
+       Zustand. ladeKreis fuellt dasselbe Objekt, deshalb gibt es danach
+       nichts einzusortieren. */
+    var neu = kreisEintraege([neuer]);
+    kreis.eintraege.push(neu[0]);
     renderKreisListe();
     var gen = kreisGen;
     /* Nur den neuen Eintrag holen, nicht alle: Der Rest steht schon. */
-    ladeKreis([neuer], null).then(function (neu) {
+    ladeKreis(neu, null).then(function () {
       if (gen !== kreisGen) { return; }
-      kreis.eintraege.push(neu[0]);
       renderKreisListe();
     });
   }
@@ -3638,24 +3754,54 @@
    * wiederherstellen, das waeren zwei Schreibvorgaenge je Zug und bei jedem
    * die Gefahr eines 409.
    */
+  /* Die offene Frist des Entfernens. Sie steht hier und nicht in einer
+     Abschlussvariablen, weil kreisRaeumen sie einloesen muss: Wer die
+     Uebersicht innerhalb der neun Sekunden verlaesst, hat entfernt, und ohne
+     diesen Weg bliebe der Schreibvorgang aus — kreisSave kehrt dann wegen des
+     geleerten Tokens wirkungslos zurueck, und der Freund staende beim
+     naechsten Oeffnen wieder da. */
+  var kreisFrist = null;
+
+  function kreisFristEinloesen() {
+    if (!kreisFrist) { return; }
+    clearTimeout(kreisFrist);
+    kreisFrist = null;
+    kreisSave();
+    /* Die Ruecknahme ist damit vorbei. Eine Meldung, deren Knopf nichts mehr
+       tut, ist schlimmer als keine. */
+    toastSchliessen();
+  }
+
   function circleRemove(id) {
     if (!kreis.doc || !kreis.token) { return; }
+    /* Steht noch eine Frist offen, wird sie zuerst eingeloest: Zwei
+       Entfernungen kurz nacheinander duerfen sich nicht gegenseitig die
+       Ruecknahme wegnehmen. */
+    kreisFristEinloesen();
     var pos = -1, i;
     for (i = 0; i < kreis.doc.friends.length; i++) {
       if (kreis.doc.friends[i].id === id) { pos = i; break; }
     }
     if (pos < 0) { return; }
+    var kreisId = kreis.id;
     var weg = kreis.doc.friends.splice(pos, 1)[0];
     var wegE = null;
     for (i = 0; i < kreis.eintraege.length; i++) {
       if (kreis.eintraege[i] && kreis.eintraege[i].freund.id === id) { wegE = kreis.eintraege.splice(i, 1)[0]; break; }
     }
     renderKreisListe();
-    var frist = setTimeout(function () { kreisSave(); }, UNDO_MS);
+    kreisFrist = setTimeout(function () {
+      kreisFrist = null;
+      kreisSave();
+    }, UNDO_MS);
     toast(t('circle.removed'), {
       label: t('circle.undo'),
       run: function () {
-        clearTimeout(frist);
+        clearTimeout(kreisFrist);
+        kreisFrist = null;
+        /* Nach einem Ortswechsel gibt es nichts mehr zurueckzunehmen: Die
+           Frist ist dann schon eingeloest und kreis.doc geraeumt. */
+        if (!kreis.doc || kreis.id !== kreisId) { return; }
         kreis.doc.friends.splice(pos, 0, weg);
         if (wegE) { kreis.eintraege.push(wegE); }
         renderKreisListe();
@@ -3719,7 +3865,11 @@
    */
   function circleAddHere() {
     if (state.mode !== 'view' || !state.id || !state.keyStr) { return; }
-    var mich = { id: state.id, key: state.keyStr, label: (state.doc && state.doc.contact.name) || '' };
+    /* Ohne Beschriftung. Der Kontaktname der fremden Liste gehoert nicht in
+       das Chiffrat des Kreises: Er ist entschluesselter Fremdinhalt, er
+       veraltete dort, und freundName() loest ihn beim Zeichnen ohnehin aus
+       dem frisch geholten Dokument auf. Angezeigt steht also dasselbe. */
+    var mich = { id: state.id, key: state.keyStr, label: '' };
     var kreise = readMine().filter(function (it) { return it.kind === 'circle'; });
 
     /* Kein gemerkter Kreis: Es entsteht einer, und die Ansicht wechselt
@@ -3736,9 +3886,11 @@
            Aktualisieren leer. */
         if (!kreis.doc) { return; }
         var gen = kreisGen;
-        return ladeKreis([mich], null).then(function (neu) {
+        var neu = kreisEintraege([mich]);
+        kreis.eintraege.push(neu[0]);
+        renderKreisListe();
+        return ladeKreis(neu, null).then(function () {
           if (gen !== kreisGen) { return; }
-          kreis.eintraege.push(neu[0]);
           renderKreisListe();
         });
       });
@@ -4477,11 +4629,15 @@
       kreis.doc.friends.forEach(function (x) { if (x.id === id) { f = x; } });
       if (!f) { return; }
       var gen = kreisGen;
-      ladeKreis([f], null).then(function (neu) {
+      /* Der bestehende Eintrag wird an Ort und Stelle ersetzt: ladeKreis
+         fuellt das uebergebene Objekt, die Reihenfolge bleibt also stehen. */
+      var neu = kreisEintraege([f]);
+      for (var i = 0; i < kreis.eintraege.length; i++) {
+        if (kreis.eintraege[i] && kreis.eintraege[i].freund.id === id) { kreis.eintraege[i] = neu[0]; break; }
+      }
+      renderKreisListe();
+      ladeKreis(neu, null).then(function () {
         if (gen !== kreisGen) { return; }
-        for (var i = 0; i < kreis.eintraege.length; i++) {
-          if (kreis.eintraege[i] && kreis.eintraege[i].freund.id === id) { kreis.eintraege[i] = neu[0]; break; }
-        }
         renderKreisListe();
       });
     });
@@ -4543,7 +4699,15 @@
       /* Kurzweg wie unten, aber gegen kreis.doc: state.doc bleibt im Kreis
          null, der Vergleich darunter griffe also nie und jeder hashchange
          schickte den Kreis erneut durchs Netz. */
-      if (kreis.id === parsed.id && kreis.doc) { renderKreis(); return; }
+      if (kreis.id === parsed.id && kreis.doc) {
+        /* Den Modus mitsetzen: renderKreis allein liesse state.mode auf dem
+           Wert der zuvor geoeffneten Liste stehen, und daran haengen
+           rememberList, updateSettingsLink und setLang. */
+        state.mode = 'circle';
+        state.doc = null;
+        renderKreis();
+        return;
+      }
       oeffneKreis(parsed);
       return;
     }

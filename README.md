@@ -192,14 +192,23 @@ schlicht `data/.ai-key`. Beides wirkt sofort.
 
 ## Erscheinungsbild
 
-Warmer Papierton als Grund, weiche Kanten, ruhige Schatten. Die Farbe trägt
-Bedeutung und nicht Schmuck:
+Ein helles Grün als Grund, weiße Flächen darauf, weiche Kanten. Der Aufruf
+oben steht flach: keine Verläufe, kein Punktraster, kein Schatten. Die Farbe
+trägt Bedeutung und nicht Schmuck:
 
 | Farbe | Heißt |
 | --- | --- |
 | Grün | frei — und führt die Handlung an |
 | Bernstein | verliehen |
 | Rot | zerstörend, und nur dort |
+
+Zwei Arten von Liste, zwei Zeichen. Ein Blatt mit Zeilen steht für die
+Leihliste, drei Köpfe über zwei Schultern für den Freundeskreis. Sie sind
+verschieden gebaut und nicht nur verschieden gefärbt, damit sie sich auch in
+16 Punkten Größe und im dunklen Erscheinungsbild unterscheiden. Beide stehen
+auf der Startseite über ihrem Erklärkasten, in jeder Zeile des gemerkten
+Kastens und dort zusätzlich als Wort auf einer Marke: Das Zeichen trägt den
+Blick, die Marke trägt die Vorlesestimme und die Übersetzung.
 
 Alles steht in `style.css`. Die Datei ist die gesamte Gestaltung; ein zweites
 Stylesheet gibt es nicht.
@@ -335,6 +344,7 @@ weniger Bewegung, nicht weniger Anerkennung.
 │   ├── lists/                    verschlüsselte Listen
 │   └── throttle/                 Ratenbegrenzung, gehashte IP-Adressen
 ├── tools/
+│   ├── .htaccess                 sperrt das Verzeichnis, zweite Schicht
 │   ├── purge.php                 Wartungsskript für alte Listen
 │   ├── build-fonts.py            erzeugt die Schriftteilmengen
 │   ├── i18n-check.js             prüft beide Wörterbücher auf denselben Schlüsselsatz
@@ -532,6 +542,41 @@ https://leihichdir.de/check.html
 
 Die Prüfung zeigt unter anderem, ob `.htaccess` greift, ob `data/` von außen
 gesperrt ist und ob der Proxy den Schlüssel gefunden hat.
+
+### Vorgelagerter nginx
+
+In Plesk steht nginx vor Apache. Ist unter *Hosting-Einstellungen* → *Apache
+& nginx* die Option **Smart static files processing** gesetzt, liefert nginx
+statische Dateien selbst aus: `.html`, `.css`, `.js`, Bilder und Schriften
+gehen dann nie durch Apache. Das ist schnell, hat aber eine Folge, die man
+nicht sieht: **nginx liest keine `.htaccess`.** Die Sperre für `tools/` und
+`tests/` gilt dann nur noch für PHP-Dateien.
+
+Woran man es erkennt: `check.html` meldet `tools/purge.php` als gesperrt und
+`tools/og-vorlage.html` als erreichbar. Dieselbe Regel in `.htaccess` trifft
+beide; wenn nur eine greift, beantwortet sie nicht derselbe Server. Genau
+diesen Befund gibt die Prüfung seitdem aus.
+
+Zwei Wege. Entweder die Option abschalten, dann läuft alles durch Apache und
+`.htaccess` gilt wieder für jede Datei. Oder die Sperre zusätzlich in
+*Zusätzliche nginx-Direktiven* eintragen:
+
+```nginx
+location ~ ^/(tools|tests|\.git|\.github)/ {
+    deny all;
+    return 404;
+}
+```
+
+Die zweite Fassung ist die robustere: Sie gilt unabhängig davon, wer die
+Datei ausliefert. Fehlt außerdem `mod_headers`, gehören dieselben
+Sicherheitskopfzeilen ebenfalls dorthin — den Wortlaut nennt der Befund in
+`check.html`.
+
+Als zweite Schicht liegen `tools/.htaccess` und `tests/.htaccess` im
+Repository. Sie sperren beide Verzeichnisse auch dann, wenn die Regel im
+Wurzelverzeichnis einmal umgeschrieben wird. Gegen einen nginx, der die
+Datei selbst ausliefert, helfen sie nicht: Er liest sie nicht.
 
 ## Vorschau über GitHub Pages
 

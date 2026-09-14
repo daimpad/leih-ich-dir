@@ -117,6 +117,10 @@
      Sperren aus derselben .htaccess greifen, wird daraus eine Diagnose. */
   var kopfzeilenFehlen = false;
   var sperrenGreifen = false;
+  /* Getrennt gezaehlt, weil der Unterschied die Diagnose traegt: Eine
+     PHP-Datei geht immer durch Apache, eine .html-Datei nicht unbedingt. */
+  var dynamischGesperrt = 0, dynamischOffen = 0;
+  var statischGesperrt = 0, statischOffen = 0;
 
   /* Eine Richtlinie in ihre Direktiven zerlegen. Auf Teilzeichenketten zu
      pruefen waere keine Verbesserung: indexOf("script-src 'self'") findet das
@@ -239,17 +243,27 @@
 
   function checkSealed() {
     group('Abschottung');
-    var paths = ['data/', 'data/lists/', '.git/config', 'tests/api-test.php',
-                 'tools/purge.php', 'tools/og-vorlage.html'];
-    return paths.reduce(function (chain, path) {
+    /* 'art' sagt, wer die Anfrage beantwortet: Eine PHP-Datei reicht jeder
+       Aufbau an Apache weiter, eine statische Datei nicht unbedingt. Genau
+       diese Trennung macht den Befund am Ende moeglich. */
+    var paths = [
+      ['data/', 'ordner'], ['data/lists/', 'ordner'], ['.git/config', 'statisch'],
+      ['tests/api-test.php', 'dynamisch'], ['tools/purge.php', 'dynamisch'],
+      ['tools/og-vorlage.html', 'statisch']
+    ];
+    return paths.reduce(function (chain, eintrag) {
+      var path = eintrag[0], art = eintrag[1];
       return chain.then(function () {
         return head(path).then(function (r) {
           var detail = 'Status ' + r.status;
           if (path === '.git/config' && r.status === 200) {
             detail = 'Status 200, die gesamte Repository-Historie liegt offen';
           }
-          if (r.status !== 200) { sperrenGreifen = true; }
-          check(LEVEL_MUST, 'gesperrt: ' + path, r.status !== 200, detail);
+          var zu = r.status !== 200;
+          if (zu) { sperrenGreifen = true; }
+          if (art === 'dynamisch') { zu ? dynamischGesperrt++ : dynamischOffen++; }
+          if (art === 'statisch') { zu ? statischGesperrt++ : statischOffen++; }
+          check(LEVEL_MUST, 'gesperrt: ' + path, zu, detail);
         });
       });
     }, Promise.resolve());
@@ -308,14 +322,33 @@
    * uebersprungen. Genau diese Stille macht den Fehler so schwer zu finden.
    */
   function checkDiagnose() {
-    if (!kopfzeilenFehlen) { return Promise.resolve(); }
+    /* Der zweite Befund gilt auch dann, wenn die Kopfzeilen stehen: Eine
+       gesperrte PHP-Datei neben einer offenen .html-Datei im selben
+       Verzeichnis kann kein einzelner Server erzeugen. Dieselbe Regel traefe
+       beide. Also beantwortet sie nicht derselbe Server. */
+    var gespalten = dynamischGesperrt > 0 && statischOffen > 0;
+    if (!kopfzeilenFehlen && !gespalten) { return Promise.resolve(); }
     group('Befund');
-    if (sperrenGreifen) {
+
+    if (gespalten) {
+      check(LEVEL_MUST, 'Ursache der offenen statischen Dateien', false,
+        'Unter tools/ ist die PHP-Datei gesperrt und die .html-Datei nicht. '
+        + 'Dieselbe Regel in .htaccess trifft beide, also beantwortet sie nicht '
+        + 'derselbe Server: Ein vorgelagerter nginx liefert statische Dateien '
+        + 'selbst aus und liest dabei keine .htaccess. In Plesk steht der '
+        + 'Schalter unter Hosting-Einstellungen, Apache & nginx, bei '
+        + '"Smart static files processing". Abschalten laesst alles durch '
+        + 'Apache laufen; wer ihn behalten will, traegt die Sperre zusaetzlich '
+        + 'in die nginx-Direktiven ein. Der Wortlaut steht im README unter '
+        + '"Vorgelagerter nginx".');
+    }
+
+    if (kopfzeilenFehlen && sperrenGreifen) {
       check(LEVEL_MUST, 'Ursache der fehlenden Kopfzeilen', false,
         'Die .htaccess wird gelesen, sonst waeren die Sperren oben nicht wirksam. '
         + 'Es fehlt das Apache-Modul mod_headers. In Plesk unter Tools & Einstellungen, '
         + 'Apache-Webserver, headers anhaken; danach diese Pruefung wiederholen.');
-    } else {
+    } else if (kopfzeilenFehlen) {
       check(LEVEL_MUST, 'Ursache der fehlenden Kopfzeilen', false,
         'Weder Kopfzeilen noch Sperren greifen: Die .htaccess wird gar nicht '
         + 'ausgewertet. Im Virtual Host fehlt AllowOverride All.');
