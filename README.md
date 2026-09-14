@@ -213,7 +213,7 @@ Stylesheet gibt es nicht.
 
   | Schrift | Wofür |
   | --- | --- |
-  | Ranchers | Wortmarke und Überschriften erster und zweiter Ordnung |
+  | Ranchers | Wortmarke und Überschriften |
   | Inter | Fließtext, Bedienelemente, alles Übrige |
   | Zilla Slab | der Zusatz in der Fußzeile |
   | Space Mono | Links und Schlüssel, alles Wörtliche |
@@ -243,8 +243,7 @@ unterbindet das ohnehin.
 ├── api.php                       Flat-File-Backend, optional mit KI-Proxy
 ├── .htaccess                     Sicherheits-Header, Sperren für Punktdateien
 ├── assets/
-│   ├── fonts/                    WOFF2-Teilmengen und ihre @font-face-Regeln
-│   └── pics/logo.svg             Wortmarke
+│   └── fonts/                    WOFF2-Teilmengen und ihre @font-face-Regeln
 ├── data/                         Laufzeitdaten, nicht im Repository
 │   ├── .htaccess                 verbietet jeden HTTP-Zugriff
 │   ├── .ai-key                   optionaler Schlüssel für den KI-Proxy

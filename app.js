@@ -899,6 +899,8 @@
    * 8 · Rendering
    * ===================================================================== */
 
+  var shownView = null;
+
   function showView(name) {
     ['viewStart', 'viewList', 'viewError'].forEach(function (id) {
       var node = document.getElementById(id);
@@ -908,6 +910,13 @@
        Liste von Gegenstaenden, die schmal besser zu lesen ist. */
     var main = document.getElementById('main');
     if (main) { main.classList.toggle('page--wide', name === 'viewStart'); }
+
+    /* Ein Wechsel der Ansicht ist ein Ortswechsel und beginnt deshalb oben.
+       Der Browser behaelt den Rollstand sonst bei, weil das Dokument
+       dasselbe bleibt: Wer die Schaltflaeche am Fuss der Startseite bedient,
+       landete mitten in der neuen Liste, beim Teilen statt beim Anfang. */
+    if (shownView !== null && shownView !== name) { window.scrollTo(0, 0); }
+    shownView = name;
   }
 
   function showError(code) {
