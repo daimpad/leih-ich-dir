@@ -244,8 +244,9 @@ header.site { padding-block: var(--s-4); }
 }
 .brand-word { font-size: 1.45rem; }
 /* Die Bildmarke links vom Namen. Sie bringt ihre Farben mit und folgt dem
-   Erscheinungsbild nicht: Der helle Grund ist Teil des Zeichens. */
-.brand-mark { width: 1.9rem; height: 1.9rem; flex: 0 0 auto; }
+   Erscheinungsbild nicht: Der helle Grund ist Teil des Zeichens. In dieser
+   Groesse traegt auch die runde Aussenlinie, die klein zu einem Haar wird. */
+.brand-mark { width: 3.8rem; height: 3.8rem; flex: 0 0 auto; }
 .brand-ich { color: var(--green); }
 
 .bar-controls { display: flex; align-items: center; gap: var(--s-2); }
@@ -288,7 +289,7 @@ header.site { padding-block: var(--s-4); }
 }
 .btn--primary:hover { background: var(--green-ink); border-color: var(--green-ink); color: var(--on-green); }
 
-.btn--lg { padding: .95rem 1.7rem; font-size: 1.05rem; border-radius: 14px; }
+.btn--lg { padding: .4rem .8rem; font-size: 1.05rem; border-radius: 14px; }
 .btn--sm { padding: .42rem .8rem; font-size: .9rem; border-radius: 10px; }
 
 /* Leise: trägt keine Fläche, nur Text. Für alles Beiläufige. */
@@ -1016,11 +1017,12 @@ header.site { padding-block: var(--s-4); }
  * ===================================================================== */
 
 @media (pointer: coarse) {
-  .ctl-square, .modal__x, .info, .btn--sm, .chip--level { position: relative; }
+  .ctl-square, .modal__x, .info, .btn--sm, .btn--lg, .chip--level { position: relative; }
   .ctl-square::after,
   .modal__x::after,
   .info::after,
   .btn--sm::after,
+  .btn--lg::after,
   .chip--level::after {
     content: ""; position: absolute;
     top: 50%; left: 50%; transform: translate(-50%, -50%);
