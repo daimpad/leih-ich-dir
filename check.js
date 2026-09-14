@@ -112,6 +112,12 @@
     return Promise.resolve();
   }
 
+  /* Merkposten fuer die Schlussfolgerung am Ende: Ob die Kopfzeilen fehlen,
+     sagt fuer sich genommen wenig. Erst zusammen mit der Frage, ob die
+     Sperren aus derselben .htaccess greifen, wird daraus eine Diagnose. */
+  var kopfzeilenFehlen = false;
+  var sperrenGreifen = false;
+
   function checkHeaders() {
     group('Kopfzeilen');
     return head('./').then(function (r) {
@@ -121,8 +127,9 @@
       }
       var h = r.res.headers;
       var csp = h.get('content-security-policy');
+      kopfzeilenFehlen = !csp;
       check(LEVEL_MUST, 'Content-Security-Policy als Kopfzeile', !!csp,
-        csp ? 'gesetzt' : 'fehlt, meist fehlt AllowOverride All');
+        csp ? 'gesetzt' : 'fehlt, die Ursache steht am Ende unter Befund');
       check(LEVEL_SHOULD, 'X-Content-Type-Options nosniff',
         (h.get('x-content-type-options') || '') === 'nosniff');
       check(LEVEL_SHOULD, 'Referrer-Policy no-referrer',
@@ -150,9 +157,14 @@
       ['assets/fonts/inter-400.woff2', 'font/woff2'],
       ['assets/pics/pfote.svg', 'image/svg+xml'],
       ['assets/pics/og.png', 'image/png'],
-      ['assets/pics/favicon.svg', 'image/svg+xml'],
-      ['assets/pics/apple-touch-icon.png', 'image/png'],
+      ['favicon.svg', 'image/svg+xml'],
+      ['favicon-96x96.png', 'image/png'],
+      ['apple-touch-icon.png', 'image/png'],
       ['favicon.ico', 'image'],
+      ['site.webmanifest', 'json'],
+      ['assets/pics/icon-192.png', 'image/png'],
+      ['assets/pics/icon-512.png', 'image/png'],
+      ['assets/pics/icon-maskable-512.png', 'image/png'],
       ['robots.txt', 'text/plain'],
       ['sitemap.xml', 'xml']
     ];
@@ -180,6 +192,7 @@
           if (path === '.git/config' && r.status === 200) {
             detail = 'Status 200, die gesamte Repository-Historie liegt offen';
           }
+          if (r.status !== 200) { sperrenGreifen = true; }
           check(LEVEL_MUST, 'gesperrt: ' + path, r.status !== 200, detail);
         });
       });
@@ -226,6 +239,32 @@
             : 'Schluessel fehlt, der Browser zerlegt selbst');
       });
     });
+  }
+
+  /**
+   * Die Schlussfolgerung aus zwei Beobachtungen.
+   *
+   * Fehlen die Kopfzeilen, greifen aber die Sperren, dann wird die .htaccess
+   * gelesen — RedirectMatch und Require all denied stehen in derselben Datei
+   * und brauchen dasselbe AllowOverride wie Header. Dann liegt es nicht an
+   * AllowOverride, sondern daran, dass mod_headers fehlt: Der ganze Block
+   * steht in <IfModule mod_headers.c> und wird ohne das Modul stillschweigend
+   * uebersprungen. Genau diese Stille macht den Fehler so schwer zu finden.
+   */
+  function checkDiagnose() {
+    if (!kopfzeilenFehlen) { return Promise.resolve(); }
+    group('Befund');
+    if (sperrenGreifen) {
+      check(LEVEL_MUST, 'Ursache der fehlenden Kopfzeilen', false,
+        'Die .htaccess wird gelesen, sonst waeren die Sperren oben nicht wirksam. '
+        + 'Es fehlt das Apache-Modul mod_headers. In Plesk unter Tools & Einstellungen, '
+        + 'Apache-Webserver, headers anhaken; danach diese Pruefung wiederholen.');
+    } else {
+      check(LEVEL_MUST, 'Ursache der fehlenden Kopfzeilen', false,
+        'Weder Kopfzeilen noch Sperren greifen: Die .htaccess wird gar nicht '
+        + 'ausgewertet. Im Virtual Host fehlt AllowOverride All.');
+    }
+    return Promise.resolve();
   }
 
   function checkFonts() {
@@ -275,6 +314,7 @@
       .then(checkSealed)
       .then(checkApi)
       .then(checkFonts)
+      .then(checkDiagnose)
       .then(function () {
         summarise();
         btn.disabled = false;
