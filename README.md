@@ -287,8 +287,8 @@ weniger Bewegung, nicht weniger Anerkennung.
 ├── einstellungen.html            Erscheinungsbild, Schlüssel, Zwischenspeicher
 ├── check.html · check.js         Abnahme im Browser, nach dem Deployment löschbar
 ├── theme.js                      Wahl zwischen hell, dunkel und der Systemeinstellung
-├── impressum.html                Entwurf, Angaben müssen ergänzt werden
-├── datenschutz.html              Entwurf, juristisch prüfen lassen
+├── impressum.html                Anbieterkennzeichnung nach § 5 TMG
+├── datenschutz.html              beschreibt den technischen Stand, juristisch prüfen lassen
 ├── ueber.html                    Beschreibung des Projekts
 ├── app.js                        Verschlüsselung · i18n · Rendering · Sprache · Speicher
 ├── style.css                     das gesamte Erscheinungsbild

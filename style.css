@@ -218,7 +218,16 @@ button, input, textarea, select { font: inherit; color: inherit; }
 /* Die Startseite traegt drei Spalten und darf dafuer breiter stehen. */
 .page--wide { max-width: 58rem; }
 
+/* Hinweis: .site-header greift nirgends, die Kopfleiste traegt im Markup
+   die Klasse .site. Die Regel steht seit dem ersten Entwurf hier und bleibt
+   unangetastet, weil ihr Abstand nie gewirkt hat und ihn nachtraeglich
+   einzuschalten das Layout verschoebe. */
 .site-header { padding-block: var(--s-4); }
+
+/* Die Kopfleiste laeuft breiter als der Text darunter: Die Wortmarke sitzt
+   damit naeher am linken Rand und fluchtet auf der Startseite mit dem
+   Inhalt, statt mittig eingerueckt zu stehen. */
+header.site .shell { max-width: 58rem; }
 .bar { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); }
 
 /* Die Marke ist nur noch Schrift. Die Silbe in der Mitte traegt die Farbe:
@@ -429,6 +438,9 @@ button, input, textarea, select { font: inherit; color: inherit; }
 }
 
 .hero-body { position: relative; }
+/* Der Aufruf im Rahmen selbst. Er steht unter den Auszeichnungen: erst die
+   Zusage, dann die Handlung. */
+.hero-act { margin-top: var(--s-6); }
 .hero h1 { font-size: clamp(2.6rem, 8vw, 4.4rem); line-height: 1.02; }
 .hero h1 mark { background: none; color: var(--green); }
 .hero .lead { margin-top: var(--s-4); max-width: 32rem; font-size: clamp(1.08rem, 2.2vw, 1.3rem); }

@@ -46,17 +46,31 @@
     <p class="lead">Was diese Anwendung verarbeitet, und was sie technisch nicht sehen kann.</p>
   </div>
 
-  <div class="note note--warn note">
-    <div><p class="note__body">
-      Entwurf. Die technischen Angaben beschreiben, was die Anwendung
-      tatsächlich tut. Die rechtliche Einordnung und die Angaben zur
-      verantwortlichen Stelle gehören geprüft, bevor der Dienst startet.
-    </p></div>
-  </div>
-
   <section class="card">
     <h2 class="card__title">Verantwortliche Stelle</h2>
-    <p>[Name und Anschrift wie im Impressum]<br>E-Mail: [adresse@example.org]</p>
+    <p>
+      NOZILLA – Damian Paderta<br>
+      Kaiser-Karl-Ring 26<br>
+      53111 Bonn<br>
+      E-Mail: <a href="mailto:contact@nozilla.de">contact@nozilla.de</a>
+    </p>
+    <p class="hint">
+      Verantwortlich im Sinne von Artikel 4 Nummer 7 DSGVO ist, wer über Zwecke
+      und Mittel der Verarbeitung entscheidet. Über die Inhalte der Listen
+      entscheidet allein, wer sie anlegt; lesbar sind sie ausschließlich für
+      die Personen, die den Link haben.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="card__title">Hosting</h2>
+    <p>
+      Die Seite wird bei der netcup GmbH, Daimlerstraße 25, 76185 Karlsruhe,
+      betrieben. Der Server steht in Deutschland. Mit dem Anbieter besteht ein
+      Vertrag zur Auftragsverarbeitung nach Artikel 28 DSGVO. Der Anbieter
+      verarbeitet die Daten ausschließlich weisungsgebunden und kann die
+      verschlüsselten Listeninhalte ebenso wenig lesen wie der Betrieb selbst.
+    </p>
   </section>
 
   <section class="card">
@@ -124,8 +138,21 @@
     </ul>
     <p>
       Rechtsgrundlage ist die Einwilligung durch die bewusste Nutzung der
-      Schaltfläche zum Einsprechen, Artikel 6 Absatz 1 Buchstabe a DSGVO.
-      [Angaben zur Übermittlung in ein Drittland prüfen lassen.]
+      Schaltfläche zum Einsprechen, Artikel 6 Absatz 1 Buchstabe a DSGVO. Die
+      Einwilligung lässt sich jederzeit widerrufen, indem die Spracheingabe
+      nicht mehr benutzt wird; die Rechtmäßigkeit der bis dahin erfolgten
+      Verarbeitung bleibt davon unberührt.
+    </p>
+    <p>
+      In beiden Fällen werden Daten an Google (Google Ireland Limited,
+      Gordon House, Barrow Street, Dublin 4, Irland, sowie Google LLC in den
+      Vereinigten Staaten) übermittelt und dort auch außerhalb der Europäischen
+      Union verarbeitet. Google LLC ist nach dem EU-US Data Privacy Framework
+      zertifiziert; ergänzend gelten die Standardvertragsklauseln der
+      Europäischen Kommission. Ein dem europäischen Niveau gleichwertiger
+      Schutz lässt sich damit nicht in jedem Fall zusichern. Wer das nicht
+      möchte, pflegt die Liste über die Tastatur — dann wird nichts
+      übertragen.
     </p>
   </section>
 
@@ -133,10 +160,39 @@
     <h2 class="card__title">Löschung</h2>
     <p>
       Eine Liste lässt sich jederzeit über den Bearbeiten-Link selbst löschen,
-      dann wird die Datei auf dem Server entfernt. Listen, die [ein Jahr] lang
-      nicht mehr geändert wurden, werden automatisch gelöscht. Da der Betrieb
-      die Inhalte nicht lesen kann, ist eine Auskunft über einzelne Listen
-      technisch nicht möglich.
+      dann wird die Datei auf dem Server entfernt. Listen, die ein Jahr lang
+      nicht mehr geändert wurden, werden automatisch gelöscht; das erledigt ein
+      Wartungsskript, das täglich läuft. Die Zähler der Mengenbegrenzung werden
+      nach einer Stunde entfernt.
+    </p>
+    <p>
+      Da der Betrieb die Inhalte nicht lesen kann, ist eine Auskunft über den
+      Inhalt einzelner Listen technisch nicht möglich. Wer eine Liste löschen
+      möchte, nutzt dafür den Bearbeiten-Link; ohne ihn lässt sich eine Liste
+      auch von uns keiner Person zuordnen.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="card__title">Rechtsgrundlagen</h2>
+    <p>
+      Das Speichern und Ausliefern einer Liste geschieht auf Wunsch der Person,
+      die sie anlegt, und dient der Erfüllung dieses Verhältnisses, Artikel 6
+      Absatz 1 Buchstabe b DSGVO. Die Mengenbegrenzung mit gehashten Adressen
+      dient dem Schutz des Dienstes vor Missbrauch und damit einem berechtigten
+      Interesse, Artikel 6 Absatz 1 Buchstabe f DSGVO. Für die Spracheingabe
+      gilt die Einwilligung nach Buchstabe a; sie ist im Abschnitt darüber
+      beschrieben.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 class="card__title">Verschlüsselte Übertragung</h2>
+    <p>
+      Die Seite wird ausschließlich über HTTPS ausgeliefert. Das ist nicht nur
+      Vorsicht, sondern Voraussetzung: Die Web Crypto API, mit der die Inhalte
+      im Browser verschlüsselt werden, steht nur in einem sicheren Kontext
+      bereit. Ohne HTTPS funktioniert die Anwendung nicht.
     </p>
   </section>
 
@@ -147,6 +203,16 @@
       Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch sowie
       ein Beschwerderecht bei einer Aufsichtsbehörde. Anfragen richten sich an
       die oben genannte Adresse.
+    </p>
+    <p>
+      Zuständige Aufsichtsbehörde für den Sitz der verantwortlichen Stelle ist
+      die Landesbeauftragte für Datenschutz und Informationsfreiheit
+      Nordrhein-Westfalen, Kavalleriestraße 2–4, 40213 Düsseldorf.
+    </p>
+    <p class="hint">
+      Dieser Text beschreibt den tatsächlichen technischen Stand der Anwendung;
+      er ist keine Rechtsberatung. Änderungen am Dienst gehören auch hier
+      nachgetragen.
     </p>
   </section>
 

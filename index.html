@@ -252,7 +252,7 @@
         <div class="hero-glow" aria-hidden="true"></div>
         <div class="hero-body">
           <h1><span data-i18n="hero.a">Leih</span> <mark data-i18n="hero.b">ich</mark> <span data-i18n="hero.c">Dir.</span></h1>
-          <p class="lead" data-i18n="hero.lead">Versende Deine Liste an Leihgegenständen an andere.</p>
+          <p class="lead" data-i18n="hero.lead">Erstelle eine Liste von Gegenständen, die Du verleihen möchtest, und versende sie an Deine Freunde.</p>
 
           <ul class="trust" data-i18n-label="trust.label" aria-label="Eigenschaften">
             <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.tracking">Kostenlos</span></li>
@@ -260,16 +260,14 @@
             <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.ads">Ohne Login</span></li>
             <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.crypto">Verschlüsselt</span></li>
           </ul>
+
+          <p class="hero-act">
+            <button type="button" id="btnCreateHero" class="btn btn--primary btn--xl" data-create
+                    data-i18n="start.create">Neue Liste anlegen</button>
+          </p>
         </div>
       </div>
     </div>
-
-    <!-- Auf diesem Gerät gemerkte Listen. Rein lokal, kein Konto, und nur
-         sichtbar, wenn es etwas zu zeigen gibt. -->
-    <section class="mine" id="mineBox" hidden>
-      <h2 data-i18n="mine.headline">Deine Listen auf diesem Gerät</h2>
-      <ul id="mineList"></ul>
-    </section>
 
     <!-- Drei Schritte in einer Reihe, mit Pfeilen dazwischen. Schmal
          untereinander, die Pfeile drehen sich dann mit. -->
@@ -296,8 +294,18 @@
 
     <!-- Der Aufruf am Ende, in voller Grösse. -->
     <div class="cta">
-      <button type="button" id="btnCreate" class="btn btn--primary btn--xl" data-i18n="start.create">Neue Liste anlegen</button>
+      <button type="button" id="btnCreate" class="btn btn--primary btn--xl" data-create data-i18n="start.create">Neue Liste anlegen</button>
     </div>
+
+    <!-- Auf diesem Gerät gemerkte Listen. Sie stehen unter dem Aufruf: Wer
+         zum ersten Mal hier ist, soll den Weg nach vorn sehen, und wer
+         wiederkommt, findet seine Liste dort, wo er hinunterscrollt. Rein
+         lokal, kein Konto, und nur sichtbar, wenn es etwas zu zeigen gibt. -->
+    <section class="mine" id="mineBox" hidden>
+      <h2 data-i18n="mine.headline">Deine Listen auf diesem Gerät</h2>
+      <ul id="mineList"></ul>
+    </section>
+
 
   </section>
 
@@ -320,24 +328,6 @@
         <button type="button" id="levelChip" class="chip chip--level" hidden></button>
       </p>
     </div>
-
-    <!-- Der Zugang. Erscheint einmal, direkt nach dem Anlegen, und bleibt
-         stehen, bis er ausdrücklich bestätigt wurde. Wer ihn verliert,
-         verliert die Liste; deshalb ist er hier kein Beiwerk. -->
-    <section class="keybox" id="keyBox" hidden>
-      <h2 class="keybox__title" data-i18n="key.headline">Bewahre diesen Link auf!</h2>
-      <div class="spaced-lg linkrow">
-        <label class="sr-only" for="keyLink" data-i18n="key.label">Bearbeiten-Link</label>
-        <input type="text" id="keyLink" class="input mono" readonly>
-        <button type="button" class="btn btn--primary" data-copy="keyLink" data-i18n="share.copy">Kopieren</button>
-      </div>
-      <p class="hint keybox__remember" id="keyRemember" data-i18n="key.remember">
-        Auf diesem Gerät gemerkt — beim nächsten Besuch findest Du die Liste auf der Startseite wieder.
-      </p>
-      <p class="spaced-lg actions">
-        <button type="button" id="btnKeyDone" class="btn" data-i18n="key.done">Ich habe den Link gesichert</button>
-      </p>
-    </section>
 
     <!-- 2 · Inventar, mit dem Hinzufügen darin -->
     <section class="card" id="inventoryBox">
@@ -433,6 +423,26 @@
         </div>
       </div>
     </details>
+
+    <!-- Der Zugang. Erscheint einmal, direkt nach dem Anlegen, und bleibt
+         stehen, bis er ausdrücklich bestätigt wurde. Er steht unmittelbar
+         über „Link teilen", weil beides Links sind — der geheime zuerst.
+         Wer ihn verliert, verliert die Liste; deshalb ist er hier kein
+         Beiwerk. -->
+    <section class="keybox" id="keyBox" hidden>
+      <h2 class="keybox__title" data-i18n="key.headline">Bewahre diesen Link auf!</h2>
+      <div class="spaced-lg linkrow">
+        <label class="sr-only" for="keyLink" data-i18n="key.label">Bearbeiten-Link</label>
+        <input type="text" id="keyLink" class="input mono" readonly>
+        <button type="button" class="btn btn--primary" data-copy="keyLink" data-i18n="share.copy">Kopieren</button>
+      </div>
+      <p class="hint keybox__remember" id="keyRemember" data-i18n="key.remember">
+        Auf diesem Gerät gemerkt — beim nächsten Besuch findest Du die Liste auf der Startseite wieder.
+      </p>
+      <p class="spaced-lg actions">
+        <button type="button" id="btnKeyDone" class="btn" data-i18n="key.done">Ich habe den Link gesichert</button>
+      </p>
+    </section>
 
     <!-- 4 · Link weitergeben, nur im Bearbeitenmodus -->
     <section class="card" id="shareBox" hidden>
