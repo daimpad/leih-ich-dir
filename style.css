@@ -655,6 +655,26 @@ header.site { padding-block: var(--s-4); }
 .item-ask { flex: 0 0 auto; }
 .item--lent.items-read-lent { background: var(--surface-alt); }
 
+/* Freundeskreis: wem die Sache gehoert. Rechts und auch schmal
+   stehenbleibend — bei alphabetischer Ordnung unterscheiden sich benachbarte
+   Zeilen oft nur durch die Person. Anders als .item-more ist das keine
+   Erklaerung, sondern die Angabe, die die Zeile ueberhaupt beantwortet. */
+.item-who {
+  flex: 0 0 auto; max-width: 40%; color: var(--muted); font-size: .9rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* Gemessen bei 390 Pixeln: Mit 40 Prozent umbrach "Bohrmaschine" neben
+   "Bernd vom Chor" mitten im Wort. Schmal bekommt der Name der Sache den
+   Vorrang, die Person wird abgeschnitten statt der Gegenstand umbrochen. */
+@media (max-width: 30rem) {
+  .item-who { max-width: 30%; font-size: .82rem; }
+}
+/* Der Verweis traegt die Zeile. .itemrow ist auf <button> und <div> gemuenzt
+   und setzt keine Farbe; ohne diese Zeile faerbte die a-Regel weiter oben die
+   ganze Zeile gruen. Kein items--read: Das naehme Zeiger und Wechsel beim
+   Ueberfahren weg, und hier ist die Zeile wirklich anklickbar. */
+.items--kreis .itemrow { text-decoration: none; color: inherit; }
+
 /* == 9 · Teilen und Kontakt ============================================ */
 
 .linkrow { display: flex; gap: var(--s-2); align-items: stretch; flex-wrap: wrap; }

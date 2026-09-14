@@ -118,6 +118,39 @@
   var kopfzeilenFehlen = false;
   var sperrenGreifen = false;
 
+  /* Eine Richtlinie in ihre Direktiven zerlegen. Auf Teilzeichenketten zu
+     pruefen waere keine Verbesserung: indexOf("script-src 'self'") findet das
+     auch in "script-src 'self' 'unsafe-inline'", und
+     indexOf("connect-src 'self' https://…") ebenso in "… *". Verglichen wird
+     deshalb der vollstaendige Wert einer Direktive. */
+  function direktive(csp, name) {
+    var teile = String(csp || '').split(';');
+    for (var i = 0; i < teile.length; i++) {
+      var w = teile[i].replace(/^\s+|\s+$/g, '').split(/\s+/);
+      if (w[0].toLowerCase() === name) { return w.slice(1).join(' '); }
+    }
+    return null;
+  }
+
+  var CSP_SOLL = [
+    ['default-src', "'self'"],
+    ['script-src',  "'self'"],
+    ['style-src',   "'self'"],
+    ['font-src',    "'self'"],
+    ['img-src',     "'self' data:"],
+    ['connect-src', "'self' https://generativelanguage.googleapis.com"],
+    ['base-uri',    "'none'"],
+    ['form-action', "'none'"]
+  ];
+
+  function pruefeCsp(stufe, csp, woher) {
+    CSP_SOLL.forEach(function (soll) {
+      var ist = direktive(csp, soll[0]);
+      check(stufe, woher + ': ' + soll[0] + ' ' + soll[1], ist === soll[1],
+        ist === null ? 'fehlt' : ist);
+    });
+  }
+
   function checkHeaders() {
     group('Kopfzeilen');
     return head('./').then(function (r) {
@@ -130,6 +163,9 @@
       kopfzeilenFehlen = !csp;
       check(LEVEL_MUST, 'Content-Security-Policy als Kopfzeile', !!csp,
         csp ? 'gesetzt' : 'fehlt, die Ursache steht am Ende unter Befund');
+      /* Nicht nur, dass sie dasteht, sondern was sie sagt. Eine zu weite
+         connect-src oder ein 'unsafe-inline' faellt sonst nicht auf. */
+      if (csp) { pruefeCsp(LEVEL_MUST, csp, 'Kopfzeile'); }
       check(LEVEL_SHOULD, 'X-Content-Type-Options nosniff',
         (h.get('x-content-type-options') || '') === 'nosniff');
       check(LEVEL_SHOULD, 'Referrer-Policy no-referrer',
@@ -139,6 +175,26 @@
       check(LEVEL_SHOULD, 'Strict-Transport-Security',
         !!h.get('strict-transport-security'),
         'in .htaccess auskommentiert, erst bei dauerhaftem HTTPS einschalten');
+    }).then(function () {
+      /* Fehlt mod_headers, ist die Meta-Fassung in index.html die einzige
+         verbliebene Sperre. Sie gehoert also ebenso geprueft, und zwar auf
+         derselben Seite, auf der sie steht. */
+      return fetch('./', { cache: 'no-store' }).then(function (res) {
+        return res.text();
+      }).then(function (html) {
+        var m = /<meta[^>]+http-equiv=["']Content-Security-Policy["'][^>]*>/i.exec(html);
+        /* Das Trennzeichen ueber einen Rueckverweis festhalten, nicht ueber
+           eine Zeichenklasse: In der Richtlinie stehen einfache
+           Anfuehrungszeichen ('self', 'none'), an denen [^"']+ sofort
+           abbraeche und einen Torso zurueckliesse. */
+        var inhalt = m ? (/content\s*=\s*(["'])([\s\S]*?)\1/i.exec(m[0]) || [])[2] : null;
+        check(LEVEL_SHOULD, 'Content-Security-Policy als <meta> in index.html', !!inhalt,
+          inhalt ? 'gesetzt' : 'fehlt');
+        if (inhalt) { pruefeCsp(LEVEL_SHOULD, inhalt, 'meta'); }
+      }).catch(function () {
+        check(LEVEL_SHOULD, 'Content-Security-Policy als <meta> in index.html', false,
+          'index.html nicht lesbar');
+      });
     });
   }
 

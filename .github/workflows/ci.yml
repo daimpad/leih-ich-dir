@@ -46,3 +46,26 @@ jobs:
           # dass theme.js und check.js dazukamen und hier zunaechst fehlten.
           find . -name '*.js' -not -path './.git/*' -not -path './vendor/*' -print0 \
             | xargs -0 -n1 -t node --check
+
+      # CONTRIBUTING.md sagt zu: ES5-vertraegliche Syntax plus Promise, fetch
+      # und crypto.subtle. node --check nimmt eine Pfeilfunktion anstandslos
+      # an, die Zusage stand also bisher nur auf dem Papier. Dieselbe
+      # find-Zeile wie oben, ausdruecklich ohne Namensliste: Eine Liste von
+      # Dateien veraltet, sobald eine dazukommt.
+      #
+      # Der Rueckstrich fuer Schablonenzeichenketten steht bewusst nicht in
+      # der Regel. Diese Pruefung liest den Text und nicht den Syntaxbaum, und
+      # im Bestand steht er in Kommentaren und in einem regulaeren Ausdruck.
+      # Eine Regel, die regelmaessig falsch anschlaegt, wird abgeschaltet.
+      - name: Keine ES6-Syntax in ausgelieferten Skripten
+        run: |
+          treffer=$(find . -name '*.js' -not -path './.git/*' -not -path './vendor/*' -print0 \
+            | xargs -0 grep -nE '=>|\b(let|const)[[:space:]]|\basync[[:space:]]|\bawait[[:space:]]' || true)
+          if [ -n "$treffer" ]; then
+            echo "ES5-Zusage verletzt (CONTRIBUTING.md):"
+            echo "$treffer"
+            exit 1
+          fi
+
+      - name: Beide Woerterbuecher vollstaendig
+        run: node tools/i18n-check.js
