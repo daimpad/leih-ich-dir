@@ -1369,13 +1369,38 @@
    * Die gemerkten Listen auf der Startseite. Sie stehen dort, wo jemand sie
    * sucht, der den Reiter geschlossen hat — und nur dann, wenn es sie gibt.
    */
-  /** Der Verweis in der Kopfleiste steht ueberall, wo es etwas zu zeigen
-      gibt — auch auf der Startseite: Der Kasten mit den Listen sitzt dort
-      unter dem Aufruf, und wer wiederkommt, soll nicht erst suchen. */
+  /* Das Fragment, das die Startseite zum Kasten mit den Listen fuehrt. Es
+     ist absichtlich kein Zugangslink: parseHash() erkennt es nicht und
+     liefert null, die Startseite erscheint also ganz normal. */
+  var MINE_HASH = '#meine';
+
+  /**
+   * Der Verweis in der Kopfleiste steht ueberall, wo es etwas zu zeigen gibt
+   * — auch auf der Startseite. Wohin er fuehrt, haengt davon ab, wie viel es
+   * zu zeigen gibt:
+   *
+   * - eine Liste: unmittelbar in diese Liste. Ein Zwischenhalt, auf dem genau
+   *   ein Eintrag steht, waere ein Klick ohne Gegenwert.
+   * - mehrere: auf die Startseite und dort zum Kasten. Der sitzt unter dem
+   *   Aufruf, und ohne den Sprung landete man wieder oben — der Knopf sah
+   *   deshalb bisher wirkungslos aus.
+   */
   function updateMineLink() {
     var link = $('#lnkMine');
     if (!link) { return; }
-    link.hidden = readMine().length === 0;
+    var mine = readMine();
+    link.hidden = mine.length === 0;
+    if (!mine.length) { return; }
+    link.setAttribute('href', mine.length === 1 ? ('./' + mine[0].hash) : ('./' + MINE_HASH));
+  }
+
+  /** Holt den Kasten ins Bild und uebergibt ihm die Tastaturfuehrung. */
+  function zeigeMeine() {
+    var box = $('#mineBox');
+    if (!box || box.hidden) { return; }
+    box.scrollIntoView({ block: 'start', behavior: ruhig() ? 'auto' : 'smooth' });
+    var erste = $('#mineList a');
+    if (erste) { erste.focus({ preventScroll: true }); }
   }
 
   function renderMine() {
@@ -3254,6 +3279,15 @@
 
     $('#levelChip').addEventListener('click', openRundenbuch);
 
+    /* Steht das Fragment schon, loest ein weiterer Klick kein hashchange aus.
+       Dann springt dieser Weg. */
+    $('#lnkMine').addEventListener('click', function (ev) {
+      if (this.getAttribute('href') !== './' + MINE_HASH) { return; }
+      if (location.hash !== MINE_HASH) { return; }
+      ev.preventDefault();
+      zeigeMeine();
+    });
+
     $('#btnShareView').addEventListener('click', function () {
       nativeShare({
         title: state.doc.title || t('list.untitled'),
@@ -3351,6 +3385,8 @@
       state.mode = 'start';
       renderMine();
       showView('viewStart');
+      /* Nach dem Zeichnen, denn showView() setzt den Rollstand zurueck. */
+      if (location.hash === MINE_HASH) { setTimeout(zeigeMeine, 0); }
       return;
     }
     /* Bereits geladene Liste nicht erneut anfordern. */
@@ -3422,8 +3458,8 @@
       $('#lnkBack').textContent = t('settings.backStart');
     }
 
-    var mineLink = $('#lnkMine');
-    if (mineLink) { mineLink.hidden = readMine().length === 0; }
+    /* Auch von hier fuehrt der Verweis dorthin, wo etwas zu sehen ist. */
+    updateMineLink();
 
     detectStore().then(function (store) {
       Store = store;
