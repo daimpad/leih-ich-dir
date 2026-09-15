@@ -587,7 +587,7 @@
           <textarea id="voiceText" class="textarea voice-text" rows="6" maxlength="1500"
                     aria-required="true"
                     data-i18n-placeholder="voice.placeholder"
-                    placeholder="Mehrere Sachen am Stück sprechen oder eintippen"></textarea>
+                    placeholder="Mehrere Gegenstände am Stück sprechen oder eintippen"></textarea>
           <div class="voicerow">
             <button type="button" id="btnVoiceApply" class="btn btn--primary btn--sm" data-i18n="voice.apply">Übernehmen</button>
             <small class="hint" id="voiceHint" hidden></small>
@@ -605,7 +605,7 @@
         <h3 class="empty-head" data-i18n="items.emptyHead">Noch nichts drin</h3>
         <p id="itemsEmptyText"></p>
         <p class="empty-eg" id="itemsEmptyEg" hidden>
-          <span class="empty-eg__label" data-i18n="items.emptyEg">Zum Beispiel</span>
+          <span class="empty-eg__label" data-i18n="items.emptyEg">z. B.</span>
           <span class="empty-eg__list" id="itemsEmptyList"></span>
         </p>
       </div>
@@ -630,7 +630,7 @@
           Diese Angaben werden mitverschlüsselt und nur für die Anfrage-Schaltflächen Deiner Freunde genutzt.
         </p>
         <div class="spaced-lg field">
-          <label class="field__label" for="cfgName" data-i18n="contact.name">Dein Name</label>
+          <label class="field__label" for="cfgName" data-i18n="contact.name">Dein Name, freiwillig</label>
           <input type="text" id="cfgName" class="input" maxlength="60" autocomplete="name"
                  data-i18n-placeholder="contact.namePlaceholder" placeholder="">
           <small class="hint" data-i18n="contact.nameHint">
@@ -638,7 +638,7 @@
           </small>
         </div>
         <div class="field">
-          <label class="field__label" for="cfgEmail" data-i18n="settings.email">E-Mail für Anfragen</label>
+          <label class="field__label" for="cfgEmail" data-i18n="settings.email">E-Mail für Anfragen, freiwillig</label>
           <input type="email" id="cfgEmail" class="input" maxlength="120" autocomplete="email" placeholder="name@example.org">
         </div>
         <div class="field">
@@ -687,7 +687,7 @@
     <!-- 4 · Link weitergeben, nur im Bearbeitenmodus -->
     <section class="card" id="shareBox" hidden>
       <div class="card__head">
-        <h2 class="card__title" data-i18n="share.headline">Link weitergeben</h2>
+        <h2 class="card__title" data-i18n="share.headline">Link teilen</h2>
         <!-- Auskunft auf Zuruf: der Satz zur Technik steht im Titel des
              Zeichens und erscheint beim Zeigen. -->
         <span class="info" tabindex="0" role="note" id="shareInfo"
@@ -708,7 +708,8 @@
 
       <div class="tabpanel" id="tabView" role="tabpanel" aria-labelledby="tabBtnView">
         <p class="hint" data-i18n="share.viewHint">
-          Diesen Link sehen Deine Freunde. Ändern lässt sich damit nichts.
+          Diesen Link geben Deine Freunde weiter. Er zeigt die Liste, ändern
+          lässt sich damit nichts.
         </p>
         <div class="spaced linkrow">
           <label class="sr-only" for="linkView" data-i18n="share.viewLabel">Ansehen-Link für Freunde</label>
@@ -791,7 +792,7 @@
            Loeschknopf braucht in Safari eigene Zuruecksetzung, und dafuer
            gaebe es hier keinen Baustein. -->
       <div class="field">
-        <label class="sr-only" for="circleQ" data-i18n="circle.searchLabel">Suchen</label>
+        <label class="sr-only" for="circleQ" data-i18n="circle.searchLabel">Unter allen Sachen suchen</label>
         <input type="text" id="circleQ" class="input" autocomplete="off"
                data-i18n-placeholder="circle.searchPlaceholder" placeholder="Suchen">
         <p class="hint" id="circleCount" role="status" aria-live="polite"></p>

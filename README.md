@@ -359,6 +359,7 @@ weniger Bewegung, nicht weniger Anerkennung.
 │   ├── purge.php                 Wartungsskript für alte Listen
 │   ├── build-fonts.py            erzeugt die Schriftteilmengen
 │   ├── i18n-check.js             prüft beide Wörterbücher auf denselben Schlüsselsatz
+│   ├── fallback-check.js         prüft die Ersatztexte im HTML gegen das Wörterbuch
 │   └── check-deployment.php      prüft eine laufende Installation von außen
 ├── tests/
 │   ├── api-test.php              Funktionstest des Backends, ohne Abhängigkeiten
