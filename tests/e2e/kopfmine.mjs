@@ -114,6 +114,64 @@ for (const w of [900, 1280]) {
   ok(w + 'px: keine schwebende Schaltflaeche', m.fab === 'none', m.fab);
 }
 
+/*
+ * Die Schwelle selbst, in beiden Sprachen.
+ *
+ * Bei 42rem wechselt die Kopfleiste zur schwebenden Schaltflaeche, und die
+ * Zahl ist gemessen und nicht gegriffen: Damit Marke, beide Wege und die drei
+ * Schalter in eine Zeile passen, braucht Deutsch 635 Punkte und Englisch 665.
+ * Genau ueber der Schwelle muss die Zeile also auch auf Englisch halten —
+ * andernfalls rutschten die Schalter unter die Marke und schoeben den Inhalt
+ * nach unten, und zwar nur fuer die eine Sprache, in der niemand nachsieht.
+ * Knapp darunter muss umgekehrt die Schaltflaeche uebernehmen.
+ */
+console.log('\n· Die Schwelle bei 42rem, deutsch und englisch');
+for (const sprache of ['de', 'en']) {
+  await page.goto(URL, { waitUntil: 'networkidle' });
+  await page.evaluate((l) => { localStorage.setItem('lid.lang', l); }, sprache);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(300);
+
+  await page.setViewportSize({ width: 672, height: 780 });
+  await page.waitForTimeout(250);
+  {
+    const m = await page.evaluate(() => ({
+      kopf: getComputedStyle(document.querySelector('#barMine')).display,
+      fab: getComputedStyle(document.querySelector('#fab')).display
+    }));
+    ok('672px [' + sprache + ']: die Schaltflaeche traegt', m.fab === 'block' && m.kopf === 'none',
+       m.fab + ' / ' + m.kopf);
+  }
+
+  await page.setViewportSize({ width: 680, height: 780 });
+  await page.waitForTimeout(250);
+  {
+    const m = await page.evaluate(() => {
+      const a = document.querySelector('#lnkMine'), b = document.querySelector('#lnkCircle');
+      return { a: a.getBoundingClientRect(), b: b.getBoundingClientRect(),
+               ctl: document.querySelector('.bar-controls').getBoundingClientRect(),
+               marke: document.querySelector('.brand').getBoundingClientRect(),
+               fab: getComputedStyle(document.querySelector('#fab')).display,
+               worte: a.innerText.trim() + ' / ' + b.innerText.trim(),
+               ueberlauf: document.documentElement.scrollWidth > window.innerWidth + 1 };
+    });
+    ok('680px [' + sprache + ']: die Kopfleiste traegt', m.fab === 'none', m.fab);
+    ok('680px [' + sprache + ']: eine Zeile, kein Umbruch',
+       Math.abs(m.a.top - m.ctl.top) < 2 && Math.abs(m.b.top - m.ctl.top) < 2 &&
+       Math.abs(m.marke.top - m.ctl.top) < 14,
+       'Marke ' + Math.round(m.marke.top) + ', Wege ' + Math.round(m.a.top) +
+       '/' + Math.round(m.b.top) + ', Schalter ' + Math.round(m.ctl.top));
+    ok('680px [' + sprache + ']: die Wege stehen links von den Schaltern',
+       m.b.right <= m.ctl.left + 1,
+       'Weg endet ' + Math.round(m.b.right) + ', Schalter ab ' + Math.round(m.ctl.left));
+    ok('680px [' + sprache + ']: kein waagerechter Ueberlauf', !m.ueberlauf);
+    ok('680px [' + sprache + ']: beide ausgeschrieben',
+       sprache === 'de' ? m.worte === 'Leihliste / Superliste'
+                        : m.worte === 'Lending list / Super list', m.worte);
+  }
+}
+await page.evaluate(() => { localStorage.setItem('lid.lang', 'de'); });
+
 console.log('\n· Der Weg fuehrt hinein');
 await page.setViewportSize({ width: 390, height: 780 });
 await page.waitForTimeout(200);
