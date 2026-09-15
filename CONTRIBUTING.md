@@ -36,9 +36,10 @@ find . -name '*.php' -print0 | xargs -0 -n1 php -l   # PHP-Syntax
 node --check app.js                                  # JavaScript-Syntax
 php tests/api-test.php                               # Funktionstest des Backends
 node tools/i18n-check.js                             # beide Wörterbücher vollständig
+node tools/fallback-check.js                         # Ersatztexte im HTML wie im Wörterbuch
 ```
 
-Diese vier Prüfungen laufen als GitHub-Action; ein Pull Request sollte sie
+Diese fünf Prüfungen laufen als GitHub-Action; ein Pull Request sollte sie
 bestehen. Sie kommen ohne Browser aus und sagen deshalb nichts darüber, ob die
 Oberfläche sich verhält wie zugesagt.
 

@@ -69,3 +69,10 @@ jobs:
 
       - name: Beide Woerterbuecher vollstaendig
         run: node tools/i18n-check.js
+
+      # Jeder Knoten mit data-i18n traegt den Satz zweimal, im HTML und im
+      # Woerterbuch. Der aus dem HTML ist nur sichtbar, bis applyStaticI18n()
+      # ihn ueberschreibt — und dauerhaft, wenn JavaScript ausfaellt. Genau
+      # deshalb faellt es niemandem auf, wenn beide auseinanderlaufen.
+      - name: Ersatztexte im HTML wie im Woerterbuch
+        run: node tools/fallback-check.js
