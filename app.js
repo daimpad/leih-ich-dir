@@ -4614,39 +4614,73 @@
    * 13 · Ereignisse
    * ===================================================================== */
 
+  /**
+   * Die Horcher, nach Ansichten geordnet. bindEvents() selbst ist nur noch das
+   * Inhaltsverzeichnis: Wer eine Schaltflaeche sucht, liest hier, in welcher
+   * Ansicht sie sitzt, und geht dann genau dorthin.
+   *
+   * Zuvor standen alle siebenunddreissig in einer einzigen Funktion von 222
+   * Zeilen. Das war kein Schoenheitsfehler: Die naechstgroesste Funktion im
+   * Quelltext hat 113, und eine Liste, die doppelt so lang ist wie alles
+   * andere, liest niemand mehr von oben nach unten — man sucht darin.
+   *
+   * Aufgerufen wird nur von init(), und nur einmal je Ladevorgang. Die
+   * Einstellungsseite hat ihren eigenen Einstieg und holt sich mit bindNav()
+   * genau das, was sie mit dieser Seite teilt.
+   */
   function bindEvents() {
+    bindKopf();
+    bindListe();
+    bindEintragen();
+    bindTeilen();
+    bindFenster();
+    bindKreis();
+    bindSeite();
+  }
+
+  /**
+   * Die Kopfleiste: Sprache, die beiden Wege zu den eigenen Listen und die
+   * Marke mit der Feierstufe. Licht und Einstellungen haengen nicht hier — das
+   * eine schaltet theme.js noch vor dem Koerper, das andere ist ein
+   * gewoehnlicher Verweis und braucht kein JavaScript.
+   */
+  function bindKopf() {
     $('#btnLang').addEventListener('click', function () {
       setLang(lang === 'de' ? 'en' : 'de');
     });
+    bindNav();
+    $('#levelChip').addEventListener('click', openRundenbuch);
+  }
 
-    $('#btnMic').addEventListener('click', toggleMic);
-
-    /* Der Verweis oeffnet dieselbe Box zum Eintippen, auch ohne Mikrofon. */
-    $('#btnBulk').addEventListener('click', function () {
-      setVoiceOpen(!voiceOpen);
-      if (voiceOpen) { $('#voiceText').focus(); }
-    });
-
-    /* Reiter im Abschnitt Link teilen */
-    $$('.tab').forEach(function (tab) {
-      tab.addEventListener('click', function () { selectTab(tab.getAttribute('data-tab')); });
-    });
-    $('#btnVoiceApply').addEventListener('click', function () {
-      processVoiceText($('#voiceText').value);
-    });
-
+  /**
+   * Die Leihliste: anlegen, aktualisieren, eintragen, benennen, oeffnen, und
+   * der Zugangskasten am Ende des Anlegens. Dazu der Kontaktkasten — ein
+   * eigener Aufklapper, aber er schreibt in dasselbe state.doc und steht und
+   * faellt mit ihm.
+   */
+  function bindListe() {
     $$('[data-create]').forEach(function (btn) {
       btn.addEventListener('click', createList);
     });
     $('#btnRefresh').addEventListener('click', function () { refresh(true); });
-
     $('#addForm').addEventListener('submit', function (ev) {
       ev.preventDefault();
       addItem($('#addName').value, '');
       $('#addName').value = '';
       $('#addName').focus();
     });
-
+    $('#listTitleInput').addEventListener('input', function () {
+      state.doc.title = this.value;
+      touch();
+    });
+    /* Delegation für die Inventarliste */
+    $('#itemList').addEventListener('click', function (ev) {
+      var hit = ev.target.closest('[data-act]');
+      if (!hit) { return; }
+      var id = hit.closest('.item').getAttribute('data-id');
+      if (hit.getAttribute('data-act') === 'ask') { openAskModal(id); return; }
+      openItemModal(id);
+    });
     /* Der Zugang wird weggeräumt, wenn er ausdrücklich gesichert wurde. Das
        ist der Abschluss des Anlegens und nicht das Anlegen selbst: Wer den
        Bearbeiten-Link nicht bestaetigt hat, hat die Liste noch nicht in der
@@ -4665,48 +4699,42 @@
       this.checked = true;
       this.dispatchEvent(new Event('change', { bubbles: true }));
     });
-
-    $('#modalClose').addEventListener('click', closeItemModal);
-    $('#itemModal').addEventListener('close', function () {
-      modalItemId = null;
-      feierNachholen();
-    });
-
-    $('#levelChip').addEventListener('click', openRundenbuch);
-
-    bindNav();
-
-    $('#btnShareView').addEventListener('click', function () {
-      nativeShare({
-        title: state.doc.title || t('list.untitled'),
-        text: t('share.message', { title: state.doc.title || t('list.untitled') }),
-        url: viewLink()
-      }).then(function (ok) {
-        /* Ein Abbruch ist kein Fehler und keine Weitergabe: nativeShare()
-           unterscheidet beides bereits, es wurde bisher nur weggeworfen. */
-        if (ok) { feierWeiter(); }
-      });
-    });
-
-    $('#listTitleInput').addEventListener('input', function () {
-      state.doc.title = this.value;
-      touch();
-    });
-
+    /* Der Kontaktkasten. Vier Felder, ein Muster: schreiben und touch(). */
     $('#cfgName').addEventListener('input', function () { state.doc.contact.name = this.value; touch(); });
     $('#cfgEmail').addEventListener('input', function () { state.doc.contact.email = this.value.trim(); touch(); });
     $('#cfgPhone').addEventListener('input', function () { state.doc.contact.phone = this.value.trim(); touch(); });
     $('#cfgShowBorrower').addEventListener('change', function () { state.doc.showBorrower = this.checked; touch(); });
+  }
 
-    /* Delegation für die Inventarliste */
-    $('#itemList').addEventListener('click', function (ev) {
-      var hit = ev.target.closest('[data-act]');
-      if (!hit) { return; }
-      var id = hit.closest('.item').getAttribute('data-id');
-      if (hit.getAttribute('data-act') === 'ask') { openAskModal(id); return; }
-      openItemModal(id);
+  /**
+   * Sprechen und Sammeleingabe. Beide fuehren in dieselbe Box: Wer kein
+   * Mikrofon hat oder keines geben moechte, tippt dort mehrere Sachen am Stueck.
+   */
+  function bindEintragen() {
+    $('#btnMic').addEventListener('click', toggleMic);
+    /* Der Verweis oeffnet dieselbe Box zum Eintippen, auch ohne Mikrofon. */
+    $('#btnBulk').addEventListener('click', function () {
+      setVoiceOpen(!voiceOpen);
+      if (voiceOpen) { $('#voiceText').focus(); }
     });
+    $('#btnVoiceApply').addEventListener('click', function () {
+      processVoiceText($('#voiceText').value);
+    });
+  }
 
+  /**
+   * Der Kasten zum Weitergeben: die beiden Reiter, das Kopieren, das Aufdecken
+   * des geheimen Links und die Weitergabe ueber das Geraet.
+   *
+   * [data-copy] steht auch an den Feldern der Superliste. Das ist kein
+   * Versehen: Es ist ein Muster und keine Ansicht, und der Handgriff
+   * unterscheidet die Faelle an der Kennung des Ziels.
+   */
+  function bindTeilen() {
+    /* Reiter im Abschnitt Link teilen */
+    $$('.tab').forEach(function (tab) {
+      tab.addEventListener('click', function () { selectTab(tab.getAttribute('data-tab')); });
+    });
     $$('[data-copy]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var ziel = btn.getAttribute('data-copy');
@@ -4727,18 +4755,43 @@
         });
       });
     });
-
     $('#btnRevealEdit').addEventListener('click', function () {
       var input = $('#linkEdit');
       var hidden = input.type === 'password';
       input.type = hidden ? 'text' : 'password';
       this.textContent = t(hidden ? 'share.hide' : 'share.reveal');
     });
+    $('#btnShareView').addEventListener('click', function () {
+      nativeShare({
+        title: state.doc.title || t('list.untitled'),
+        text: t('share.message', { title: state.doc.title || t('list.untitled') }),
+        url: viewLink()
+      }).then(function (ok) {
+        /* Ein Abbruch ist kein Fehler und keine Weitergabe: nativeShare()
+           unterscheidet beides bereits, es wurde bisher nur weggeworfen. */
+        if (ok) { feierWeiter(); }
+      });
+    });
+  }
 
-    /* ---------------------------------------------------------------- *
-     * Superliste
-     * ---------------------------------------------------------------- */
+  /**
+   * Das Fenster zu einem Gegenstand. Schliessen kann es auch der Browser, ueber
+   * Escape und den Hintergrund; deshalb haengt das Aufraeumen am close-Ereignis
+   * und nicht am Knopf.
+   */
+  function bindFenster() {
+    $('#modalClose').addEventListener('click', closeItemModal);
+    $('#itemModal').addEventListener('close', function () {
+      modalItemId = null;
+      feierNachholen();
+    });
+  }
 
+  /**
+   * Die Superliste. Sie steht neben state und nicht darin, und ihre
+   * Bedienelemente stehen hier aus demselben Grund beisammen.
+   */
+  function bindKreis() {
     $('#btnRevealCircle').addEventListener('click', function () {
       var input = $('#circleLink');
       var hidden = input.type === 'password';
@@ -4813,7 +4866,14 @@
         renderKreisListe();
       });
     });
+  }
 
+  /**
+   * Was nicht an einer Ansicht haengt, sondern am Fenster: der letzte
+   * Schreibvorgang vor dem Verlassen, das Nachladen beim Zurueckkehren und der
+   * Weg, auf dem jede Ansicht ueberhaupt erst aufgerufen wird.
+   */
+  function bindSeite() {
     /* Ungespeicherte Änderungen vor dem Verlassen wegschreiben. */
     window.addEventListener('beforeunload', function (ev) {
       if (state.mode === 'edit' && state.dirty) {
@@ -4822,12 +4882,10 @@
         ev.returnValue = '';
       }
     });
-
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) { return; }
       if (state.mode === 'view') { refresh(false); }
     });
-
     window.addEventListener('hashchange', route);
   }
 

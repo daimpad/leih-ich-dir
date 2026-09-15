@@ -79,20 +79,30 @@ const MESSUNG = `(() => {
   };
 })()`;
 
-async function pruefe(p, name, breite) {
+async function pruefe(p, name, breite, sprache) {
   await p.waitForTimeout(350);
   const m = await p.evaluate(MESSUNG);
-  ok(name + ' @' + breite + ': kein waagerechter Ueberlauf', m.seite <= m.fenster,
+  const wo = name + ' [' + sprache + '] @' + breite + ': ';
+  ok(wo + 'kein waagerechter Ueberlauf', m.seite <= m.fenster,
      'scrollWidth ' + m.seite + ' > ' + m.fenster);
-  ok(name + ' @' + breite + ': nichts ragt seitlich heraus', m.raus.length === 0, m.raus.join(' | '));
-  ok(name + ' @' + breite + ': alle Trefferflaechen >= 44', m.klein.length === 0, m.klein.join(' | '));
-  ok(name + ' @' + breite + ': niemand stiehlt den Griff des Nachbarn', m.gestohlen.length === 0, m.gestohlen.join(' | '));
+  ok(wo + 'nichts ragt seitlich heraus', m.raus.length === 0, m.raus.join(' | '));
+  ok(wo + 'alle Trefferflaechen >= 44', m.klein.length === 0, m.klein.join(' | '));
+  ok(wo + 'niemand stiehlt den Griff des Nachbarn', m.gestohlen.length === 0, m.gestohlen.join(' | '));
   return m;
 }
 
+/* Beide Sprachen, nicht nur Deutsch. i18n-check sagt, dass die Woerterbuecher
+   denselben Schluesselsatz tragen — nicht, dass die englischen Saetze auch
+   passen. Und sie sind laenger: In der Kopfleiste braucht Englisch 665 Punkte,
+   wo Deutsch mit 635 auskommt. Wo dieser Unterschied eine Schaltflaeche unter
+   44 Punkte druecken oder eine Zeile aus dem Fenster schieben wuerde, stand es
+   bisher in keiner Zusicherung. Vier Durchgaenge statt zweier, rund eine
+   Minute statt einer halben. */
+for (const sprache of ['de', 'en']) {
 for (const breite of [320, 390]) {
-  console.log('=== ' + breite + ' Punkte ===');
-  const ctx = await br.newContext({ viewport:{width:breite, height:800}, locale:'de-DE',
+  console.log('=== ' + sprache + ' @ ' + breite + ' Punkte ===');
+  const ctx = await br.newContext({ viewport:{width:breite, height:800},
+    locale: sprache === 'de' ? 'de-DE' : 'en-GB',
     hasTouch:true, isMobile:true, deviceScaleFactor:2,
     userAgent:'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Mobile Safari/537.36' });
   await ctx.addInitScript(() => { Object.defineProperty(navigator,'share',{value:function(){return Promise.resolve();},configurable:true}); });
@@ -101,7 +111,7 @@ for (const breite of [320, 390]) {
   p.on('pageerror', e => fehler.push(e.message));
 
   await p.goto(BASE + '/', { waitUntil:'networkidle' });
-  await p.evaluate(() => { localStorage.clear(); localStorage.setItem('lid.lang','de'); });
+  await p.evaluate((l) => { localStorage.clear(); localStorage.setItem('lid.lang', l); }, sprache);
   await p.reload({ waitUntil:'networkidle' });
 
   const anna = await mach(p, { v:1, title:'Annas sehr langer Listenname zum Ausprobieren', 
@@ -111,16 +121,16 @@ for (const breite of [320, 390]) {
       {id:'i2',name:'Rasenmäher',note:'',status:'lent',borrower:'Carla Musterfrau',since:'2026-08-01'}]});
 
   console.log('· Startseite');
-  await pruefe(p, 'Start', breite);
+  await pruefe(p, 'Start', breite, sprache);
 
   console.log('· Liste ansehen');
   await p.goto(BASE + '/#v='+anna.id+'.'+anna.keyStr, { waitUntil:'networkidle' });
   await p.waitForSelector('#viewList:not([hidden])');
-  await pruefe(p, 'Ansehen', breite);
+  await pruefe(p, 'Ansehen', breite, sprache);
 
   console.log('· Anfrage-Dialog');
   await p.locator('#itemList .item-ask').first().click();
-  await pruefe(p, 'Anfrage', breite);
+  await pruefe(p, 'Anfrage', breite, sprache);
   await p.locator('#modalClose').click();
   await p.waitForTimeout(250);
 
@@ -128,17 +138,17 @@ for (const breite of [320, 390]) {
   await p.goto(BASE + '/#e='+anna.id+'.'+anna.keyStr+'.'+anna.token, { waitUntil:'networkidle' });
   await p.waitForSelector('#viewList:not([hidden])');
   await p.waitForTimeout(500);
-  await pruefe(p, 'Bearbeiten', breite);
+  await pruefe(p, 'Bearbeiten', breite, sprache);
 
   console.log('· Gegenstand-Dialog');
   await p.locator('#itemList .itemrow').first().click();
-  await pruefe(p, 'Gegenstand', breite);
+  await pruefe(p, 'Gegenstand', breite, sprache);
   await p.locator('#modalClose').click();
   await p.waitForTimeout(250);
 
   console.log('· Kontakt und Teilen aufgeklappt');
   await p.locator('#contactBox summary').click();
-  await pruefe(p, 'Kontakt', breite);
+  await pruefe(p, 'Kontakt', breite, sprache);
 
   console.log('· Superliste');
   await p.goto(BASE + '/', { waitUntil:'networkidle' });
@@ -151,26 +161,28 @@ for (const breite of [320, 390]) {
   await p.locator('#circleAddLink').fill('#v='+anna.id+'.'+anna.keyStr);
   await p.locator('#btnCircleAdd').click();
   await p.waitForTimeout(900);
-  await pruefe(p, 'Superliste', breite);
+  await pruefe(p, 'Superliste', breite, sprache);
 
   console.log('· Einstellungen');
   await p.goto(BASE + '/einstellungen.html'+kh, { waitUntil:'networkidle' });
   await p.waitForTimeout(700);
-  await pruefe(p, 'Einstellungen', breite);
+  await pruefe(p, 'Einstellungen', breite, sprache);
 
   console.log('· Fehleransicht');
   await p.goto(BASE + '/#v=00112233445566778899aabbccddeeff.' + 'A'.repeat(43), { waitUntil:'networkidle' });
   await p.waitForTimeout(700);
-  await pruefe(p, 'Fehler', breite);
+  await pruefe(p, 'Fehler', breite, sprache);
 
   console.log('· Rechtstexte');
   for (const seite of ['ueber.html','datenschutz.html','impressum.html']) {
     await p.goto(BASE + '/'+seite, { waitUntil:'networkidle' });
-    await pruefe(p, seite, breite);
+    await pruefe(p, seite, breite, sprache);
   }
 
-  ok('keine unbehandelte Ausnahme im ganzen Rundgang @'+breite, fehler.length === 0, fehler.join(' | '));
+  ok('keine unbehandelte Ausnahme im ganzen Rundgang ['+sprache+'] @'+breite,
+     fehler.length === 0, fehler.join(' | '));
   await ctx.close();
+}
 }
 
 console.log('\n' + pass + ' erfuellt, ' + fail + ' offen');
