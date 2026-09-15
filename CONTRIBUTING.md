@@ -38,12 +38,27 @@ php tests/api-test.php                               # Funktionstest des Backend
 node tools/i18n-check.js                             # beide Wörterbücher vollständig
 ```
 
-Alle vier Prüfungen laufen als GitHub-Action; ein Pull Request sollte sie
-bestehen. Der Funktionstest deckt bislang nur das Backend ab. Änderungen an der
-Oberfläche bitte zusätzlich manuell durchspielen: Liste anlegen, Gegenstand
-hinzufügen, Status wechseln, Ansehen-Link in einem zweiten Browserprofil öffnen,
-Sprache umschalten. Ein automatisierter Browsertest wäre ein lohnender Beitrag,
-sofern er die Anwendung selbst abhängigkeitsfrei lässt.
+Diese vier Prüfungen laufen als GitHub-Action; ein Pull Request sollte sie
+bestehen. Sie kommen ohne Browser aus und sagen deshalb nichts darüber, ob die
+Oberfläche sich verhält wie zugesagt.
+
+Dafür liegen die Browsertests unter `tests/e2e/`. Sie fahren die Seite in
+einem echten Chromium durch und messen, was dabei herauskommt: Größen in
+Punkten, Statuscodes, Inhalte im Dokument, unbehandelte Ausnahmen.
+
+```bash
+php -S 127.0.0.1:8099            # Fenster 1
+node tests/e2e/lauf.mjs          # Fenster 2
+```
+
+Playwright ist die einzige Abhängigkeit, und sie gehört zu den Tests, nicht
+zur Anwendung: Ausgeliefert wird davon nichts. Die Anleitung samt
+Umgebungsvariablen steht in `tests/e2e/README.md`. In der GitHub-Action laufen
+sie nicht mit, ein Browser wäre dort ein Vielfaches der übrigen Laufzeit.
+
+Fällt eine Zusicherung, erst nachsehen, ob sie noch gilt: Mehrere Suiten
+hielten Anforderungen fest, die später abgelöst wurden. Solche Zeilen werden
+nachgezogen und nicht repariert.
 
 ## Code-Stil
 
@@ -110,11 +125,14 @@ Sichtbare Texte folgen diesen Regeln:
   kostet; die Klappenzeilen der höchsten Feierstufe, also der Stufenaufstieg
   und die laut gefeierte Heimkehr; und der erste Satz des Aufrufs auf der
   Startseite. Von den rund dreißig Feiertexten tragen zwei eines. Der
-  Zugangskasten des Freundeskreises hat bewusst keines bekommen, und
+  Zugangskasten der Superliste hat bewusst keines bekommen, und
   Einstellungen, Hinweise, Abzeichentexte, Rundenbuch und jede Fehlermeldung
   bleiben ohne. Ein Ausrufezeichen, das überall steht, ruft nirgends mehr.
 - Deutsches Wort vor Anglizismus, wo es eines gibt: Schaltfläche statt Button.
-- Keine Werbewörter.
+- Keine Werbewörter. Eine benannte Ausnahme: **Superliste** ist der Name
+  einer Sache und keine Anpreisung. Er beschreibt, was sie ist, nämlich eine
+  Liste der Leihlisten, und er ist als Name gewählt worden, nicht als
+  Adjektiv. Ein zweites Wort dieser Machart kommt nicht dazu.
 
 Dasselbe gilt für Kommentare im Code, Commit-Nachrichten und
 Pull-Request-Beschreibungen.

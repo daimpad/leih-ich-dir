@@ -64,6 +64,22 @@
     <rect x="8" y="29" width="6" height="6" fill="currentColor" stroke="none"/>
     <rect x="8" y="45" width="6" height="6" fill="currentColor" stroke="none"/>
   </symbol>
+  <symbol id="i-leihliste" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <rect x="12" y="8" width="40" height="48"/>
+    <rect x="19" y="19" width="5" height="5" fill="currentColor" stroke="none"/>
+    <path d="M30 21.5 L45 21.5"/>
+    <rect x="19" y="30" width="5" height="5" fill="currentColor" stroke="none"/>
+    <path d="M30 32.5 L45 32.5"/>
+    <rect x="19" y="41" width="5" height="5" fill="currentColor" stroke="none"/>
+    <path d="M30 43.5 L45 43.5"/>
+  </symbol>
+  <symbol id="i-kreis" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <circle cx="13" cy="24" r="7" fill="currentColor" stroke="none"/>
+    <circle cx="32" cy="18" r="8" fill="currentColor" stroke="none"/>
+    <circle cx="51" cy="24" r="7" fill="currentColor" stroke="none"/>
+    <path d="M6 52 L6 40 L26 40 L26 52"/>
+    <path d="M38 52 L38 40 L58 40 L58 52"/>
+  </symbol>
   <symbol id="i-chev" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter">
     <path d="M26 16 L42 32 L26 48"/>
   </symbol>
@@ -88,15 +104,19 @@
         <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-moon" id="themeIconUse"/></svg>
       </button>
     </div>
-    <!-- Der Weg zu den eigenen Listen ist ein Geschwister der Bedienelemente
-         und nicht eines von ihnen: Schmal rueckt er dadurch in eine eigene
-         Zeile und steht dort ausgeschrieben und unterstrichen, statt als
-         namenloses Zeichen zwischen Sprache, Licht und Einstellungen zu
-         verschwinden. Er erscheint erst, wenn dieses Geraet Listen kennt. -->
-    <a id="lnkMine" class="ctl-square ctl-wide" href="./" hidden data-i18n-label="mine.link">
-      <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-list"/></svg>
-      <span class="ctl-label" data-i18n="mine.link">Meine Listen</span>
-    </a>
+    <!-- Dieselben zwei Wege wie auf der Hauptseite, aus demselben Grund und
+         mit derselben Schaltung in app.js. Schmal treten sie ab, und die
+         schwebende Schaltflaeche am Fuss der Seite uebernimmt. -->
+    <nav class="bar-mine" id="barMine" hidden data-i18n-label="nav.mine">
+      <a id="lnkMine" class="ctl-square ctl-wide" href="./" hidden>
+        <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-leihliste"/></svg>
+        <span class="ctl-label" data-i18n="nav.list">Leihliste</span>
+      </a>
+      <a id="lnkCircle" class="ctl-square ctl-wide" href="./" hidden>
+        <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-kreis"/></svg>
+        <span class="ctl-label" data-i18n="nav.circle">Superliste</span>
+      </a>
+    </nav>
   </div>
 </header>
 
@@ -238,6 +258,23 @@
     </p>
   </div>
 </footer>
+
+<!-- Die schwebende Schaltflaeche, wie auf der Hauptseite. -->
+<details class="fab" id="fab" hidden>
+  <summary class="fab__btn" data-i18n-label="nav.mine">
+    <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-list"/></svg>
+  </summary>
+  <div class="fab__menu">
+    <a class="fab__item" id="fabMine" href="./" hidden>
+      <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-leihliste"/></svg>
+      <span data-i18n="nav.list">Leihliste</span>
+    </a>
+    <a class="fab__item" id="fabCircle" href="./" hidden>
+      <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-kreis"/></svg>
+      <span data-i18n="nav.circle">Superliste</span>
+    </a>
+  </div>
+</details>
 
 <div class="toast-region" id="toastRegion" aria-live="polite">
   <div class="toast" id="toast" hidden>

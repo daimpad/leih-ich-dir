@@ -324,15 +324,22 @@
         <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gear"/></svg>
       </a>
     </div>
-    <!-- Der Weg zu den eigenen Listen ist ein Geschwister der Bedienelemente
-         und nicht eines von ihnen: Schmal rueckt er dadurch in eine eigene
-         Zeile und steht dort ausgeschrieben und unterstrichen, statt als
-         namenloses Zeichen zwischen Sprache, Licht und Einstellungen zu
-         verschwinden. Er erscheint erst, wenn dieses Geraet Listen kennt. -->
-    <a id="lnkMine" class="ctl-square ctl-wide" href="./" hidden data-i18n-label="mine.link">
-      <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-list"/></svg>
-      <span class="ctl-label" data-i18n="mine.link">Meine Listen</span>
-    </a>
+    <!-- Die beiden Wege zu den eigenen Listen sind Geschwister der
+         Bedienelemente und nicht eines von ihnen. Sie tragen je ihr Zeichen
+         und ihr Wort, denn seit es zwei Arten von Listen gibt, sagt "Meine
+         Listen" nicht mehr, wo man landet. Jeder erscheint erst, wenn dieses
+         Geraet eine Liste seiner Art kennt. Schmal treten beide ganz ab: Dort
+         uebernimmt die schwebende Schaltflaeche am Fuss der Seite. -->
+    <nav class="bar-mine" id="barMine" hidden data-i18n-label="nav.mine">
+      <a id="lnkMine" class="ctl-square ctl-wide" href="./" hidden>
+        <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-leihliste"/></svg>
+        <span class="ctl-label" data-i18n="nav.list">Leihliste</span>
+      </a>
+      <a id="lnkCircle" class="ctl-square ctl-wide" href="./" hidden>
+        <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-kreis"/></svg>
+        <span class="ctl-label" data-i18n="nav.circle">Superliste</span>
+      </a>
+    </nav>
   </div>
 </header>
 
@@ -449,7 +456,7 @@
       </p>
     </section>
 
-    <!-- Der Freundeskreis. Dieselbe Bauform, damit der Vergleich leicht
+    <!-- Die Superliste. Dieselbe Bauform, damit der Vergleich leicht
          faellt, aber ein eigenes Zeichen und ein eigener Aufruf: Der zweite
          Knopf traegt bewusst nicht die volle Farbe, weil eine eigene Liste
          der Anfang ist und der Kreis der zweite Schritt. -->
@@ -458,18 +465,18 @@
         <span class="howto__mark howto__mark--kreis" aria-hidden="true">
           <svg class="ico" focusable="false"><use href="#i-kreis"/></svg>
         </span>
-        <span data-i18n="circleSteps.headline">So geht’s: Leihlisten zum eigenen Freundeskreis hinzufügen</span>
+        <span data-i18n="circleSteps.headline">So geht’s: aus vielen Leihlisten eine Superliste</span>
       </h2>
       <p class="hint howto__lead" data-i18n="circleSteps.lead"></p>
       <ol class="steps">
         <li>
           <span class="step-no step-no--kreis" aria-hidden="true">1</span>
-          <h3 data-i18n="circleSteps.one">Ansehen-Link bekommen</h3>
+          <h3 data-i18n="circleSteps.one">Ansehen-Links sammeln</h3>
           <p data-i18n="circleSteps.oneText"></p>
         </li>
         <li>
           <span class="step-no step-no--kreis" aria-hidden="true">2</span>
-          <h3 data-i18n="circleSteps.two">In den Kreis aufnehmen</h3>
+          <h3 data-i18n="circleSteps.two">In die Superliste legen</h3>
           <p data-i18n="circleSteps.twoText"></p>
         </li>
         <li>
@@ -478,12 +485,8 @@
           <p data-i18n="circleSteps.threeText"></p>
         </li>
       </ol>
-      <div class="note spaced-lg">
-        <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-info"/></svg>
-        <div><p data-i18n="circleSteps.honest"></p></div>
-      </div>
       <p class="actions spaced-lg">
-        <button type="button" id="btnStartCircle" class="btn" data-i18n="circle.startNew">Freundeskreis anlegen</button>
+        <button type="button" id="btnStartCircle" class="btn" data-i18n="circle.startNew">Superliste anlegen</button>
       </p>
     </section>
 
@@ -492,7 +495,7 @@
          wiederkommt, findet seine Liste dort, wo er hinunterscrollt. Rein
          lokal, kein Konto, und nur sichtbar, wenn es etwas zu zeigen gibt. -->
     <!-- translate="no" nur auf diesem Kasten, nicht auf der ganzen
-         Startseite: Hier stehen entschluesselte Titel, mit dem Freundeskreis
+         Startseite: Hier stehen entschluesselte Titel, mit der Superliste
          kuenftig auch der Name eines Personenkreises. Der uebrige Aufruf
          traegt kein Geheimnis, und wer weder Deutsch noch Englisch liest,
          soll ihn uebersetzen koennen. -->
@@ -611,7 +614,7 @@
     <!-- Nur im Ansehen-Modus, also in der Liste eines Freundes. Darunter ist
          dort Platz: #shareBox, #addForm und #contactBox sind verborgen. -->
     <p class="actions spaced-lg" id="circleAddHereRow" hidden>
-      <button type="button" id="btnCircleAddHere" class="linkbtn" data-i18n="circle.addHere">Zum Freundeskreis hinzufügen</button>
+      <button type="button" id="btnCircleAddHere" class="linkbtn" data-i18n="circle.addHere">Zur Superliste hinzufügen</button>
     </p>
 
     <!-- 3 · Kontakt, zugeklappt: erst nötig, wenn jemand anfragen soll -->
@@ -735,7 +738,7 @@
   </section>
 
   <!-- ==================================================================== -->
-  <!-- Freundeskreis: die Gegenstaende aller gesammelten Listen              -->
+  <!-- Superliste: die Gegenstaende aller gesammelten Listen              -->
   <!-- ==================================================================== -->
   <!-- translate="no" aus demselben Grund wie bei #viewList: Hier steht die
        dichteste Ansammlung entschluesselten Fremdmaterials der ganzen
@@ -748,9 +751,9 @@
       <div class="titlerow">
         <h1 id="circleTitleRead" hidden></h1>
         <label class="title-edit" hidden id="circleTitleWrap">
-          <span class="sr-only" data-i18n="circle.titleLabel">Name des Freundeskreises, freiwillig</span>
+          <span class="sr-only" data-i18n="circle.titleLabel">Name der Superliste, freiwillig</span>
           <input type="text" id="circleTitleInput" class="input title-input" maxlength="80"
-                 data-i18n-placeholder="circle.titlePlaceholder" placeholder="Freundeskreis">
+                 data-i18n-placeholder="circle.titlePlaceholder" placeholder="Superliste">
         </label>
       </div>
       <p class="titlemeta"><span id="circleMeta"></span></p>
@@ -759,8 +762,10 @@
     <!-- Die Ehrlichkeitszeile. Fest, nicht schliessbar, kein Aufklapper: Eine
          sichtbare Zeile ist eine, die ohne Zutun dasteht. Kein note--warn —
          Bernstein bedeutet in dieser Anwendung Verleihung und Zugangslink,
-         hier ist nichts schiefgegangen. -->
-    <div class="note" id="circleTruth">
+         hier ist nichts schiefgegangen. Sie tritt nur ab, solange noch gar
+         keine Leihliste drinsteht: Dann sagt sie nichts ueber niemanden, und
+         die Aufforderung zum Ergaenzen steht ungestoert unter dem Namen. -->
+    <div class="note" id="circleTruth" hidden>
       <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-info"/></svg>
       <div><p data-i18n="circle.honest"></p></div>
     </div>
@@ -794,13 +799,10 @@
 
       <ul id="circleItems" class="items items--kreis"></ul>
 
-      <!-- Drei verschiedene Leerzustaende, drei Knoten: gar keine Freunde,
-           Freunde ohne Gegenstaende, und nichts gefunden. -->
-      <div id="circleEmptyNone" class="empty" hidden>
-        <svg class="empty-face" aria-hidden="true" focusable="false"><use href="#i-face-wart"/></svg>
-        <h3 class="empty-head" data-i18n="circle.emptyNoneHead">Noch niemand dabei</h3>
-        <p data-i18n="circle.emptyNoneText"></p>
-      </div>
+      <!-- Zwei Leerzustaende, zwei Knoten: Leihlisten ohne Gegenstaende und
+           nichts gefunden. Den dritten Fall — noch gar keine Leihliste — traegt
+           diese Karte nicht mehr; dann tritt sie ganz ab und #circleManage
+           steht an ihrer Stelle oben. -->
       <div id="circleEmptyAll" class="empty" hidden>
         <svg class="empty-face" aria-hidden="true" focusable="false"><use href="#i-face-wart"/></svg>
         <h3 class="empty-head" data-i18n="circle.emptyAllHead">Nichts eingetragen</h3>
@@ -812,13 +814,16 @@
       </p>
     </section>
 
-    <!-- Verwalten: aufnehmen und entfernen. Zugeklappt, weil die Uebersicht
-         der Zweck ist und das Verwalten der Anlass. -->
+    <!-- Aufnehmen und entfernen. Zugeklappt, solange schon Leihlisten
+         drinstehen: Dann ist die Uebersicht der Zweck und das Verwalten der
+         Anlass. Steht noch keine drin, kehrt sich das um — renderKreisManage()
+         klappt auf, tauscht die Ueberschrift und blendet den Vorspann ein. -->
     <details class="fold" id="circleManage">
-      <summary><span data-i18n="circle.manageHeadline">Freunde verwalten</span></summary>
+      <summary><span id="circleManageTitle" data-i18n="circle.manageHeadline">Leihliste eines Freundes hinzufügen</span></summary>
       <div class="fold__body">
+        <p class="hint" id="circleManageLead" data-i18n="circle.emptyNoneText" hidden></p>
         <div class="field">
-          <label for="circleAddLink" data-i18n="circle.addLabel">Ansehen-Link eines Freundes</label>
+          <label for="circleAddLink" data-i18n="circle.addLabel">Ansehen-Link der Leihliste</label>
           <div class="addrow">
             <input type="text" id="circleAddLink" class="input" autocomplete="off"
                    data-i18n-placeholder="circle.addPlaceholder" placeholder="Link einfügen">
@@ -838,7 +843,7 @@
     <section class="keybox" id="circleKeyBox" hidden>
       <h2 class="keybox__title" data-i18n="circle.keyHeadline">Bewahre diesen Link auf</h2>
       <div class="spaced-lg linkrow">
-        <label class="sr-only" for="circleKeyLink" data-i18n="circle.keyLabel">Zugangs-Link des Freundeskreises</label>
+        <label class="sr-only" for="circleKeyLink" data-i18n="circle.keyLabel">Zugangs-Link der Superliste</label>
         <input type="text" id="circleKeyLink" class="input mono" readonly>
         <button type="button" class="btn btn--primary" data-copy="circleKeyLink" data-i18n="share.copy">Kopieren</button>
       </div>
@@ -856,11 +861,11 @@
          daneben ist der Grund, warum er nur einen hat. -->
     <section class="card" id="circleShareBox" hidden>
       <div class="card__head">
-        <h2 class="card__title" data-i18n="circle.shareHeadline">Freundeskreis weitergeben</h2>
+        <h2 class="card__title" data-i18n="circle.shareHeadline">Superliste weitergeben</h2>
       </div>
       <p class="hint" data-i18n="circle.shareWarn"></p>
       <div class="spaced linkrow">
-        <label class="sr-only" for="circleLink" data-i18n="circle.shareLabel">Link zum Freundeskreis</label>
+        <label class="sr-only" for="circleLink" data-i18n="circle.shareLabel">Link zur Superliste</label>
         <input type="password" id="circleLink" class="input mono" readonly>
         <button type="button" class="btn" id="btnRevealCircle" data-i18n="share.reveal">Zeigen</button>
         <button type="button" class="btn btn--primary" data-copy="circleLink" data-i18n="share.copy">Kopieren</button>
@@ -925,6 +930,28 @@
   <svg class="klappe__face" focusable="false"><use href="#i-face-jubel" id="klappeUse"/></svg>
   <span class="klappe__text" id="klappeText"></span>
 </div>
+
+<!-- Die schwebende Schaltflaeche. Sie ersetzt schmal die beiden Verweise aus
+     der Kopfleiste: Dort standen sie unter der Marke in einer eigenen Zeile
+     und schoben den Inhalt nach unten, hier stehen sie am Daumen. Ein
+     <details> und kein eigenes Auf und Zu in JavaScript — der Browser kann
+     das, und die Tastatur bekommt es damit umsonst. Geschlossen wird
+     ausserdem bei Escape und bei einem Tipper daneben. -->
+<details class="fab" id="fab" hidden>
+  <summary class="fab__btn" data-i18n-label="nav.mine">
+    <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-list"/></svg>
+  </summary>
+  <div class="fab__menu">
+    <a class="fab__item" id="fabMine" href="./" hidden>
+      <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-leihliste"/></svg>
+      <span data-i18n="nav.list">Leihliste</span>
+    </a>
+    <a class="fab__item" id="fabCircle" href="./" hidden>
+      <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-kreis"/></svg>
+      <span data-i18n="nav.circle">Superliste</span>
+    </a>
+  </div>
+</details>
 
 <div class="toast-region" id="toastRegion" aria-live="polite">
   <!-- Die Meldung nennt Namen von Gegenstaenden. -->
