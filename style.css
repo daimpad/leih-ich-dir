@@ -10,6 +10,7 @@
  *   1 · Merkmale (hell und dunkel)
  *   2 · Grundlage
  *   3 · Gerüst und Kopfleiste
+ *  3a · Schwebende Schaltfläche
  *   4 · Schaltflächen
  *   5 · Felder
  *   6 · Karten, Aufklapper, Hinweise
@@ -18,7 +19,7 @@
  *   9 · Teilen und Kontakt
  *  10 · Fenster, Meldungen
  *  11 · Fußzeile
- *  12 · Telefon
+ *  12 · Telefon und schwebende Schaltfläche
  *  13 · Grobe Zeiger
  * ===================================================================== */
 
@@ -224,6 +225,9 @@ button, input, textarea, select { font: inherit; color: inherit; }
    (style-src 'self') und werden vom Browser verworfen. */
 .spaced    { margin-top: var(--s-3); }
 .spaced-lg { margin-top: var(--s-4); }
+/* Der Vorspann im Aufklapper der Superliste steht vor den Feldern und nicht
+   zwischen ihnen: Sein Abstand liegt deshalb unten. */
+#circleManageLead { margin-bottom: var(--s-4); }
 
 .muted { color: var(--muted); }
 .txt-sm { font-size: .9rem; }
@@ -283,11 +287,55 @@ header.site { padding-block: var(--s-4); }
 }
 .ctl-label { font-size: .88rem; }
 
-/* Breit steht der Verweis auf die eigenen Listen links neben den Schaltern,
-   so wie bisher. Die Reihenfolge steht hier und nicht im Markup, weil er
-   schmal darunter rutscht. */
-#lnkMine { order: 1; }
+/* Breit stehen die beiden Wege zu den eigenen Listen links neben den
+   Schaltern. Die Reihenfolge steht hier und nicht im Markup, weil der Block
+   schmal ganz abtritt und die schwebende Schaltflaeche uebernimmt. */
+.bar-mine { order: 1; display: flex; align-items: center; gap: var(--s-2); }
 .bar-controls { order: 2; }
+
+/* == 3a · Schwebende Schaltfläche ====================================== *
+ *
+ * Schmal treten die beiden Wege aus der Kopfleiste ab und stehen hier: am
+ * unteren rechten Rand, wo der Daumen liegt. Traeger ist ein <details>, die
+ * Flaeche also ein <summary> — damit bringt der Browser Auf und Zu, die
+ * Tastaturfuehrung und die Zustandsmeldung fuer die Vorlesestimme selbst mit.
+ * Beide Teile liegen fest am Fenster und nicht im Fluss, der <details> selbst
+ * ist deshalb ein Kasten ohne Hoehe am Ende des Dokuments.
+ * ===================================================================== */
+
+.fab { display: none; }
+
+.fab__btn {
+  position: fixed; right: var(--s-4); bottom: var(--s-4); z-index: 57;
+  width: 3.4rem; height: 3.4rem;
+  display: grid; place-items: center; cursor: pointer;
+  background: var(--green); color: var(--on-green);
+  border: 1px solid var(--green); border-radius: 999px;
+  box-shadow: var(--shadow-lift);
+  /* Das Dreieck des Aufklappers faellt weg: Die Flaeche traegt ihr eigenes
+     Zeichen, und die beiden Schreibweisen decken zusammen jeden Browser ab. */
+  list-style: none;
+}
+.fab__btn::-webkit-details-marker { display: none; }
+/* Der Fokusring folgt der Form: Die Sammelregel setzt 4 Punkte Rundung, auf
+   einem Kreis saehe das aus wie ein verrutschtes Quadrat. */
+.fab__btn:focus-visible { border-radius: 999px; }
+.fab__btn .ico { width: 1.5rem; height: 1.5rem; }
+/* Offen tritt die Flaeche zurueck: Die Wahl steht darueber, nicht auf ihr. */
+.fab[open] .fab__btn { background: var(--surface); color: var(--ink); border-color: var(--line-firm); }
+
+.fab__menu {
+  position: fixed; right: var(--s-4); bottom: calc(var(--s-4) + 4rem); z-index: 57;
+  display: flex; flex-direction: column; align-items: stretch; gap: var(--s-2);
+}
+.fab__item {
+  display: flex; align-items: center; gap: var(--s-3);
+  padding: .8rem 1rem; text-decoration: none; font-weight: 500;
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line-firm); border-radius: var(--r-btn);
+  box-shadow: var(--shadow-lift);
+}
+.fab__item .ico { width: 1.4rem; height: 1.4rem; flex: 0 0 auto; color: var(--green); }
 
 /* == 4 · Schaltflächen ================================================= */
 
@@ -649,7 +697,7 @@ header.site { padding-block: var(--s-4); }
 .items-head .checked { color: var(--faint); font-size: .88rem; }
 
 .addrow { display: flex; gap: var(--s-2); align-items: stretch; }
-/* Auf .input und nicht auf #addName: Die Zeile im Freundeskreis benutzt
+/* Auf .input und nicht auf #addName: Die Zeile in der Superliste benutzt
    dieselbe Klasse, und ohne min-width: 0 traegt ein Eingabefeld als
    Flex-Kind seine Standardbreite von rund 20 Zeichen als Mindestmass mit
    sich herum. Bei 320 Punkten schob es die Schaltflaeche daneben hinaus. */
@@ -702,7 +750,7 @@ header.site { padding-block: var(--s-4); }
 .item-ask { flex: 0 0 auto; }
 .item--lent.items-read-lent { background: var(--surface-alt); }
 
-/* Freundeskreis: wem die Sache gehoert. Rechts und auch schmal
+/* Superliste: wem die Sache gehoert. Rechts und auch schmal
    stehenbleibend — bei alphabetischer Ordnung unterscheiden sich benachbarte
    Zeilen oft nur durch die Person. Anders als .item-more ist das keine
    Erklaerung, sondern die Angabe, die die Zeile ueberhaupt beantwortet. */
@@ -1032,37 +1080,27 @@ header.site { padding-block: var(--s-4); }
   }
 }
 
+/* Die schwebende Schaltflaeche loest die Kopfleiste ab, sobald deren beide
+   Wege nicht mehr neben Marke und Schaltern in eine Zeile passen. Gemessen
+   wurde, wo die Zeile umbricht: Deutsch braucht 635 Punkte, Englisch 665.
+   Darunter rutschten die Schalter unter die Marke und der Inhalt nach unten;
+   die Schaltflaeche kostet dagegen keine Zeile. */
+@media (max-width: 42rem) {
+  .bar-mine { display: none; }
+  .fab { display: block; }
+  /* Unten rechts steht jetzt die Schaltflaeche. Meldung, Klappe und das Ende
+     der Fusszeile ruecken um ihre Hoehe darueber, sonst laege sie auf ihnen. */
+  .site-footer { padding-bottom: calc(var(--s-7) + 3.6rem); }
+  .toast-region { bottom: calc(var(--s-5) + 3.6rem); }
+  .klappe { bottom: calc(var(--s-5) + 9.8rem); }
+}
+
 @media (max-width: 34rem) {
   .shell { padding-inline: var(--s-4); }
   .hero-panel { border-radius: 22px; }
   .trust li { font-size: .88rem; }
   /* Schmal nimmt der Aufruf die ganze Zeile: Daneben steht ohnehin nichts. */
   .hero-act .btn { width: 100%; }
-  /* Im Kopf bleibt vom Knopf das Zeichen. */
-  .ctl-label { display: none; }
-  .ctl-wide { padding-inline: 0; width: 2.4rem; }
-
-  /* Der Weg zu den eigenen Listen bekommt eine eigene Zeile und das Aussehen
-     eines Verweises: ausgeschrieben, gruen, unterstrichen. Als namenloses
-     Rundzeichen zwischen Sprache, Licht und Einstellungen war er von einem
-     Schalter nicht zu unterscheiden. */
-  #lnkMine {
-    order: 3; flex: 0 0 100%; width: auto;
-    justify-content: flex-start;
-    height: auto; min-width: 0;
-    /* Der Strich liegt unter dem Wort, die Flaeche zum Tippen ist groesser:
-       senkrecht gepolstert kommt der Verweis auf die Hoehe der Schalter. */
-    padding-block: var(--s-2); padding-inline: 0;
-    background: none; border: 0; border-radius: 0; box-shadow: none;
-    color: var(--green-ink);
-  }
-  #lnkMine:hover { color: var(--green); }
-  #lnkMine:active { transform: none; }
-  #lnkMine .ctl-label {
-    display: inline; font-size: 1rem;
-    text-decoration: underline; text-underline-offset: .18em;
-  }
-
   /* Schmal steht der Zusatz unter den Verweisen statt neben ihnen. */
   .footer-row { flex-direction: column; align-items: flex-start; }
   .footer-claim { white-space: normal; flex-wrap: wrap; }
@@ -1077,15 +1115,16 @@ header.site { padding-block: var(--s-4); }
   .fold > summary { flex-wrap: wrap; }
   .fold > summary .fold-sub { margin-left: 0; flex-basis: 100%; text-align: left; }
 
-  /* Die Eingabe bleibt beim Blättern am unteren Rand erreichbar. Damit
-     erübrigt sich eine zusätzlich schwebende Schaltfläche. */
+  /* Die Eingabe bleibt beim Blättern am oberen Rand erreichbar. Sie klebt
+     oben und nicht unten: Unten steht die schwebende Schaltflaeche, und zwei
+     Dinge an derselben Stelle waeren eines zu viel. */
   .addbox { position: sticky; top: 0; z-index: 20; background: var(--surface); padding-block: var(--s-3); }
   .addbox::before {
     content: ""; position: absolute; inset: 0 calc(var(--s-4) * -1);
     background: var(--surface); border-top: 1px solid var(--line); z-index: -1;
   }
   /* Nur im Inventar. Dort tragen die beiden Schaltflaechen ein Zeichen und
-     koennen ihr Wort schmal ablegen; die Zeile im Freundeskreis hat kein
+     koennen ihr Wort schmal ablegen; die Zeile in der Superliste hat kein
      Zeichen, und "Aufnehmen" lief bei 2,9rem Breite ueber beide Raender
      hinaus, links bis in das Eingabefeld daneben. */
   .addbox .addrow .btn span:not(.sr-only) { display: none; }
@@ -1094,7 +1133,9 @@ header.site { padding-block: var(--s-4); }
 
   .footer-nav { gap: var(--s-2) var(--s-4); }
   .toast-region { width: calc(100vw - 2rem); }
-  .klappe { bottom: calc(var(--s-5) + 7.4rem); }
+  /* Weiter oben als im Block darueber: Schmal ist die Meldung breiter und
+     haeufiger zweizeilig, die Klappe braucht den Abstand entsprechend. */
+  .klappe { bottom: calc(var(--s-5) + 11rem); }
   .klappe__face { width: 2.2rem; height: 2.2rem; }
   .klappe__text { font-size: 1.1rem; }
 }
@@ -1119,7 +1160,7 @@ header.site { padding-block: var(--s-4); }
 
 @media (pointer: coarse) {
   /* .linkbtn und .tab kamen dazu: Gemessen bei 320 und 390 Punkten war
-     "Mehrere auf einmal" 132 mal 22, "Freundeskreis anlegen" 171 mal 25 und
+     "Mehrere auf einmal" 132 mal 22, "Superliste anlegen" 171 mal 25 und
      ein Reiter im Teilen-Kasten 94 mal 39 gross. Alle drei sind eigene
      Bedienelemente und keine Verweise im Fliesstext, fuer die die Ausnahme
      der Richtlinie gilt. */

@@ -26,8 +26,9 @@ oder Kontaktdaten.
 | **Ein Eintrag, ein Fenster** | verfügbar bleibt schmucklos, verliehen trägt Name und Datum in der Zeile |
 | **Anfragen** | steht bei Freunden in der Zeile: vorformulierter Text, weitergegeben über das Gerät oder per `mailto:` |
 | **Rücknahme statt Rückfrage** | ein gelöschter Eintrag lässt sich neun Sekunden lang zurückholen |
-| **Gemerkte Listen** | eigene Listen und Freundeskreise stehen auf der Startseite dieses Browsers und über einen Verweis in der Kopfleiste, rein lokal und ohne Konto |
-| **Freundeskreis** | mehrere Ansehen-Links zu einer Übersicht bündeln, alle Gegenstände in einer Liste, mit Suche über Gegenstand, Person und Notiz |
+| **Gemerkte Listen** | eigene Leihlisten und Superlisten stehen auf der Startseite dieses Browsers, rein lokal und ohne Konto |
+| **Zwei Wege dorthin** | breit als zwei Verweise in der Kopfleiste, je mit Zeichen und Wort; schmal als eine schwebende Schaltfläche unten rechts |
+| **Superliste** | eine Liste der Leihlisten: mehrere Ansehen-Links zu einer Übersicht bündeln, alle Gegenstände in einer Liste, mit Suche über Gegenstand, Person und Notiz |
 | **Spracheingabe** | Gegenstände unterwegs einsprechen, Zerlegung im Browser oder wahlweise per Gemini |
 | **Erscheinungsbild** | eigenständig in `style.css`, Schriften mitgeliefert, keine fremden Server |
 | **Auffindbar** | Titel, Beschreibungen, Open Graph, `robots.txt` und `sitemap.xml`; strukturierte Angaben als JSON-LD |
@@ -85,8 +86,8 @@ Ehrliche Einordnung, denn Verschlüsselung ersetzt kein Rechtemanagement:
 - Wer den Ansehen-Link hat, kann alles lesen und weitergeben. Der Link *ist* das Geheimnis.
 - Wer den Bearbeiten-Link verliert, verliert den Zugang; eine Wiederherstellung ist bauartbedingt unmöglich.
 - Der Server kennt zwar keine Inhalte, aber Metadaten: Größe des Chiffrats, Zeitpunkte, Revisionszähler.
-- Der Freundeskreis erzeugt im Zugriffsprotokoll ein Muster, das einzelne Aufrufe nicht erzeugen: welche Listen zusammen und von welcher Adresse aus gelesen werden. Lesen ist ungedrosselt, die Schranke von vier gleichzeitigen Abrufen sitzt im Browser.
-- Der Link zu einem Freundeskreis ist ein Bündel fremder Schlüssel. Es gibt für ihn bewusst keine Form nur zum Ansehen: Er wird als Ganzes weitergegeben oder gar nicht. Die gesammelten Personen erfahren nichts davon, denn eine Benachrichtigung setzte voraus, festzuhalten, wer welche Liste liest.
+- Die Superliste erzeugt im Zugriffsprotokoll ein Muster, das einzelne Aufrufe nicht erzeugen: welche Listen zusammen und von welcher Adresse aus gelesen werden. Lesen ist ungedrosselt, die Schranke von vier gleichzeitigen Abrufen sitzt im Browser.
+- Der Link zu einer Superliste ist ein Bündel fremder Schlüssel. Es gibt für ihn bewusst keine Form nur zum Ansehen: Er wird als Ganzes weitergegeben oder gar nicht. Die gesammelten Personen erfahren nichts davon, denn eine Benachrichtigung setzte voraus, festzuhalten, wer welche Liste liest.
 - Ein kompromittierter Server könnte manipuliertes JavaScript ausliefern. Diesem Angriff ist jede Web-Anwendung mit Client-Verschlüsselung ausgesetzt; er lässt sich nur durch Prüfung des ausgelieferten Codes eingrenzen.
 - Gleichzeitige Änderungen an zwei Bearbeiten-Links: Der Server erkennt den Konflikt über den Revisionszähler, der Client schreibt danach seinen Stand fort (*last write wins*).
 - Die Übersetzungsfunktion des Browsers ist eine Übertragung an Dritte: Sie liest Textknoten aus und schickt sie an den Dienst des Browserherstellers. Die Bereiche mit entschlüsseltem Inhalt tragen deshalb `translate="no"`; Browser, die sich daran halten, lassen sie stehen. Erzwingen lässt es sich nicht.
@@ -203,12 +204,22 @@ trägt Bedeutung und nicht Schmuck:
 | Rot | zerstörend, und nur dort |
 
 Zwei Arten von Liste, zwei Zeichen. Ein Blatt mit Zeilen steht für die
-Leihliste, drei Köpfe über zwei Schultern für den Freundeskreis. Sie sind
+Leihliste, drei Köpfe über zwei Schultern für die Superliste. Sie sind
 verschieden gebaut und nicht nur verschieden gefärbt, damit sie sich auch in
 16 Punkten Größe und im dunklen Erscheinungsbild unterscheiden. Beide stehen
 auf der Startseite über ihrem Erklärkasten, in jeder Zeile des gemerkten
 Kastens und dort zusätzlich als Wort auf einer Marke: Das Zeichen trägt den
 Blick, die Marke trägt die Vorlesestimme und die Übersetzung.
+
+Dieselben zwei Zeichen tragen die Wege zu den eigenen Listen. Breit stehen sie
+nebeneinander in der Kopfleiste, jedes mit seinem Wort. Schmal treten sie dort
+ab: Zwei namenlose Rundzeichen zwischen Sprache, Licht und Einstellungen wären
+von Schaltern nicht zu unterscheiden gewesen, zwei ausgeschriebene Zeilen unter
+der Marke hätten den Inhalt nach unten geschoben. Stattdessen sammelt eine
+schwebende Schaltfläche unten rechts beide — ein `<details>`, damit Auf und Zu,
+Tastaturführung und Zustandsmeldung vom Browser kommen und nicht aus
+JavaScript. Jeder Weg erscheint erst, wenn dieses Gerät eine Liste seiner Art
+kennt.
 
 Alles steht in `style.css`. Die Datei ist die gesamte Gestaltung; ein zweites
 Stylesheet gibt es nicht.
@@ -331,7 +342,7 @@ weniger Bewegung, nicht weniger Anerkennung.
 ├── impressum.html                Anbieterkennzeichnung nach § 5 TMG
 ├── datenschutz.html              beschreibt den technischen Stand, juristisch prüfen lassen
 ├── ueber.html                    Beschreibung des Projekts
-├── app.js                        Verschlüsselung · i18n · Rendering · Sprache · Speicher · Freundeskreis
+├── app.js                        Verschlüsselung · i18n · Rendering · Sprache · Speicher · Superliste
 ├── style.css                     das gesamte Erscheinungsbild
 ├── api.php                       Flat-File-Backend, optional mit KI-Proxy
 ├── .htaccess                     Sicherheits-Header, Sperren für Punktdateien
@@ -349,7 +360,9 @@ weniger Bewegung, nicht weniger Anerkennung.
 │   ├── build-fonts.py            erzeugt die Schriftteilmengen
 │   ├── i18n-check.js             prüft beide Wörterbücher auf denselben Schlüsselsatz
 │   └── check-deployment.php      prüft eine laufende Installation von außen
-├── tests/api-test.php            Funktionstest des Backends, ohne Abhängigkeiten
+├── tests/
+│   ├── api-test.php              Funktionstest des Backends, ohne Abhängigkeiten
+│   └── e2e/                      Browsertests: hilfe.mjs, lauf.mjs und die Suiten
 ├── .github/workflows/ci.yml      Syntaxprüfung und Funktionstest
 ├── CONTRIBUTING.md
 └── LICENSE                       MIT

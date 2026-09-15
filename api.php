@@ -306,7 +306,7 @@ function action_read(): never
        (ftruncate, dann fwrite) und haelt dabei LOCK_EX; ein ungesperrtes
        file_get_contents traf das Fenster dazwischen und bekam eine leere
        oder halbe Datei. Der Leser sah dann 500 corrupt fuer eine Liste, der
-       nichts fehlt — und im Freundeskreis bietet der Aufklapper fuer diesen
+       nichts fehlt — und in der Superliste bietet der Aufklapper fuer diesen
        Status bewusst kein "Erneut versuchen" an. LOCK_SH laesst beliebig
        viele Leser gleichzeitig zu und haelt nur den Schreiber auf. */
     $fh = @fopen(list_path($id), 'rb');

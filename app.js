@@ -25,7 +25,7 @@
   var LS_LANG        = 'lid.lang';
   var LS_MINE        = 'lid.mine'; // auf diesem Gerät gemerkte eigene Listen
   var MINE_MAX       = 8;      // mehr merkt sich niemand, und die Startseite bliebe voll
-  var MAX_FRIENDS    = 24;     // Listen je Freundeskreis; Begruendung bei ladeKreis()
+  var MAX_FRIENDS    = 24;     // Listen je Superliste; Begruendung bei ladeKreis()
   var KREIS_PAR      = 4;      // gleichzeitige Abrufe beim Oeffnen eines Kreises
   var KREIS_LANGSAM  = 6000;   // ms, ab denen eine Zeile als "dauert" gilt
 
@@ -128,7 +128,7 @@
          eine weisse Seite: openList() (Abschnitt 10) hat importKey als
          allerersten Ausdruck, die Ausnahme verlaesst die Funktion vor dem
          .catch, und in index.html beginnen alle Ansichten mit hidden. Im
-         Freundeskreis genuegte ein einziger beschaedigter Schluessel, um die
+         Superliste genuegte ein einziger beschaedigter Schluessel, um die
          ganze Uebersicht wortlos abzuraeumen. */
       var bytes;
       try { bytes = b64u.decode(str); }
@@ -216,15 +216,14 @@
       'start.create': 'Leihliste anlegen',
       'start.creating': 'Leihliste wird angelegt …',
 
-      'circleSteps.headline': 'So geht\u2019s: Leihlisten zum eigenen Freundeskreis hinzufügen',
-      'circleSteps.lead': 'Ein Freundeskreis sammelt die Ansehen-Links mehrerer Leihlisten und zeigt alles daraus in einer Übersicht. Er ist selbst eine verschlüsselte Liste mit einem eigenen Link.',
-      'circleSteps.one': 'Ansehen-Link bekommen',
-      'circleSteps.oneText': 'Eine Freundin schickt Dir den Link zu ihrer Leihliste, so wie Du ihr Deinen schickst.',
-      'circleSteps.two': 'In den Kreis aufnehmen',
+      'circleSteps.headline': 'So geht\u2019s: aus vielen Leihlisten eine Superliste',
+      'circleSteps.lead': 'Du hast schon ein paar Leihlisten von Freunden zusammengetragen und möchtest sie zusammen durchsuchen. Genau dafür ist eine Superliste da: eine Liste der Leihlisten. Sie führt alle zusammen, die Dir geteilt wurden, und macht sie nach Gegenstand und Verfügbarkeit durchsuchbar.',
+      'circleSteps.one': 'Ansehen-Links sammeln',
+      'circleSteps.oneText': 'Deine Freunde schicken Dir die Links zu ihren Leihlisten, so wie Du ihnen Deinen schickst.',
+      'circleSteps.two': 'In die Superliste legen',
       'circleSteps.twoText': 'Den Link einfügen und einen Namen dazu vergeben. Gespeichert werden Kennung und Schlüssel, keine Gegenstände.',
       'circleSteps.three': 'An einer Stelle suchen',
-      'circleSteps.threeText': 'Alle Sachen aller gesammelten Listen stehen in einer Liste, durchsuchbar nach Gegenstand, Person und Notiz.',
-      'circleSteps.honest': 'Die Personen, deren Listen Du sammelst, erfahren davon nichts. Eine Benachrichtigung setzte voraus, dass festgehalten wird, wer welche Liste liest. Das hält diese Anwendung nicht fest.',
+      'circleSteps.threeText': 'Alle Sachen aus allen gesammelten Leihlisten in einer Liste, durchsuchbar nach Gegenstand, Person und Notiz, mit frei oder verliehen daneben.',
 
       'list.titleLabel': 'Titel der Liste, freiwillig',
       'list.titlePlaceholder': 'Titel der Liste',
@@ -235,8 +234,11 @@
       'list.newTitle': 'Meine Leihliste',
 
       'mine.headline': 'Auf diesem Gerät gemerkt',
-      'mine.hint': 'Deine Leihlisten und Freundeskreise. Die Links dazu kennt nur dieser Browser.',
-      'mine.link': 'Meine Listen',
+      'mine.hint': 'Deine Leihlisten und Superlisten. Die Links dazu kennt nur dieser Browser.',
+
+      'nav.mine': 'Meine Listen',
+      'nav.list': 'Leihliste',
+      'nav.circle': 'Superliste',
 
       'key.headline': 'Bewahre diesen Link auf!',
       'key.label': 'Bearbeiten-Link',
@@ -322,7 +324,7 @@
       'settings.themeLight': 'Hell',
       'settings.themeDark': 'Dunkel',
       'settings.cacheHeadline': 'Zwischenspeicher',
-      'settings.cacheHint': 'Entfernt alles, was diese Anwendung in diesem Browser ablegt: Sprache, Erscheinungsbild, KI-Schlüssel, Töne, die Ruhigstellung, die gemerkten Listen und Freundeskreise, Deine Runden und Abzeichen und im Vorschaumodus die lokal gehaltenen Listen und Freundeskreise. Deine Liste auf dem Server und Deine Links bleiben unberührt.',
+      'settings.cacheHint': 'Entfernt alles, was diese Anwendung in diesem Browser ablegt: Sprache, Erscheinungsbild, KI-Schlüssel, Töne, die Ruhigstellung, die gemerkten Leihlisten und Superlisten, Deine Runden und Abzeichen und im Vorschaumodus die lokal gehaltenen Leihlisten und Superlisten. Deine Liste auf dem Server und Deine Links bleiben unberührt.',
       'settings.cacheClear': 'Zwischenspeicher löschen',
       'settings.cacheConfirm': 'Alles löschen, was diese Anwendung in diesem Browser ablegt? Die Liste auf dem Server bleibt bestehen.',
       'settings.cacheDone': 'Zwischenspeicher geleert.',
@@ -381,22 +383,22 @@
       'error.exists': 'Diese Listen-Kennung ist bereits vergeben. Bitte erneut versuchen.',
       'error.kindmix': 'Dieser Link gehört zu einer anderen Art von Liste.',
 
-      /* -- Freundeskreis ------------------------------------------------ */
+      /* -- Superliste ------------------------------------------------- */
 
-      'circle.badge': 'Freundeskreis',
+      'circle.badge': 'Superliste',
       'list.badge': 'Leihliste',
       'title.edit': 'Deine Leihliste · LeihIchDir',
       'title.view': 'Eine Leihliste · LeihIchDir',
-      'circle.untitled': 'Freundeskreis',
-      'circle.newTitle': 'Mein Freundeskreis',
+      'circle.untitled': 'Superliste',
+      'circle.newTitle': 'Meine Superliste',
       'circle.unnamed': 'Ohne Namen',
-      'circle.titleLabel': 'Name des Freundeskreises, freiwillig',
-      'circle.titlePlaceholder': 'Freundeskreis',
-      'circle.honest': 'Die Personen, deren Listen hier stehen, erfahren davon nichts. Eine Benachrichtigung setzte voraus, dass festgehalten wird, wer welche Liste liest. Dieser Freundeskreis hält das nicht fest.',
-      'circle.previewNote': 'Im Vorschaumodus liegen Listen nur in diesem Browser. Der Freundeskreis findet deshalb nur Listen, die Du hier selbst angelegt hast; die Listen Deiner Freunde liegen in deren Browsern.',
+      'circle.titleLabel': 'Name der Superliste, freiwillig',
+      'circle.titlePlaceholder': 'Superliste',
+      'circle.honest': 'Die Personen, deren Leihlisten hier stehen, erfahren davon nichts. Eine Benachrichtigung setzte voraus, dass festgehalten wird, wer welche Liste liest. Diese Superliste hält das nicht fest.',
+      'circle.previewNote': 'Im Vorschaumodus liegen Listen nur in diesem Browser. Die Superliste findet deshalb nur Leihlisten, die Du hier selbst angelegt hast; die Listen Deiner Freunde liegen in deren Browsern.',
       'circle.itemsHeadline': 'Was es gibt',
-      'circle.meta': '{n} Listen gesammelt',
-      'circle.meta_1': '1 Liste gesammelt',
+      'circle.meta': '{n} Leihlisten gesammelt',
+      'circle.meta_1': '1 Leihliste gesammelt',
       'circle.searchLabel': 'Unter allen Sachen suchen',
       'circle.searchPlaceholder': 'Suchen',
       'circle.total': '{n} Sachen',
@@ -404,30 +406,30 @@
       'circle.hits': '{n} von {g}',
       'circle.hits_1': '1 von {g}',
       'circle.none': 'Nichts gefunden',
-      'circle.missing': '{n} Listen konnten nicht geladen werden',
-      'circle.missing_1': '1 Liste konnte nicht geladen werden',
-      'circle.beyond': '{n} weitere Listen sind nicht dabei',
-      'circle.beyond_1': '1 weitere Liste ist nicht dabei',
+      'circle.missing': '{n} Leihlisten konnten nicht geladen werden',
+      'circle.missing_1': '1 Leihliste konnte nicht geladen werden',
+      'circle.beyond': '{n} weitere Leihlisten sind nicht dabei',
+      'circle.beyond_1': '1 weitere Leihliste ist nicht dabei',
       'circle.noHit': 'Nichts gefunden.',
       'circle.reset': 'Suche zurücksetzen',
-      'circle.emptyNoneHead': 'Noch niemand dabei',
-      'circle.emptyNoneText': 'Nimm unten den Ansehen-Link einer Freundin oder eines Freundes auf, dann stehen die Sachen daraus hier.',
+      'circle.emptyNoneHead': 'Ergänze hier die Leihlisten Deiner Freunde',
+      'circle.emptyNoneText': 'Füge den Ansehen-Link einer Leihliste ein. Die Superliste holt sie bei jedem Öffnen frisch und zeigt alles daraus in einer Liste.',
       'circle.emptyAllHead': 'Nichts eingetragen',
-      'circle.emptyAllText': 'Die gesammelten Listen sind erreichbar, aber noch leer.',
-      'circle.manageHeadline': 'Freunde verwalten',
-      'circle.addLabel': 'Ansehen-Link eines Freundes',
+      'circle.emptyAllText': 'Die gesammelten Leihlisten sind erreichbar, aber noch leer.',
+      'circle.manageHeadline': 'Leihliste eines Freundes hinzufügen',
+      'circle.addLabel': 'Ansehen-Link der Leihliste',
       'circle.addPlaceholder': 'Link einfügen',
       'circle.add': 'Aufnehmen',
       'circle.addName': 'Name der Person, freiwillig',
-      'circle.addHere': 'Zum Freundeskreis hinzufügen',
-      'circle.startNew': 'Freundeskreis anlegen',
+      'circle.addHere': 'Zur Superliste hinzufügen',
+      'circle.startNew': 'Superliste anlegen',
       'circle.added': 'Aufgenommen in {kreis}.',
-      'circle.selfAdd': 'Das ist dieser Freundeskreis selbst.',
-      'circle.nestAdd': 'Ein Freundeskreis lässt sich nicht in einen anderen aufnehmen.',
-      'circle.dupAdd': 'Diese Liste steht schon im Freundeskreis.',
-      'circle.full': 'Mehr als {n} Listen fasst ein Freundeskreis nicht.',
-      'circle.remove': 'Aus dem Kreis nehmen',
-      'circle.removed': 'Aus dem Kreis genommen.',
+      'circle.selfAdd': 'Das ist diese Superliste selbst.',
+      'circle.nestAdd': 'Eine Superliste lässt sich nicht in eine andere aufnehmen.',
+      'circle.dupAdd': 'Diese Leihliste steht schon in der Superliste.',
+      'circle.full': 'Mehr als {n} Leihlisten fasst eine Superliste nicht.',
+      'circle.remove': 'Aus der Superliste nehmen',
+      'circle.removed': 'Aus der Superliste genommen.',
       'circle.undo': 'Rückgängig',
       'circle.retry': 'Erneut versuchen',
       'circle.fPending': 'wird geholt',
@@ -437,16 +439,16 @@
       'circle.fCount': '{n} Sachen',
       'circle.fCount_1': '1 Sache',
       'circle.keyHeadline': 'Bewahre diesen Link auf',
-      'circle.keyLabel': 'Zugangs-Link des Freundeskreises',
-      'circle.keyRemember': 'Auf diesem Gerät gemerkt, beim nächsten Besuch findest Du den Freundeskreis auf der Startseite wieder.',
-      'circle.shareHeadline': 'Freundeskreis weitergeben',
-      'circle.shareWarn': 'Wer diesen Link bekommt, sieht alle Listen Deines Freundeskreises. Einen Link nur zum Ansehen gibt es hier nicht.',
-      'circle.shareLabel': 'Link zum Freundeskreis',
+      'circle.keyLabel': 'Zugangs-Link der Superliste',
+      'circle.keyRemember': 'Auf diesem Gerät gemerkt, beim nächsten Besuch findest Du die Superliste auf der Startseite wieder.',
+      'circle.shareHeadline': 'Superliste weitergeben',
+      'circle.shareWarn': 'Wer diesen Link bekommt, sieht alle Leihlisten Deiner Superliste. Einen Link nur zum Ansehen gibt es hier nicht.',
+      'circle.shareLabel': 'Link zur Superliste',
       'circle.copied': 'Gut verwahrt.',
-      'circle.deleteConfirm': 'Der gesamte Freundeskreis wird unwiderruflich vom Server gelöscht. Die Listen Deiner Freunde bleiben unberührt. Fortfahren?',
-      'circle.dangerHeadline': 'Freundeskreis löschen',
-      'circle.dangerHint': 'Der Freundeskreis wird unwiderruflich vom Server entfernt. Sein Link läuft danach ins Leere. Die Listen Deiner Freunde bleiben unberührt.',
-      'circle.delete': 'Freundeskreis endgültig löschen',
+      'circle.deleteConfirm': 'Die gesamte Superliste wird unwiderruflich vom Server gelöscht. Die Leihlisten Deiner Freunde bleiben unberührt. Fortfahren?',
+      'circle.dangerHeadline': 'Superliste löschen',
+      'circle.dangerHint': 'Die Superliste wird unwiderruflich vom Server entfernt. Ihr Link läuft danach ins Leere. Die Leihlisten Deiner Freunde bleiben unberührt.',
+      'circle.delete': 'Superliste endgültig löschen',
 
 
       /* -- Das Spielerische ------------------------------------------- */
@@ -586,15 +588,14 @@
       'start.create': 'Create a lending list',
       'start.creating': 'Creating lending list …',
 
-      'circleSteps.headline': 'How it works: add lending lists to your own circle',
-      'circleSteps.lead': 'A circle of friends collects the view links of several lending lists and shows everything from them in one overview. It is an encrypted list of its own, with its own link.',
-      'circleSteps.one': 'Get a view link',
-      'circleSteps.oneText': 'A friend sends you the link to their lending list, just as you send them yours.',
-      'circleSteps.two': 'Add it to the circle',
+      'circleSteps.headline': 'How it works: many lending lists, one super list',
+      'circleSteps.lead': 'You have collected a few lending lists from friends and would like to search them together. That is what a super list is for: a list of lending lists. It brings together everything shared with you and makes it searchable by thing and availability.',
+      'circleSteps.one': 'Collect view links',
+      'circleSteps.oneText': 'Your friends send you the links to their lending lists, just as you send them yours.',
+      'circleSteps.two': 'Put them in the super list',
       'circleSteps.twoText': 'Paste the link and give it a name. The id and the key are stored, no things.',
       'circleSteps.three': 'Search in one place',
-      'circleSteps.threeText': 'Everything from all collected lists sits in one list, searchable by thing, person and note.',
-      'circleSteps.honest': 'The people whose lists you collect are not told about it. A notice would require a record of who reads which list. This application keeps no such record.',
+      'circleSteps.threeText': 'Everything from all collected lending lists in one list, searchable by thing, person and note, with free or lent beside it.',
 
       'list.titleLabel': 'List title, optional',
       'list.titlePlaceholder': 'List title',
@@ -605,8 +606,11 @@
       'list.newTitle': 'My lending list',
 
       'mine.headline': 'Remembered on this device',
-      'mine.hint': 'Your lending lists and circles. Only this browser knows the links.',
-      'mine.link': 'My lists',
+      'mine.hint': 'Your lending lists and super lists. Only this browser knows the links.',
+
+      'nav.mine': 'My lists',
+      'nav.list': 'Lending list',
+      'nav.circle': 'Super list',
 
       'key.headline': 'Keep this link!',
       'key.label': 'Edit link',
@@ -693,7 +697,7 @@
       'settings.themeDark': 'Dark',
       'settings.cacheHeadline': 'Local data',
       'settings.cacheClear': 'Clear local data',
-      'settings.cacheHint': 'Removes everything this application stores in this browser: language, appearance, AI key, sounds, the motion setting, the remembered lists and circles, your rounds and badges, and in preview mode the locally held lists and circles. Your list on the server and your links stay untouched.',
+      'settings.cacheHint': 'Removes everything this application stores in this browser: language, appearance, AI key, sounds, the motion setting, the remembered lending lists and super lists, your rounds and badges, and in preview mode the locally held lending lists and super lists. Your list on the server and your links stay untouched.',
       'settings.cacheConfirm': 'Remove everything this application stores in this browser? The list on the server stays.',
       'settings.cacheDone': 'Local data cleared.',
       'settings.dangerHeadline': 'Delete list',
@@ -751,22 +755,22 @@
       'error.exists': 'This list id is already taken. Please try again.',
       'error.kindmix': 'This link belongs to a different kind of list.',
 
-      /* -- Circle of friends -------------------------------------------- */
+      /* -- Super list ------------------------------------------------- */
 
-      'circle.badge': 'Circle',
+      'circle.badge': 'Super list',
       'list.badge': 'Lending list',
       'title.edit': 'Your lending list · LeihIchDir',
       'title.view': 'A lending list · LeihIchDir',
-      'circle.untitled': 'Circle of friends',
-      'circle.newTitle': 'My circle of friends',
+      'circle.untitled': 'Super list',
+      'circle.newTitle': 'My super list',
       'circle.unnamed': 'No name',
-      'circle.titleLabel': 'Name of the circle, optional',
-      'circle.titlePlaceholder': 'Circle of friends',
-      'circle.honest': 'The people whose lists are kept here are not told about it. A notice would require a record of who reads which list. This circle keeps no such record.',
-      'circle.previewNote': 'In preview mode lists live in this browser only. The circle therefore finds just the lists you created here; your friends lists live in their own browsers.',
+      'circle.titleLabel': 'Name of the super list, optional',
+      'circle.titlePlaceholder': 'Super list',
+      'circle.honest': 'The people whose lending lists are kept here are not told about it. A notice would require a record of who reads which list. This super list keeps no such record.',
+      'circle.previewNote': 'In preview mode lists live in this browser only. The super list therefore finds just the lending lists you created here; your friends\u2019 lists live in their own browsers.',
       'circle.itemsHeadline': 'What there is',
-      'circle.meta': '{n} lists collected',
-      'circle.meta_1': '1 list collected',
+      'circle.meta': '{n} lending lists collected',
+      'circle.meta_1': '1 lending list collected',
       'circle.searchLabel': 'Search across all things',
       'circle.searchPlaceholder': 'Search',
       'circle.total': '{n} things',
@@ -774,30 +778,30 @@
       'circle.hits': '{n} of {g}',
       'circle.hits_1': '1 of {g}',
       'circle.none': 'Nothing found',
-      'circle.missing': '{n} lists could not be loaded',
-      'circle.missing_1': '1 list could not be loaded',
-      'circle.beyond': '{n} further lists are not included',
-      'circle.beyond_1': '1 further list is not included',
+      'circle.missing': '{n} lending lists could not be loaded',
+      'circle.missing_1': '1 lending list could not be loaded',
+      'circle.beyond': '{n} further lending lists are not included',
+      'circle.beyond_1': '1 further lending list is not included',
       'circle.noHit': 'Nothing found.',
       'circle.reset': 'Clear the search',
-      'circle.emptyNoneHead': 'Nobody here yet',
-      'circle.emptyNoneText': 'Add a friends view link below, then the things from that list appear here.',
+      'circle.emptyNoneHead': 'Add your friends\u2019 lending lists here',
+      'circle.emptyNoneText': 'Paste the view link of a lending list. The super list fetches it fresh every time you open it and shows everything from it in one list.',
       'circle.emptyAllHead': 'Nothing listed',
-      'circle.emptyAllText': 'The collected lists can be reached, but they are still empty.',
-      'circle.manageHeadline': 'Manage friends',
-      'circle.addLabel': 'View link of a friend',
+      'circle.emptyAllText': 'The collected lending lists can be reached, but they are still empty.',
+      'circle.manageHeadline': 'Add a friend\u2019s lending list',
+      'circle.addLabel': 'View link of the lending list',
       'circle.addPlaceholder': 'Paste link',
       'circle.add': 'Add',
       'circle.addName': 'Name of the person, optional',
-      'circle.addHere': 'Add to my circle of friends',
-      'circle.startNew': 'Create a circle of friends',
+      'circle.addHere': 'Add to my super list',
+      'circle.startNew': 'Create a super list',
       'circle.added': 'Added to {kreis}.',
-      'circle.selfAdd': 'That is this circle itself.',
-      'circle.nestAdd': 'A circle of friends cannot be added to another one.',
-      'circle.dupAdd': 'This list is already in the circle.',
-      'circle.full': 'A circle holds no more than {n} lists.',
-      'circle.remove': 'Remove from the circle',
-      'circle.removed': 'Removed from the circle.',
+      'circle.selfAdd': 'That is this super list itself.',
+      'circle.nestAdd': 'A super list cannot be added to another one.',
+      'circle.dupAdd': 'This lending list is already in the super list.',
+      'circle.full': 'A super list holds no more than {n} lending lists.',
+      'circle.remove': 'Remove from the super list',
+      'circle.removed': 'Removed from the super list.',
       'circle.undo': 'Undo',
       'circle.retry': 'Try again',
       'circle.fPending': 'loading',
@@ -807,16 +811,16 @@
       'circle.fCount': '{n} things',
       'circle.fCount_1': '1 thing',
       'circle.keyHeadline': 'Keep this link safe',
-      'circle.keyLabel': 'Access link of the circle',
-      'circle.keyRemember': 'Remembered on this device, you will find the circle on the start page next time.',
-      'circle.shareHeadline': 'Pass on the circle',
-      'circle.shareWarn': 'Anyone who gets this link sees every list in your circle. There is no view-only link for it.',
-      'circle.shareLabel': 'Link to the circle',
+      'circle.keyLabel': 'Access link of the super list',
+      'circle.keyRemember': 'Remembered on this device, you will find the super list on the start page next time.',
+      'circle.shareHeadline': 'Pass on the super list',
+      'circle.shareWarn': 'Anyone who gets this link sees every lending list in your super list. There is no view-only link for it.',
+      'circle.shareLabel': 'Link to the super list',
       'circle.copied': 'Kept safe.',
-      'circle.deleteConfirm': 'The entire circle will be irreversibly deleted from the server. Your friends lists stay untouched. Continue?',
-      'circle.dangerHeadline': 'Delete the circle',
-      'circle.dangerHint': 'The circle will be irreversibly removed from the server. Its link then leads nowhere. Your friends lists stay untouched.',
-      'circle.delete': 'Delete the circle for good',
+      'circle.deleteConfirm': 'The entire super list will be irreversibly deleted from the server. Your friends\u2019 lending lists stay untouched. Continue?',
+      'circle.dangerHeadline': 'Delete the super list',
+      'circle.dangerHint': 'The super list will be irreversibly removed from the server. Its link then leads nowhere. Your friends\u2019 lending lists stay untouched.',
+      'circle.delete': 'Delete the super list for good',
 
 
       /* -- The playful part ------------------------------------------- */
@@ -967,7 +971,7 @@
        Knoten der Listenansicht, initSettings setzt aber state.mode auf 'edit'
        oder 'circle' — ohne diese Zeile warf der Sprachwechsel dort in
        render() eine unbehandelte Ausnahme. Das galt schon vor dem
-       Freundeskreis und faellt hier nur auf, weil er denselben Weg nimmt. */
+       Superliste und faellt hier nur auf, weil er denselben Weg nimmt. */
     /* Die beiden Schaltflaechen fuer Zeigen und Verbergen tragen ihre
        Beschriftung aus dem Woerterbuch. applyStaticI18n setzt sie gerade auf
        "Zeigen" zurueck, auch wenn der Link offen daliegt; dann stuende dort
@@ -1251,7 +1255,7 @@
   var voiceOpen = false;   // die Sprachbox steht zu, bis das Mikrofon oder der Verweis sie öffnet
 
   /**
-   * Der Freundeskreis steht ausdruecklich NEBEN state, nicht darin. save()
+   * Die Superliste steht ausdruecklich NEBEN state, nicht darin. save()
    * verschluesselt state.doc im Ganzen; laege dort der Inhalt fremder Listen,
    * schriebe der Kreis ihn in sein eigenes Chiffrat auf den Server — eine
    * Kopie, die niemand mehr entfernt. Auch state.circleData genuegte nicht:
@@ -1321,14 +1325,14 @@
   }
 
   /**
-   * Normalisiert einen Freundeskreis. Kuerzt nie: Eine Schranke, die
+   * Normalisiert eine Superliste. Kuerzt nie: Eine Schranke, die
    * Eintraege wegwirft, gehoert nicht hierher — der erste Schreibvorgang
    * schriebe die gekuerzte Fassung zurueck, und der Ansehen-Link des
    * verworfenen Freundes stand nur dort. MAX_FRIENDS greift beim Aufnehmen
    * und beim Holen, nicht beim Lesen.
    *
    * Was hier ausdruecklich NICHT steht: kein token (ein fremder
-   * Schreibzugang hat in einem Freundeskreis nichts zu suchen), keine
+   * Schreibzugang hat in einer Superliste nichts zu suchen), keine
    * fertige url (sonst entschiede fremder Text, wohin diese Anwendung
    * verweist), kein zwischengespeicherter Titel, keine Gegenstaende, kein
    * Kontakt des Freundes. Die Reihenfolge des Feldes leistet, was ein
@@ -1386,7 +1390,7 @@
   function editHash(id, key, token) { return '#e=' + id + '.' + key + '.' + token; }
   function viewLink() { return baseUrl() + viewHash(state.id, state.keyStr); }
   function editLink() { return baseUrl() + editHash(state.id, state.keyStr, state.token); }
-  /* Ein Freundeskreis hat nur diese eine Form. Eine Zwei-Teile-Fassung ohne
+  /* Eine Superliste hat nur diese eine Form. Eine Zwei-Teile-Fassung ohne
      Token gaebe es nicht als Ersparnis, sondern als Falle: Sie reichte die
      Schluessel aller gesammelten Freunde weiter. */
   function circleHash(id, key, token) { return '#k=' + id + '.' + key + '.' + token; }
@@ -1428,7 +1432,7 @@
       id: istKreis ? kreis.id : state.id,
       hash: istKreis ? circleHash(kreis.id, kreis.keyStr, kreis.token)
                      : editHash(state.id, state.keyStr, state.token),
-      /* Ein Freundeskreis ist dasselbe Versprechen wie eine Liste: ein Link,
+      /* Eine Superliste ist dasselbe Versprechen wie eine Liste: ein Link,
          den nur dieses Geraet kennt und dessen Verlust nicht rueckgaengig zu
          machen ist. Nur die Marke sagt, welche Art es ist; ein Eintrag ohne
          kind stammt aus der Zeit davor und gilt als Liste. */
@@ -1478,7 +1482,7 @@
        sind unberuehrt, 32 Byte ergeben ueber b64u.encode genau 43 Zeichen. */
     if (!ID_RE.test(id) || !KEY_RE.test(parts[1] || '')) { throw new AppError('badlink'); }
     /* 'v' ist die einzige Form ohne Token. 'e' und 'k' sind beides Zugaenge:
-       Ein Freundeskreis wird als Ganzes weitergegeben oder gar nicht, denn
+       Eine Superliste wird als Ganzes weitergegeben oder gar nicht, denn
        sein "Ansehen-Link" reichte die Schluessel aller Freunde weiter. */
     if (m[1] === 'v') { return { mode: 'view', id: id, key: parts[1], token: null }; }
     if (!parts[2]) { throw new AppError('badlink'); }
@@ -1664,7 +1668,7 @@
 
     renderItems();
     updateSettingsLink();
-    updateMineLink();
+    updateNav();
     setSaveState(state.saving ? 'saving' : (state.dirty ? 'unsaved' : 'saved'));
   }
 
@@ -1773,23 +1777,110 @@
   var MINE_HASH = '#meine';
 
   /**
-   * Der Verweis in der Kopfleiste steht ueberall, wo es etwas zu zeigen gibt
-   * — auch auf der Startseite. Wohin er fuehrt, haengt davon ab, wie viel es
-   * zu zeigen gibt:
+   * Wohin ein Weg fuehrt, oder null, wenn dieses Geraet keine Liste dieser Art
+   * kennt. Die Regel ist fuer beide Arten dieselbe:
    *
    * - eine Liste: unmittelbar in diese Liste. Ein Zwischenhalt, auf dem genau
    *   ein Eintrag steht, waere ein Klick ohne Gegenwert.
    * - mehrere: auf die Startseite und dort zum Kasten. Der sitzt unter dem
    *   Aufruf, und ohne den Sprung landete man wieder oben — der Knopf sah
    *   deshalb bisher wirkungslos aus.
+   *
+   * Der Kasten zeigt beide Arten zusammen. Das ist kein Widerspruch: Getrennt
+   * sind die Wege, damit ihr Wort haelt, was es verspricht — nicht der Ort,
+   * an dem man ankommt.
    */
-  function updateMineLink() {
-    var link = $('#lnkMine');
-    if (!link) { return; }
-    var mine = readMine();
-    link.hidden = mine.length === 0;
-    if (!mine.length) { return; }
-    link.setAttribute('href', mine.length === 1 ? ('./' + mine[0].hash) : ('./' + MINE_HASH));
+  function navZiel(kreisArt) {
+    var passend = readMine().filter(function (e) { return (e.kind === 'circle') === kreisArt; });
+    if (!passend.length) { return null; }
+    return './' + (passend.length === 1 ? passend[0].hash : MINE_HASH);
+  }
+
+  function navSetzen(knoten, ziel) {
+    if (!knoten) { return; }
+    knoten.hidden = !ziel;
+    if (ziel) { knoten.setAttribute('href', ziel); }
+  }
+
+  /**
+   * Die Wege zu den eigenen Listen, an beiden Orten zugleich: breit in der
+   * Kopfleiste, schmal in der schwebenden Schaltflaeche. Beide stehen im
+   * Dokument, welcher zu sehen ist, entscheidet allein das Erscheinungsbild —
+   * so bleibt hier eine Schaltung statt zweier, die auseinanderlaufen koennen.
+   *
+   * Jeder Weg erscheint erst, wenn es eine Liste seiner Art gibt. Seit es
+   * zwei Arten gibt, ist das keine Feinheit mehr: "Superliste" ueber einem
+   * Geraet, das keine kennt, versprach einen Ort, den es nicht gibt.
+   */
+  function updateNav() {
+    var listen = navZiel(false);
+    var kreise = navZiel(true);
+    navSetzen($('#lnkMine'), listen);
+    navSetzen($('#fabMine'), listen);
+    navSetzen($('#lnkCircle'), kreise);
+    navSetzen($('#fabCircle'), kreise);
+    /* Die beiden Huellen tragen kein eigenes Ziel und verschwinden, wenn
+       beide Wege verschwinden: sonst bliebe in der Kopfleiste eine Luecke und
+       am Fuss eine Schaltflaeche, hinter der nichts steht. */
+    var etwas = !!(listen || kreise);
+    sichtbar($('#barMine'), etwas);
+    sichtbar($('#fab'), etwas);
+    if (!etwas) { fabZu(false); }
+  }
+
+  function sichtbar(knoten, ja) { if (knoten) { knoten.hidden = !ja; } }
+
+  /**
+   * Die Schaltung der Wege. Sie steht fuer sich und nicht in bindEvents(),
+   * weil die Einstellungsseite dieselbe Kopfleiste und dieselbe schwebende
+   * Schaltflaeche traegt, aber einen eigenen Einstieg hat — initSettings()
+   * kehrt vor bindEvents() um. Ohne diesen eigenen Aufruf blieb die Wahl
+   * dort offen stehen: Escape und der Tipper daneben fehlten.
+   */
+  function bindNav() {
+    /* Steht das Fragment schon, loest ein weiterer Klick kein hashchange aus.
+       Dann springt dieser Weg. Alle vier Verweise teilen ihn: Es sind dieselben
+       zwei Wege, nur an zwei Orten. */
+    ['#lnkMine', '#lnkCircle', '#fabMine', '#fabCircle'].forEach(function (wahl) {
+      var knoten = $(wahl);
+      if (!knoten) { return; }
+      knoten.addEventListener('click', function (ev) {
+        fabZu(false);
+        if (this.getAttribute('href') !== './' + MINE_HASH) { return; }
+        if (location.hash !== MINE_HASH) { return; }
+        ev.preventDefault();
+        zeigeMeine();
+      });
+    });
+
+    if (!$('#fab')) { return; }
+    /* Ein <details> geht von sich aus nur ueber seine eigene Flaeche wieder
+       zu. Beides hier nachgereicht, damit sich die Wahl wie ein Menue anfuehlt:
+       Escape nimmt sie zurueck und gibt die Fuehrung an die Flaeche, ein
+       Tipper daneben nimmt sie stumm zurueck. Der Tipper auf die Flaeche
+       selbst liegt innerhalb und faellt deshalb nicht darunter — das <details>
+       hat da schon umgeschaltet. */
+    document.addEventListener('keydown', function (ev) {
+      if (ev.key !== 'Escape') { return; }
+      var fab = $('#fab');
+      if (!fab || !fab.open) { return; }
+      /* Ohne das schloesse Escape zugleich ein offenes Fenster darunter. */
+      ev.preventDefault();
+      fabZu(true);
+    });
+    document.addEventListener('click', function (ev) {
+      var fab = $('#fab');
+      if (fab && fab.open && !fab.contains(ev.target)) { fabZu(false); }
+    });
+  }
+
+  /** Klappt die schwebende Schaltflaeche zu; mit true kehrt die Fuehrung auf sie zurueck. */
+  function fabZu(fokus) {
+    var fab = $('#fab');
+    if (!fab || !fab.open) { return; }
+    fab.open = false;
+    var flaeche = $('.fab__btn', fab);
+    if (fokus && flaeche) { flaeche.focus(); }
   }
 
   /** Holt den Kasten ins Bild und uebergibt ihm die Tastaturfuehrung. */
@@ -1808,7 +1899,7 @@
     var mine = readMine();
     list.textContent = '';
     box.hidden = mine.length === 0;
-    updateMineLink();
+    updateNav();
     if (!mine.length) { return; }
 
     mine.forEach(function (entry) {
@@ -1854,7 +1945,7 @@
    * Wer hat es, und seit wann. Ohne Namen bleibt es bei der Tatsache.
    *
    * Ob der Name gezeigt wird, entscheidet das Dokument, AUS DEM der
-   * Gegenstand stammt. Im Freundeskreis ist das nicht die geoeffnete
+   * Gegenstand stammt. In der Superliste ist das nicht die geoeffnete
    * Sammlung, und beide naheliegenden Kurzschluesse waeren falsch:
    * state.mode === 'edit' zeigte Namen, die ein Freund verborgen hat;
    * state.doc.showBorrower der Sammlung ist das false aus emptyCircle() und
@@ -1928,7 +2019,7 @@
   }
 
   /* ------------------------------------------------------------------ *
-   * Freundeskreis · Zusammenfuehren, Zeichnen, Suchen
+   * Superliste · Zusammenfuehren, Zeichnen, Suchen
    *
    * Geholt wird hier nichts. Alles, was diese Funktionen brauchen, steht in
    * kreis.eintraege; deshalb kosten ein Sprachwechsel und jeder Tastendruck
@@ -2084,6 +2175,9 @@
     filterKreis();
     renderKreisFreunde();
     renderKreisMeta();
+    /* Hier und nicht in renderKreis: Aufnehmen und Entfernen gehen nicht ueber
+       das vollstaendige Zeichnen, und gerade sie legen den Schalter um. */
+    renderKreisManage();
   }
 
   /* Die Zeile unter dem Titel sagt, worueber die Uebersicht ueberhaupt geht.
@@ -2193,7 +2287,6 @@
        geholt. Sie sind kein Fehler und gehoeren deshalb nicht zu fehlt, aber
        ohne sie behauptete die Zahl eine Vollstaendigkeit, die es nicht gibt. */
     var drueber = Math.max(0, kreis.doc.friends.length - kreis.eintraege.length);
-    $('#circleEmptyNone').hidden = !(kreis.doc.friends.length === 0);
     $('#circleEmptyAll').hidden  = !(freunde > 0 && kreis.zeilen.length === 0 && fehlt === 0);
     $('#circleEmptyHit').hidden  = !(teile && treffer === 0 && kreis.zeilen.length > 0);
     renderKreisZahl(treffer, kreis.zeilen.length, !!teile, fehlt, drueber);
@@ -2224,6 +2317,42 @@
     node.textContent = min < 1 ? t('items.checkedNow') : t('items.checked', { n: min });
   }
 
+  /**
+   * Der Aufklapper zum Aufnehmen kennt zwei Lagen, und welche gilt, entscheidet
+   * allein die Zahl der gesammelten Leihlisten.
+   *
+   * Steht noch keine drin, gibt es nichts zu durchsuchen: "Was es gibt" tritt
+   * ganz ab, der Aufklapper rueckt damit an den Kopf der Ansicht, steht offen
+   * und heisst nach dem, was jetzt ansteht — die Leihlisten der Freunde
+   * ergaenzen. Steht schon eine drin, ist die Uebersicht der Zweck und das
+   * Aufnehmen der Anlass: Dann heisst der Aufklapper nach seiner Handlung und
+   * bleibt zu.
+   *
+   * Die Ueberschrift wird nicht nur geschrieben, sondern auch umgeschluesselt:
+   * Ohne das gesetzte data-i18n schriebe der naechste Sprachwechsel die alte
+   * Zeile zurueck, denn applyStaticI18n() liest das Attribut, nicht den Zustand.
+   */
+  function renderKreisManage() {
+    var istZugang = !!kreis.token;
+    var box = $('#circleBox');
+    var titel = $('#circleManageTitle');
+    var lead = $('#circleManageLead');
+    if (!box || !titel || !lead) { return; }
+    var leer = istZugang && !!(kreis.doc && kreis.doc.friends.length === 0);
+    box.hidden = leer;
+    var schluessel = leer ? 'circle.emptyNoneHead' : 'circle.manageHeadline';
+    titel.setAttribute('data-i18n', schluessel);
+    titel.textContent = t(schluessel);
+    lead.hidden = !leer;
+    /* Die Ehrlichkeitszeile spricht von den Personen, deren Leihlisten hier
+       stehen. Steht noch keine drin, spricht sie von niemandem. */
+    sichtbar($('#circleTruth'), !leer);
+    /* Nur aufklappen, nie zuklappen: Zugeklappt zeigte die leere Superliste
+       ueberhaupt nichts mehr. Wer schon etwas gesammelt hat, behaelt dagegen
+       seinen Stand, auch ueber ein erneutes Zeichnen hinweg. */
+    if (leer) { $('#circleManage').open = true; }
+  }
+
   /** Zeichnet die Uebersicht vollstaendig. Holt nichts. */
   function renderKreis() {
     showView('viewCircle');
@@ -2248,10 +2377,10 @@
        oder sobald der erste Freund aufgenommen wird. */
     renderKreisListe();
     renderKreisChecked();
-    /* Ohne diese beiden Zeilen zeigten der Einstellungen-Verweis und
-       "Meine Listen" weiter auf die zuvor geoeffnete Liste. */
+    /* Ohne diese beiden Zeilen zeigten der Einstellungen-Verweis und die Wege
+       zu den eigenen Listen weiter auf die zuvor geoeffnete Liste. */
     updateSettingsLink();
-    updateMineLink();
+    updateNav();
   }
 
   /* ------------------------------------------------------------------ *
@@ -3513,12 +3642,24 @@
   }
 
   /* ===================================================================== *
-   * 10a · Der Freundeskreis
+   * 10a · Die Superliste
    *
    * Eine eigene Art Dokument hinter einem eigenen Fragmentpraefix. Der Server
    * unterscheidet sie nicht von einer Liste, und genau das ist die Zusage:
    * api.php bleibt unveraendert, es gibt keine neue Aktion und keine
    * Verknuepfung zwischen zwei Kennungen.
+   *
+   * ZUM NAMEN IM QUELLTEXT. Die Oberflaeche sagt "Superliste", der Quelltext
+   * sagt an drei Stellen weiter "kreis" beziehungsweise "circle": das Objekt
+   * mit dem Zustand, der Namensraum der Woerterbuecher und beide Formen, die
+   * nach aussen gehen. Die letzten beiden sind nicht frei waehlbar:
+   *   - das Fragmentpraefix #k=, das in jedem schon verschickten Link steht,
+   *   - das Feld kind: 'circle' in jedem schon gespeicherten Dokument.
+   * Beide zu aendern hiesse, bestehende Links und bestehende Dokumente
+   * ungueltig zu machen; es gibt keinen Weg, das nachtraeglich zu reparieren,
+   * denn der Server kann die Dokumente nicht lesen. Der Zustand und der
+   * Namensraum heissen deshalb aus einem Stueck weiter so wie die Form, an
+   * die sie gebunden sind, und nicht halb so und halb anders.
    * ===================================================================== */
 
   /**
@@ -3732,7 +3873,7 @@
    * Nimmt, was der Nutzer eingefuegt hat, und behaelt davon nur id und key.
    * Ein versehentlich eingefuegter Bearbeiten-Link wird angenommen und dabei
    * abgewertet: Der dritte Teil faellt weg. Ein fremder Schreibzugang hat in
-   * einem Freundeskreis nichts zu suchen — und ihn abzulehnen hiesse, den
+   * einer Superliste nichts zu suchen — und ihn abzulehnen hiesse, den
    * Nutzer den Link von Hand kuerzen zu lassen.
    * Ein Kreis-Link faellt schon am Praefix auf, vor jedem Netzzugriff. Eine
    * Ebene, klar benannt: Die Aufloesung waere unbegrenzt in Tiefe und
@@ -3845,8 +3986,8 @@
   }
 
   /**
-   * Legt einen Freundeskreis an. Kein feierZugang(): Das zaehlt g.listen hoch
-   * und feiert mit einer Stufe; ein Freundeskreis ist keine angelegte Liste.
+   * Legt eine Superliste an. Kein feierZugang(): Das zaehlt g.listen hoch
+   * und feiert mit einer Stufe; eine Superliste ist keine angelegte Liste.
    * Die Knoepfe tragen auch kein data-create — createButtons() schriebe sonst
    * beim Anlegen einer gewoehnlichen Liste "Liste wird angelegt …" darauf.
    */
@@ -4533,14 +4674,7 @@
 
     $('#levelChip').addEventListener('click', openRundenbuch);
 
-    /* Steht das Fragment schon, loest ein weiterer Klick kein hashchange aus.
-       Dann springt dieser Weg. */
-    $('#lnkMine').addEventListener('click', function (ev) {
-      if (this.getAttribute('href') !== './' + MINE_HASH) { return; }
-      if (location.hash !== MINE_HASH) { return; }
-      ev.preventDefault();
-      zeigeMeine();
-    });
+    bindNav();
 
     $('#btnShareView').addEventListener('click', function () {
       nativeShare({
@@ -4602,7 +4736,7 @@
     });
 
     /* ---------------------------------------------------------------- *
-     * Freundeskreis
+     * Superliste
      * ---------------------------------------------------------------- */
 
     $('#btnRevealCircle').addEventListener('click', function () {
@@ -4613,7 +4747,7 @@
     });
 
     /* Spiegelbildlich zu #chkKeyDone, aber ohne feierZugang(): Ein
-       Freundeskreis ist keine angelegte Liste. */
+       Superliste ist keine angelegte Liste. */
     $('#chkCircleKeyDone').addEventListener('change', function () {
       if (!this.checked) { return; }
       $('#circleKeyBox').hidden = true;
@@ -4720,7 +4854,7 @@
       /* Ein Fragment, das kein Zugangslink ist, ist ein Seitenanker und kein
          Ortswechsel. Der Sprunglink (Ziel #main) hat keinen eigenen Zuhoerer;
          ohne diese Zeile raeumte er die offene Ansicht weg — bei einer Liste
-         kostete das einen Abruf, beim Freundeskreis alle. MINE_HASH bleibt
+         kostete das einen Abruf, bei der Superliste alle. MINE_HASH bleibt
          ausgenommen, es lebt davon, dass parseHash hier null liefert. */
       if (location.hash && location.hash !== MINE_HASH && (state.doc || kreis.doc)) { return; }
       stopRefresh();
@@ -4848,8 +4982,11 @@
       $('#lnkBack').textContent = t('settings.backStart');
     }
 
-    /* Auch von hier fuehrt der Verweis dorthin, wo etwas zu sehen ist. */
-    updateMineLink();
+    /* Auch von hier fuehren die Wege dorthin, wo etwas zu sehen ist — und die
+       schwebende Schaltflaeche braucht ihre eigene Schaltung, weil diese Seite
+       bindEvents() nie erreicht. */
+    bindNav();
+    updateNav();
 
     detectStore().then(function (store) {
       Store = store;
@@ -4862,7 +4999,7 @@
          und fuer den Rueckweg. */
       state.mode = parsed.mode;
       /* Der Loeschkasten ist auf die Liste gemuenzt: Er spricht von "beiden
-         Links", und ein Freundeskreis hat genau einen. Das Merkmal wird
+         Links", und eine Superliste hat genau einen. Das Merkmal wird
          getauscht, nicht der Text, sonst ueberschriebe der naechste
          Sprachwechsel die Beschriftung wieder. Beide Richtungen ausdruecklich,
          damit der Kasten nicht davon abhaengt, was vorher dastand. */
