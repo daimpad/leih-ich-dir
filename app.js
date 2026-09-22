@@ -414,6 +414,7 @@
       'circle.meta': '{n} Leihlisten gesammelt',
       'circle.meta_1': '1 Leihliste gesammelt',
       'circle.searchLabel': 'Unter allen Sachen suchen',
+      'circle.onlyFree': 'Nur zeigen, was gerade frei ist',
       'circle.searchPlaceholder': 'Suchen',
       'circle.total': '{n} Sachen',
       'circle.total_1': '1 Sache',
@@ -799,6 +800,7 @@
       'circle.meta': '{n} lending lists collected',
       'circle.meta_1': '1 lending list collected',
       'circle.searchLabel': 'Search across all things',
+      'circle.onlyFree': 'Show only what is free right now',
       'circle.searchPlaceholder': 'Search',
       'circle.total': '{n} things',
       'circle.total_1': '1 thing',
@@ -2299,9 +2301,14 @@
   function filterKreis() {
     if (!kreis.doc) { return; }
     var teile = sucheTeile($('#circleQ').value);
+    /* Die Startseite verspricht "durchsuchbar nach Gegenstand und
+       Verfuegbarkeit". Der Text sucht den Gegenstand; dieser Schalter ist die
+       Verfuegbarkeit. Kein Suchwort "frei": Das stuende im Weg, sobald etwas
+       so heisst, und uebersetzt sich nicht. */
+    var nurFrei = !!($('#circleOnlyFree') && $('#circleOnlyFree').checked);
     var treffer = 0;
     for (var i = 0; i < kreis.zeilen.length; i++) {
-      var ja = passt(kreis.zeilen[i], teile);
+      var ja = passt(kreis.zeilen[i], teile) && (!nurFrei || kreis.zeilen[i].status === 'available');
       kreis.zeilen[i].node.hidden = !ja;
       if (ja) { treffer++; }
     }
@@ -2317,8 +2324,9 @@
        ohne sie behauptete die Zahl eine Vollstaendigkeit, die es nicht gibt. */
     var drueber = Math.max(0, kreis.doc.friends.length - kreis.eintraege.length);
     $('#circleEmptyAll').hidden  = !(freunde > 0 && kreis.zeilen.length === 0 && fehlt === 0);
-    $('#circleEmptyHit').hidden  = !(teile && treffer === 0 && kreis.zeilen.length > 0);
-    renderKreisZahl(treffer, kreis.zeilen.length, !!teile, fehlt, drueber);
+    var gefragt = !!teile || nurFrei;
+    $('#circleEmptyHit').hidden  = !(gefragt && treffer === 0 && kreis.zeilen.length > 0);
+    renderKreisZahl(treffer, kreis.zeilen.length, gefragt, fehlt, drueber);
   }
 
   function renderKreisZahl(treffer, gesamt, gefragt, fehlt, drueber) {
@@ -5070,9 +5078,11 @@
     $('#circleQ').addEventListener('input', filterKreis);
     $('#btnCircleReset').addEventListener('click', function () {
       $('#circleQ').value = '';
+      if ($('#circleOnlyFree')) { $('#circleOnlyFree').checked = false; }
       filterKreis();
       $('#circleQ').focus();
     });
+    $('#circleOnlyFree').addEventListener('change', filterKreis);
 
     /* Kein touch()/scheduleSave(): Der Kreis kennt keinen Aufschub. Der
        Titel wird beim Verlassen des Feldes geschrieben, nicht bei jedem

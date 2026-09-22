@@ -825,6 +825,13 @@
         <label class="sr-only" for="circleQ" data-i18n="circle.searchLabel">Unter allen Sachen suchen</label>
         <input type="text" id="circleQ" class="input" autocomplete="off"
                data-i18n-placeholder="circle.searchPlaceholder" placeholder="Suchen">
+        <!-- Die Verfuegbarkeit als Schalter, nicht als Suchwort: Die
+             Startseite verspricht beides, Gegenstand und Verfuegbarkeit. -->
+        <label class="check spaced">
+          <input type="checkbox" id="circleOnlyFree">
+          <span class="check__box" aria-hidden="true"></span>
+          <span data-i18n="circle.onlyFree">Nur zeigen, was gerade frei ist</span>
+        </label>
         <p class="hint" id="circleCount" role="status" aria-live="polite"></p>
       </div>
 

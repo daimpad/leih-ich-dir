@@ -123,6 +123,27 @@ ok('die erste Bohrmaschine ist Annas, die zweite Bernds', z[0].wer==='Anna' && z
 ok('der Verweis zeigt auf die Liste des Freundes', z[0].href === '#v=' + anna.id + '.' + anna.keyStr, z[0].href);
 ok('die Notiz steht auch an der Zeile', z[0].notiz === 'mit Koffer', z[0].notiz);
 
+console.log('· Nur was frei ist');
+/* Von den sechs Sachen sind zwei verliehen: Annas Rasenmaeher und Bernds
+   Hobel. Der Schalter ist die Verfuegbarkeit, der Text der Gegenstand; beide
+   greifen zusammen. Zuruecksetzen nimmt beides zurueck. */
+await p.locator('#circleQ').fill('');
+await p.locator('#circleOnlyFree').check();
+await p.waitForTimeout(150);
+let frei = await zeilen();
+ok('der Schalter laesst vier freie Sachen stehen', frei.length === 4 && !frei.some(x => /Rasenmäher|Hobel/.test(x.name)),
+   JSON.stringify(frei.map(x => x.name)));
+ok('die Zahl sagt vier von sechs', /4 von 6/.test(await p.locator('#circleCount').textContent()),
+   await p.locator('#circleCount').textContent());
+await p.locator('#circleQ').fill('hobel');
+await p.waitForTimeout(150);
+ok('Schalter und Suchwort greifen zusammen: der Hobel ist verliehen, also nichts',
+   (await zeilen()).length === 0 && !(await p.locator('#circleEmptyHit').isHidden()));
+await p.locator('#btnCircleReset').click();
+await p.waitForTimeout(150);
+ok('Zuruecksetzen nimmt Suchwort und Schalter zurueck',
+   (await zeilen()).length === 6 && !(await p.evaluate(() => document.querySelector('#circleOnlyFree').checked)));
+
 console.log('· Verborgene Namen (F4)');
 const mäh = z.find(x=>x.name==='Rasenmäher');
 const hob = z.find(x=>x.name==='Hobel');
