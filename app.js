@@ -26,6 +26,7 @@
   var LS_MINE        = 'lid.mine'; // auf diesem Gerät gemerkte eigene Listen
   var MINE_MAX       = 8;      // mehr merkt sich niemand, und die Startseite bliebe voll
   var MAX_FRIENDS    = 24;     // Listen je Superliste; Begruendung bei ladeKreis()
+  var LEBENSZEICHEN_TAGE = 30; // Tage ohne Schreibvorgang, dann eines; Begruendung bei lebenszeichen()
   var KREIS_PAR      = 4;      // gleichzeitige Abrufe beim Oeffnen eines Kreises
   var KREIS_LANGSAM  = 6000;   // ms, ab denen eine Zeile als "dauert" gilt
 
@@ -259,6 +260,14 @@
       'share.copyfail': 'Kopieren nicht möglich. Bitte den Link von Hand markieren.',
       'share.reveal': 'Zeigen',
       'share.hide': 'Verbergen',
+
+      'backup.headline': 'Sichern',
+      'backup.hint': 'Legt Deine Liste als Datei auf diesem Gerät ab: Gegenstände, Kontakt und Stand, im Klartext. Der Link ist nicht darin. Aus der Datei lässt sich auf der Startseite eine neue Liste anlegen, mit neuen Links, falls diese hier einmal verloren geht. Bewahre sie dort auf, wo Du auch Deinen Bearbeiten-Link aufbewahrst.',
+      'backup.download': 'Als Datei sichern',
+      'backup.restore': 'Aus einer Sicherung wiederherstellen',
+      'backup.restoring': 'Liste wird wiederhergestellt …',
+      'backup.badFile': 'Das ist keine Sicherung einer Leihliste.',
+      'backup.restored': 'Wiederhergestellt als neue Liste, mit neuen Links.',
       'share.hint': 'Der Schlüssel steht hinter dem Rautezeichen und wird technisch nie an den Server übertragen.',
 
       'add.nameLabel': 'Gegenstand',
@@ -631,6 +640,14 @@
       'share.copyfail': 'Copying failed. Please select the link by hand.',
       'share.reveal': 'Show',
       'share.hide': 'Hide',
+
+      'backup.headline': 'Back up',
+      'backup.hint': 'Saves your list as a file on this device: things, contact and status, in plain text. The link is not in it. From the file you can create a new list on the start page, with new links, should this one ever be lost. Keep it where you keep your edit link.',
+      'backup.download': 'Save as file',
+      'backup.restore': 'Restore from a backup',
+      'backup.restoring': 'Restoring list …',
+      'backup.badFile': 'That is not a backup of a lending list.',
+      'backup.restored': 'Restored as a new list, with new links.',
       'share.hint': 'The key lives behind the # sign and is technically never sent to the server.',
 
       'add.nameLabel': 'Item',
@@ -1262,6 +1279,7 @@
    * Der Abzug in save() griffe sie mit.
    */
   var kreis = {
+    updated: null,   // Zeitstempel des letzten Schreibvorgangs, vom Server
     id: null, key: null, keyStr: null, token: null, proof: null,
     rev: 0, doc: null,
     eintraege: [],    // ein Eintrag je Freund, mit doc oder fehler
@@ -1641,6 +1659,7 @@
     $('#shareBox').hidden = !isEdit;
     $('#addForm').hidden = !isEdit;
     $('#contactBox').hidden = !isEdit;
+    $('#backupBox').hidden = !isEdit;
     $('#btnRefresh').hidden = isEdit;
     /* Nur in der Liste eines Freundes: Die eigene Liste in den eigenen Kreis
        zu legen ergibt nichts, sie steht schon im Kasten darunter. */
@@ -3562,15 +3581,27 @@
   }
 
   function createList() {
-    createButtons(true, t('start.creating'));
+    var doc = emptyDoc();
+    doc.title = t('list.newTitle');
+    createListFrom(doc, t('start.creating'), null);
+  }
+
+  /**
+   * Legt eine Liste aus einem fertigen Dokument an. Zwei Aufrufer: das leere
+   * Anlegen von der Startseite und das Wiederherstellen aus einer Sicherung.
+   * Beide bekommen neue Kennung, neuen Schluessel und neues Token — eine
+   * Sicherung enthaelt keinen Zugang, sie enthaelt die Liste. Der Rueckgabewert
+   * ist die Kette; sie ist auch im Fehlerfall erfuellt, weil das catch am
+   * Ende die Meldung schon gezeigt hat.
+   */
+  function createListFrom(doc, warten, danach) {
+    createButtons(true, warten);
 
     var id = randomHex(16);
     var token = randomToken(24);
-    var doc = emptyDoc();
-    doc.title = t('list.newTitle');
     var keyRef = null;
 
-    Crypt.generateKey().then(function (key) {
+    return Crypt.generateKey().then(function (key) {
       keyRef = key;
       return Promise.all([Crypt.exportKey(key), Crypt.proof(token), Crypt.encrypt(key, doc, id)]);
     }).then(function (parts) {
@@ -3599,11 +3630,110 @@
         $('#chkKeyDone').checked = false;
         $('#keyBox').hidden = false;
         $('#keyRemember').hidden = !mineWorks();
+        if (danach) { danach(); }
       });
     }).catch(function (err) {
       createButtons(false, t('start.create'));
       toast(t('error.' + (err && err.code ? err.code : 'network')));
     });
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Sichern und Wiederherstellen
+   *
+   * Die Datei ist Klartext und enthaelt keinen Link: Gegenstaende, Kontakt,
+   * Stand. Sie ersetzt nicht den Zugang, sondern die Liste — wer beides
+   * verliert, legt daraus auf der Startseite eine neue an, mit neuen Links.
+   * Kein Schluessel und kein Token in der Datei, aus zwei Gruenden: Sie liegt
+   * dort, wo der Browser sie ablegt, oft im Ordner fuer Downloads und oft in
+   * einer Cloud-Synchronisation; und ein Zugang, der an zwei Orten liegt, ist
+   * keiner mehr. Der Bearbeiten-Link hat seinen eigenen Kasten.
+   *
+   * Nur die Leihliste. Eine Superliste ist ein Buendel fremder Schluessel;
+   * die im Klartext in eine Datei zu schreiben, entschiede ueber Dritte.
+   * ------------------------------------------------------------------ */
+
+  function sicherungsName(titel) {
+    var slug = String(titel || '').toLowerCase()
+      .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+    return 'leihliste-' + (slug || 'ohne-namen') + '-' + new Date().toISOString().slice(0, 10) + '.json';
+  }
+
+  function sichereListe() {
+    if (!state.doc || state.mode !== 'edit') { return; }
+    var kopie = JSON.parse(JSON.stringify(state.doc));
+    var datei = {
+      leihichdir: 1,
+      kind: 'list',
+      exported: new Date().toISOString(),
+      v: SCHEMA_VERSION,
+      title: kopie.title,
+      contact: kopie.contact,
+      showBorrower: kopie.showBorrower,
+      items: kopie.items
+    };
+    var blob = new Blob([JSON.stringify(datei, null, 2)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = el('a');
+    a.href = url;
+    a.download = sicherungsName(kopie.title);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    /* Nicht sofort freigeben: Manche Browser lesen den Blob erst nach dem Klick. */
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  function stelleWiederHer(file) {
+    var knopf = $('#btnRestore');
+    var reader = new FileReader();
+    reader.onload = function () {
+      var raw = null;
+      try { raw = JSON.parse(String(reader.result)); } catch (e) { raw = null; }
+      /* Eine Sicherung ist ein Listendokument mit items. kindOf() haelt ein
+         Superlisten-Dokument fern, das jemand von Hand hineingelegt hat. */
+      if (!raw || typeof raw !== 'object' || !Array.isArray(raw.items) || kindOf(raw) !== 'list') {
+        toast(t('backup.badFile'));
+        return;
+      }
+      if (knopf) { knopf.disabled = true; }
+      createListFrom(normalizeAny(raw, 'list', null), t('backup.restoring'), function () {
+        toast(t('backup.restored'));
+      }).then(function () { if (knopf) { knopf.disabled = false; } });
+    };
+    reader.onerror = function () { toast(t('backup.badFile')); };
+    reader.readAsText(file);
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Das Lebenszeichen
+   *
+   * purge.php loescht, was ein Jahr lang nicht *geschrieben* wurde. Lesen
+   * zaehlt nicht, und der Server kann nicht zaehlen, was er nicht sieht. Eine
+   * Liste, die taeglich angesehen, aber nie geaendert wird, verschwaende also
+   * nach einem Jahr — und die Superliste, deren ganzer Gebrauch das Lesen
+   * ist, erst recht. Deshalb schreibt der Browser beim Oeffnen mit Zugang das
+   * Dokument unveraendert noch einmal, sobald der letzte Schreibvorgang
+   * laenger als LEBENSZEICHEN_TAGE zurueckliegt.
+   *
+   * Nicht bei jedem Oeffnen: Das waere ein Schreibvorgang je Aufruf, und
+   * "zuletzt gespeichert" hiesse nichts mehr. Nur mit Token: Wer nur ansieht,
+   * kann nicht schreiben und soll es nicht — sonst hielte jeder Leser eine
+   * fremde Liste am Leben, und die Frist waere keine.
+   * ------------------------------------------------------------------ */
+
+  function lebenszeichenFaellig(updated) {
+    if (!updated) { return false; }
+    return (Date.now() / 1000 - updated) > LEBENSZEICHEN_TAGE * 86400;
+  }
+
+  function lebenszeichen() {
+    if (state.mode !== 'edit' || !state.token || !lebenszeichenFaellig(state.updated)) { return; }
+    /* save() schreibt nur, was als geaendert gilt. Der Inhalt bleibt derselbe;
+       geaendert ist die Aussage des Servers, wann zuletzt geschrieben wurde. */
+    state.dirty = true;
+    save();
   }
 
   /** Lädt eine Liste anhand der Fragmentdaten und entschlüsselt sie lokal. */
@@ -3636,6 +3766,7 @@
       render();
       if (state.mode === 'view') { startRefresh(); } else { stopRefresh(); }
       hinweisLangeDraussen();
+      lebenszeichen();
     }).catch(function (err) {
       showError(err && err.code ? err.code : 'network');
     });
@@ -3685,6 +3816,7 @@
       if (res.status === 404) { throw new AppError('notfound'); }
       if (res.status !== 200) { throw new AppError(mapError(res)); }
       kreis.rev = res.body.rev;
+      kreis.updated = res.body.updated;
       return Crypt.decrypt(kreis.key, res.body.payload, kreis.id);
     }).then(function (raw) {
       if (gen !== kreisGen) { return null; }
@@ -3721,6 +3853,13 @@
         if (gen !== kreisGen) { return; }
         kreis.geprueftAm = Date.now();
         renderKreis();
+        /* Erst hier und nicht vor dem Holen: So liegt zwischen Lebenszeichen
+           und dem ersten moeglichen Aufnehmen nicht noch die ganze Ladezeit,
+           in der beide Schreibvorgaenge sich um dieselbe Revision straeuben
+           koennten. Ganz ausschliessen laesst sich das nicht — einmal in
+           dreissig Tagen, im Fenster eines Schreibvorgangs; kreisSave meldet
+           den Konflikt, und das Aufnehmen laesst sich wiederholen. */
+        kreisLebenszeichen();
       });
     }).catch(function (err) {
       if (gen !== kreisGen) { return; }
@@ -3812,6 +3951,12 @@
    * Damit braucht der Kreis weder touch() noch scheduleSave() noch einen
    * Eintrag im beforeunload-Zuhoerer, und save() bleibt unberuehrt.
    */
+  /** Das Lebenszeichen der Superliste; Begruendung bei lebenszeichen(). */
+  function kreisLebenszeichen() {
+    if (!kreis.doc || !kreis.token || !lebenszeichenFaellig(kreis.updated)) { return; }
+    kreisSave();
+  }
+
   function kreisSave() {
     if (!kreis.token || !kreis.doc) { return Promise.resolve(); }
     /* Alles, was der Schreibvorgang braucht, wird hier festgehalten und nicht
@@ -3839,7 +3984,7 @@
          ist. Sonst traegt ein spaet eintreffendes Ergebnis seine Zahl in ein
          fremdes Dokument. */
       if (res && res.status === 200) {
-        if (kreis.id === id) { kreis.rev = res.body.rev; }
+        if (kreis.id === id) { kreis.rev = res.body.rev; kreis.updated = res.body.updated; }
         return;
       }
       toast(t('error.' + mapError(res)));
@@ -4698,6 +4843,15 @@
       ev.preventDefault();
       this.checked = true;
       this.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    /* Sichern und Wiederherstellen. Das Dateifeld bleibt verborgen; der
+       Verweis auf der Startseite oeffnet es. Zuruecksetzen nach dem Lesen,
+       sonst loest dieselbe Datei beim zweiten Mal kein change mehr aus. */
+    $('#btnBackup').addEventListener('click', sichereListe);
+    $('#btnRestore').addEventListener('click', function () { $('#backupFile').click(); });
+    $('#backupFile').addEventListener('change', function () {
+      if (this.files && this.files[0]) { stelleWiederHer(this.files[0]); }
+      this.value = '';
     });
     /* Der Kontaktkasten. Vier Felder, ein Muster: schreiben und touch(). */
     $('#cfgName').addEventListener('input', function () { state.doc.contact.name = this.value; touch(); });

@@ -269,10 +269,14 @@
       dann wird die Datei auf dem Server entfernt. Listen, die ein Jahr lang
       nicht mehr geändert wurden, werden automatisch gelöscht; das erledigt ein
       Wartungsskript, das täglich läuft. Maßgeblich ist der letzte
-      Schreibvorgang, nicht der letzte Aufruf: Eine Superliste, die jemand
-      täglich öffnet, aber ein Jahr lang nicht ergänzt, fällt unter diese
-      Frist. Die Zähler der Mengenbegrenzung werden nach einer Stunde
-      entfernt.
+      Schreibvorgang, nicht der letzte Aufruf. Damit eine Liste, die nur
+      gelesen und nicht geändert wird, nicht unter diese Frist fällt, schreibt
+      der Browser sie beim Öffnen mit dem Bearbeiten-Link unverändert noch
+      einmal, sobald der letzte Schreibvorgang länger als dreißig Tage
+      zurückliegt; für die Superliste gilt dasselbe mit ihrem Zugangs-Link.
+      Wer nur ansieht, schreibt nicht. Eine Liste, die ein Jahr lang niemand
+      mit ihrem Zugang öffnet, wird gelöscht. Die Zähler der Mengenbegrenzung
+      werden nach einer Stunde entfernt.
     </p>
     <p>
       Da der Betrieb die Inhalte nicht lesen kann, ist eine Auskunft über den

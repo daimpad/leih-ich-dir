@@ -454,6 +454,13 @@
         <button type="button" class="btn btn--primary" data-create
                 data-i18n="start.create">Leihliste anlegen</button>
       </p>
+      <!-- Wer schon eine hatte: Der Weg zurueck steht neben dem Anlegen, weil
+           genau hier jemand steht, der seine Liste verloren hat. Das Dateifeld
+           bleibt verborgen, der Verweis oeffnet es. -->
+      <p class="spaced">
+        <button type="button" id="btnRestore" class="linkbtn" data-i18n="backup.restore">Aus einer Sicherung wiederherstellen</button>
+        <input type="file" id="backupFile" accept="application/json,.json" hidden>
+      </p>
     </section>
 
     <!-- Die Superliste. Dieselbe Bauform, damit der Vergleich leicht
@@ -735,6 +742,19 @@
       </div>
 
     </section>
+
+    <!-- Sichern: eine Datei im Klartext, ohne Link. Ein Aufklapper und keine
+         Karte, weil das Sichern selten ist und der Kasten darueber der
+         Alltag. Die Begruendung steht bei sichereListe() in app.js. -->
+    <details class="fold" id="backupBox" hidden>
+      <summary><span data-i18n="backup.headline">Sichern</span></summary>
+      <div class="fold__body">
+        <p class="hint" data-i18n="backup.hint"></p>
+        <div class="spaced field">
+          <button type="button" id="btnBackup" class="btn" data-i18n="backup.download">Als Datei sichern</button>
+        </div>
+      </div>
+    </details>
 
   </section>
 

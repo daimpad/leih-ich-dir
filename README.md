@@ -26,6 +26,7 @@ oder Kontaktdaten.
 | **Ein Eintrag, ein Fenster** | verfügbar bleibt schmucklos, verliehen trägt Name und Datum in der Zeile |
 | **Anfragen** | steht bei Freunden in der Zeile: vorformulierter Text, weitergegeben über das Gerät oder per `mailto:` |
 | **Rücknahme statt Rückfrage** | ein gelöschter Eintrag lässt sich neun Sekunden lang zurückholen |
+| **Sichern und Wiederherstellen** | die Liste als Klartextdatei auf dem eigenen Gerät, ohne Link; daraus entsteht auf der Startseite eine neue Liste mit neuen Links |
 | **Gemerkte Listen** | eigene Leihlisten und Superlisten stehen auf der Startseite dieses Browsers, rein lokal und ohne Konto |
 | **Zwei Wege dorthin** | breit als zwei Verweise in der Kopfleiste, je mit Zeichen und Wort; schmal als eine schwebende Schaltfläche unten rechts |
 | **Superliste** | eine Liste der Leihlisten: mehrere Ansehen-Links zu einer Übersicht bündeln, alle Gegenstände in einer Liste, mit Suche über Gegenstand, Person und Notiz |
@@ -84,7 +85,8 @@ Wiederherstellen des Bearbeiten-Links genügt.
 Ehrliche Einordnung, denn Verschlüsselung ersetzt kein Rechtemanagement:
 
 - Wer den Ansehen-Link hat, kann alles lesen und weitergeben. Der Link *ist* das Geheimnis.
-- Wer den Bearbeiten-Link verliert, verliert den Zugang; eine Wiederherstellung ist bauartbedingt unmöglich.
+- Wer den Bearbeiten-Link verliert, verliert den Zugang zu dieser Liste; den Link wiederherzustellen ist bauartbedingt unmöglich. Aus einer Sicherungsdatei lässt sich eine neue Liste anlegen — mit neuen Links, die Freunde neu bekommen müssen. Die Superliste lässt sich nicht sichern: Sie ist ein Bündel fremder Schlüssel, und die gehören nicht in eine Klartextdatei.
+- Listen, die ein Jahr lang nicht geschrieben wurden, löscht `tools/purge.php`. Lesen zählt nicht, und der Server kann nicht zählen, was er nicht sieht. Deshalb schreibt der Browser eine Liste beim Öffnen mit Zugang unverändert neu, sobald der letzte Schreibvorgang mehr als dreißig Tage zurückliegt; die Superliste ebenso. Wer nur ansieht, hält nichts am Leben.
 - Der Server kennt zwar keine Inhalte, aber Metadaten: Größe des Chiffrats, Zeitpunkte, Revisionszähler.
 - Die Superliste erzeugt im Zugriffsprotokoll ein Muster, das einzelne Aufrufe nicht erzeugen: welche Listen zusammen und von welcher Adresse aus gelesen werden. Lesen ist ungedrosselt, die Schranke von vier gleichzeitigen Abrufen sitzt im Browser.
 - Der Link zu einer Superliste ist ein Bündel fremder Schlüssel. Es gibt für ihn bewusst keine Form nur zum Ansehen: Er wird als Ganzes weitergegeben oder gar nicht. Die gesammelten Personen erfahren nichts davon, denn eine Benachrichtigung setzte voraus, festzuhalten, wer welche Liste liest.
