@@ -454,6 +454,13 @@
         <button type="button" class="btn btn--primary" data-create
                 data-i18n="start.create">Leihliste anlegen</button>
       </p>
+      <!-- Wer schon eine hatte: Der Weg zurueck steht neben dem Anlegen, weil
+           genau hier jemand steht, der seine Liste verloren hat. Das Dateifeld
+           bleibt verborgen, der Verweis oeffnet es. -->
+      <p class="spaced">
+        <button type="button" id="btnRestore" class="linkbtn" data-i18n="backup.restore">Aus einer Sicherung wiederherstellen</button>
+        <input type="file" id="backupFile" accept="application/json,.json" hidden>
+      </p>
     </section>
 
     <!-- Die Superliste. Dieselbe Bauform, damit der Vergleich leicht
@@ -720,6 +727,16 @@
           </button>
           <button type="button" class="btn btn--primary" data-copy="linkView" data-i18n="share.copy">Kopieren</button>
         </div>
+        <!-- Zurueckziehen. Der Ansehen-Link ist das Geheimnis, und wer ihn
+             einmal hat, hat ihn. Dieser Knopf ist der einzige Weg, ihn wieder
+             einzufangen: Er tauscht den Schluessel, nicht die Liste. Kein
+             btn--danger — Rot ist dem Zerstoerenden vorbehalten, und hier
+             geht nichts verloren ausser dem alten Zugang. Begruendung bei
+             schluesselWechseln() in app.js. -->
+        <p class="hint spaced-lg" data-i18n="revoke.hint"></p>
+        <div class="spaced field">
+          <button type="button" id="btnRevoke" class="btn" data-i18n="revoke.button">Ansehen-Link zurückziehen</button>
+        </div>
       </div>
 
       <div class="tabpanel" id="tabEdit" role="tabpanel" aria-labelledby="tabBtnEdit" hidden>
@@ -735,6 +752,19 @@
       </div>
 
     </section>
+
+    <!-- Sichern: eine Datei im Klartext, ohne Link. Ein Aufklapper und keine
+         Karte, weil das Sichern selten ist und der Kasten darueber der
+         Alltag. Die Begruendung steht bei sichereListe() in app.js. -->
+    <details class="fold" id="backupBox" hidden>
+      <summary><span data-i18n="backup.headline">Sichern</span></summary>
+      <div class="fold__body">
+        <p class="hint" data-i18n="backup.hint"></p>
+        <div class="spaced field">
+          <button type="button" id="btnBackup" class="btn" data-i18n="backup.download">Als Datei sichern</button>
+        </div>
+      </div>
+    </details>
 
   </section>
 
@@ -795,6 +825,13 @@
         <label class="sr-only" for="circleQ" data-i18n="circle.searchLabel">Unter allen Sachen suchen</label>
         <input type="text" id="circleQ" class="input" autocomplete="off"
                data-i18n-placeholder="circle.searchPlaceholder" placeholder="Suchen">
+        <!-- Die Verfuegbarkeit als Schalter, nicht als Suchwort: Die
+             Startseite verspricht beides, Gegenstand und Verfuegbarkeit. -->
+        <label class="check spaced">
+          <input type="checkbox" id="circleOnlyFree">
+          <span class="check__box" aria-hidden="true"></span>
+          <span data-i18n="circle.onlyFree">Nur zeigen, was gerade frei ist</span>
+        </label>
         <p class="hint" id="circleCount" role="status" aria-live="polite"></p>
       </div>
 

@@ -43,7 +43,7 @@ DirectoryIndex index.html
 </FilesMatch>
 
 # Projektinterne Dateien und Verzeichnisse aus dem Repository sperren
-RedirectMatch 404 (?i)/(\.git|\.github|tools|tests|CONTRIBUTING\.md|README\.md|LICENSE)(/|$)
+RedirectMatch 404 (?i)/(\.git|\.github|tools|tests|CLAUDE\.md|CONTRIBUTING\.md|README\.md|LICENSE)(/|$)
 
 # HTTPS erzwingen. Ueber http laeuft die Anwendung ohnehin nicht: Ohne
 # sicheren Kontext fehlt crypto.subtle. Schwerer wiegt das andere: Eine ueber

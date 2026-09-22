@@ -26,6 +26,7 @@ oder Kontaktdaten.
 | **Ein Eintrag, ein Fenster** | verfügbar bleibt schmucklos, verliehen trägt Name und Datum in der Zeile |
 | **Anfragen** | steht bei Freunden in der Zeile: vorformulierter Text, weitergegeben über das Gerät oder per `mailto:` |
 | **Rücknahme statt Rückfrage** | ein gelöschter Eintrag lässt sich neun Sekunden lang zurückholen |
+| **Sichern und Wiederherstellen** | die Liste als Klartextdatei auf dem eigenen Gerät, ohne Link; daraus entsteht auf der Startseite eine neue Liste mit neuen Links |
 | **Gemerkte Listen** | eigene Leihlisten und Superlisten stehen auf der Startseite dieses Browsers, rein lokal und ohne Konto |
 | **Zwei Wege dorthin** | breit als zwei Verweise in der Kopfleiste, je mit Zeichen und Wort; schmal als eine schwebende Schaltfläche unten rechts |
 | **Superliste** | eine Liste der Leihlisten: mehrere Ansehen-Links zu einer Übersicht bündeln, alle Gegenstände in einer Liste, mit Suche über Gegenstand, Person und Notiz |
@@ -83,10 +84,11 @@ Wiederherstellen des Bearbeiten-Links genügt.
 
 Ehrliche Einordnung, denn Verschlüsselung ersetzt kein Rechtemanagement:
 
-- Wer den Ansehen-Link hat, kann alles lesen und weitergeben. Der Link *ist* das Geheimnis.
-- Wer den Bearbeiten-Link verliert, verliert den Zugang; eine Wiederherstellung ist bauartbedingt unmöglich.
+- Wer den Ansehen-Link hat, kann alles lesen und weitergeben. Der Link *ist* das Geheimnis. Zurückziehen lässt er sich trotzdem: Die Liste wird unter einem neuen Schlüssel neu verschlüsselt, alle bisherigen Links — auch der eigene Bearbeiten-Link — laufen ins Leere, und die Freunde bekommen den neuen. Eine Superliste, die den alten Schlüssel hält, meldet die Liste als nicht mehr passend.
+- Wer den Bearbeiten-Link verliert, verliert den Zugang zu dieser Liste; den Link wiederherzustellen ist bauartbedingt unmöglich. Aus einer Sicherungsdatei lässt sich eine neue Liste anlegen — mit neuen Links, die Freunde neu bekommen müssen. Die Superliste lässt sich nicht sichern: Sie ist ein Bündel fremder Schlüssel, und die gehören nicht in eine Klartextdatei.
+- Listen, die ein Jahr lang nicht geschrieben wurden, löscht `tools/purge.php`. Lesen zählt nicht, und der Server kann nicht zählen, was er nicht sieht. Deshalb schreibt der Browser eine Liste beim Öffnen mit Zugang unverändert neu, sobald der letzte Schreibvorgang mehr als dreißig Tage zurückliegt; die Superliste ebenso. Wer nur ansieht, hält nichts am Leben.
 - Der Server kennt zwar keine Inhalte, aber Metadaten: Größe des Chiffrats, Zeitpunkte, Revisionszähler.
-- Die Superliste erzeugt im Zugriffsprotokoll ein Muster, das einzelne Aufrufe nicht erzeugen: welche Listen zusammen und von welcher Adresse aus gelesen werden. Lesen ist ungedrosselt, die Schranke von vier gleichzeitigen Abrufen sitzt im Browser.
+- Die Superliste erzeugt im Zugriffsprotokoll ein Muster, das einzelne Aufrufe nicht erzeugen: welche Listen zusammen und von welcher Adresse aus gelesen werden. Lesen ist gedrosselt, aber großzügig: 1200 Abrufe je Stunde und Adresse, das ist der Alltag einer vollen Superliste, viele Male geöffnet, und nicht das Hämmern. Die Schranke von vier gleichzeitigen Abrufen sitzt weiterhin im Browser. Hinter einem Proxy gilt die durchgereichte Adresse, aber nur, wenn die Anfrage von `localhost` kommt — von außen ließe sich die Kopfzeile erfinden.
 - Der Link zu einer Superliste ist ein Bündel fremder Schlüssel. Es gibt für ihn bewusst keine Form nur zum Ansehen: Er wird als Ganzes weitergegeben oder gar nicht. Die gesammelten Personen erfahren nichts davon, denn eine Benachrichtigung setzte voraus, festzuhalten, wer welche Liste liest.
 - Ein kompromittierter Server könnte manipuliertes JavaScript ausliefern. Diesem Angriff ist jede Web-Anwendung mit Client-Verschlüsselung ausgesetzt; er lässt sich nur durch Prüfung des ausgelieferten Codes eingrenzen.
 - Gleichzeitige Änderungen an zwei Bearbeiten-Links: Der Server erkennt den Konflikt über den Revisionszähler, der Client schreibt danach seinen Stand fort (*last write wins*).
@@ -360,11 +362,13 @@ weniger Bewegung, nicht weniger Anerkennung.
 │   ├── build-fonts.py            erzeugt die Schriftteilmengen
 │   ├── i18n-check.js             prüft beide Wörterbücher auf denselben Schlüsselsatz
 │   ├── fallback-check.js         prüft die Ersatztexte im HTML gegen das Wörterbuch
+│   ├── pruefe.sh                 alle statischen Prüfungen in einem Aufruf, wie die Action
 │   └── check-deployment.php      prüft eine laufende Installation von außen
 ├── tests/
 │   ├── api-test.php              Funktionstest des Backends, ohne Abhängigkeiten
 │   └── e2e/                      Browsertests: hilfe.mjs, lauf.mjs und die Suiten
 ├── .github/workflows/ci.yml      Syntaxprüfung und Funktionstest
+├── CLAUDE.md                     Arbeitsgrundlage für eine KI-Sitzung: Regeln, Karte, Prüfbefehle
 ├── CONTRIBUTING.md
 └── LICENSE                       MIT
 ```
@@ -497,6 +501,34 @@ cd /var/www/leih-ich-dir && git pull --ff-only
 Entfernt Listen, die ein Jahr lang nicht geschrieben wurden. Mit `--dry-run`
 lässt sich der Lauf zunächst beobachten.
 
+**8. Sichern**
+
+`data/lists/` ist die gesamte Datenbank: eine Datei je Liste, Chiffrat und
+Prüfwert, sonst nichts. Wer dieses Verzeichnis hat, hat alle Listen — ohne
+sie lesen zu können, denn die Schlüssel liegen bei den Nutzerinnen. Genau
+deshalb kann der Betrieb sie auch nicht wiederherstellen, wenn es weg ist:
+Eine Nutzerin hat höchstens ihre eigene Sicherungsdatei, und die legt eine
+neue Liste an, mit neuen Links.
+
+```cron
+45 4 * * * rsync -a --delete /var/www/leih-ich-dir/data/lists/ /var/backups/leih-ich-dir/lists/
+```
+
+Die Kopie bleibt Chiffrat und ist damit so unbedenklich wie das Original;
+sie gehört trotzdem dorthin, wo Sicherungen liegen, und nicht ins
+Webverzeichnis. Nach dem Abräumen und nicht davor, sonst sichert man, was
+gerade gelöscht wurde. `--delete` hält die Kopie gleich; wer Stände behalten
+will, nimmt statt eines festen Zielpfads einen mit Datum.
+
+Was *nicht* gesichert werden muss: `data/throttle/` sind Zähler der
+Ratenbegrenzung und werden stündlich alt. `data/.salt` verschleiert die
+Adressen in diesen Zählern; fehlt sie, legt `api.php` beim nächsten Aufruf
+eine neue an, und nichts geht verloren. Die Schreibnachweise hängen nicht an
+ihr.
+
+Zurückspielen heißt: Verzeichnis kopieren, Rechte setzen, fertig. Die
+Listen-Kennungen stehen im Dateinamen, jeder Link findet seine Datei wieder.
+
 ## Deployment über Plesk (netcup-Webhosting)
 
 Auf einem Webhosting-Paket ohne Konsolenzugriff übernimmt Plesk das `git
@@ -556,6 +588,13 @@ https://leihichdir.de/check.html
 
 Die Prüfung zeigt unter anderem, ob `.htaccess` greift, ob `data/` von außen
 gesperrt ist und ob der Proxy den Schlüssel gefunden hat.
+
+**6. Sichern**
+
+Auch hier ist `data/lists/` die ganze Datenbank; was dazu gehört und was
+nicht, steht oben unter *Deployment auf einem LAMP-Stack, Schritt 8*. In
+Plesk übernimmt das der Sicherungsmanager der Domain — oder ein geplanter
+Task mit demselben `rsync`.
 
 ### Vorgelagerter nginx
 
