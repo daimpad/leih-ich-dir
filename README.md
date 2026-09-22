@@ -501,6 +501,34 @@ cd /var/www/leih-ich-dir && git pull --ff-only
 Entfernt Listen, die ein Jahr lang nicht geschrieben wurden. Mit `--dry-run`
 lässt sich der Lauf zunächst beobachten.
 
+**8. Sichern**
+
+`data/lists/` ist die gesamte Datenbank: eine Datei je Liste, Chiffrat und
+Prüfwert, sonst nichts. Wer dieses Verzeichnis hat, hat alle Listen — ohne
+sie lesen zu können, denn die Schlüssel liegen bei den Nutzerinnen. Genau
+deshalb kann der Betrieb sie auch nicht wiederherstellen, wenn es weg ist:
+Eine Nutzerin hat höchstens ihre eigene Sicherungsdatei, und die legt eine
+neue Liste an, mit neuen Links.
+
+```cron
+45 4 * * * rsync -a --delete /var/www/leih-ich-dir/data/lists/ /var/backups/leih-ich-dir/lists/
+```
+
+Die Kopie bleibt Chiffrat und ist damit so unbedenklich wie das Original;
+sie gehört trotzdem dorthin, wo Sicherungen liegen, und nicht ins
+Webverzeichnis. Nach dem Abräumen und nicht davor, sonst sichert man, was
+gerade gelöscht wurde. `--delete` hält die Kopie gleich; wer Stände behalten
+will, nimmt statt eines festen Zielpfads einen mit Datum.
+
+Was *nicht* gesichert werden muss: `data/throttle/` sind Zähler der
+Ratenbegrenzung und werden stündlich alt. `data/.salt` verschleiert die
+Adressen in diesen Zählern; fehlt sie, legt `api.php` beim nächsten Aufruf
+eine neue an, und nichts geht verloren. Die Schreibnachweise hängen nicht an
+ihr.
+
+Zurückspielen heißt: Verzeichnis kopieren, Rechte setzen, fertig. Die
+Listen-Kennungen stehen im Dateinamen, jeder Link findet seine Datei wieder.
+
 ## Deployment über Plesk (netcup-Webhosting)
 
 Auf einem Webhosting-Paket ohne Konsolenzugriff übernimmt Plesk das `git
@@ -560,6 +588,13 @@ https://leihichdir.de/check.html
 
 Die Prüfung zeigt unter anderem, ob `.htaccess` greift, ob `data/` von außen
 gesperrt ist und ob der Proxy den Schlüssel gefunden hat.
+
+**6. Sichern**
+
+Auch hier ist `data/lists/` die ganze Datenbank; was dazu gehört und was
+nicht, steht oben unter *Deployment auf einem LAMP-Stack, Schritt 8*. In
+Plesk übernimmt das der Sicherungsmanager der Domain — oder ein geplanter
+Task mit demselben `rsync`.
 
 ### Vorgelagerter nginx
 
