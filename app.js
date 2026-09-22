@@ -268,6 +268,11 @@
       'backup.restoring': 'Liste wird wiederhergestellt …',
       'backup.badFile': 'Das ist keine Sicherung einer Leihliste.',
       'backup.restored': 'Wiederhergestellt als neue Liste, mit neuen Links.',
+
+      'revoke.hint': 'Wer diesen Link hat, sieht die Liste — auch, wer ihn weitergereicht bekam. Zurückziehen macht alle bisherigen Links dieser Liste ungültig, den Ansehen-Link wie den Bearbeiten-Link, und gibt Dir neue.',
+      'revoke.button': 'Ansehen-Link zurückziehen',
+      'revoke.confirm': 'Alle bisherigen Links dieser Liste werden ungültig, auch Dein Bearbeiten-Link. Du bekommst neue und musst den Ansehen-Link neu weitergeben. Fortfahren?',
+      'revoke.done': 'Zurückgezogen. Die alten Links gelten nicht mehr, hier sind die neuen.',
       'share.hint': 'Der Schlüssel steht hinter dem Rautezeichen und wird technisch nie an den Server übertragen.',
 
       'add.nameLabel': 'Gegenstand',
@@ -383,7 +388,7 @@
       'error.back': 'Zur Startseite',
       'error.badlink': 'Dieser Link ist unvollständig oder beschädigt.',
       'error.notfound': 'Diese Liste gibt es nicht (mehr).',
-      'error.decrypt': 'Die Daten lassen sich mit diesem Schlüssel nicht entschlüsseln.',
+      'error.decrypt': 'Dieser Link passt nicht mehr zu dieser Liste. Vielleicht wurde er zurückgezogen; dann hat die Person, der die Liste gehört, einen neuen.',
       'error.network': 'Der Server ist gerade nicht erreichbar.',
       'error.forbidden': 'Dieser Bearbeiten-Link ist nicht gültig.',
       'error.nocrypto': 'Dieser Browser stellt die Web Crypto API nicht bereit. Bitte rufe die Seite über HTTPS auf und nutze einen aktuellen Browser.',
@@ -648,6 +653,11 @@
       'backup.restoring': 'Restoring list …',
       'backup.badFile': 'That is not a backup of a lending list.',
       'backup.restored': 'Restored as a new list, with new links.',
+
+      'revoke.hint': 'Anyone who has this link can see the list, including anyone it was passed on to. Revoking makes every existing link of this list invalid, the view link and the edit link alike, and gives you new ones.',
+      'revoke.button': 'Revoke the view link',
+      'revoke.confirm': 'Every existing link of this list becomes invalid, your edit link too. You get new ones and have to pass the view link on again. Continue?',
+      'revoke.done': 'Revoked. The old links no longer work; here are the new ones.',
       'share.hint': 'The key lives behind the # sign and is technically never sent to the server.',
 
       'add.nameLabel': 'Item',
@@ -763,7 +773,7 @@
       'error.back': 'Back to start',
       'error.badlink': 'This link is incomplete or damaged.',
       'error.notfound': 'This list does not exist (any more).',
-      'error.decrypt': 'The data cannot be decrypted with this key.',
+      'error.decrypt': 'This link no longer fits this list. It may have been revoked; if so, the person the list belongs to has a new one.',
       'error.network': 'The server cannot be reached right now.',
       'error.forbidden': 'This edit link is not valid.',
       'error.nocrypto': 'This browser does not provide the Web Crypto API. Please open the page via HTTPS and use an up-to-date browser.',
@@ -3736,6 +3746,89 @@
     save();
   }
 
+  /* ------------------------------------------------------------------ *
+   * Den Ansehen-Link zurueckziehen
+   *
+   * "Der Link ist das Geheimnis" ist eine ehrliche Einordnung, aber ohne
+   * Widerruf: Wer den Ansehen-Link einmal weitergegeben hat, konnte ihn nie
+   * wieder einfangen, ausser durch Loeschen und Neuanlegen. Dabei braucht der
+   * Widerruf keine Serveraenderung. Die Liste wird unter einem neuen
+   * Schluessel neu verschluesselt — gleiche Kennung, gleiches Token, also
+   * derselbe Datensatz und derselbe Schreibnachweis. Jeder alte Link, ob
+   * Ansehen oder Bearbeiten, traegt den alten Schluessel und scheitert
+   * danach an der Entschluesselung; eine Superliste, die ihn haelt, meldet die
+   * Liste als nicht mehr passend. Das ist inhaltlich richtig: Der Zugang ist
+   * entzogen.
+   *
+   * Ein laufender Schreibvorgang mit dem alten Schluessel muss vorher fertig
+   * sein. Landete er nach unserem, laege das Dokument wieder unter dem alten
+   * Schluessel: Der alte Link gaelte, der neue nicht. Deshalb wird gewartet,
+   * der Aufschub geloescht und der Schnappschuss erst danach gezogen, damit
+   * er alles traegt, was bis dahin eingetippt wurde.
+   * ------------------------------------------------------------------ */
+
+  function wartenBisGespeichert(versuche) {
+    return new Promise(function (fertig) {
+      (function tick(n) {
+        if (!state.saving || n <= 0) { fertig(); return; }
+        setTimeout(function () { tick(n - 1); }, 100);
+      })(versuche);
+    });
+  }
+
+  function schluesselWechseln() {
+    if (state.mode !== 'edit' || !state.doc || !state.token) { return; }
+    if (!window.confirm(t('revoke.confirm'))) { return; }
+    var knopf = $('#btnRevoke');
+    if (knopf) { knopf.disabled = true; }
+    var neuerKey = null, neuerKeyStr = null, generation = 0;
+    return wartenBisGespeichert(50).then(function () {
+      clearTimeout(saveTimer);
+      generation = docGen;
+      var snapshot = JSON.parse(JSON.stringify(state.doc));
+      snapshot.v = SCHEMA_VERSION;
+      return Crypt.generateKey().then(function (key) {
+        neuerKey = key;
+        return Promise.all([Crypt.exportKey(key), Crypt.encrypt(key, snapshot, state.id)]);
+      });
+    }).then(function (teile) {
+      neuerKeyStr = teile[0];
+      var payload = teile[1];
+      return Store.write(state.id, state.proof, state.rev, payload).then(function (res) {
+        /* Wie in save(): Bei einem Konflikt einmal mit der aktuellen Revision. */
+        if (res.status === 409 && res.body && typeof res.body.rev === 'number') {
+          state.rev = res.body.rev;
+          return Store.write(state.id, state.proof, state.rev, payload);
+        }
+        return res;
+      });
+    }).then(function (res) {
+      if (res.status !== 200) { throw new AppError(mapError(res)); }
+      state.key = neuerKey;
+      state.keyStr = neuerKeyStr;
+      state.rev = res.body.rev;
+      state.updated = res.body.updated;
+      /* Was waehrend des Schreibens eingetippt wurde, bleibt offen und geht
+         mit dem naechsten Speichern — dann schon unter dem neuen Schluessel. */
+      state.dirty = (docGen !== generation);
+      history.replaceState(null, '', editHash(state.id, neuerKeyStr, state.token));
+      rememberList();
+      updateSettingsLink();
+      render();
+      /* Der Zugang, noch einmal und deutlich: Der Bearbeiten-Link ist ein
+         anderer als der, den die Besitzerin aufbewahrt hat. */
+      $('#keyLink').value = editLink();
+      $('#chkKeyDone').checked = false;
+      $('#keyBox').hidden = false;
+      $('#keyRemember').hidden = !mineWorks();
+      $('#keyBox').scrollIntoView({ block: 'start', behavior: ruhig() ? 'auto' : 'smooth' });
+      toast(t('revoke.done'));
+      if (state.dirty) { scheduleSave(); }
+    }).catch(function (err) {
+      toast(t('error.' + (err && err.code ? err.code : 'network')));
+    }).then(function () { if (knopf) { knopf.disabled = false; } });
+  }
+
   /** Lädt eine Liste anhand der Fragmentdaten und entschlüsselt sie lokal. */
   function openList(route) {
     return Crypt.importKey(route.key).then(function (key) {
@@ -4889,6 +4982,7 @@
     $$('.tab').forEach(function (tab) {
       tab.addEventListener('click', function () { selectTab(tab.getAttribute('data-tab')); });
     });
+    $('#btnRevoke').addEventListener('click', schluesselWechseln);
     $$('[data-copy]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var ziel = btn.getAttribute('data-copy');

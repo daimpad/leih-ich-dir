@@ -727,6 +727,16 @@
           </button>
           <button type="button" class="btn btn--primary" data-copy="linkView" data-i18n="share.copy">Kopieren</button>
         </div>
+        <!-- Zurueckziehen. Der Ansehen-Link ist das Geheimnis, und wer ihn
+             einmal hat, hat ihn. Dieser Knopf ist der einzige Weg, ihn wieder
+             einzufangen: Er tauscht den Schluessel, nicht die Liste. Kein
+             btn--danger — Rot ist dem Zerstoerenden vorbehalten, und hier
+             geht nichts verloren ausser dem alten Zugang. Begruendung bei
+             schluesselWechseln() in app.js. -->
+        <p class="hint spaced-lg" data-i18n="revoke.hint"></p>
+        <div class="spaced field">
+          <button type="button" id="btnRevoke" class="btn" data-i18n="revoke.button">Ansehen-Link zurückziehen</button>
+        </div>
       </div>
 
       <div class="tabpanel" id="tabEdit" role="tabpanel" aria-labelledby="tabBtnEdit" hidden>
