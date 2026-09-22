@@ -200,6 +200,31 @@ check('Ablage enthält keinen Klartext', $stored !== '' && !str_contains($stored
 check('Ablage speichert nur den Hash des Nachweises', str_contains($stored, '"verifier"') && !str_contains($stored, $proof));
 http_json($base, ['a' => 'delete', 'id' => $plainId, 'proof' => $proof]);
 
+/* Lesen ist gedrosselt, aber großzügig: Die Grenze steht in api.php. Dieser
+   Block steht vor dem Anlege-Spam, denn danach ließe sich keine Liste mehr
+   anlegen, an der man lesen könnte.
+   Geprüft wird, dass sie greift, und dass sie erst greift, wenn ein
+   einzelner Browser sie im Alltag nicht erreicht — eine Superliste mit allen
+   Leihlisten, viele Male in der Stunde geöffnet. */
+$readId = bin2hex(random_bytes(16));
+http_json($base, ['a' => 'create', 'id' => $readId, 'proof' => $proof, 'payload' => $payload('Leiter')]);
+$reads = 0;
+$readBlocked = false;
+for ($attempt = 0; $attempt < 1400; $attempt++) {
+    [$code] = http_json($base . '?a=read&id=' . $readId);
+    if ($code === 429) {
+        $readBlocked = true;
+        break;
+    }
+    if ($code === 200) {
+        $reads++;
+    }
+}
+check('Ratenbegrenzung greift beim Lesen', $readBlocked);
+check('Ratenbegrenzung lässt reichlich Lesen zu', $reads >= 1000, $reads);
+[$code, $body] = http_json($base, ['a' => 'delete', 'id' => $readId, 'proof' => $proof]);
+check('Löschen bleibt trotz Lesedrossel möglich', $code === 200, (string) $code);
+
 /* Ratenbegrenzung: irgendwann verweigert der Server neue Listen. Die genaue
    Grenze steht in api.php; geprüft wird, dass sie überhaupt greift und nicht
    schon nach wenigen Anfragen zuschlägt. */

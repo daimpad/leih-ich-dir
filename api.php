@@ -61,6 +61,8 @@ const MAX_REQUEST_SIZE = 1048576;  // 1 MiB Rohanfrage
 const MAX_CT_CHARS     = 524288;   // 512 KiB Chiffrat (base64url)
 const CREATE_LIMIT     = 20;       // neue Listen pro Fenster und IP
 const CREATE_WINDOW    = 3600;     // Sekunden
+const READ_LIMIT       = 1200;     // Lesezugriffe pro Fenster und IP; Begruendung bei action_read()
+const READ_WINDOW      = 3600;
 const THROTTLE_GC_PROB = 50;       // 1 von n Anfragen räumt alte Zählerdateien auf
 
 /* -- KI-Proxy ---------------------------------------------------------------
@@ -236,9 +238,35 @@ function valid_payload(mixed $payload): array
  *
  * @param string $bucket Name des Zählers, trennt Anlegen und KI-Anfragen
  */
-function throttle(string $bucket, int $limit, int $window): void
+/**
+ * Die Adresse, nach der gedrosselt wird.
+ *
+ * Steht ein Proxy vor Apache — in Plesk der nginx —, ist REMOTE_ADDR dessen
+ * Adresse und fuer alle dieselbe; dann traefe jede Grenze alle Nutzerinnen
+ * zusammen. Plesk reicht die echte Adresse ueber mod_remoteip durch, aber
+ * nicht jeder Aufbau tut das. Deshalb: Kommt die Anfrage von localhost und
+ * traegt sie X-Forwarded-For, gilt die erste Adresse darin. Nur dann — von
+ * aussen laesst sich die Kopfzeile beliebig setzen, und wer sie glaubte,
+ * liesse sich die Drosselung mit einer erfundenen Adresse je Anfrage
+ * abschalten.
+ */
+function client_ip(): string
 {
     $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    $lokal = in_array($ip, ['127.0.0.1', '::1'], true);
+    $weiter = trim((string) ($_SERVER['HTTP_X_FORWARDED_FOR'] ?? ''));
+    if ($lokal && $weiter !== '') {
+        $erste = trim(explode(',', $weiter)[0]);
+        if (filter_var($erste, FILTER_VALIDATE_IP) !== false) {
+            return $erste;
+        }
+    }
+    return $ip;
+}
+
+function throttle(string $bucket, int $limit, int $window): void
+{
+    $ip = client_ip();
     $file = throttle_dir() . '/' . hash('sha256', $bucket . '|' . $ip . '|' . install_salt()) . '.json';
 
     $fh = @fopen($file, 'c+');
@@ -302,6 +330,14 @@ function action_read(): never
     if (!valid_id($id)) {
         fail(400, 'malformed');
     }
+    /* Auch das Lesen ist gedrosselt, grosszuegig: 1200 je Stunde und Adresse
+       sind zwanzig je Minute — eine Superliste mit allen 24 Leihlisten
+       laesst sich damit fuenfzigmal in der Stunde oeffnen, und die
+       Auffrischung im Ansehen-Modus alle 45 Sekunden kostet 80. Gedrosselt
+       wird nicht der Gebrauch, sondern das Haemmern: Bisher stand die
+       einzige Schranke, vier Abrufe zugleich, im Browser eines gutwilligen
+       Nutzers, und jeder Lesevorgang belegt drueben einen PHP-Prozess. */
+    throttle('read', READ_LIMIT, READ_WINDOW);
     /* Mit geteilter Sperre lesen. action_write schreibt in dieselbe Datei
        (ftruncate, dann fwrite) und haelt dabei LOCK_EX; ein ungesperrtes
        file_get_contents traf das Fenster dazwischen und bekam eine leere
