@@ -360,11 +360,13 @@ weniger Bewegung, nicht weniger Anerkennung.
 │   ├── build-fonts.py            erzeugt die Schriftteilmengen
 │   ├── i18n-check.js             prüft beide Wörterbücher auf denselben Schlüsselsatz
 │   ├── fallback-check.js         prüft die Ersatztexte im HTML gegen das Wörterbuch
+│   ├── pruefe.sh                 alle statischen Prüfungen in einem Aufruf, wie die Action
 │   └── check-deployment.php      prüft eine laufende Installation von außen
 ├── tests/
 │   ├── api-test.php              Funktionstest des Backends, ohne Abhängigkeiten
 │   └── e2e/                      Browsertests: hilfe.mjs, lauf.mjs und die Suiten
 ├── .github/workflows/ci.yml      Syntaxprüfung und Funktionstest
+├── CLAUDE.md                     Arbeitsgrundlage für eine KI-Sitzung: Regeln, Karte, Prüfbefehle
 ├── CONTRIBUTING.md
 └── LICENSE                       MIT
 ```
