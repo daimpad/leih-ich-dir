@@ -26,6 +26,9 @@ keine Datenbank, kein Framework, kein Bauschritt. Betrieb: leihichdir.de.
   verworfen und fällt lokal nicht auf.
 - **Schlüssel im Fragment** (`#e=id.key.token`, `#v=id.key`, `#k=id.key.token`).
   Das Fragment verlässt den Browser nie. `#v` ist die einzige Form ohne Token.
+  Der Widerruf tauscht beides auf einmal: neuer Schlüssel *und* neues Token
+  (`newproof` beim Schreiben). Nur den Schlüssel zu tauschen genügt nicht —
+  ein noch offenes Fenster schriebe die alte Verschlüsselung zurück.
 - **Ein Stylesheet**, `style.css`. Farben, Abstände, Radien nur als Merkmale
   in `:root`, hell und dunkel. Keine Verläufe, keine Emoji; Zeichen sind
   `<symbol>` in `index.html`, 64×64, Strich 4–5, eckige Enden.
