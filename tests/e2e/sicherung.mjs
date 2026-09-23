@@ -1,11 +1,13 @@
 /*
  * Sichern, Wiederherstellen und das Lebenszeichen.
  *
- * Drei Zusagen, die das Fortbestehen der Daten betreffen: Die Sicherung
- * traegt die Liste, aber keinen Zugang. Aus ihr entsteht eine neue Liste mit
- * neuen Links. Und eine Liste, die laenger als dreissig Tage nicht
- * geschrieben wurde, bekommt beim Oeffnen mit Zugang ein Lebenszeichen —
- * beim Ansehen nicht.
+ * Zusagen, die das Fortbestehen der Daten betreffen: Die Sicherung einer
+ * Leihliste traegt die Liste, aber keinen Zugang. Aus ihr entsteht eine neue
+ * Liste mit neuen Links. Die Sicherung einer Superliste traegt die
+ * gesammelten Ansehen-Links — fremden Zugang also, absichtlich und laut
+ * angesagt —, aber nicht den Zugang zur Superliste selbst und kein Token.
+ * Und eine Liste, die laenger als dreissig Tage nicht geschrieben wurde,
+ * bekommt beim Oeffnen mit Zugang ein Lebenszeichen — beim Ansehen nicht.
  *
  * Das Lebenszeichen laesst sich nur pruefen, wenn der Datensatz aelter ist,
  * als ein Test warten kann. Die Suite greift deshalb neben der Anwendung in
@@ -92,14 +94,78 @@ ok('und auf dem Server liegt sie vollstaendig',
    && drueben.doc.items[1].status === 'lent');
 ok('der Wiederherstellen-Verweis ist wieder frei', !(await p.evaluate(() => document.querySelector('#btnRestore').disabled)));
 
+console.log('· Die Superliste sichern');
+await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+await p.waitForTimeout(300);
+await p.locator('#btnStartCircle').click();
+await p.waitForSelector('#viewCircle:not([hidden])');
+await p.waitForTimeout(800);
+const kAlt = (await p.evaluate(() => location.hash)).slice(3).split('.');
+await p.evaluate(() => { document.querySelector('#circleManage').open = true; });
+await p.locator('#circleAddLink').fill('#v=' + anna.id + '.' + anna.keyStr);
+await p.locator('#circleAddName').fill('Anna');
+await p.locator('#btnCircleAdd').click();
+await p.waitForTimeout(1500);
+ok('die Superliste zeigt Annas zwei Sachen',
+   (await p.locator('#circleItems > li:not([hidden])').count()) === 2);
+
+ok('der Aufklapper zum Sichern steht da', !(await p.locator('#circleBackupBox').isHidden()));
+await p.evaluate(() => { document.querySelector('#circleBackupBox').open = true; });
+const [kDownload] = await Promise.all([
+  p.waitForEvent('download'),
+  p.locator('#btnCircleBackup').click()
+]);
+const kName = kDownload.suggestedFilename();
+ok('die Datei heisst nach Superliste und Tag',
+   /^superliste-[a-z0-9-]+-\d{4}-\d{2}-\d{2}\.json$/.test(kName), kName);
+const kPfad = await kDownload.path();
+const kText = readFileSync(kPfad, 'utf8');
+const kDatei = JSON.parse(kText);
+ok('sie traegt die gesammelte Leihliste mit Kennung, Schluessel und Beschriftung',
+   kDatei.leihichdir === 1 && kDatei.kind === 'circle' && kDatei.friends.length === 1
+   && kDatei.friends[0].id === anna.id && kDatei.friends[0].key === anna.keyStr
+   && kDatei.friends[0].label === 'Anna', kText.slice(0, 200));
+/* Der springende Punkt: Fremden Ansehen-Zugang traegt die Datei absichtlich
+   — das ist der Zweck und steht so in der Warnung. Den Zugang zur Superliste
+   selbst traegt sie nicht, und ein Token keiner der beiden. */
+ok('aber keinen Zugang zur Superliste selbst',
+   !kText.includes(kAlt[0]) && !kText.includes(kAlt[1]) && !kText.includes(kAlt[2]));
+ok('und kein Token irgendeiner Leihliste',
+   !kText.includes(anna.token) && !/"token"/.test(kText));
+
+console.log('· Die Superliste wiederherstellen');
+await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+await p.waitForTimeout(300);
+await p.locator('#backupFile').setInputFiles(kPfad);
+await p.waitForSelector('#viewCircle:not([hidden])', { timeout: 15000 });
+await p.waitForTimeout(2000);
+const kNeu = (await p.evaluate(() => location.hash));
+const kNeuTeile = kNeu.slice(3).split('.');
+ok('es entsteht eine neue Superliste mit eigenem Zugang',
+   /^#k=/.test(kNeu) && kNeuTeile[0] !== kAlt[0] && kNeuTeile[1] !== kAlt[1]
+   && kNeuTeile[2] !== kAlt[2], kNeu.slice(0, 24));
+ok('die Meldung sagt es', (await p.locator('#toastText').textContent()).includes('neue Superliste'),
+   await p.locator('#toastText').textContent());
+ok('der Zugangskasten steht offen, denn der Link ist neu',
+   !(await p.locator('#circleKeyBox').isHidden()));
+ok('und Annas zwei Sachen stehen wieder da',
+   (await p.locator('#circleItems > li:not([hidden])').count()) === 2);
+await p.evaluate(() => { document.querySelector('#circleManage').open = true; });
+ok('mit der Beschriftung aus der Datei',
+   /Anna/.test(await p.locator('#circleFriends li').first().textContent()));
+
 console.log('· Keine Sicherung');
 await p.goto(BASE + '/', { waitUntil: 'networkidle' });
 await p.waitForTimeout(300);
 const muell = join(tmpdir(), 'lid-keine-sicherung.json');
-writeFileSync(muell, JSON.stringify({ kind: 'circle', title: 'x', friends: [] }));
+/* Bis zu dieser Aenderung stand hier ein Superlisten-Dokument und die
+   Zusicherung, es werde abgewiesen. Die Anforderung ist abgeloest, nicht
+   verletzt: Beide Arten lassen sich jetzt wiederherstellen. Geprueft wird
+   deshalb, was weiterhin keine Sicherung ist — ein Dokument ohne beides. */
+writeFileSync(muell, JSON.stringify({ leihichdir: 1, kind: 'list', title: 'x' }));
 await p.locator('#backupFile').setInputFiles(muell);
 await p.waitForTimeout(500);
-ok('ein Superlisten-Dokument wird abgewiesen',
+ok('ein Dokument ohne Gegenstaende und ohne Leihlisten wird abgewiesen',
    (await p.locator('#toastText').textContent()).includes('keine Sicherung'),
    await p.locator('#toastText').textContent());
 ok('und die Startseite bleibt', await p.locator('#viewStart').isVisible());

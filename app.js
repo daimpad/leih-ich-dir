@@ -266,8 +266,10 @@
       'backup.download': 'Als Datei sichern',
       'backup.restore': 'Aus einer Sicherung wiederherstellen',
       'backup.restoring': 'Liste wird wiederhergestellt …',
-      'backup.badFile': 'Das ist keine Sicherung einer Leihliste.',
+      'backup.badFile': 'Diese Datei ist keine Sicherung.',
       'backup.restored': 'Wiederhergestellt als neue Liste, mit neuen Links.',
+      'backup.circleHint': 'Legt Deine Superliste als Datei auf diesem Gerät ab: die Namen und die Ansehen-Links der gesammelten Leihlisten, im Klartext. Damit liegt fremder Zugang auf Deiner Festplatte — wer die Datei bekommt, sieht die Leihlisten Deiner Freund:innen, so wie Du sie siehst. Bewahre sie so sorgfältig auf wie einen Schlüsselbund. Der Zugangs-Link dieser Superliste steht nicht darin: Aus der Datei entsteht eine neue Superliste mit neuem Link.',
+      'backup.restoredCircle': 'Wiederhergestellt als neue Superliste, mit neuem Link.',
 
       'revoke.hint': 'Wer diesen Link hat, sieht die Liste — auch, wer ihn weitergereicht bekam. Zurückziehen macht alle bisherigen Links dieser Liste ungültig, den Ansehen-Link wie den Bearbeiten-Link, und gibt Dir neue.',
       'revoke.button': 'Ansehen-Link zurückziehen',
@@ -653,8 +655,10 @@
       'backup.download': 'Save as file',
       'backup.restore': 'Restore from a backup',
       'backup.restoring': 'Restoring list …',
-      'backup.badFile': 'That is not a backup of a lending list.',
+      'backup.badFile': 'This file is not a backup.',
       'backup.restored': 'Restored as a new list, with new links.',
+      'backup.circleHint': 'Saves your super list as a file on this device: the names and the view links of the collected lending lists, in plain text. That puts other people\u2019s access on your hard drive — whoever gets the file sees your friends\u2019 lending lists just as you see them. Keep it as carefully as you would a set of keys. The access link of this super list is not in it: from the file, a new super list is created, with a new link.',
+      'backup.restoredCircle': 'Restored as a new super list, with a new link.',
 
       'revoke.hint': 'Anyone who has this link can see the list, including anyone it was passed on to. Revoking makes every existing link of this list invalid, the view link and the edit link alike, and gives you new ones.',
       'revoke.button': 'Revoke the view link',
@@ -2414,6 +2418,9 @@
        ueber Dritte an einer Stelle, die die Anwendung nicht abschirmen kann. */
     $('#circleManage').hidden = !istZugang;
     $('#circleShareBox').hidden = !istZugang;
+    /* Sichern nur mit Zugang, wie bei der Leihliste: Wer eine fremde
+       Superliste geoeffnet haette, duerfte sie nicht als Datei mitnehmen. */
+    $('#circleBackupBox').hidden = !istZugang;
     $('#circlePreview').hidden = !(Store && Store.kind === 'local');
     if (istZugang) { $('#circleLink').value = circleLink(); }
     /* #circleKeyBox wird hier ausdruecklich NICHT verborgen: Er bleibt
@@ -3675,21 +3682,62 @@
    * einer Cloud-Synchronisation; und ein Zugang, der an zwei Orten liegt, ist
    * keiner mehr. Der Bearbeiten-Link hat seinen eigenen Kasten.
    *
-   * Nur die Leihliste. Eine Superliste ist ein Buendel fremder Schluessel;
-   * die im Klartext in eine Datei zu schreiben, entschiede ueber Dritte.
+   * DIE SUPERLISTE AUCH, seit dieser Aenderung. Vorher stand hier das
+   * Gegenteil: "Nur die Leihliste. Eine Superliste ist ein Buendel fremder
+   * Schluessel; die im Klartext in eine Datei zu schreiben, entschiede ueber
+   * Dritte." Der Einwand war halb richtig und deshalb falsch herum gedacht.
+   *
+   * Richtig ist: Die Datei traegt Kennung und Schluessel jeder gesammelten
+   * Leihliste, also fremden Zugang, und der liegt danach auf einer
+   * Festplatte. Uebersehen war, dass der Zugangs-Link der Superliste (#k=)
+   * genau dasselbe gewaehrt — und zwar jedem, der ihn bekommt. Die Datei
+   * schafft also keine neue Art von Preisgabe, sondern eine zweite Kopie
+   * einer schon bestehenden. Wer die Datei fuer unzumutbar haelt, muesste
+   * die Superliste selbst fuer unzumutbar halten.
+   *
+   * Was bleibt, ist der Unterschied in der Sichtbarkeit: Ein Link, den man
+   * verschickt, fuehlt sich nach Zugang an; eine Datei im Ordner fuer
+   * Downloads nicht. Deshalb steht die Warnung im Aufklapper und nicht im
+   * Kleingedruckten, und sie sagt, was drin ist, statt zu beruhigen.
+   *
+   * Kein Token in der Datei, auch hier nicht: normalizeCircle laesst keines
+   * durch, und ein fremder Schreibzugang haette in einer Superliste ohnehin
+   * nichts zu suchen. Die Datei gibt also weiter, was der Eigentuemer sehen
+   * darf, und nicht, was er aendern darf.
    * ------------------------------------------------------------------ */
 
-  function sicherungsName(titel) {
+  function sicherungsName(titel, praefix) {
     var slug = String(titel || '').toLowerCase()
       .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
       .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
-    return 'leihliste-' + (slug || 'ohne-namen') + '-' + new Date().toISOString().slice(0, 10) + '.json';
+    return (praefix || 'leihliste') + '-' + (slug || 'ohne-namen') + '-' +
+           new Date().toISOString().slice(0, 10) + '.json';
+  }
+
+  /**
+   * Schiebt ein Dokument als Datei zum Nutzer. Getrennt von dem, was in der
+   * Datei steht: Die beiden Sicherungen unterscheiden sich im Inhalt und in
+   * der Warnung daneben, nicht im Weg nach draussen. Der Weg fuehrt ueber
+   * einen Blob und ein erzeugtes a — ein Download-Attribut auf einer
+   * data-URL scheitert an der CSP.
+   */
+  function ladeHerunter(datei, name) {
+    var blob = new Blob([JSON.stringify(datei, null, 2)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = el('a');
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    /* Nicht sofort freigeben: Manche Browser lesen den Blob erst nach dem Klick. */
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
   }
 
   function sichereListe() {
     if (!state.doc || state.mode !== 'edit') { return; }
     var kopie = JSON.parse(JSON.stringify(state.doc));
-    var datei = {
+    ladeHerunter({
       leihichdir: 1,
       kind: 'list',
       exported: new Date().toISOString(),
@@ -3698,38 +3746,93 @@
       contact: kopie.contact,
       showBorrower: kopie.showBorrower,
       items: kopie.items
-    };
-    var blob = new Blob([JSON.stringify(datei, null, 2)], { type: 'application/json' });
-    var url = URL.createObjectURL(blob);
-    var a = el('a');
-    a.href = url;
-    a.download = sicherungsName(kopie.title);
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    /* Nicht sofort freigeben: Manche Browser lesen den Blob erst nach dem Klick. */
-    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    }, sicherungsName(kopie.title, 'leihliste'));
   }
 
+  /**
+   * Die Sicherung der Superliste. Was hineingeht, ist genau das, was
+   * normalizeCircle durchlaesst: Kennung, Schluessel und die selbst
+   * vergebene Beschriftung je gesammelter Leihliste. Kein Token, kein
+   * zwischengespeicherter fremder Titel, keine Gegenstaende — die Superliste
+   * haelt davon ohnehin nichts, und eine Datei soll nicht mehr wissen als
+   * das Dokument, aus dem sie stammt.
+   */
+  function sichereKreis() {
+    if (!kreis.doc || state.mode !== 'circle') { return; }
+    var kopie = JSON.parse(JSON.stringify(kreis.doc));
+    ladeHerunter({
+      leihichdir: 1,
+      kind: 'circle',
+      exported: new Date().toISOString(),
+      v: SCHEMA_VERSION,
+      title: kopie.title,
+      friends: kopie.friends
+    }, sicherungsName(kopie.title || t('circle.untitled'), 'superliste'));
+  }
+
+  /**
+   * Ein Weg fuer beide Arten. Welche es ist, sagt das Dokument selbst — und
+   * das ist hier die richtige Reihenfolge, anders als beim Laden vom Server:
+   * Dort weiss der Aufrufer aus dem Link, was er erwartet, und ein Dokument,
+   * das etwas anderes behauptet, ist ein Fund. Hier weiss niemand etwas; die
+   * Nutzerin waehlt eine Datei und soll nicht vorher sagen muessen, was sie
+   * ist. Manipuliert werden kann die Angabe trotzdem nicht zu etwas Boesem:
+   * Beide Zweige normalisieren, und mehr als die eigenen Daten steht in
+   * keiner der beiden Formen.
+   */
   function stelleWiederHer(file) {
     var knopf = $('#btnRestore');
+    function frei() { if (knopf) { knopf.disabled = false; } }
     var reader = new FileReader();
     reader.onload = function () {
       var raw = null;
       try { raw = JSON.parse(String(reader.result)); } catch (e) { raw = null; }
-      /* Eine Sicherung ist ein Listendokument mit items. kindOf() haelt ein
-         Superlisten-Dokument fern, das jemand von Hand hineingelegt hat. */
-      if (!raw || typeof raw !== 'object' || !Array.isArray(raw.items) || kindOf(raw) !== 'list') {
-        toast(t('backup.badFile'));
+      if (!raw || typeof raw !== 'object') { toast(t('backup.badFile')); return; }
+
+      if (kindOf(raw) === 'circle' && Array.isArray(raw.friends)) {
+        if (knopf) { knopf.disabled = true; }
+        stelleKreisWiederHer(normalizeAny(raw, 'circle', null)).then(frei);
         return;
       }
+      if (!Array.isArray(raw.items)) { toast(t('backup.badFile')); return; }
       if (knopf) { knopf.disabled = true; }
       createListFrom(normalizeAny(raw, 'list', null), t('backup.restoring'), function () {
         toast(t('backup.restored'));
-      }).then(function () { if (knopf) { knopf.disabled = false; } });
+      }).then(frei);
     };
     reader.onerror = function () { toast(t('backup.badFile')); };
     reader.readAsText(file);
+  }
+
+  /**
+   * Legt aus einer Sicherung eine neue Superliste an. Neue Kennung, neuer
+   * Schluessel, neues Token — wie beim Wiederherstellen einer Leihliste, und
+   * aus demselben Grund: Die Datei enthaelt die Sammlung und nicht den
+   * Zugang.
+   *
+   * Die aufgenommenen Leihlisten werden danach geholt. Ohne das stuende die
+   * frische Superliste bis zum naechsten Aktualisieren leer da, obwohl in
+   * ihrem Dokument alles steht — und das saehe aus wie ein Fehlschlag.
+   */
+  function stelleKreisWiederHer(doc) {
+    return createCircle(function () {
+      kreis.doc.title = doc.title;
+      kreis.doc.friends = doc.friends;
+      kreisSave();
+    }).then(function () {
+      if (!kreis.doc) { return; }
+      toast(t('backup.restoredCircle'));
+      var gen = kreisGen;
+      kreis.eintraege = kreisEintraege(kreis.doc.friends);
+      renderKreisListe();
+      return ladeKreis(kreis.eintraege, null).then(function () {
+        /* Nur zeichnen, wenn noch derselbe Kreis offen ist: Wer waehrend des
+           Holens weiterklickt, bekaeme sonst die Sachen einer Superliste in
+           eine andere gezeichnet. */
+        if (gen !== kreisGen) { return; }
+        renderKreisListe();
+      });
+    });
   }
 
   /* ------------------------------------------------------------------ *
@@ -5077,6 +5180,8 @@
    * Bedienelemente stehen hier aus demselben Grund beisammen.
    */
   function bindKreis() {
+    $('#btnCircleBackup').addEventListener('click', sichereKreis);
+
     $('#btnRevealCircle').addEventListener('click', function () {
       var input = $('#circleLink');
       var hidden = input.type === 'password';
