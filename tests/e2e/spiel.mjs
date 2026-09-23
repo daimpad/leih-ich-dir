@@ -145,7 +145,7 @@ ok('und trägt den Stufennamen', /Erste Runde|First round/.test(await chip.inner
 await chip.click();
 await page.waitForSelector('#itemModal[open]');
 const label = await page.locator('#itemModal').getAttribute('aria-label');
-ok('das Fenster nennt sich Rundenbuch', /Rundenbuch|Round book/.test(label || ''), label || 'keins');
+ok('das Fenster nennt sich Rundenbuch', /Rundenbuch|Book of rounds/.test(label || ''), label || 'keins');
 ok('vier Zahlen im Buch', await page.locator('.buch-zahl').count() === 4);
 ok('mindestens ein Abzeichen verliehen', await page.locator('.buch-abz').count() > 0, String(await page.locator('.buch-abz').count()));
 ok('der Hinweis auf den lokalen Speicher steht da', /diesem Browser|this browser/.test(await page.locator('#modalBody').innerText()));
