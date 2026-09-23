@@ -104,6 +104,11 @@ console.log('\n· Englisch, längere Überschrift');
     return { text: Math.round(a.x + a.width), bild: Math.round(b.x), titel: t.textContent };
   });
   ok('auch auf Englisch kein Zusammenstoss', m.text <= m.bild, JSON.stringify(m));
+  /* Die englischen Auszeichnungen sind laenger als die deutschen — „Free of
+     charge" gegen „Kostenlos". Gemessen wurde die Reihe bisher nur auf
+     Deutsch; dass sie auch hier eine bleibt, stand nur zu vermuten. */
+  ok('auch auf Englisch stehen die Auszeichnungen in einer Reihe', await page.evaluate(() =>
+    new Set(Array.from(document.querySelectorAll('.trust li')).map(n => Math.round(n.getBoundingClientRect().top))).size === 1));
   await page.close();
 }
 
