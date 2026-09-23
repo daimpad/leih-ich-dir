@@ -1,0 +1,113 @@
+name: Browsertests
+
+# Nicht bei jedem Push, sondern auf Knopfdruck: Die Batterie braucht rund
+# sechs Minuten, einen Browser und einen laufenden Server. Zu starten unter
+# Actions → Browsertests → Run workflow.
+#
+# Warum ueberhaupt in der Action, wo sie doch lokal laeuft: Bisher gab es
+# keinen Weg, sie ohne eingerichtetes Playwright nachzuholen. Wer eine
+# Aenderung nur im Browser der GitHub-Oberflaeche macht, konnte die
+# Zusicherungen gar nicht pruefen. Hier steht beides bereit.
+on:
+  workflow_dispatch:
+    inputs:
+      suiten:
+        description: 'Nur passende Suiten, durch Leerzeichen getrennt (leer = alle)'
+        required: false
+        default: ''
+
+jobs:
+  browser:
+    name: Browsertests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Festgeschrieben und nicht offen gelassen: Ein rotes Ergebnis soll
+      # heissen, dass der Quelltext nicht stimmt — nicht, dass Playwright
+      # sich ueber Nacht geaendert hat. Heraufsetzen ist ein eigener,
+      # absichtlicher Handgriff. Dieselbe Fassung wie im Arbeitsrechner.
+      # Aufgerufen wird playwright und nicht npx playwright: npx laedt eine
+      # Fassung aus dem Netz nach, wenn die Aufloesung ueber den Pfad
+      # fehlschlaegt — und zwar still. Die festgeschriebene Nummer waere
+      # dann umgangen, ohne dass es im Protokoll auffiele.
+      - name: Playwright und Chromium
+        run: |
+          npm install -g playwright@1.56.1
+          playwright install --with-deps chromium
+
+      # Server und Batterie stehen in einem Schritt, nicht in zweien. Ein
+      # mit & gestarteter Prozess ueberlebt das Ende seines Schrittes zwar
+      # meistens, aber zugesichert ist es nicht; ein Server, der zwischen
+      # zwei Schritten stirbt, ergaebe neunundzwanzig rote Suiten und keinen
+      # Hinweis, woran es lag.
+      #
+      # Gewartet wird auf die erste Antwort und nicht auf eine feste
+      # Zeitspanne: Ein zu kurzes sleep ergibt einen Fehlschlag, der mit dem
+      # Geprueften nichts zu tun hat, ein zu langes kostet bei jedem Lauf.
+      - name: Anwendung starten und Batterie laufen lassen
+        env:
+          SUITEN: ${{ inputs.suiten }}
+        run: |
+          set -o pipefail
+          php -S 127.0.0.1:8099 -t . > /tmp/php.log 2>&1 &
+          bereit=nein
+          for i in $(seq 1 30); do
+            if curl -sf -o /dev/null http://127.0.0.1:8099/; then bereit=ja; break; fi
+            sleep 0.5
+          done
+          if [ "$bereit" != ja ]; then
+            echo 'Der Server antwortet nach 15 Sekunden nicht:'
+            cat /tmp/php.log
+            exit 1
+          fi
+          # Denselben Weg wie die README: Playwright liegt global, der Pfad
+          # wird gesagt statt geraten.
+          export LID_PLAYWRIGHT="$(npm root -g)/playwright/index.mjs"
+          # $SUITEN steht absichtlich ohne Anfuehrungszeichen: Die Eingabe
+          # ist eine Liste von Filtern, die lauf.mjs einzeln erwartet, und
+          # genau die Wortzerlegung macht daraus mehrere Argumente. Sie
+          # deutet dabei keine Sonderzeichen: "kreis; rm -rf /" wird zu drei
+          # Filtern und nicht zu einem zweiten Befehl — nachgestellt.
+          #
+          # set -f dagegen ist noetig. Ohne das erweitert die Shell ein
+          # Sternchen in der Eingabe zur Dateiliste des Arbeitsverzeichnisses
+          # — kein Ausbruch, aber ein Lauf, der etwas ganz anderes tut als
+          # der Eingebende meinte.
+          set -f
+          node tests/e2e/lauf.mjs $SUITEN 2>&1 | tee /tmp/bilanz.txt
+
+      # Die Bilanz gehoert dorthin, wo man sie ohne Aufklappen sieht.
+      - name: Bilanz in die Zusammenfassung
+        if: always()
+        run: |
+          {
+            echo '## Browsertests'
+            echo ''
+            echo '```'
+            cat /tmp/bilanz.txt 2>/dev/null || echo 'keine Bilanz — die Batterie kam nicht bis dahin'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # Viele Suiten messen Abstaende und legen dabei Bildschirmfotos ab.
+      # Faellt eine Zusicherung ueber eine Groesse, ist das Bild daneben das
+      # Einzige, woran sich von hier aus beurteilen laesst, was zu weit
+      # links stand.
+      - name: Bildschirmfotos aufheben
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bildschirmfotos
+          path: tests/e2e/.bilder/
+          if-no-files-found: ignore
+          retention-days: 7

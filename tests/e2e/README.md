@@ -51,6 +51,23 @@ LEIH_DATA_DIR=/tmp/leih-test php -S 127.0.0.1:8099
 LEIH_DATA_DIR=/tmp/leih-test node tests/e2e/lauf.mjs
 ```
 
+## Ohne eingerichtetes Playwright
+
+**Actions → Browsertests → Run workflow.** Dieselbe Batterie, auf einem
+Rechner von GitHub, mit Browser und Server darauf eingerichtet. Wählbar ist
+der Zweig und, im Feld darunter, eine Liste von Filtern — leer lassen heißt
+alle Suiten.
+
+Die Bilanz steht danach in der Zusammenfassung des Laufs, ohne dass man das
+Protokoll aufklappen muss. Fällt etwas, liegen die Bildschirmfotos der
+Suiten als Anhang daneben: Bei einer Zusicherung über einen Abstand ist das
+Bild oft das Einzige, woran sich beurteilen lässt, was zu weit links stand.
+
+Das ist der Weg für alle, die keine Playwright-Installation haben — etwa
+weil sie eine Änderung nur in der Weboberfläche von GitHub gemacht haben.
+Gegenüber dem Lauf auf dem eigenen Rechner ist er langsamer; für die Arbeit
+an einer Sache bleibt das zweite Fenster das bessere Werkzeug.
+
 ## Wie eine Suite aufgebaut ist
 
 Kein Testrahmen, keine Zusicherungsbibliothek. `hilfe.mjs` bringt das
