@@ -200,9 +200,9 @@
       'hero.lead': 'Zeig Deinen Freund:innen, was sie bei Dir ausleihen können!',
 
       'trust.label': 'Eigenschaften',
-      'trust.tracking': 'Kostenlos',
-      'trust.account': 'Werbefrei',
-      'trust.ads': 'Ohne Login',
+      'trust.nocost': 'Kostenlos',
+      'trust.noads': 'Werbefrei',
+      'trust.nologin': 'Ohne Login',
       'trust.crypto': 'Verschlüsselt',
 
       'steps.headline': 'So geht\u2019s: eine eigene Leihliste einstellen',
@@ -587,9 +587,9 @@
       'hero.lead': 'Show your friends what they can borrow from you!',
 
       'trust.label': 'Properties',
-      'trust.tracking': 'Free of charge',
-      'trust.account': 'No ads',
-      'trust.ads': 'No login',
+      'trust.nocost': 'Free of charge',
+      'trust.noads': 'No ads',
+      'trust.nologin': 'No login',
       'trust.crypto': 'Encrypted',
 
       'steps.headline': 'How it works: set up your own lending list',
