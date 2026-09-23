@@ -273,6 +273,7 @@
       'revoke.button': 'Ansehen-Link zurückziehen',
       'revoke.confirm': 'Alle bisherigen Links dieser Liste werden ungültig, auch Dein Bearbeiten-Link. Du bekommst neue und musst den Ansehen-Link neu weitergeben. Fortfahren?',
       'revoke.done': 'Zurückgezogen. Die alten Links gelten nicht mehr, hier sind die neuen.',
+      'revoke.unsure': 'Der Server hat nicht geantwortet. Ob der Wechsel angekommen ist, lässt sich von hier nicht sagen — lade die Seite neu und sieh nach, welcher Link die Liste öffnet.',
       'share.hint': 'Der Schlüssel steht hinter dem Rautezeichen und wird technisch nie an den Server übertragen.',
 
       'add.nameLabel': 'Gegenstand',
@@ -659,6 +660,7 @@
       'revoke.button': 'Revoke the view link',
       'revoke.confirm': 'Every existing link of this list becomes invalid, your edit link too. You get new ones and have to pass the view link on again. Continue?',
       'revoke.done': 'Revoked. The old links no longer work; here are the new ones.',
+      'revoke.unsure': 'The server did not answer. Whether the change went through cannot be told from here — reload the page and see which link opens the list.',
       'share.hint': 'The key lives behind the # sign and is technically never sent to the server.',
 
       'add.nameLabel': 'Item',
@@ -1193,7 +1195,12 @@
     kind: 'remote',
     create: function (id, proof, payload) { return apiPost({ a: 'create', id: id, proof: proof, payload: payload }); },
     read:   function (id, rev) { return apiGet('?a=read&id=' + encodeURIComponent(id) + (rev ? '&rev=' + rev : '')); },
-    write:  function (id, proof, rev, payload) { return apiPost({ a: 'write', id: id, proof: proof, rev: rev, payload: payload }); },
+    write:  function (id, proof, rev, payload, neuerProof) {
+      var body = { a: 'write', id: id, proof: proof, rev: rev, payload: payload };
+      /* Nur beim Widerruf gesetzt; sonst bleibt die Anfrage, wie sie war. */
+      if (neuerProof) { body.newproof = neuerProof; }
+      return apiPost(body);
+    },
     remove: function (id, proof) { return apiPost({ a: 'delete', id: id, proof: proof }); }
   };
 
@@ -1222,12 +1229,13 @@
       if (rev && Number(rev) === rec.rev) { return Promise.resolve({ status: 200, body: { rev: rec.rev, unchanged: true } }); }
       return Promise.resolve({ status: 200, body: { rev: rec.rev, updated: rec.updated, payload: rec.payload } });
     },
-    write: function (id, proof, rev, payload) {
+    write: function (id, proof, rev, payload, neuerProof) {
       var rec = this._get(id);
       if (!rec) { return Promise.resolve({ status: 404, body: { error: 'notfound' } }); }
       if (rec.proof !== proof) { return Promise.resolve({ status: 403, body: { error: 'forbidden' } }); }
       if (Number(rev) !== rec.rev) { return Promise.resolve({ status: 409, body: { error: 'conflict', rev: rec.rev } }); }
       rec.rev += 1; rec.updated = nowSec(); rec.payload = payload;
+      if (neuerProof) { rec.proof = neuerProof; }
       if (!this._put(id, rec)) { return Promise.resolve({ status: 507, body: { error: 'toolarge' } }); }
       return Promise.resolve({ status: 200, body: { rev: rec.rev, updated: rec.updated } });
     },
@@ -3760,13 +3768,19 @@
    * "Der Link ist das Geheimnis" ist eine ehrliche Einordnung, aber ohne
    * Widerruf: Wer den Ansehen-Link einmal weitergegeben hat, konnte ihn nie
    * wieder einfangen, ausser durch Loeschen und Neuanlegen. Dabei braucht der
-   * Widerruf keine Serveraenderung. Die Liste wird unter einem neuen
-   * Schluessel neu verschluesselt — gleiche Kennung, gleiches Token, also
-   * derselbe Datensatz und derselbe Schreibnachweis. Jeder alte Link, ob
-   * Ansehen oder Bearbeiten, traegt den alten Schluessel und scheitert
-   * danach an der Entschluesselung; eine Superliste, die ihn haelt, meldet die
-   * Liste als nicht mehr passend. Das ist inhaltlich richtig: Der Zugang ist
-   * entzogen.
+   * Widerruf nur eine kleine: Die Liste wird unter einem neuen Schluessel neu
+   * verschluesselt und bekommt zugleich ein neues Token — gleiche Kennung,
+   * also derselbe Datensatz. Jeder alte Link, ob Ansehen oder Bearbeiten,
+   * traegt den alten Schluessel und scheitert an der Entschluesselung; eine
+   * Superliste, die ihn haelt, meldet die Liste als nicht mehr passend.
+   *
+   * Warum auch das Token. Der Schluessel allein genuegte nicht: Ein zweites
+   * Fenster, das die Liste noch unter dem alten Schluessel geoeffnet hat,
+   * haette beim naechsten Tastendruck weiter schreiben duerfen — das Token
+   * war ja unveraendert — und haette damit das Dokument in der alten
+   * Verschluesselung zurueckgeschrieben. Der Widerruf waere still aufgehoben
+   * gewesen, und der eben notierte neue Link haette nicht mehr gepasst. Mit
+   * dem neuen Token bekommt dieses Fenster ein 403 und sagt es.
    *
    * Ein laufender Schreibvorgang mit dem alten Schluessel muss vorher fertig
    * sein. Landete er nach unserem, laege das Dokument wieder unter dem alten
@@ -3790,6 +3804,7 @@
     var knopf = $('#btnRevoke');
     if (knopf) { knopf.disabled = true; }
     var neuerKey = null, neuerKeyStr = null, generation = 0;
+    var neuesToken = randomToken(24), neuerProof = null;
     return wartenBisGespeichert(50).then(function () {
       clearTimeout(saveTimer);
       generation = docGen;
@@ -3797,16 +3812,20 @@
       snapshot.v = SCHEMA_VERSION;
       return Crypt.generateKey().then(function (key) {
         neuerKey = key;
-        return Promise.all([Crypt.exportKey(key), Crypt.encrypt(key, snapshot, state.id)]);
+        return Promise.all([Crypt.exportKey(key), Crypt.encrypt(key, snapshot, state.id),
+                            Crypt.proof(neuesToken)]);
       });
     }).then(function (teile) {
       neuerKeyStr = teile[0];
       var payload = teile[1];
-      return Store.write(state.id, state.proof, state.rev, payload).then(function (res) {
-        /* Wie in save(): Bei einem Konflikt einmal mit der aktuellen Revision. */
+      neuerProof = teile[2];
+      return Store.write(state.id, state.proof, state.rev, payload, neuerProof).then(function (res) {
+        /* Wie in save(): Bei einem Konflikt einmal mit der aktuellen Revision.
+           Der neue Nachweis geht mit, sonst traege der zweite Versuch den
+           Wechsel nicht mehr. */
         if (res.status === 409 && res.body && typeof res.body.rev === 'number') {
           state.rev = res.body.rev;
-          return Store.write(state.id, state.proof, state.rev, payload);
+          return Store.write(state.id, state.proof, state.rev, payload, neuerProof);
         }
         return res;
       });
@@ -3814,12 +3833,14 @@
       if (res.status !== 200) { throw new AppError(mapError(res)); }
       state.key = neuerKey;
       state.keyStr = neuerKeyStr;
+      state.token = neuesToken;
+      state.proof = neuerProof;
       state.rev = res.body.rev;
       state.updated = res.body.updated;
       /* Was waehrend des Schreibens eingetippt wurde, bleibt offen und geht
          mit dem naechsten Speichern — dann schon unter dem neuen Schluessel. */
       state.dirty = (docGen !== generation);
-      history.replaceState(null, '', editHash(state.id, neuerKeyStr, state.token));
+      history.replaceState(null, '', editHash(state.id, neuerKeyStr, neuesToken));
       rememberList();
       updateSettingsLink();
       render();
@@ -3833,7 +3854,15 @@
       toast(t('revoke.done'));
       if (state.dirty) { scheduleSave(); }
     }).catch(function (err) {
-      toast(t('error.' + (err && err.code ? err.code : 'network')));
+      /* Ein Netzfehler ist hier etwas anderes als sonst: Der Schreibvorgang
+         kann angekommen sein, und dann gelten Schluessel und Token schon,
+         waehrend dieses Fenster noch die alten haelt. Das laesst sich von hier
+         nicht aufloesen — also wird es gesagt, statt "Der Server ist gerade
+         nicht erreichbar" zu melden und den Eindruck zu lassen, nichts sei
+         geschehen. Ein 403 oder 409 ist dagegen eindeutig: Dann hat der Server
+         geantwortet und nichts geaendert. */
+      var code = (err && err.code) ? err.code : 'network';
+      toast(code === 'network' ? t('revoke.unsure') : t('error.' + code));
     }).then(function () { if (knopf) { knopf.disabled = false; } });
   }
 

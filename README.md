@@ -43,7 +43,7 @@ Beim Anlegen einer Liste erzeugt der Browser drei Werte:
 |---|---|---|---|
 | Listen-ID | 16 Byte (hex) | Adresse der Datei auf dem Server | ja |
 | AES-Schlüssel | 256 Bit | Ver-/Entschlüsselung der Inhalte | **nein** |
-| Bearbeiten-Token | 24 Byte | Autorisiert Schreibzugriffe | **nein** (nur sein SHA-256) |
+| Bearbeiten-Token | 24 Byte | Autorisiert Schreibzugriffe; beim Widerruf tauschbar | **nein** (nur sein SHA-256) |
 
 Daraus entstehen die beiden Links:
 
@@ -84,7 +84,7 @@ Wiederherstellen des Bearbeiten-Links genügt.
 
 Ehrliche Einordnung, denn Verschlüsselung ersetzt kein Rechtemanagement:
 
-- Wer den Ansehen-Link hat, kann alles lesen und weitergeben. Der Link *ist* das Geheimnis. Zurückziehen lässt er sich trotzdem: Die Liste wird unter einem neuen Schlüssel neu verschlüsselt, alle bisherigen Links — auch der eigene Bearbeiten-Link — laufen ins Leere, und die Freunde bekommen den neuen. Eine Superliste, die den alten Schlüssel hält, meldet die Liste als nicht mehr passend.
+- Wer den Ansehen-Link hat, kann alles lesen und weitergeben. Der Link *ist* das Geheimnis. Zurückziehen lässt er sich trotzdem: Die Liste wird unter einem neuen Schlüssel neu verschlüsselt und bekommt zugleich ein neues Token. Alle bisherigen Links — auch der eigene Bearbeiten-Link — können die Liste danach weder lesen noch beschreiben; die Freunde bekommen den neuen. Eine Superliste, die den alten Schlüssel hält, meldet die Liste als nicht mehr passend. Was in dieser Zeit schon kopiert wurde, holt der Widerruf nicht zurück.
 - Wer den Bearbeiten-Link verliert, verliert den Zugang zu dieser Liste; den Link wiederherzustellen ist bauartbedingt unmöglich. Aus einer Sicherungsdatei lässt sich eine neue Liste anlegen — mit neuen Links, die Freunde neu bekommen müssen. Die Superliste lässt sich nicht sichern: Sie ist ein Bündel fremder Schlüssel, und die gehören nicht in eine Klartextdatei.
 - Listen, die ein Jahr lang nicht geschrieben wurden, löscht `tools/purge.php`. Lesen zählt nicht, und der Server kann nicht zählen, was er nicht sieht. Deshalb schreibt der Browser eine Liste beim Öffnen mit Zugang unverändert neu, sobald der letzte Schreibvorgang mehr als dreißig Tage zurückliegt; die Superliste ebenso. Wer nur ansieht, hält nichts am Leben.
 - Der Server kennt zwar keine Inhalte, aber Metadaten: Größe des Chiffrats, Zeitpunkte, Revisionszähler.

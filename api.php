@@ -243,12 +243,20 @@ function valid_payload(mixed $payload): array
  *
  * Steht ein Proxy vor Apache — in Plesk der nginx —, ist REMOTE_ADDR dessen
  * Adresse und fuer alle dieselbe; dann traefe jede Grenze alle Nutzerinnen
- * zusammen. Plesk reicht die echte Adresse ueber mod_remoteip durch, aber
- * nicht jeder Aufbau tut das. Deshalb: Kommt die Anfrage von localhost und
- * traegt sie X-Forwarded-For, gilt die erste Adresse darin. Nur dann — von
- * aussen laesst sich die Kopfzeile beliebig setzen, und wer sie glaubte,
- * liesse sich die Drosselung mit einer erfundenen Adresse je Anfrage
- * abschalten.
+ * zusammen. Deshalb: Kommt die Anfrage von localhost und traegt sie
+ * X-Forwarded-For, gilt eine Adresse daraus. Nur von localhost — von aussen
+ * laesst sich die Kopfzeile beliebig setzen.
+ *
+ * Und zwar die LETZTE, nicht die erste. nginx setzt die Kopfzeile in Plesk
+ * ueber $proxy_add_x_forwarded_for, und das HAENGT AN: Was die Nutzerin
+ * geschickt hat, bleibt stehen, die echte Adresse kommt hinten dazu. Die
+ * erste Adresse ist damit die, die jemand selbst hineingeschrieben hat.
+ * Nachgestellt, weil es nicht zu glauben war: 25 Anlegeversuche mit
+ * wechselnder erster Adresse gingen alle durch, wo bei fester nach 20
+ * gesperrt wird — die Drosselung war damit ganz abgeschaltet, und zwar
+ * leichter als ohne diese Kopfzeile. Die letzte Adresse hat der unmittelbar
+ * verbundene Proxy geschrieben; ersetzt er die Kopfzeile, statt anzuhaengen,
+ * steht genau eine drin, und erste und letzte sind dieselbe.
  */
 function client_ip(): string
 {
@@ -256,9 +264,10 @@ function client_ip(): string
     $lokal = in_array($ip, ['127.0.0.1', '::1'], true);
     $weiter = trim((string) ($_SERVER['HTTP_X_FORWARDED_FOR'] ?? ''));
     if ($lokal && $weiter !== '') {
-        $erste = trim(explode(',', $weiter)[0]);
-        if (filter_var($erste, FILTER_VALIDATE_IP) !== false) {
-            return $erste;
+        $kette = array_map('trim', explode(',', $weiter));
+        $letzte = (string) end($kette);
+        if (filter_var($letzte, FILTER_VALIDATE_IP) !== false) {
+            return $letzte;
         }
     }
     return $ip;
@@ -430,6 +439,17 @@ function action_write(array $in): never
     }
     $payload = valid_payload($in['payload'] ?? null);
     $baseRev = isset($in['rev']) ? (int) $in['rev'] : 0;
+    /* Der Schreibnachweis laesst sich beim Schreiben austauschen. Das ist der
+       Widerruf: Wer den Schluessel wechselt, wechselt auch das Token, sonst
+       koennte ein noch offenes Fenster mit dem alten Bearbeiten-Link das
+       Dokument in der alten Verschluesselung zurueckschreiben und den Widerruf
+       aufheben. Erlaubt nur, wer den bisherigen Nachweis schon erbracht hat —
+       die Pruefung steht unten und kommt zuerst. Der Server erfaehrt dabei
+       nichts Neues: ein Hash loest den anderen ab. */
+    $newProof = $in['newproof'] ?? null;
+    if ($newProof !== null && !valid_proof((string) $newProof)) {
+        fail(400, 'malformed');
+    }
 
     $fh = @fopen(list_path($id), 'r+');
     if ($fh === false) {
@@ -452,6 +472,9 @@ function action_write(array $in): never
     $rec['rev'] = (int) $rec['rev'] + 1;
     $rec['updated'] = time();
     $rec['payload'] = $payload;
+    if ($newProof !== null) {
+        $rec['verifier'] = verifier((string) $newProof);
+    }
 
     rewind($fh);
     ftruncate($fh, 0);

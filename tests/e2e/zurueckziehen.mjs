@@ -1,9 +1,11 @@
 /*
  * Den Ansehen-Link zurueckziehen.
  *
- * Die Liste wird unter einem neuen Schluessel neu verschluesselt, gleiche
- * Kennung, gleiches Token. Danach muss gelten: Der alte Ansehen-Link
- * scheitert mit einem Wort, das den Fall benennt; der neue zeigt die Liste;
+ * Die Liste wird unter einem neuen Schluessel neu verschluesselt und bekommt
+ * ein neues Token, bei gleicher Kennung. Danach muss gelten: Der alte
+ * Ansehen-Link scheitert mit einem Wort, das den Fall benennt; der alte
+ * Bearbeiten-Link darf auch nicht mehr schreiben — sonst koennte ein noch
+ * offenes Fenster den Widerruf still aufheben; der neue Link zeigt die Liste;
  * eine Superliste, die den alten Schluessel haelt, meldet die Liste als
  * nicht mehr passend und bietet kein "Erneut versuchen" an; das Gedaechtnis
  * dieses Geraets traegt den neuen Zugang; und auf dem Server liegt derselbe
@@ -58,8 +60,8 @@ await p.waitForTimeout(1500);
 ok('die Rueckfrage nennt beide Links', /Bearbeiten-Link/.test(rueckfrage) && /Ansehen-Link/.test(rueckfrage), rueckfrage);
 const neuHash = await p.evaluate(() => location.hash);
 const neuTeile = neuHash.slice(3).split('.');
-ok('das Fragment traegt einen neuen Schluessel bei gleicher Kennung und gleichem Token',
-   /^#e=/.test(neuHash) && neuTeile[0] === anna.id && neuTeile[1] !== anna.keyStr && neuTeile[2] === anna.token,
+ok('das Fragment traegt neuen Schluessel und neues Token bei gleicher Kennung',
+   /^#e=/.test(neuHash) && neuTeile[0] === anna.id && neuTeile[1] !== anna.keyStr && neuTeile[2] !== anna.token,
    neuHash.slice(0, 30));
 ok('der Zugangskasten steht offen, mit dem neuen Bearbeiten-Link',
    !(await p.locator('#keyBox').isHidden()) && (await p.locator('#keyLink').inputValue()).includes(neuTeile[1]));
@@ -78,6 +80,30 @@ ok('auf dem Server liegt derselbe Datensatz eine Revision weiter, unter dem neue
 let altLesbar = true;
 try { await liesListe(p, anna.id + '.' + anna.keyStr); } catch (e) { altLesbar = false; }
 ok('mit dem alten Schluessel ist er unlesbar', !altLesbar);
+
+/* Und das Wichtigste: Das alte Token darf auch nicht mehr schreiben. Sonst
+   koennte ein Fenster, das die Liste noch unter dem alten Schluessel offen
+   haelt, sie beim naechsten Tastendruck in der alten Verschluesselung
+   zurueckschreiben — der Widerruf waere still aufgehoben, und der eben
+   notierte neue Link passte nicht mehr. Geschrieben wird hier unmittelbar
+   ueber die Schnittstelle, mit dem Nachweis aus dem alten Token. */
+const vorProbe = fehler.length;
+const altSchreibt = await p.evaluate(async (arg) => {
+  const enc = (b) => { let s = ''; for (const x of b) { s += String.fromCharCode(x); }
+    return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+  const proof = enc(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(arg.token))));
+  const r = await fetch('api.php', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ a: 'write', id: arg.id, proof: proof, rev: arg.rev,
+                           payload: { iv: 'AAAAAAAAAAAAAAAA', ct: 'AAAA' } }) });
+  return r.status;
+}, { id: anna.id, token: anna.token, rev: drueben.rev });
+ok('das alte Token schreibt nicht mehr', altSchreibt === 403, String(altSchreibt));
+/* Der Browser schreibt jedes abgewiesene fetch in die Konsole. Dieses 403 hat
+   die Probe eben selbst herbeigefuehrt; es waere der einzige Fund am Ende und
+   ein falscher. Herausgenommen wird genau das, was seit vorProbe dazukam und
+   nach einem abgewiesenen Abruf aussieht — kein pauschales Stummschalten. */
+fehler.splice(vorProbe, fehler.length - vorProbe,
+  ...fehler.slice(vorProbe).filter(z => !/403 \(Forbidden\)/.test(z)));
 
 await p.goto(BASE + '/' + altView, { waitUntil: 'networkidle' });
 await p.waitForTimeout(900);

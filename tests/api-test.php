@@ -150,6 +150,31 @@ check('write ohne gültigen Nachweis → verboten', $code === 403);
 [$code] = http_json($base, ['a' => 'write', 'id' => $id, 'proof' => $proof, 'rev' => 2, 'payload' => ['iv' => 'zu-kurz', 'ct' => 'abc']]);
 check('write mit defektem Initialisierungsvektor → 400', $code === 400);
 
+/* Der Widerruf: Beim Schreiben lässt sich der Nachweis austauschen. Danach
+   schreibt nur noch der neue — das ist der Unterschied zwischen "der alte
+   Link zeigt nichts mehr" und "der alte Link kann nichts mehr". */
+$neuerNachweis = b64u(random_bytes(32));
+[$code] = http_json($base, ['a' => 'write', 'id' => $id, 'proof' => $proof, 'rev' => 2, 'payload' => $payload('x'), 'newproof' => 'kein gültiger Nachweis']);
+check('write mit unbrauchbarem neuen Nachweis → 400', $code === 400);
+
+[$code] = http_json($base, ['a' => 'write', 'id' => $id, 'proof' => $foreign, 'rev' => 2, 'payload' => $payload('x'), 'newproof' => $neuerNachweis]);
+check('Nachweistausch ohne gültigen alten Nachweis → verboten', $code === 403);
+
+[$code] = http_json($base, ['a' => 'write', 'id' => $id, 'proof' => $proof, 'rev' => 2, 'payload' => $payload('x')]);
+check('der alte Nachweis schreibt noch, solange nichts getauscht wurde', $code === 200);
+
+[$code, $body] = http_json($base, ['a' => 'write', 'id' => $id, 'proof' => $proof, 'rev' => 3, 'payload' => $payload('widerrufen'), 'newproof' => $neuerNachweis]);
+check('Nachweistausch mit gültigem alten Nachweis', $code === 200 && ($body['rev'] ?? 0) === 4);
+
+[$code] = http_json($base, ['a' => 'write', 'id' => $id, 'proof' => $proof, 'rev' => 4, 'payload' => $payload('zurueck')]);
+check('danach schreibt der alte Nachweis nicht mehr', $code === 403);
+
+[$code, $body] = http_json($base, ['a' => 'write', 'id' => $id, 'proof' => $neuerNachweis, 'rev' => 4, 'payload' => $payload('weiter')]);
+check('und der neue schreibt', $code === 200 && ($body['rev'] ?? 0) === 5);
+
+/* Für die folgenden Prüfungen gilt wieder der ursprüngliche Nachweis. */
+http_json($base, ['a' => 'write', 'id' => $id, 'proof' => $neuerNachweis, 'rev' => 5, 'payload' => $payload('zurueckgetauscht'), 'newproof' => $proof]);
+
 [$code] = http_json($base, ['a' => 'write', 'id' => $id, 'proof' => $proof, 'rev' => 2, 'payload' => ['iv' => b64u(random_bytes(12)), 'ct' => str_repeat('a', 600000)]]);
 check('write mit übergroßem Chiffrat → 413', $code === 413);
 
