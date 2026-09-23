@@ -86,6 +86,10 @@ zwischendurch nachsehen. `lauf.mjs` setzt vor jeder Suite `data/throttle`
 zurück; wer eine Suite einzeln startet, macht das selbst (`rm -rf
 data/throttle`), sonst antwortet `api.php` ab der zwanzigsten Liste mit 429.
 
+Ohne eingerichtetes Playwright: **Actions → Browsertests → Run workflow**.
+Dieselbe Batterie auf einem Rechner von GitHub, wahlweise nur einzelne
+Suiten; die Bilanz steht in der Zusammenfassung des Laufs.
+
 Fällt eine Zusicherung: erst nachsehen, ob sie noch gilt. Abgelöste
 Anforderungen werden nachgezogen, nicht repariert.
 
