@@ -118,7 +118,9 @@
   var kopfzeilenFehlen = false;
   var sperrenGreifen = false;
   /* Getrennt gezaehlt, weil der Unterschied die Diagnose traegt: Eine
-     PHP-Datei geht immer durch Apache, eine .html-Datei nicht unbedingt. */
+     PHP-Datei geht immer durch Apache, eine .html-Datei nicht unbedingt.
+     dynamischGesperrt zaehlt die PHP-Anfragen, die ein Server abgewiesen hat
+     und nicht ein Skript selbst. */
   var dynamischGesperrt = 0, dynamischOffen = 0;
   var statischGesperrt = 0, statischOffen = 0;
 
@@ -253,28 +255,61 @@
        .htaccess im Wurzelverzeichnis oder tools/.htaccess greift.
        'dynamisch': tests/api-test.php und tools/purge.php verweigern den
        Dienst selbst, sobald sie nicht auf der Kommandozeile laufen, und
-       antworten dann mit 403. Ein 403 beweist hier nichts; erst ein 404
-       stammt vom RedirectMatch.
+       antworten dann mit 403. Ein 404 stammt vom RedirectMatch. Ein 403 ist
+       mehrdeutig: Es kann die Selbstsperre sein, aber auch Apaches Sperre aus
+       tools/.htaccess und tests/.htaccess, die vor dem RedirectMatch greift.
+       Welches von beiden, entscheidet 'erfunden'.
+       'erfunden': eine PHP-Datei, die es nicht gibt. Kein Skript kann sich
+       selbst sperren, das nicht existiert; ein 403 darauf stammt also vom
+       Server. Das ist der Fall, den die Unterordner-Dateien erzeugen, und
+       ohne diese Zeile konnte der Befund seit dem 14. September nicht mehr
+       ausloesen. Ein 404 sagt nichts: So antwortet auch ein Server ganz ohne
+       Sperre.
        'sonst': data/, data/lists/ und .git/config koennen auch ohne jede
        .htaccess gesperrt sein — ein Server ohne Verzeichnisliste antwortet
        auf einen Ordner mit 403, und Punktdateien sperren viele Aufbauten von
-       sich aus. Sie werden geprueft, taugen aber nicht als Beleg. */
+       sich aus. Sie werden geprueft, taugen aber nicht als Beleg.
+       'schluessel': die Datei, in der ein KI-Schluessel ohne Konsolenzugriff
+       liegt. Sie hat eine Endung, und genau solche Dateien liefert ein
+       vorgelagerter nginx selbst aus, ohne data/.htaccess zu lesen. Gibt es
+       sie nicht, ist die Antwort 404 und der Punkt erfuellt, ohne etwas zu
+       beweisen; gibt es sie und kommt sie ueber HTTP an, ist der Schluessel
+       offen. Gemeldet wird deshalb nur das Zweite, und der Text sagt es. */
     var paths = [
       ['data/', 'sonst'], ['data/lists/', 'sonst'], ['.git/config', 'sonst'],
       ['tests/api-test.php', 'dynamisch'], ['tools/purge.php', 'dynamisch'],
-      ['tools/og-vorlage.html', 'beweis']
+      ['tools/nicht-vorhanden-abnahme.php', 'erfunden'],
+      ['tools/og-vorlage.html', 'beweis'],
+      ['data/ai-key.txt', 'schluessel']
     ];
     return paths.reduce(function (chain, eintrag) {
       var path = eintrag[0], art = eintrag[1];
       return chain.then(function () {
         return head(path).then(function (r) {
+          if (art === 'schluessel') {
+            check(LEVEL_MUST, 'nicht abrufbar: ' + path, r.status !== 200,
+              r.status === 200
+                ? 'Status 200, der KI-Schluessel liegt offen: Datei entfernen, bei Google einen neuen '
+                  + 'ausstellen und die Sperre nachholen (README, Vorgelagerter nginx)'
+                : 'Status ' + r.status + ', ob es die Datei gibt, sagt dieser Punkt nicht');
+            return;
+          }
           var detail = 'Status ' + r.status;
           if (path === '.git/config' && r.status === 200) {
             detail = 'Status 200, die gesamte Repository-Historie liegt offen';
           }
           var zu = r.status !== 200;
           if (art === 'dynamisch' && r.status === 403) {
-            detail += ', das ist die Selbstsperre des Skripts und kein Beleg fuer die .htaccess';
+            detail += ', entweder die Selbstsperre des Skripts oder die Sperre aus der .htaccess des Ordners; '
+              + 'die erfundene Datei darunter entscheidet';
+          }
+          if (art === 'erfunden') {
+            if (r.status === 403) {
+              detail += ', die Datei gibt es nicht: Diese Sperre kommt vom Server und nicht von einem Skript';
+              dynamischGesperrt++;
+            } else if (r.status === 404) {
+              detail += ', daraus laesst sich nichts schliessen';
+            }
           }
           if (art === 'beweis') {
             zu ? (sperrenGreifen = true, statischGesperrt++) : statischOffen++;
@@ -361,9 +396,10 @@
         + 'selbst aus und liest dabei keine .htaccess. In Plesk steht der '
         + 'Schalter unter Hosting-Einstellungen, Apache & nginx, bei '
         + '"Smart static files processing". Abschalten laesst alles durch '
-        + 'Apache laufen; wer ihn behalten will, traegt die Sperre zusaetzlich '
-        + 'in die nginx-Direktiven ein. Der Wortlaut steht im README unter '
-        + '"Vorgelagerter nginx".');
+        + 'Apache laufen; wer ihn behalten will, traegt die Sperre als '
+        + '"location ^~" in die nginx-Direktiven ein, nicht als Regex-location: '
+        + 'Die kann gegen Plesks eigene Regel verlieren. Der Wortlaut steht im '
+        + 'README unter "Vorgelagerter nginx".');
     }
 
     if (kopfzeilenFehlen && sperrenGreifen) {

@@ -199,23 +199,55 @@ echo "\nAbschottung\n";
    daran. 'beweis' ist eine gewoehnliche lesbare Datei in einem gewoehnlichen
    Verzeichnis: Sie ist nur gesperrt, wenn der RedirectMatch greift.
    'dynamisch' sind die beiden PHP-Skripte, die sich selbst mit 403 sperren,
-   sobald sie nicht auf der Kommandozeile laufen — erst ein 404 stammt vom
-   RedirectMatch. 'sonst' koennen auch ohne .htaccess gesperrt sein: Ein
-   Server ohne Verzeichnisliste antwortet auf einen Ordner mit 403, und
-   Punktdateien sperren viele Aufbauten von sich aus. */
+   sobald sie nicht auf der Kommandozeile laufen. Ein 404 stammt vom
+   RedirectMatch. Ein 403 ist mehrdeutig: Es kann die Selbstsperre sein, aber
+   auch Apaches Sperre aus tools/.htaccess und tests/.htaccess, die vor dem
+   RedirectMatch greift. Welches von beiden, entscheidet 'erfunden': eine
+   PHP-Datei, die es nicht gibt. Kein Skript kann sich selbst sperren, das
+   nicht existiert; ein 403 darauf stammt also vom Server. Ohne diese Zeile
+   konnte der Befund seit dem 14. September nicht mehr ausloesen. Ein 404
+   sagt nichts: So antwortet auch ein Server ganz ohne Sperre.
+   'sonst' koennen auch ohne .htaccess gesperrt sein: Ein Server ohne
+   Verzeichnisliste antwortet auf einen Ordner mit 403, und Punktdateien
+   sperren viele Aufbauten von sich aus.
+   'schluessel' ist die Datei, in der ein KI-Schluessel ohne Konsolenzugriff
+   liegt. Sie hat eine Endung, und genau solche Dateien liefert ein
+   vorgelagerter nginx selbst aus, ohne data/.htaccess zu lesen. Gibt es sie
+   nicht, ist die Antwort 404 und der Punkt erfuellt, ohne etwas zu
+   beweisen; gibt es sie und kommt sie ueber HTTP an, ist der Schluessel
+   offen. Gemeldet wird deshalb nur das Zweite, und der Text sagt es. */
 foreach ([
-    '/data/'                  => 'sonst',
-    '/data/lists/'            => 'sonst',
-    '/.git/config'            => 'sonst',
-    '/tests/api-test.php'     => 'dynamisch',
-    '/tools/purge.php'        => 'dynamisch',
-    '/tools/og-vorlage.html'  => 'beweis',
+    '/data/'                             => 'sonst',
+    '/data/lists/'                       => 'sonst',
+    '/.git/config'                       => 'sonst',
+    '/tests/api-test.php'                => 'dynamisch',
+    '/tools/purge.php'                   => 'dynamisch',
+    '/tools/nicht-vorhanden-abnahme.php' => 'erfunden',
+    '/tools/og-vorlage.html'             => 'beweis',
+    '/data/ai-key.txt'                   => 'schluessel',
 ] as $path => $art) {
     $res = fetch($base . $path);
+    if ($art === 'schluessel') {
+        line('MUSS', 'nicht abrufbar: ' . $path, $res['status'] !== 200,
+            $res['status'] === 200
+                ? 'Status 200, der KI-Schluessel liegt offen: Datei entfernen, bei Google einen neuen '
+                  . 'ausstellen und die Sperre nachholen (README, Vorgelagerter nginx)'
+                : 'Status ' . $res['status'] . ', ob es die Datei gibt, sagt dieser Punkt nicht');
+        continue;
+    }
     $zu = $res['status'] !== 200;
     $detail = 'Status ' . $res['status'];
     if ($art === 'dynamisch' && $res['status'] === 403) {
-        $detail .= ', Selbstsperre des Skripts, kein Beleg fuer die .htaccess';
+        $detail .= ', entweder die Selbstsperre des Skripts oder die Sperre aus der .htaccess des Ordners; '
+            . 'die erfundene Datei darunter entscheidet';
+    }
+    if ($art === 'erfunden') {
+        if ($res['status'] === 403) {
+            $detail .= ', die Datei gibt es nicht: Diese Sperre kommt vom Server und nicht von einem Skript';
+            $dynamischGesperrt++;
+        } elseif ($res['status'] === 404) {
+            $detail .= ', daraus laesst sich nichts schliessen';
+        }
     }
     if ($art === 'beweis') {
         if ($zu) { $sperrenGreifen = true; } else { $statischOffen++; }
@@ -253,8 +285,10 @@ if ($kopfzeilenFehlen || $gespalten) {
             . 'selbst aus und liest dabei keine .htaccess. In Plesk steht der Schalter '
             . 'unter Hosting-Einstellungen, Apache & nginx, bei "Smart static files '
             . 'processing". Abschalten laesst alles durch Apache laufen; wer ihn '
-            . 'behalten will, traegt die Sperre zusaetzlich in die nginx-Direktiven '
-            . 'ein. Der Wortlaut steht im README unter "Vorgelagerter nginx".');
+            . 'behalten will, traegt die Sperre als "location ^~" in die '
+            . 'nginx-Direktiven ein, nicht als Regex-location: Die kann gegen '
+            . 'Plesks eigene Regel verlieren. Der Wortlaut steht im README unter '
+            . '"Vorgelagerter nginx".');
     }
     if ($kopfzeilenFehlen && !empty($sperrenGreifen)) {
         line('MUSS', 'Ursache der fehlenden Kopfzeilen', false,
