@@ -175,7 +175,10 @@ chmod 600 data/.ai-key && chown www-data data/.ai-key
 **Ohne Konsolenzugriff** tut es eine Textdatei mit dem Schlüssel als einzigem
 Inhalt, hochgeladen als `data/ai-key.txt`. Viele Dateiverwaltungen von
 Webhostern können keine Punktdateien anlegen, deshalb wird dieser zweite Name
-ebenfalls gelesen. Beide liegen in `data/` und sind über HTTP gleich gesperrt.
+ebenfalls gelesen. Beide liegen in `data/`. Gesperrt sind sie durch `data/.htaccess`
+und damit nur, solange Apache die Datei ausliefert: Ein vorgelagerter nginx kann
+`ai-key.txt` selbst ausliefern, denn die Datei hat eine Endung (README, *Vorgelagerter
+nginx*). `.ai-key` hat keine und wird von einer Endungsregel nicht erfasst.
 
 Ein dritter Weg ist die Umgebung, etwa `SetEnv LEIH_AI_KEY …` im Virtual Host.
 Der Schlüssel gehört nicht ins Repository; `data/` steht in `.gitignore`.
@@ -446,9 +449,17 @@ davon, ob `.htaccess` greift.
 Hinter nginx statt Apache übernimmt folgender Block die Aufgabe von `.htaccess`:
 
 ```nginx
-location ^~ /data/ { deny all; return 404; }
-location ~ /\.     { deny all; return 404; }
+location ^~ /data/    { return 404; }
+location ^~ /tools/   { return 404; }
+location ^~ /tests/   { return 404; }
+location ^~ /.git/    { return 404; }
+location ^~ /.github/ { return 404; }
+location ~ /\.        { return 404; }
 ```
+
+`tools/` und `tests/` standen hier bisher nicht: Die `.htaccess` sperrt sie über
+`RedirectMatch`, und nginx liest keine `.htaccess`. Warum `^~` und nicht `~`, steht
+unter *Vorgelagerter nginx* im Plesk-Kapitel.
 
 **5. Abnahme**
 
@@ -571,15 +582,29 @@ SetEnv LEIH_DATA_DIR /var/www/vhosts/leihichdir.de/private/leih-data
 ```
 
 Steht die Domain auf *nginx allein*, greifen weder diese Zeile noch
-`.htaccess`. Dann gehört der nginx-Block aus dem vorigen Abschnitt in
+`.htaccess`. Dann gehört der nginx-Block aus dem LAMP-Kapitel, Schritt 4, in
 *Zusätzliche nginx-Direktiven*, oder die Domain wird auf Apache mit nginx als
 Proxy zurückgestellt.
 
 **4. KI-Schlüssel ablegen**
 
-Ohne Konsole über den Dateimanager: eine Datei `ai-key.txt`, die allein den
-Schlüssel enthält, in den Datenordner legen — also in `httpdocs/data/` oder,
-falls gesetzt, in den Ordner aus `LEIH_DATA_DIR`.
+Die Listen in `data/` liegen verschlüsselt, der KI-Schlüssel nicht. Deshalb
+zuerst eine Probe, ob nginx den Datenordner an Apache vorbei ausliefert:
+Im Dateimanager in `httpdocs/data/` eine Datei `probe.txt` mit dem Inhalt `x`
+anlegen und `https://leihichdir.de/data/probe.txt` öffnen.
+
+* Erscheint das `x`, liefert nginx die Datei selbst aus, und `data/.htaccess`
+  wird nicht gelesen. Den Schlüssel dann **nicht** dort ablegen, sondern zuerst
+  *Vorgelagerter nginx* unten umsetzen und die Probe wiederholen.
+* Erscheint eine Sperrseite, ist es sicher.
+
+Die Probe danach löschen. Dann der Schlüssel selbst, ohne Konsole über den
+Dateimanager: bevorzugt als Punktdatei `.ai-key`, die keine Endung hat und von
+einer Endungsregel nicht erfasst wird; kann der Dateimanager keine Punktdateien,
+als `ai-key.txt`. Beides gehört in den Datenordner — also in `httpdocs/data/` oder,
+falls gesetzt, in den Ordner aus `LEIH_DATA_DIR`. Liegt er außerhalb von
+`httpdocs`, erreicht ihn über HTTP ohnehin niemand. `check.html` fragt
+`data/ai-key.txt` ab und meldet es, wenn die Datei ankommt.
 
 **5. Abnahme**
 
@@ -600,30 +625,67 @@ Task mit demselben `rsync`.
 ### Vorgelagerter nginx
 
 In Plesk steht nginx vor Apache. Ist unter *Hosting-Einstellungen* → *Apache
-& nginx* die Option **Smart static files processing** gesetzt, liefert nginx
-statische Dateien selbst aus: `.html`, `.css`, `.js`, Bilder und Schriften
-gehen dann nie durch Apache. Das ist schnell, hat aber eine Folge, die man
-nicht sieht: **nginx liest keine `.htaccess`.** Die Sperre für `tools/` und
-`tests/` gilt dann nur noch für PHP-Dateien.
+& nginx* die Option **Smart static files processing** gesetzt (je nach
+Fassung auch: *Serve static files directly by nginx*), liefert nginx statische
+Dateien selbst aus: `.html`, `.css`, `.js`, Bilder, Schriften und weitere
+Endungen, die Plesk festlegt. Diese Dateien gehen dann nie durch Apache. Das
+ist schnell, hat aber eine Folge, die man nicht sieht: **nginx liest keine
+`.htaccess`.** Die Sperre für `tools/` und `tests/` gilt dann nur noch für
+PHP-Dateien, und `data/.htaccess` schützt nur, was Apache ausliefert.
 
-Woran man es erkennt: `check.html` meldet `tools/purge.php` als gesperrt und
-`tools/og-vorlage.html` als erreichbar. Dieselbe Regel in `.htaccess` trifft
-beide; wenn nur eine greift, beantwortet sie nicht derselbe Server. Genau
-diesen Befund gibt die Prüfung seitdem aus.
+**Woran man es erkennt.** `check.html` meldet unter *Abschottung* die
+PHP-Dateien in `tools/` als gesperrt und `tools/og-vorlage.html` als
+erreichbar, und darunter steht der **Befund** *Ursache der offenen statischen
+Dateien*. Dieselbe Sperre trifft beide Dateien; wenn nur eine greift, antwortet
+nicht derselbe Server.
 
-Zwei Wege. Entweder die Option abschalten, dann läuft alles durch Apache und
-`.htaccess` gilt wieder für jede Datei. Oder die Sperre zusätzlich in
-*Zusätzliche nginx-Direktiven* eintragen:
+Dabei gilt: Wo Apache die `.htaccess` liest, kommt das 403 auf die PHP-Dateien
+seit `tools/.htaccess` und `tests/.htaccess` von Apache und nicht von den
+Skripten selbst, denn Apache wertet diese Sperre vor der `RedirectMatch`-Regel
+der Wurzel aus. Die Prüfung fragt deshalb zusätzlich nach einer erfundenen
+PHP-Datei in `tools/`; ein 403 darauf kann kein Skript sein.
+
+**Zwei Wege.**
+
+1. **Die Option abschalten.** Dann läuft alles durch Apache, und `.htaccess`
+   gilt wieder für jede Datei. Das ist der sichere Weg, weil er nicht davon
+   abhängt, wie Plesk seine Konfiguration zusammensetzt. Nachgestellt mit
+   Apache 2.4 und den `.htaccess`-Dateien aus diesem Repository: Jede geprüfte
+   Datei unter `tools/`, `tests/` und `data/` antwortet mit 403, ob `.php`,
+   `.html` oder `.txt`.
+2. **Die Option behalten** und die Sperre in *Zusätzliche nginx-Direktiven*
+   eintragen:
 
 ```nginx
-location ~ ^/(tools|tests|\.git|\.github)/ {
-    deny all;
-    return 404;
-}
+location ^~ /tools/   { return 404; }
+location ^~ /tests/   { return 404; }
+location ^~ /data/    { return 404; }
+location ^~ /.git/    { return 404; }
+location ^~ /.github/ { return 404; }
 ```
 
-Die zweite Fassung ist die robustere: Sie gilt unabhängig davon, wer die
-Datei ausliefert. Fehlt außerdem `mod_headers`, gehören dieselben
+**Warum `^~` und nicht ein Regex mit `~`.** nginx wertet Regex-`location`s in der
+Reihenfolge der Konfigurationsdatei aus, und die erste, die passt, gewinnt. Plesks
+Auslieferung statischer Dateien beruht auf einer solchen Regel. Steht ein Regex-Block
+hinter ihr, gewinnt sie, und die Sperre bleibt wirkungslos; wo Plesk den Einschub
+hinsetzt, hat man nicht in der Hand. Ein `^~`-Präfix beendet die Regex-Suche, sobald
+es der längste passende Präfix ist, und gilt deshalb an jeder Stelle. Nachgestellt
+mit nginx 1.24 und einer Ersatzregel für Plesks Auslieferung statischer Dateien:
+
+| Sperre | `tools/og-vorlage.html` | `data/ai-key.txt` |
+| --- | --- | --- |
+| keine | 200 | 200 |
+| `location ~` vor der Regel | 404 | 200 |
+| `location ~` hinter der Regel | 200 | 200 |
+| `location ^~` an beiden Stellen | 404 | 404 |
+
+Nicht nachgestellt ist Plesk selbst: Die Ersatzregel bildet nur nginx' Verfahren
+nach. Ob Fassung und Einstellung der eigenen Installation sich so verhalten,
+entscheidet `check.html` nach dem Speichern — der Befund muss verschwinden.
+
+Auch `data/` gehört in den Block. `data/.htaccess` hält Apache fern von dem, was
+dort liegt; eine Datei mit Endung, etwa `data/ai-key.txt`, könnte nginx dennoch
+selbst ausliefern. Fehlt außerdem `mod_headers`, gehören dieselben
 Sicherheitskopfzeilen ebenfalls dorthin — den Wortlaut nennt der Befund in
 `check.html`.
 
