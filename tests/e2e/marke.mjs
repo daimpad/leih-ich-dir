@@ -34,20 +34,25 @@ ok('Silbe "Ich" ist ausgezeichnet', await ich.count() === 1 && (await ich.innerT
 const cIch = await ich.evaluate(n => getComputedStyle(n).color);
 const cWort = await word.evaluate(n => getComputedStyle(n).color);
 ok('Silbe traegt eine eigene Farbe', cIch !== cWort, cIch + ' vs ' + cWort);
-const gruen = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--green').trim());
-ok('und zwar das Gruen der Anwendung', cIch === 'rgb(15, 122, 85)', cIch + ' / Token ' + gruen);
+// Seit der Knete traegt die Silbe Kaugummi, die Farbe der Wortmarke im
+// Hero; frueher das Gruen der Anwendung.
+const token = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--brand-ich').trim());
+ok('und zwar Kaugummi wie im Hero', cIch === 'rgb(194, 71, 122)', cIch + ' / Token ' + token);
 const ff = await word.evaluate(n => getComputedStyle(n).fontFamily);
-ok('Wortmarke in Ranchers', ff.includes('Ranchers'), ff);
+ok('Wortmarke in Nunito', ff.includes('Nunito'), ff);
 
 console.log('\n· Ueberschriften dritter Ordnung');
 const h3 = page.locator('.steps h3').first();
 ok('h3 vorhanden', await h3.count() > 0);
 const ff3 = await h3.evaluate(n => getComputedStyle(n).fontFamily);
-ok('h3 in Ranchers', ff3.includes('Ranchers'), ff3);
-const ls3 = await h3.evaluate(n => getComputedStyle(n).letterSpacing);
-ok('h3 ohne enge Laufweite', ls3 === 'normal' || ls3 === '0px', ls3);
+ok('h3 in Nunito', ff3.includes('Nunito'), ff3);
+// Ranchers hatte einen einzigen Schnitt und vertrug keine enge Laufweite;
+// beides galt nur ihr. Nunito kommt als variable Datei bis 1000, der
+// schwerste Schnitt ist also gezeichnet und nicht gerechnet.
 const w3 = await h3.evaluate(n => getComputedStyle(n).fontWeight);
-ok('h3 ohne gerechnete Fettung', w3 === '400', w3);
+ok('h3 im schwersten Schnitt', w3 === '900', w3);
+const geladen = await page.evaluate(() => document.fonts.check('900 16px Nunito'));
+ok('und der ist geladen, nicht gerechnet', geladen);
 
 console.log('\n· Anlegen beginnt oben');
 await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));

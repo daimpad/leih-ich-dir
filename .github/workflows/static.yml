@@ -44,7 +44,7 @@ jobs:
       # bekommt die Vorschau ein eigenes robots.txt, das sie ganz heraushaelt.
       - name: Nur die Oberflaeche behalten
         run: |
-          rm -rf tools tests data .github .htaccess sitemap.xml
+          rm -rf tools tests data archiv .github .htaccess sitemap.xml
           printf 'User-agent: *\nDisallow: /\n' > robots.txt
 
       - name: Upload artifact

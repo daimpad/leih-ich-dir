@@ -1,0 +1,1203 @@
+/* =====================================================================
+ * Leih-Katalog · Erscheinungsbild
+ *
+ * Eigenständig: diese Datei ist die gesamte Gestaltung der Anwendung.
+ * Es wird kein fremdes Stylesheet eingebunden, und keine Farbe steht
+ * außerhalb der Merkmale in :root — wer das Aussehen ändern will, ändert
+ * dort und nirgends sonst.
+ *
+ * Aufbau
+ *   1 · Merkmale (hell und dunkel)
+ *   2 · Grundlage
+ *   3 · Gerüst und Kopfleiste
+ *  3a · Schwebende Schaltfläche
+ *   4 · Schaltflächen
+ *   5 · Felder
+ *   6 · Karten, Aufklapper, Hinweise
+ *   7 · Startseite
+ *   8 · Liste: Titel, Inventar, Zeilen
+ *   9 · Teilen und Kontakt
+ *  10 · Fenster, Meldungen
+ *  11 · Fußzeile
+ *  12 · Telefon und schwebende Schaltfläche
+ *  13 · Grobe Zeiger
+ * ===================================================================== */
+
+/* == 1 · Merkmale ====================================================== */
+
+:root {
+  /* Flächen und Schrift */
+  /* Ein helles Gruen als Grund der Seite. Gepruefte Folgen: --muted kommt
+     darauf auf 5,4:1 und --ink auf 16,2:1, beide also weiter ueber der
+     Schwelle. --green-soft (#E4F3EC) liegt dem Grund dagegen so nahe, dass
+     es darauf verschwindet; wo eine Flaeche in dieser Farbe unmittelbar auf
+     dem Grund steht, traegt sie deshalb eine Linie. */
+  --paper:       #E8FAE9;
+  --surface:     #FFFFFF;
+  --surface-alt: #F4F0E8;
+  --ink:         #1B1813;
+  --muted:       #6B6459;
+  /* 4,95:1 auf --paper, 5,19:1 auf --surface, 4,57:1 auf --surface-alt.
+     Der vorige Wert #968F83 kam auf 3,05, 3,20 und 2,82 und fiel damit
+     unter die Schwelle von 4,5:1 — und zwar fuer jede Notiz, jeden
+     Zeitstempel und jeden Platzhalter im Formular. */
+  --faint:       #736C60;
+  --line:        #EAE3D8;
+  --line-firm:   #D9D0C1;
+
+  /* Grün heißt frei und führt die Handlung an. */
+  --green:       #0F7A55;
+  --green-ink:   #0A5C3F;
+  --green-soft:  #E4F3EC;
+  --on-green:    #FFFFFF;
+
+  /* Bernstein heißt verliehen. */
+  --amber:       #96601A;
+  --amber-soft:  #FAEFDC;
+
+  /* Rot bleibt dem Zerstörenden vorbehalten. */
+  --danger:      #A8321F;
+  --danger-soft: #FBEAE6;
+
+  --focus:       #0F7A55;
+
+  --r-card: 18px;
+  --r-btn:  12px;
+  --r-row:  14px;
+
+  --shadow:      0 1px 2px rgba(27, 24, 19, .05), 0 10px 26px -18px rgba(27, 24, 19, .5);
+  --shadow-lift: 0 2px 4px rgba(27, 24, 19, .06), 0 18px 40px -22px rgba(27, 24, 19, .55);
+
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
+  --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 64px;
+
+  --shell: 41.25rem;   /* 660px — dieselbe Breite auf jeder Seite */
+
+  /* Pfeil zwischen den Schritten, als Maske eingebettet: eine Form, die der
+     Linienfarbe folgt, ohne eine Datei nachzuladen. */
+  --pfeil: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M8 32 L52 32 M36 16 L52 32 L36 48' fill='none' stroke='%23000' stroke-width='6' stroke-linecap='square'/%3E%3C/svg%3E");
+
+  /* Bewegungsmerkmale. Ein gemeinsames Vokabular statt fuenfzehn einzeln
+     gewaehlter Kurven: Was federt, federt ueberall gleich. */
+  --takt-tipp:  120ms;   /* Druckpunkt unter dem Finger */
+  --takt-kurz:  200ms;   /* Loslassen, kleine Zustandswechsel */
+  --takt-fall:  280ms;   /* eine Zeile faellt an ihren Platz */
+  --takt-lang:  460ms;   /* die Heimkehr, der laengste Weg */
+  --feder:      cubic-bezier(.34, 1.56, .64, 1);   /* mit Ueberschwingen */
+  --feder-sanft: cubic-bezier(.22, 1, .36, 1);     /* ohne */
+
+  --sans:    'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --slab:    'Zilla Slab', Georgia, serif;
+  --mono:    'Space Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  /* Anzeigeschrift für die Wortmarke und die Überschriften. */
+  --display: 'Ranchers', 'Zilla Slab', Georgia, sans-serif;
+}
+
+/* Dunkel: erst nach Systemvorgabe, dann nach ausdrücklicher Wahl. Die
+   Reihenfolge entscheidet, deshalb steht die Wahl hinter der Vorgabe. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:       #16130F;
+    --surface:     #211D17;
+    --surface-alt: #2A251E;
+    --ink:         #F7F3EA;
+    --muted:       #B6AE9F;
+    --faint:       #978F80;
+    --line:        #322C24;
+    --line-firm:   #453E33;
+    --green:       #3FCE96;
+    --green-ink:   #7BE2BA;
+    --green-soft:  #13291F;
+    --on-green:    #0B1A13;
+    --amber:       #E7B25C;
+    --amber-soft:  #2C2317;
+    --danger:      #EC7B67;
+    --danger-soft: #2E1A16;
+    --focus:       #3FCE96;
+    --shadow:      0 1px 2px rgba(0, 0, 0, .5), 0 10px 26px -18px rgba(0, 0, 0, .9);
+    --shadow-lift: 0 2px 6px rgba(0, 0, 0, .55), 0 18px 40px -22px rgba(0, 0, 0, .95);
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper:       #16130F;
+  --surface:     #211D17;
+  --surface-alt: #2A251E;
+  --ink:         #F7F3EA;
+  --muted:       #B6AE9F;
+  --faint:       #978F80;
+  --line:        #322C24;
+  --line-firm:   #453E33;
+  --green:       #3FCE96;
+  --green-ink:   #7BE2BA;
+  --green-soft:  #13291F;
+  --on-green:    #0B1A13;
+  --amber:       #E7B25C;
+  --amber-soft:  #2C2317;
+  --danger:      #EC7B67;
+  --danger-soft: #2E1A16;
+  --focus:       #3FCE96;
+  --shadow:      0 1px 2px rgba(0, 0, 0, .5), 0 10px 26px -18px rgba(0, 0, 0, .9);
+  --shadow-lift: 0 2px 6px rgba(0, 0, 0, .55), 0 18px 40px -22px rgba(0, 0, 0, .95);
+}
+
+/* == 2 · Grundlage ===================================================== */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* Der Wert sagt dem Browser, wie er Formularelemente, Bildlaufleisten und
+   das Fenster hinter der Seite faerben soll. Der Anfangswert ueberlaesst
+   ihm die Wahl; die beiden Regeln weiter unten binden ihn an die Wahl in
+   der Kopfleiste, sobald jemand sie getroffen hat. */
+html { color-scheme: light dark; }
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  /* 1rem statt 16px: Wer die Grundgroesse im Browser hochsetzt, bekommt
+     sie auch hier. Der Rest des Stylesheets rechnet ohnehin in rem. */
+  font-size: 1rem;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Eigene Bausteine setzen display; ohne dieses Gewicht bliebe Verborgenes
+   sichtbar. Das ist keine Zierde, sondern Voraussetzung. */
+[hidden] { display: none !important; }
+
+h1, h2, h3, h4 { margin: 0; font-weight: 600; line-height: 1.2; letter-spacing: -.02em; }
+
+/* Die ersten drei Ordnungen tragen die Anzeigeschrift. Sie hat genau einen
+   Schnitt: Fettung wäre gerechnet und nicht gezeichnet, und enge Laufweite
+   verträgt sie nicht — beides wird deshalb zurückgesetzt. Dieselbe Regel
+   gilt für die beiden Felder, die als Überschrift auftreten. */
+h1, h2, h3,
+.title-input,
+.modal-title-input,
+.brand-word {
+  font-family: var(--display);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+p, ul, ol { margin: 0; }
+img, svg { max-width: 100%; }
+
+a { color: var(--green-ink); text-underline-offset: .18em; }
+a:hover { color: var(--green); }
+
+button, input, textarea, select { font: inherit; color: inherit; }
+
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* Der Notbehelf zum Kopieren (legacyCopy) haengt ein Textfeld an den Koerper,
+   waehlt es aus und nimmt es sofort wieder weg. Die Klasse stand im Skript,
+   eine Regel dazu gab es nicht: Das Feld lag also in voller Breite am Ende
+   der Seite. Sichtbar wurde das bisher nur deshalb nicht, weil alles in
+   einem Zug geschieht und der Browser dazwischen nicht zeichnet.
+   Nicht display: none und nicht visibility: hidden, beide machen die Auswahl
+   unmoeglich; kein style-Attribut, das verwirft die Richtlinie. */
+.offscreen {
+  position: fixed; top: 0; left: -9999px;
+  width: 1px; height: 1px; opacity: 0; pointer-events: none;
+}
+
+/* Der Sprung in den Inhalt: für die Tastatur da, für die Maus unsichtbar. */
+.skiplink {
+  position: absolute; left: var(--s-4); top: -4rem; z-index: 100;
+  background: var(--surface); color: var(--ink); text-decoration: none;
+  border: 1px solid var(--line-firm); border-radius: var(--r-btn);
+  padding: .6rem 1rem; box-shadow: var(--shadow-lift);
+}
+.skiplink:focus { top: var(--s-3); }
+
+/* Abstand nach oben. Zwei Stufen genügen, und sie stehen hier statt im
+   Markup: eingebettete Angaben verstoßen gegen die eigene Richtlinie
+   (style-src 'self') und werden vom Browser verworfen. */
+.spaced    { margin-top: var(--s-3); }
+.spaced-lg { margin-top: var(--s-4); }
+/* Der Vorspann im Aufklapper der Superliste steht vor den Feldern und nicht
+   zwischen ihnen: Sein Abstand liegt deshalb unten. */
+#circleManageLead { margin-bottom: var(--s-4); }
+
+.muted { color: var(--muted); }
+.txt-sm { font-size: .9rem; }
+.mono { font-family: var(--mono); }
+.lead { font-size: 1.12rem; color: var(--muted); }
+.hint { color: var(--muted); font-size: .92rem; }
+
+/* Kleine Auszeichnung in Versalien, für Zustände wie „gespeichert". */
+.tag {
+  font-size: .78rem; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--muted); font-weight: 500;
+}
+
+.ico { width: 1.15em; height: 1.15em; flex: 0 0 auto; display: block; }
+.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* == 3 · Gerüst und Kopfleiste ========================================= */
+
+.shell { max-width: var(--shell); margin: 0 auto; padding-inline: var(--s-5); }
+.page { padding-block: var(--s-4) var(--s-7); }
+
+/* Die Kopfleiste braucht Luft nach oben: Ohne sie stossen die runden
+   Knoepfe an den oberen Rand des Fensters und werden dort beschnitten. */
+header.site { padding-block: var(--s-4); }
+
+/* Die Zeile darf umbrechen: Schmal rueckt der Verweis auf die eigenen
+   Listen unter die Marke und die Bedienelemente. */
+.bar { display: flex; align-items: center; flex-wrap: wrap; gap: var(--s-2) var(--s-4); }
+
+/* Die Marke ist nur noch Schrift. Die Silbe in der Mitte traegt die Farbe:
+   Sie macht aus einer Aneinanderreihung von Buchstaben wieder einen Satz. */
+.brand {
+  display: flex; align-items: center; gap: var(--s-2);
+  text-decoration: none; color: inherit; margin-right: auto;
+}
+.brand-word { font-size: 1.45rem; }
+/* Die Bildmarke links vom Namen. Sie bringt ihre Farben mit und folgt dem
+   Erscheinungsbild nicht: Der helle Grund ist Teil des Zeichens. In dieser
+   Groesse traegt auch die runde Aussenlinie, die klein zu einem Haar wird. */
+.brand-mark { width: 3.8rem; height: 3.8rem; flex: 0 0 auto; }
+.brand-ich { color: var(--green); }
+
+.bar-controls { display: flex; align-items: center; gap: var(--s-2); }
+
+.ctl-square {
+  height: 2.4rem; min-width: 2.4rem; padding-inline: var(--s-3);
+  display: inline-grid; place-items: center;
+  background: var(--surface); color: var(--muted);
+  border: 1px solid var(--line); border-radius: 999px;
+  box-shadow: var(--shadow); cursor: pointer;
+  font-size: .82rem; font-weight: 500; letter-spacing: .04em;
+}
+.ctl-square:hover { color: var(--ink); border-color: var(--line-firm); }
+.ctl-wide {
+  display: inline-flex; align-items: center; gap: var(--s-2);
+  width: auto; padding-inline: var(--s-4); text-decoration: none;
+}
+.ctl-label { font-size: .88rem; }
+
+/* Breit stehen die beiden Wege zu den eigenen Listen links neben den
+   Schaltern. Die Reihenfolge steht hier und nicht im Markup, weil der Block
+   schmal ganz abtritt und die schwebende Schaltflaeche uebernimmt. */
+.bar-mine { order: 1; display: flex; align-items: center; gap: var(--s-2); }
+.bar-controls { order: 2; }
+
+/* == 3a · Schwebende Schaltfläche ====================================== *
+ *
+ * Schmal treten die beiden Wege aus der Kopfleiste ab und stehen hier: am
+ * unteren rechten Rand, wo der Daumen liegt. Traeger ist ein <details>, die
+ * Flaeche also ein <summary> — damit bringt der Browser Auf und Zu, die
+ * Tastaturfuehrung und die Zustandsmeldung fuer die Vorlesestimme selbst mit.
+ * Beide Teile liegen fest am Fenster und nicht im Fluss, der <details> selbst
+ * ist deshalb ein Kasten ohne Hoehe am Ende des Dokuments.
+ * ===================================================================== */
+
+.fab { display: none; }
+
+.fab__btn {
+  position: fixed; right: var(--s-4); bottom: var(--s-4); z-index: 57;
+  width: 3.4rem; height: 3.4rem;
+  display: grid; place-items: center; cursor: pointer;
+  background: var(--green); color: var(--on-green);
+  border: 1px solid var(--green); border-radius: 999px;
+  box-shadow: var(--shadow-lift);
+  /* Das Dreieck des Aufklappers faellt weg: Die Flaeche traegt ihr eigenes
+     Zeichen, und die beiden Schreibweisen decken zusammen jeden Browser ab. */
+  list-style: none;
+}
+.fab__btn::-webkit-details-marker { display: none; }
+/* Der Fokusring folgt der Form: Die Sammelregel setzt 4 Punkte Rundung, auf
+   einem Kreis saehe das aus wie ein verrutschtes Quadrat. */
+.fab__btn:focus-visible { border-radius: 999px; }
+.fab__btn .ico { width: 1.5rem; height: 1.5rem; }
+/* Offen tritt die Flaeche zurueck: Die Wahl steht darueber, nicht auf ihr. */
+.fab[open] .fab__btn { background: var(--surface); color: var(--ink); border-color: var(--line-firm); }
+
+.fab__menu {
+  position: fixed; right: var(--s-4); bottom: calc(var(--s-4) + 4rem); z-index: 57;
+  display: flex; flex-direction: column; align-items: stretch; gap: var(--s-2);
+}
+.fab__item {
+  display: flex; align-items: center; gap: var(--s-3);
+  padding: .8rem 1rem; text-decoration: none; font-weight: 500;
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line-firm); border-radius: var(--r-btn);
+  box-shadow: var(--shadow-lift);
+}
+.fab__item .ico { width: 1.4rem; height: 1.4rem; flex: 0 0 auto; color: var(--green); }
+
+/* == 4 · Schaltflächen ================================================= */
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
+  padding: .68rem 1.15rem; border-radius: var(--r-btn); cursor: pointer;
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); box-shadow: var(--shadow);
+  font-weight: 500; text-decoration: none; text-align: center;
+}
+.btn:hover { border-color: var(--line-firm); color: var(--ink); }
+.btn:disabled { opacity: .5; cursor: default; }
+
+.btn--primary {
+  background: var(--green); border-color: var(--green); color: var(--on-green); font-weight: 600;
+}
+.btn--primary:hover { background: var(--green-ink); border-color: var(--green-ink); color: var(--on-green); }
+
+.btn--lg { padding: .4rem .8rem; font-size: 1.05rem; border-radius: 14px; }
+.btn--sm { padding: .42rem .8rem; font-size: .9rem; border-radius: 10px; }
+
+/* Leise: trägt keine Fläche, nur Text. Für alles Beiläufige. */
+.btn--ghost { background: none; border-color: transparent; box-shadow: none; color: var(--muted); }
+.btn--ghost:hover { background: var(--surface-alt); border-color: transparent; }
+
+/* Zerstörend, und deshalb bewusst leise: Rot allein genügt als Warnung,
+   eine Fläche dazu würde die Handlung zur ersten Wahl machen. */
+.btn--danger { background: none; border-color: transparent; box-shadow: none; color: var(--danger); }
+.btn--danger:hover { background: var(--danger-soft); border-color: transparent; color: var(--danger); }
+
+.btn--icon { width: 2.9rem; padding-inline: 0; flex: 0 0 auto; }
+.btn--icon .ico { width: 1.3rem; height: 1.3rem; }
+.btn[aria-pressed="true"] { background: var(--green-soft); border-color: var(--green); color: var(--green-ink); }
+
+.linkbtn {
+  background: none; border: 0; padding: 0; cursor: pointer;
+  color: var(--green-ink); font-weight: 500; font-size: inherit;
+  text-decoration: underline; text-underline-offset: .18em;
+}
+.linkbtn:hover { color: var(--green); }
+
+.actions { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; }
+
+/* == 5 · Felder ======================================================== */
+
+.input, .textarea {
+  width: 100%; padding: .7rem .9rem;
+  background: var(--surface-alt); color: var(--ink);
+  border: 1px solid var(--line); border-radius: var(--r-btn);
+}
+.input::placeholder, .textarea::placeholder { color: var(--faint); }
+/* Ein echter outline statt eines gefaerbten Rahmens. Im Kontrastmodus von
+   Windows verwirft der Browser die eigenen Farben und zeichnet den outline
+   selbst — einen border-color und einen box-shadow saehe dort niemand. Der
+   weiche Ring bleibt als Fuellung daneben stehen. */
+.input:focus, .textarea:focus {
+  background: var(--surface); border-color: var(--green);
+  outline: 2px solid var(--focus); outline-offset: 2px;
+  box-shadow: 0 0 0 3px var(--green-soft);
+}
+.textarea { resize: vertical; min-height: 4.5rem; }
+
+.field { display: block; margin-bottom: var(--s-4); }
+.field:last-child { margin-bottom: 0; }
+.field__label { display: block; color: var(--muted); font-size: .88rem; margin-bottom: var(--s-1); font-weight: 500; }
+.field .hint { margin-top: var(--s-1); font-size: .87rem; }
+
+/* Kästchen und Knöpfe, ohne eigenes Widget: das native Element bleibt,
+   es wird nur unsichtbar und die Marke daneben übernimmt die Anzeige. */
+.check { display: flex; align-items: flex-start; gap: var(--s-3); cursor: pointer; }
+.check input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.check__box {
+  flex: 0 0 auto; width: 1.25rem; height: 1.25rem; margin-top: .15rem;
+  border: 1px solid var(--line-firm); border-radius: 6px; background: var(--surface);
+  display: grid; place-items: center;
+}
+.check--radio .check__box { border-radius: 999px; }
+.check input:checked + .check__box { background: var(--green); border-color: var(--green); }
+.check input:checked + .check__box::after {
+  content: ""; width: .5rem; height: .5rem; border-radius: 2px; background: var(--on-green);
+}
+.check--radio input:checked + .check__box::after { border-radius: 999px; }
+.check input:focus-visible + .check__box { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* Zweistellige Wahl: frei oder verliehen. Zwei Schaltflächen nebeneinander,
+   die tragende trägt Farbe. */
+.seg { display: flex; gap: var(--s-2); }
+.seg button {
+  flex: 1 1 0; padding: .55rem; border-radius: 10px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface-alt); color: var(--muted);
+}
+.seg button[aria-pressed="true"] { background: var(--green-soft); border-color: var(--green); color: var(--green-ink); font-weight: 600; }
+.seg button.is-lent[aria-pressed="true"] { background: var(--amber-soft); border-color: var(--amber); color: var(--amber); }
+
+/* == 6 · Karten, Aufklapper, Hinweise ================================== */
+
+.card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card);
+  padding: var(--s-5) var(--s-5); margin-bottom: var(--s-3); box-shadow: var(--shadow);
+}
+.card__title { font-size: 1.6rem; }
+.card__head { display: flex; align-items: center; gap: var(--s-2); }
+
+/* Auskunft auf Zuruf: das Zeichen trägt den Satz im Titel, sichtbar beim
+   Zeigen und beim Tasten. */
+.info {
+  display: inline-grid; place-items: center; cursor: help;
+  width: 1.6rem; height: 1.6rem; border-radius: 999px; color: var(--faint);
+}
+.info:hover, .info:focus-visible { color: var(--green); background: var(--green-soft); }
+.info .ico { width: 1rem; height: 1rem; }
+.card__title + .hint { margin-top: var(--s-1); }
+
+/* Aufklapper: zugeklappt eine Zeile, aufgeklappt eine Karte. */
+.fold {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card);
+  margin-bottom: var(--s-3); box-shadow: var(--shadow);
+}
+.fold > summary {
+  display: flex; align-items: center; gap: var(--s-3); cursor: pointer;
+  padding: var(--s-4) var(--s-5); list-style: none;
+  font-family: var(--display); font-weight: 400; font-size: 1.6rem;
+}
+.fold > summary::-webkit-details-marker { display: none; }
+.fold > summary .fold-sub {
+  margin-left: auto; color: var(--faint); text-align: right;
+  font-family: var(--sans); font-size: .92rem;
+}
+.fold[open] > summary { border-bottom: 1px solid var(--line); }
+.fold__body { padding: var(--s-5); }
+.fold__body hr { border: 0; border-top: 1px solid var(--line); margin: var(--s-5) 0; }
+.fold h3 { font-size: 1rem; margin-bottom: var(--s-1); }
+
+.note {
+  display: flex; gap: var(--s-3); align-items: flex-start;
+  background: var(--surface-alt); border: 1px solid var(--line);
+  border-radius: var(--r-card); padding: var(--s-4); margin-bottom: var(--s-3);
+  color: var(--muted); font-size: .95rem;
+}
+.note .ico { color: var(--muted); margin-top: .18rem; }
+.note--warn { background: var(--amber-soft); border-color: var(--amber); color: var(--amber); }
+.note--warn .ico { color: var(--amber); }
+
+.chip {
+  display: inline-block; padding: .2rem .7rem; border-radius: 999px;
+  background: var(--surface-alt); color: var(--muted); font-size: .82rem; white-space: nowrap;
+}
+.chip--ok { background: var(--green-soft); color: var(--green-ink); }
+
+/* Der Stern am Pflichtfeld. Er traegt die Warnfarbe und steht ohne Abstand
+   am Wort, damit er zur Beschriftung gehoert und nicht daneben schwebt. */
+.req { color: var(--danger); margin-left: .1rem; }
+/* Ein leer gelassenes Pflichtfeld faellt auf, bis es gefuellt wird. */
+.is-leer { border-color: var(--danger); box-shadow: 0 0 0 3px var(--danger-soft); }
+.is-leer:focus { border-color: var(--danger); box-shadow: 0 0 0 3px var(--danger-soft); }
+
+.empty {
+  border: 1px dashed var(--line-firm); border-radius: var(--r-row);
+  padding: var(--s-6) var(--s-4); text-align: center; color: var(--muted);
+}
+
+/* == 7 · Startseite ==================================================== */
+
+/* Der Hero ist ein Rahmen um die Zusage, den Satz und den Aufruf. Der Grund
+   ist gemalt und nicht geladen — ein weicher Farbkreis und ein feines
+   Punktraster, alles aus Verläufen. */
+.hero { padding-block: var(--s-3) 0; }
+
+/* Der Rahmen steht flach: eine Flaeche, eine Linie, sonst nichts. Verlauf,
+   Schatten, Punktraster und der bernsteinfarbene Lichtfleck sind entfallen.
+   Auf dem gruenen Grund der Seite traegt die weisse Flaeche allein, und jede
+   weitere Ebene machte den Rahmen nur unruhiger. */
+.hero-panel {
+  position: relative; overflow: hidden;
+  border: 1px solid var(--line); border-radius: 24px;
+  background: var(--surface);
+  padding: clamp(var(--s-5), 4vw, var(--s-6)) clamp(var(--s-5), 3vw, var(--s-6));
+}
+
+.hero-body { position: relative; }
+
+/* Das Bild steht neben Ueberschrift und Satz, nicht neben dem ganzen
+   Rahmen: Die vier Auszeichnungen darunter brauchen die volle Breite,
+   sonst brechen sie in zwei Reihen um. */
+.hero-top { display: flex; align-items: flex-start; gap: var(--s-5); }
+.hero-sagt { flex: 1 1 auto; min-width: 0; }
+
+/* Die Pfote mit ihrer eigenen Leihliste, in voller Farbe: Sie erklaert,
+   wofuer die Liste da ist, und ist damit kein Schmuck. Sie greift von oben
+   ueber den Rand des Rahmens herein. */
+.hero-bild {
+  flex: 0 0 auto;
+  width: 9.5rem; height: auto;
+  margin-top: calc(var(--s-5) * -1 - var(--s-2));
+}
+
+/* Die Farben der Zeichnung. Sie stehen hier und nicht in der Datei, weil das
+   SVG im Dokument steht — nur so erreicht es der Hell/Dunkel-Wechsel. Der
+   Strich bleibt im Beige der Vorlage, das Blatt der Liste nimmt die Farbe der
+   Karte an: im Hellen weiss wie bisher, im Dunkeln kein greller Block mehr. */
+.hero-bild { color: var(--surface); }
+.hero-bild .cls-1,
+.hero-bild .cls-4,
+.hero-bild .cls-5 { fill: #C7AC91; }
+.hero-bild .cls-2,
+.hero-bild .cls-3 { fill: currentColor; }
+.hero-bild .cls-4,
+.hero-bild .cls-5 { stroke: #C7AC91; stroke-miterlimit: 10; }
+.hero-bild .cls-5 { stroke-width: .75px; }
+/* Der Aufruf im Rahmen selbst. Er steht unter den Auszeichnungen: erst die
+   Zusage, dann die Handlung. */
+.hero-act { margin-top: var(--s-5); }
+/* Die Ueberschrift bleibt gross — sie ist die Marke. Der obere Wert ist so
+   gewaehlt, dass sie bei 660 Pixeln noch in einer Zeile steht. */
+.hero h1 { font-size: clamp(2.4rem, 7vw, 3.5rem); line-height: 1.04; }
+.hero h1 mark { background: none; color: var(--green); }
+.hero .lead { margin-top: var(--s-3); max-width: 30rem; font-size: clamp(1.02rem, 2vw, 1.12rem); }
+
+/* Vier Zusagen mit Haken, als Plaketten auf dem Grund. Der Haken ist grün,
+   weil er dasselbe sagt wie in der Liste: hier ist etwas in Ordnung. */
+.trust {
+  list-style: none; padding: 0; margin-top: var(--s-6);
+  display: flex; flex-wrap: wrap; gap: var(--s-2);
+}
+.trust li {
+  display: flex; align-items: center; gap: var(--s-2);
+  padding: .32rem .7rem; border-radius: 999px;
+  background: var(--surface); border: 1px solid var(--line);
+  color: var(--muted); font-size: .86rem; white-space: nowrap;
+}
+.trust .ico { width: 1rem; height: 1rem; color: var(--green); }
+
+/* Drei Schritte nebeneinander. Die Pfeile sitzen in den Lücken und gehören
+   zur Darstellung, nicht zum Text; deshalb sind sie gezeichnet und nicht
+   geschrieben. */
+.howto { margin-top: var(--s-7); }
+.howto h2 { font-size: clamp(1.8rem, 4vw, 2.4rem); }
+
+/* Die Ueberschrift traegt das Zeichen ihrer Art. Es steht davor und nicht
+   darueber: So bleibt der Zusammenhang auch dann sichtbar, wenn die
+   Ueberschrift auf dem Telefon in drei Zeilen umbricht. */
+.howto__head { display: flex; align-items: center; gap: var(--s-4); }
+.howto__head > span:last-child { min-width: 0; }
+.howto__mark {
+  flex: 0 0 auto; width: 3.2rem; height: 3.2rem; border-radius: var(--r-btn);
+  display: grid; place-items: center;
+  /* Die Linie ist nicht Schmuck: --green-soft und der Grund der Seite liegen
+     zu nah beieinander, ohne sie loeste sich die Kachel auf. */
+  background: var(--green-soft); color: var(--green-ink);
+  border: 1px solid var(--line-firm);
+}
+/* Der Kreis bekommt einen eigenen Grund. Nicht Bernstein, das heisst in
+   dieser Anwendung verliehen, und nicht Rot: Beides waere eine Aussage, die
+   hier niemand macht. */
+.howto__mark--kreis { background: var(--surface-alt); color: var(--ink); }
+.howto__mark .ico { width: 1.9rem; height: 1.9rem; }
+.howto__lead { margin-top: var(--s-3); max-width: 60ch; }
+@media (max-width: 34rem) {
+  .howto__mark { width: 2.6rem; height: 2.6rem; }
+  .howto__mark .ico { width: 1.5rem; height: 1.5rem; }
+}
+
+.steps {
+  list-style: none; padding: 0; margin-top: var(--s-5);
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-5);
+}
+.steps li {
+  position: relative;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card);
+  box-shadow: var(--shadow); padding: var(--s-4);
+}
+.steps li + li::before {
+  content: ""; position: absolute; top: 50%; left: calc(var(--s-5) * -1);
+  width: var(--s-5); height: 1.2rem; transform: translateY(-50%);
+  background: currentColor; color: var(--faint);
+  -webkit-mask: var(--pfeil) center / 1.2rem 1.2rem no-repeat;
+  mask: var(--pfeil) center / 1.2rem 1.2rem no-repeat;
+}
+.step-no {
+  width: 1.9rem; height: 1.9rem; border-radius: 999px;
+  background: var(--green-soft); color: var(--green-ink);
+  display: grid; place-items: center; font-size: 1rem; font-weight: 600;
+  margin-bottom: var(--s-3);
+}
+/* Dieselbe Unterscheidung wie oben, eine Stufe kleiner. */
+.step-no--kreis { background: var(--surface-alt); color: var(--ink); border: 1px solid var(--line-firm); }
+.steps h3 { font-size: 1.05rem; }
+.steps p { color: var(--muted); font-size: .88rem; margin-top: .25rem; }
+
+/* Eigene Listen, auf diesem Gerät gemerkt. */
+.mine { margin-top: var(--s-7); }
+.mine h2 { font-size: clamp(1.8rem, 4vw, 2.4rem); margin-bottom: var(--s-4); }
+.mine ul { list-style: none; padding: 0; display: grid; gap: var(--s-2); }
+.mine a {
+  display: flex; align-items: center; gap: var(--s-3); text-decoration: none; color: inherit;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-row);
+  padding: .7rem .9rem; box-shadow: var(--shadow);
+}
+.mine a:hover { background: var(--surface-alt); }
+/* Ohne min-width: 0 waechst ein Flex-Kind ueber seinen Platz hinaus; ein
+   langer Listenname schoebe die Seite dann waagerecht auf. */
+.mine .name { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; font-weight: 500; }
+.mine .when { color: var(--faint); font-size: .85rem; flex: 0 0 auto; }
+/* Das Zeichen der Art, als runde Marke wie in der Inventarzeile. Es sagt
+   dasselbe wie die Marke daneben, nur schneller. */
+.mine .kind {
+  flex: 0 0 auto; width: 2.1rem; height: 2.1rem; border-radius: 999px;
+  display: grid; place-items: center;
+  background: var(--green-soft); color: var(--green-ink);
+}
+.mine .kind--kreis { background: var(--surface-alt); color: var(--ink); }
+.mine .kind .ico { width: 1.2rem; height: 1.2rem; }
+.mine .chip { flex: 0 0 auto; }
+/* Schmal hat der Name Vorrang. Das Datum entfaellt zuerst: Die Art der Liste
+   ist die Angabe, nach der hier gesucht wird, das Datum der Beiwert. */
+@media (max-width: 26rem) {
+  .mine .when { display: none; }
+}
+
+/* Der Zugang. Eigene Farbe, weil er kein Bericht ist, sondern eine
+   Aufforderung: Wer diesen Link verliert, verliert die Liste. */
+.keybox {
+  background: var(--amber-soft); border: 1px solid var(--amber);
+  border-radius: var(--r-card); padding: var(--s-5); margin-bottom: var(--s-3);
+  box-shadow: var(--shadow);
+}
+.keybox__title { font-size: 1.6rem; color: var(--amber); }
+/* Ohne Deckkraft: .85 druecke den Hinweis auf 3,55:1, ohne sie steht er
+   bei 4,63:1. Leiser wird er ueber die Groesse, nicht ueber die Deckkraft —
+   Deckkraft kostet Kontrast, Groesse nicht. */
+.keybox .hint { color: var(--amber); margin-top: var(--s-2); }
+/* Nebenbemerkung, kein zweiter Hinweis: klein und in einer Zeile, damit sie
+   dem Link daneben nicht das Gewicht nimmt. */
+.keybox .keybox__remember { font-size: .74rem; margin-top: var(--s-1); }
+/* Der Haken im Zugangskasten traegt dessen Farbe, nicht das Gruen der
+   Anwendung: Hier wird eine Warnung bestaetigt, nichts Erfreuliches. */
+.keybox__check input:checked + .check__box { background: var(--amber); border-color: var(--amber); }
+.keybox__check .check__box { border-color: var(--amber); }
+.keybox .input { background: var(--surface); border-color: var(--amber); }
+
+/* == 8 · Liste ========================================================= */
+
+.titleblock { margin-bottom: var(--s-5); }
+.titleblock h1 { font-size: 2.3rem; }
+/* Titel und Speicherzustand in einer Zeile. Der Zustand steht rechts und
+   klein: Er gehoert zum Titel, draengt sich aber nicht neben ihn. */
+.titlerow { display: flex; align-items: baseline; gap: var(--s-3); }
+.titlerow h1, .titlerow .title-edit { flex: 1 1 auto; min-width: 0; }
+.chip--sm { font-size: .74rem; padding: .15rem .55rem; }
+.title-input {
+  font-size: 2.3rem;
+  padding: .3rem .6rem; margin-left: -.6rem; background: none; border-color: transparent;
+}
+.title-input:hover { background: var(--surface-alt); }
+.titlemeta { display: flex; align-items: center; flex-wrap: wrap; gap: var(--s-2); margin-top: var(--s-2); color: var(--faint); font-size: .92rem; }
+
+.items-head { display: flex; align-items: center; gap: var(--s-3); margin-bottom: var(--s-4); }
+.items-head .card__title { flex: 1 1 auto; }
+.items-head .checked { color: var(--faint); font-size: .88rem; }
+
+.addrow { display: flex; gap: var(--s-2); align-items: stretch; }
+/* Auf .input und nicht auf #addName: Die Zeile in der Superliste benutzt
+   dieselbe Klasse, und ohne min-width: 0 traegt ein Eingabefeld als
+   Flex-Kind seine Standardbreite von rund 20 Zeichen als Mindestmass mit
+   sich herum. Bei 320 Punkten schob es die Schaltflaeche daneben hinaus. */
+.addrow .input { flex: 1 1 8rem; min-width: 0; }
+/* Der Verweis steht unter der Schaltflaeche, nicht unter dem Feld: Er ist
+   die Alternative zum Hinzufuegen, nicht eine Angabe zum Namen. */
+.addhint {
+  display: flex; align-items: baseline; gap: var(--s-3); flex-wrap: wrap;
+  justify-content: flex-end; margin-top: var(--s-2); font-size: .9rem;
+}
+.addhint .voicestate { margin-right: auto; }
+
+/* Das Feld fuer mehrere auf einmal steht fuer sich, und die Schaltflaeche
+   darunter braucht Abstand: Sie fuehrt die Eingabe aus und darf nicht wie
+   ein Anhaengsel des Feldes wirken. */
+.voicebox { margin-top: var(--s-4); }
+.voicerow { display: flex; align-items: center; gap: var(--s-3); margin-top: var(--s-4); }
+.voicestate { color: var(--green-ink); }
+
+.items { list-style: none; padding: 0; margin-top: var(--s-4); display: grid; gap: var(--s-2); }
+
+.itemrow {
+  width: 100%; display: flex; align-items: center; gap: var(--s-3); text-align: left;
+  padding: .7rem .85rem; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-row);
+}
+.itemrow:hover { background: var(--surface-alt); border-color: var(--line-firm); }
+
+.item-badge {
+  flex: 0 0 auto; width: 2.1rem; height: 2.1rem; border-radius: 999px;
+  display: grid; place-items: center;
+  background: var(--green-soft); color: var(--green-ink);
+}
+.item-badge .ico { width: 1.3rem; height: 1.3rem; }
+.item--lent .item-badge { background: var(--amber-soft); color: var(--amber); }
+
+.item-text { flex: 1 1 auto; min-width: 0; }
+.item-name { display: block; font-weight: 500; overflow-wrap: anywhere; }
+.item-state { display: block; color: var(--amber); font-size: .85rem; }
+.item-note { display: block; color: var(--faint); font-size: .85rem; overflow-wrap: anywhere; }
+/* Der Weg zu den Details, in Worten neben dem Pfeil. Schmal entfaellt er:
+   Dort braucht der Name der Sache den Platz, und der Pfeil bleibt. */
+.item-more { color: var(--muted); font-size: .85rem; flex: 0 0 auto; white-space: nowrap; }
+@media (max-width: 30rem) { .item-more { display: none; } }
+.item-chev { color: var(--faint); flex: 0 0 auto; }
+
+/* Ansehen-Modus: die Anfrage steht in der Zeile, nicht hinter ihr. */
+.items--read .itemrow { cursor: default; }
+.items--read .itemrow:hover { background: var(--surface); border-color: var(--line); }
+.item-ask { flex: 0 0 auto; }
+.item--lent.items-read-lent { background: var(--surface-alt); }
+
+/* Superliste: wem die Sache gehoert. Rechts und auch schmal
+   stehenbleibend — bei alphabetischer Ordnung unterscheiden sich benachbarte
+   Zeilen oft nur durch die Person. Anders als .item-more ist das keine
+   Erklaerung, sondern die Angabe, die die Zeile ueberhaupt beantwortet. */
+.item-who {
+  flex: 0 0 auto; max-width: 40%; color: var(--muted); font-size: .9rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* Gemessen bei 390 Pixeln: Mit 40 Prozent umbrach "Bohrmaschine" neben
+   "Bernd vom Chor" mitten im Wort. Schmal bekommt der Name der Sache den
+   Vorrang, die Person wird abgeschnitten statt der Gegenstand umbrochen. */
+@media (max-width: 30rem) {
+  .item-who { max-width: 30%; font-size: .82rem; }
+}
+/* Der Verweis traegt die Zeile. .itemrow ist auf <button> und <div> gemuenzt
+   und setzt keine Farbe; ohne diese Zeile faerbte die a-Regel weiter oben die
+   ganze Zeile gruen. Kein items--read: Das naehme Zeiger und Wechsel beim
+   Ueberfahren weg, und hier ist die Zeile wirklich anklickbar. */
+.items--kreis .itemrow { text-decoration: none; color: inherit; }
+
+/* == 9 · Teilen und Kontakt ============================================ */
+
+.linkrow { display: flex; gap: var(--s-2); align-items: stretch; flex-wrap: wrap; }
+.linkrow .input { flex: 1 1 12rem; min-width: 0; font-size: .84rem; }
+
+.tabs { display: flex; gap: var(--s-2); margin-bottom: var(--s-4); }
+.tab {
+  padding: .45rem .9rem; border-radius: 999px; cursor: pointer;
+  background: var(--surface-alt); border: 1px solid transparent; color: var(--muted); font-size: .92rem;
+}
+.tab[aria-selected="true"] { background: var(--green-soft); border-color: var(--green); color: var(--green-ink); font-weight: 600; }
+
+/* == 10 · Fenster und Meldungen ======================================== */
+
+.modal {
+  width: min(26rem, calc(100vw - 2rem)); padding: 0; border: 0;
+  border-radius: 20px; background: var(--surface); color: var(--ink);
+  box-shadow: var(--shadow-lift);
+  /* Im Querformat oder bei offener Bildschirmtastatur bleibt sonst der Fuss
+     des Fensters unerreichbar: Es waechst ueber den Schirm hinaus, und ein
+     <dialog> rollt von sich aus nicht. */
+  max-height: calc(100dvh - 2rem);
+}
+/* Nur im geoeffneten Zustand. Ein <dialog> ohne open traegt vom Browser
+   display: none; ein display hier ohne [open] hebt das auf, und das leere
+   Fenster stuende sichtbar unter der Fusszeile. */
+.modal[open] { display: flex; flex-direction: column; }
+.modal::backdrop { background: rgba(27, 24, 19, .38); }
+.modal__head { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-5) var(--s-5) var(--s-2); }
+.modal__title { font-size: 1.5rem; flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+
+/* Die Ueberschrift als Feld: sie sieht aus wie Text, bis man sie anfasst. */
+.modal-title-input {
+  font-size: 1.5rem;
+  padding: .25rem .5rem; margin-left: -.5rem;
+  background: none; border-color: transparent;
+}
+.modal-title-input:hover { background: var(--surface-alt); }
+.modal__x {
+  flex: 0 0 auto; width: 2.2rem; height: 2.2rem; display: grid; place-items: center;
+  background: none; border: 0; border-radius: 999px; cursor: pointer; color: var(--muted);
+}
+.modal__x:hover { background: var(--surface-alt); color: var(--ink); }
+.modal__body { padding: var(--s-3) var(--s-5) var(--s-5); overflow-y: auto; min-height: 0; }
+.modal__foot {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s-3);
+  /* Umbrechen duerfen: Der Fuss der Anfrage traegt bis zu vier Elemente
+     (Schliessen, E-Mail, Anrufen, Teilen). Ohne diese Zeile legte der
+     Flex-Kasten sie in eine einzige Reihe und liess sie rechts aus dem
+     Fenster herauslaufen. Gemessen bei 320, 360, 390 und 430 Punkten: Der
+     Fuss brauchte jedesmal 572 Punkte, das Fenster war 282 bis 392 breit.
+     Aufgefallen ist das nicht, weil ein <dialog> in der obersten Ebene liegt
+     und die Seite davon keinen Rollbalken bekommt — die beiden letzten
+     Schaltflaechen standen einfach ausserhalb und liessen sich nicht
+     beruehren. */
+  flex-wrap: wrap;
+  padding: var(--s-4) var(--s-5); background: var(--surface-alt);
+  border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
+}
+.modal__foot .spacer { flex: 1 1 auto; }
+
+/* Der Fuss der Anfrage stellt seine Handlungen untereinander, und zwar in
+   jeder Breite, nicht erst auf dem Telefon. Der Grund ist kein Bildschirm,
+   sondern das Fenster selbst: .modal ist hoechstens 26rem breit, innen
+   bleiben rund 368 Punkte, und allein "Per E-Mail anfragen" und "Anrufen"
+   brauchen zusammen 344. Mit einer dritten Handlung geht die Reihe an keinem
+   Geraet auf, auch nicht am grossen Schirm.
+   Die Reihenfolge ergibt sich aus dem Markup, nur Schliessen wandert ans
+   Ende: Der Daumen liegt unten, und dort gehoert die Handlung hin, die die
+   Nutzerin sucht, nicht das Verlassen. */
+.modal__foot--stack { flex-direction: column; align-items: stretch; }
+.modal__foot--stack .spacer { display: none; }
+.modal__foot--stack > .btn--ghost { order: 2; }
+
+.modal-state { display: flex; align-items: center; gap: var(--s-3); font-size: .95rem; }
+.modal-state .item-badge { width: 1.8rem; height: 1.8rem; }
+
+.toast-region {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: var(--s-5); z-index: 60; width: min(26rem, calc(100vw - 2rem));
+}
+.toast {
+  display: flex; align-items: center; gap: var(--s-3);
+  background: var(--ink); color: var(--paper);
+  border-radius: var(--r-btn); padding: .8rem 1rem; box-shadow: var(--shadow-lift);
+}
+.toast__body { flex: 1 1 auto; font-size: .95rem; display: flex; align-items: center; gap: var(--s-2); }
+.toast__face { width: 1.4rem; height: 1.4rem; flex: 0 0 auto; }
+.toast__act {
+  flex: 0 0 auto; background: none; border: 0; cursor: pointer; padding: .2rem .4rem;
+  color: var(--paper); font-weight: 600; text-decoration: underline;
+}
+
+/* == 11 · Fußzeile ===================================================== */
+
+/* Der Fuss steht auf eigenem Grund und nicht auf dem Papierton der Seite:
+   Damit ist er als Abschluss erkennbar, ohne eine Linie zu brauchen, die
+   quer durch das Bild geht. Ueber das Merkmal und nicht ueber #FFFFFF, sonst
+   bliebe er im dunklen Erscheinungsbild weiss. */
+.site-footer {
+  background: var(--surface); border-top: 1px solid var(--line);
+  margin-top: var(--s-7); padding-block: var(--s-5) var(--s-7);
+}
+.footer-row {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--s-3) var(--s-5); flex-wrap: wrap;
+}
+.footer-nav { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-5); }
+.footer-nav a { color: var(--muted); text-decoration: none; }
+.footer-nav a:hover { color: var(--ink); text-decoration: underline; }
+
+/* Der Zusatz des Hauses steht in der Anzeigeschrift und in einer Zeile. */
+.footer-claim {
+  font-family: var(--slab); font-size: .95rem; color: var(--muted);
+  display: flex; align-items: baseline; gap: .45rem; white-space: nowrap;
+}
+.footer-claim a { color: var(--ink); text-decoration: none; font-weight: 700; }
+.footer-claim a:hover { color: var(--green); }
+.footer-claim span[aria-hidden] { color: var(--line-firm); }
+
+/* == 11a · Druckpunkt, Gesichter, Klappe, Konfetti =================== *
+ *
+ * Alles Verspielte sitzt hier an einer Stelle. Zwei Regeln haben es
+ * bestimmt:
+ *
+ * 1. Die Sammelregel am Dateiende schaltet unter prefers-reduced-motion
+ *    jede Animation ab. Was ohne seine Animation unsichtbar sein soll,
+ *    muss deshalb im Grundzustand unsichtbar sein — das gilt fuer die
+ *    Konfettischnipsel. Was dagegen bleiben soll, darf seine Lage nicht
+ *    aus einer Animation beziehen — das gilt fuer die Klappe.
+ * 2. Die Mitte der Klappe kommt aus transform, ihre Bewegung aus der
+ *    eigenstaendigen Eigenschaft translate. Beide zusammen, sonst
+ *    ueberschriebe die eine die andere.
+ * ===================================================================== */
+
+/* Der Druckpunkt. Keine Feier, sondern Bedienung: Er nutzt sich nie ab und
+   gilt als einziges Stueck auch auf der ruhigen Startseite. */
+.btn, .ctl-square, .seg button, .tab, .itemrow, .modal__x, .chip--level {
+  transition: transform var(--takt-kurz) var(--feder),
+              background-color var(--takt-kurz) ease,
+              border-color var(--takt-kurz) ease,
+              color var(--takt-kurz) ease;
+}
+.btn:active, .ctl-square:active, .seg button:active,
+.tab:active, .itemrow:active, .modal__x:active, .chip--level:active {
+  transform: translateY(1px) scale(.97);
+  transition-duration: var(--takt-tipp);
+}
+
+/* Eine Zeile faellt an ihren Platz: von oben, gestaucht, und dehnt sich beim
+   Aufkommen. Die Marke schnappt 80 ms spaeter hinterher. */
+@keyframes lid-fall {
+  0%   { opacity: 0; transform: translateY(-10px) scaleY(.72); }
+  60%  { opacity: 1; transform: translateY(0)     scaleY(1.06); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes lid-schnapp {
+  0%   { transform: scale(0); }
+  65%  { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+/* Hinaus: angestossen nach rechts und zurueck. */
+@keyframes lid-raus {
+  0%   { transform: none; }
+  45%  { transform: translateX(8px); }
+  100% { transform: none; }
+}
+/* Heim: von rechts herein, mit Ueberschwingen ueber den eigenen Platz. */
+@keyframes lid-heim {
+  0%   { opacity: .4; transform: translateX(28px); }
+  70%  { opacity: 1;  transform: translateX(-6px); }
+  100% { opacity: 1;  transform: none; }
+}
+@keyframes lid-einschlag {
+  0%   { transform: scale(0); }
+  60%  { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+/* Das Augenzwinkern am unteren Ende der Kurve: sieben Grad und zurueck. */
+@keyframes lid-kipp {
+  0%   { transform: rotate(0); }
+  40%  { transform: rotate(-7deg); }
+  70%  { transform: rotate(3deg); }
+  100% { transform: rotate(0); }
+}
+@keyframes lid-weg-kipp {
+  0%   { transform: rotate(0); }
+  55%  { transform: rotate(18deg); }
+  100% { transform: rotate(0); }
+}
+
+.lid-fall  { animation: lid-fall var(--takt-fall) var(--feder) both; }
+.lid-fall  .item-badge { animation: lid-schnapp var(--takt-kurz) var(--feder) 80ms both; }
+.lid-raus  { animation: lid-raus 320ms var(--feder-sanft) both; }
+.lid-raus  .item-badge { animation: lid-weg-kipp 320ms var(--feder-sanft) both; }
+.lid-heim  { animation: lid-heim var(--takt-lang) var(--feder) both; }
+.lid-heim  .item-badge { animation: lid-einschlag 340ms var(--feder) both; }
+.lid-kipp  .item-badge { animation: lid-kipp 300ms var(--feder-sanft) both; }
+
+/* Die Klappe — der Bildkanal. Sie zeigt, sie spricht nicht: Wort und Bild
+   laufen getrennt, damit toast() seine einzige Meldung behaelt. */
+.klappe {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: calc(var(--s-5) + 6.2rem); z-index: 59;
+  width: min(20rem, calc(100vw - 2rem));
+  display: flex; align-items: center; gap: var(--s-3);
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line-firm); border-radius: var(--r-btn);
+  padding: .7rem 1rem; box-shadow: var(--shadow-lift);
+  pointer-events: none;
+}
+.klappe__face { width: 2.6rem; height: 2.6rem; flex: 0 0 auto; color: var(--green); }
+.klappe__text { font-family: var(--display); font-weight: 400; font-size: 1.25rem; line-height: 1.15; }
+.klappe--jubel .klappe__face { color: var(--amber); }
+@keyframes lid-klappe {
+  0%   { opacity: 0; translate: 0 14px; }
+  70%  { opacity: 1; translate: 0 -4px; }
+  100% { opacity: 1; translate: 0 0; }
+}
+.klappe.is-an { animation: lid-klappe 260ms var(--feder) both; }
+
+/* Das Konfetti. Achtzehn vorbereitete Regeln statt einer Leinwand: Damit
+   schaltet die Sammelregel am Dateiende es ohne eine Zeile JavaScript ab,
+   denn der Grundzustand ist unsichtbar. */
+.konfetti { position: fixed; inset: 0; z-index: 58; pointer-events: none; overflow: hidden; }
+.konfetti i {
+  position: absolute; top: -6vh; width: 9px; height: 14px;
+  opacity: 0; display: block;
+}
+@keyframes lid-konf {
+  0%   { opacity: 1; transform: translateY(0) rotate(0); }
+  80%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(112vh) rotate(540deg); }
+}
+.konfetti i:nth-child(1) { left: 4%; background: var(--green); animation: lid-konf 1450ms linear 0ms both; }
+.konfetti i:nth-child(2) { left: 11%; background: var(--green-ink); animation: lid-konf 1220ms linear 80ms both; }
+.konfetti i:nth-child(3) { left: 18%; background: var(--amber); animation: lid-konf 1600ms linear 40ms both; }
+.konfetti i:nth-child(4) { left: 25%; background: var(--line-firm); animation: lid-konf 1330ms linear 160ms both; }
+.konfetti i:nth-child(5) { left: 32%; background: var(--green); animation: lid-konf 1510ms linear 20ms both; }
+.konfetti i:nth-child(6) { left: 39%; background: var(--green-ink); animation: lid-konf 1280ms linear 200ms both; }
+.konfetti i:nth-child(7) { left: 46%; background: var(--amber); animation: lid-konf 1390ms linear 110ms both; }
+.konfetti i:nth-child(8) { left: 53%; background: var(--line-firm); animation: lid-konf 1570ms linear 60ms both; }
+.konfetti i:nth-child(9) { left: 60%; background: var(--green); animation: lid-konf 1240ms linear 180ms both; }
+.konfetti i:nth-child(10) { left: 67%; background: var(--green-ink); animation: lid-konf 1460ms linear 30ms both; }
+.konfetti i:nth-child(11) { left: 74%; background: var(--amber); animation: lid-konf 1350ms linear 140ms both; }
+.konfetti i:nth-child(12) { left: 81%; background: var(--line-firm); animation: lid-konf 1590ms linear 90ms both; }
+.konfetti i:nth-child(13) { left: 88%; background: var(--green); animation: lid-konf 1300ms linear 210ms both; }
+.konfetti i:nth-child(14) { left: 94%; background: var(--green-ink); animation: lid-konf 1420ms linear 50ms both; }
+.konfetti i:nth-child(15) { left: 8%; background: var(--amber); animation: lid-konf 1530ms linear 170ms both; }
+.konfetti i:nth-child(16) { left: 50%; background: var(--line-firm); animation: lid-konf 1260ms linear 120ms both; }
+.konfetti i:nth-child(17) { left: 71%; background: var(--green); animation: lid-konf 1480ms linear 70ms both; }
+.konfetti i:nth-child(18) { left: 29%; background: var(--green-ink); animation: lid-konf 1360ms linear 190ms both; }
+
+/* Der Stufenchip. Er ist eine Schaltflaeche und muss deshalb zuruecksetzen,
+   was .chip als Textbaustein mitbringt. */
+.chip--level {
+  background: var(--surface-alt); color: var(--ink);
+  border: 1px solid var(--line); cursor: pointer;
+  display: inline-flex; align-items: center; gap: .35rem;
+  font-size: .82rem; font-family: inherit;
+}
+.chip--level:hover { border-color: var(--line-firm); }
+.chip--level:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 999px; }
+.chip--level .ico { width: 1rem; height: 1rem; }
+@keyframes lid-huepf {
+  0%, 100% { transform: translateY(0); }
+  40%      { transform: translateY(-6px); }
+  70%      { transform: translateY(2px); }
+}
+.chip--level.is-neu { animation: lid-huepf 420ms var(--feder) both; }
+
+/* Der leere Kasten — bisher die kaelteste Stelle der Anwendung. */
+.empty-face { width: 4rem; height: 4rem; color: var(--faint); display: block; margin: 0 auto var(--s-3); }
+.empty-head { font-size: 1.6rem; color: var(--ink); margin-bottom: var(--s-2); }
+.empty-eg { margin-top: var(--s-4); font-size: .9rem; }
+.empty-eg__label { color: var(--muted); }
+.empty-eg__list { display: inline; }
+.empty-eg__list button {
+  background: none; border: 0; padding: 0 .15rem; cursor: pointer;
+  color: var(--green-ink); text-decoration: underline; text-underline-offset: .18em;
+  font: inherit;
+}
+.empty-eg__list button:hover { color: var(--green); }
+
+/* Das Rundenbuch nutzt dasselbe Fenster wie ein Gegenstand. */
+.buch-stufe { font-family: var(--display); font-weight: 400; font-size: 2rem; line-height: 1.1; }
+.buch-zahlen { display: flex; flex-wrap: wrap; gap: var(--s-4); margin-top: var(--s-3); }
+.buch-zahl { display: flex; flex-direction: column; }
+.buch-zahl b { font-size: 1.4rem; font-weight: 600; }
+.buch-zahl span { font-size: .82rem; color: var(--muted); }
+.buch-liste { margin-top: var(--s-5); display: grid; gap: var(--s-3); }
+.buch-abz { display: flex; align-items: flex-start; gap: var(--s-3); }
+.buch-abz .item-badge { flex: 0 0 auto; }
+.buch-abz b { display: block; font-weight: 600; }
+.buch-abz span { display: block; color: var(--muted); font-size: .9rem; }
+
+/* == 12 · Telefon ====================================================== */
+
+@media (max-width: 46rem) {
+  /* Untereinander, und die Pfeile drehen sich mit. */
+  /* Nebeneinander wird der Text zu schmal; das Bild tritt zurueck. */
+  .hero-bild { display: none; }
+
+  .steps { grid-template-columns: 1fr; gap: var(--s-5); }
+  .steps li + li::before {
+    top: calc(var(--s-5) * -1); left: 50%; width: 1.2rem; height: var(--s-5);
+    transform: translateX(-50%) rotate(90deg);
+  }
+}
+
+/* Die schwebende Schaltflaeche loest die Kopfleiste ab, sobald deren beide
+   Wege nicht mehr neben Marke und Schaltern in eine Zeile passen. Gemessen
+   wurde, wo die Zeile umbricht: Deutsch braucht 635 Punkte, Englisch 665.
+   Darunter rutschten die Schalter unter die Marke und der Inhalt nach unten;
+   die Schaltflaeche kostet dagegen keine Zeile. */
+@media (max-width: 42rem) {
+  .bar-mine { display: none; }
+  .fab { display: block; }
+  /* Unten rechts steht jetzt die Schaltflaeche. Meldung, Klappe und das Ende
+     der Fusszeile ruecken um ihre Hoehe darueber, sonst laege sie auf ihnen. */
+  .site-footer { padding-bottom: calc(var(--s-7) + 3.6rem); }
+  .toast-region { bottom: calc(var(--s-5) + 3.6rem); }
+  .klappe { bottom: calc(var(--s-5) + 9.8rem); }
+}
+
+@media (max-width: 34rem) {
+  .shell { padding-inline: var(--s-4); }
+  .hero-panel { border-radius: 22px; }
+  .trust li { font-size: .88rem; }
+  /* Schmal nimmt der Aufruf die ganze Zeile: Daneben steht ohnehin nichts. */
+  .hero-act .btn { width: 100%; }
+  /* Schmal steht der Zusatz unter den Verweisen statt neben ihnen. */
+  .footer-row { flex-direction: column; align-items: flex-start; }
+  .footer-claim { white-space: normal; flex-wrap: wrap; }
+  .keybox { padding: var(--s-4); }
+  .card, .fold__body { padding: var(--s-4); }
+  .fold > summary { padding: var(--s-4); }
+  .hero h1 { font-size: 2.4rem; }
+  .hero .lead { font-size: 1.06rem; }
+  .titleblock h1, .title-input { font-size: 1.9rem; }
+
+  /* Der Aufklapper-Zusatz rutscht unter den Namen statt ihn zu drängen. */
+  .fold > summary { flex-wrap: wrap; }
+  .fold > summary .fold-sub { margin-left: 0; flex-basis: 100%; text-align: left; }
+
+  /* Die Eingabe bleibt beim Blättern am oberen Rand erreichbar. Sie klebt
+     oben und nicht unten: Unten steht die schwebende Schaltflaeche, und zwei
+     Dinge an derselben Stelle waeren eines zu viel. */
+  .addbox { position: sticky; top: 0; z-index: 20; background: var(--surface); padding-block: var(--s-3); }
+  .addbox::before {
+    content: ""; position: absolute; inset: 0 calc(var(--s-4) * -1);
+    background: var(--surface); border-top: 1px solid var(--line); z-index: -1;
+  }
+  /* Nur im Inventar. Dort tragen die beiden Schaltflaechen ein Zeichen und
+     koennen ihr Wort schmal ablegen; die Zeile in der Superliste hat kein
+     Zeichen, und "Aufnehmen" lief bei 2,9rem Breite ueber beide Raender
+     hinaus, links bis in das Eingabefeld daneben. */
+  .addbox .addrow .btn span:not(.sr-only) { display: none; }
+  .addbox .addrow .btn { width: 2.9rem; padding-inline: 0; }
+  .addbox .addrow .btn .ico { width: 1.3rem; height: 1.3rem; }
+
+  .footer-nav { gap: var(--s-2) var(--s-4); }
+  .toast-region { width: calc(100vw - 2rem); }
+  /* Weiter oben als im Block darueber: Schmal ist die Meldung breiter und
+     haeufiger zweizeilig, die Klappe braucht den Abstand entsprechend. */
+  .klappe { bottom: calc(var(--s-5) + 11rem); }
+  .klappe__face { width: 2.2rem; height: 2.2rem; }
+  .klappe__text { font-size: 1.1rem; }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+/* == 13 · Grobe Zeiger ================================================= *
+ *
+ * Ein Finger trifft ungenauer als ein Mauszeiger. Die Bedienelemente der
+ * Kopfleiste messen 38,4 Punkte, das Schliesskreuz im Fenster 35,2 — beides
+ * unter den 44, die sich als Mass fuer eine bequeme Trefferflaeche
+ * eingebuergert haben.
+ *
+ * Statt die Elemente zu vergroessern und damit das Bild zu aendern, waechst
+ * nur die Flaeche: ein unsichtbares Feld liegt mittig ueber dem Element und
+ * nimmt den Tipp mit entgegen. Der Abstand in der Kopfleiste betraegt acht
+ * Punkte, die Felder beruehren sich also nicht.
+ * ===================================================================== */
+
+@media (pointer: coarse) {
+  /* .linkbtn und .tab kamen dazu: Gemessen bei 320 und 390 Punkten war
+     "Mehrere auf einmal" 132 mal 22, "Superliste anlegen" 171 mal 25 und
+     ein Reiter im Teilen-Kasten 94 mal 39 gross. Alle drei sind eigene
+     Bedienelemente und keine Verweise im Fliesstext, fuer die die Ausnahme
+     der Richtlinie gilt. */
+  .ctl-square, .modal__x, .info, .btn--sm, .btn--lg, .chip--level,
+  .linkbtn, .tab { position: relative; }
+  .ctl-square::after,
+  .modal__x::after,
+  .info::after,
+  .btn--sm::after,
+  .btn--lg::after,
+  .chip--level::after,
+  .linkbtn::after,
+  .tab::after {
+    content: ""; position: absolute;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: max(100%, 44px); height: max(100%, 44px);
+  }
+
+  /* Hier Polsterung statt Ueberlagerung: Die Zeilen der Erscheinungswahl
+     stossen ohne Abstand aneinander und sind 25 Punkte hoch, ein Fehlgriff
+     traf also die Nachbarzeile. Zwei Ueberlagerungen wuerden sich ueber-
+     schneiden, und dann gewaenne die spaetere im Dokument. Gemeint ist
+     ohnehin die ganze Zeile, deshalb waechst sie wirklich. */
+  .check { padding-block: .6rem; }
+
+  /* Dasselbe im Fuss: vier Verweise nebeneinander, jeder 25 Punkte hoch und
+     "Ueber" nur 37 breit. Sie brechen um, deshalb muss die Reihe wirklich
+     wachsen und nicht nur der Trefferbereich; eine Ueberlagerung reichte in
+     die Nachbarreihe hinein. min-width wirkt, weil .footer-nav ein
+     Flex-Kasten ist und seine Kinder damit zu Bloecken werden. */
+  .footer-nav a { padding-block: .6rem; min-width: 44px; text-align: center; }
+
+  /* Die Ueberschrift des Fensters ist im Bearbeiten-Modus ein Eingabefeld
+     und blieb mit 39 Punkten darunter. */
+  .modal-title-input { min-height: 44px; }
+
+  /* Ein Feld unter 16 Punkten laesst iOS Safari beim Antippen in die Seite
+     zoomen und nicht wieder heraus. Am Schreibtisch bleibt der Link schmal. */
+  .linkrow .input { font-size: 1rem; }
+}

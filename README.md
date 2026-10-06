@@ -228,26 +228,37 @@ JavaScript. Jeder Weg erscheint erst, wenn dieses Gerät eine Liste seiner Art
 kennt.
 
 Alles steht in `style.css`. Die Datei ist die gesamte Gestaltung; ein zweites
-Stylesheet gibt es nicht.
+Stylesheet gibt es nicht. Das frühere Erscheinungsbild — Papiergrün, weiße
+Karten, Ranchers — liegt in `archiv/alter-stil/`.
 
+* Alles Greifbare ist Knete: außen ein weicher Wurfschatten, innen ein dunkler
+  Schatten unten rechts und ein heller oben links, dazu ein Lichtfleck. Das
+  Rezept steht an einer Stelle; die Bausteine setzen nur ihre Farbe. Was in
+  die Tiefe geht — Felder, die Reiterleiste, leere Kästen, Verliehenes beim
+  Ansehen —, ist eine Mulde. Verläufe gibt es nur für diesen Lichtfleck und
+  in den gezeichneten Dingen.
+* Der Grund ist Minzgrün. Kaugummi führt die Handlung an, Minze heißt frei,
+  Pfirsich verliehen, Butter mahnt, Immergrün zeigt eine Wahl; Rot bleibt
+  dem Zerstörenden. Knöpfe und Kugeln bleiben auch im Dunkeln helle Knete,
+  Flächen und Grund werden dunkel.
 * Farben, Abstände, Radien und Schatten stehen als Merkmale in `:root`, einmal
-  hell und einmal dunkel. Im Rumpf der Datei steht kein einziger Farbwert.
+  hell und einmal dunkel. Im Rumpf der Datei steht kein einziger Farbwert,
+  auch nicht für die SVG-Verläufe: Sie tragen Farbklassen.
 * Dunkel folgt erst der Systemvorgabe und dann der ausdrücklichen Wahl aus den
   Einstellungsseite; `theme.js` setzt dafür `data-theme` am Wurzelelement,
-  noch bevor der Körper gezeichnet wird.
+  noch bevor der Körper gezeichnet wird, und ebenso die Klasse `ruhig`, wenn
+  dort Bewegung abbestellt ist.
 * Die Zeichen liegen als Symbolsatz in `index.html`, einfarbig und über
   `currentColor` an die Schriftfarbe gebunden. Raster 64 × 64, Strichstärke 4
-  bis 5, eckige Enden.
-* Vier Schriften liegen als WOFF2-Teilmengen unter `assets/fonts/` und werden
-  selbst ausgeliefert, zusammen 127 KiB. Alle stehen unter der SIL Open Font
+  bis 5, eckige Enden — unverändert aus nozilla-ci, in Kugeln aus Knete.
+* Zwei Schriften liegen als WOFF2-Teilmengen unter `assets/fonts/` und werden
+  selbst ausgeliefert, zusammen 61 KiB. Beide stehen unter der SIL Open Font
   License; erzeugt mit `tools/build-fonts.py` aus den TrueType-Dateien in
   [google/fonts](https://github.com/google/fonts).
 
   | Schrift | Wofür |
   | --- | --- |
-  | Ranchers | Wortmarke und Überschriften |
-  | Inter | Fließtext, Bedienelemente, alles Übrige |
-  | Zilla Slab | der Zusatz in der Fußzeile |
+  | Nunito | alles, als eine variable Datei: 500 im Fließtext, 900 in Wortmarke und Überschriften |
   | Space Mono | Links und Schlüssel, alles Wörtliche |
 
 Eingebettete `style`-Angaben gibt es nicht: Die Sicherheitsrichtlinie erlaubt
@@ -259,31 +270,31 @@ Ladezeit: Ein Aufruf von `fonts.gstatic.com` würde die IP-Adresse jeder
 Besucherin an einen Dritten übertragen, und die Content Security Policy
 unterbindet das ohnehin.
 
-### Das Bild im Hero
+### Wortmarke und Bild im Hero
 
-Rechts im Hero steht eine Katzenpfote, die ihre eigene Leihliste hält —
-Wollknäuel, Fischgräte, Futternapf, Maus. Sie steht in voller Farbe und
-nicht als blasser Grund: Sie sagt mit, wofür die Liste da ist, und ist damit
-kein Schmuck, sondern Teil der Aussage.
+Die Wortmarke ist aus Knete: Jeder Buchstabe dreifach geschichtet, ein
+dunkler Sockel, ein Rand für die Pausbacken, die Fläche mit Lichtfleck.
+`app.js` formt sie zur Laufzeit (Abschnitt 8a) aus den drei Teilen des
+Titels, gemessen in Nunito und in der gewählten Sprache — auf Englisch
+heißt sie „Borrow it from me.“. Der Titel bleibt für Vorleseprogramme im
+Dokument.
 
-Sie hängt über den oberen Rand des Rahmens hinaus, wie eine Pfote, die von
-oben hereingreift. Unter 46 rem Fensterbreite entfällt sie, weil daneben
-kein Platz für den Text bleibt.
+Darunter liegen sechs Dinge auf einem Kissen: Bohrmaschine, Leiter, Zelt,
+Würfel, Waffeleisen, ein Schalter. Sie sagen, wofür die Liste da ist, und
+tragen keine Aussage, die nicht schon im Satz stünde; sie sind deshalb für
+Vorleseprogramme verborgen und nicht anwählbar. Wer eines anfasst, bringt es
+zum Springen. Mehr geschieht nicht — kein Konfetti, kein Ton —, denn die
+Startseite bleibt ruhig.
 
-Die Zeichnung steht als `<svg>` im Dokument, nicht in einem `<img>`. Ein
-nachgeladenes SVG ist ein eigenes Dokument: Das Stylesheet der Seite reicht
-nicht hinein, `currentColor` fiele dort auf Schwarz zurück. Im Dokument
-dagegen greift `style.css` auf die Pfade zu, und das Blatt der Liste nimmt
-über `currentColor` die Farbe der Karte an — im Hellen weiß wie bisher, im
-Dunkeln kein greller Block. Das gilt auch, wenn die Wahl im Kopf der Seite
-der Systemvorgabe widerspricht; eine Mediaabfrage in der Datei könnte das
-nicht.
+Die Zeichnungen stehen als `<svg>` im Dokument, nicht in einem `<img>`: Nur
+so erreichen sie die Merkmale aus `style.css` und der Wechsel zwischen hell
+und dunkel. Filter und Verläufe liegen im Symbolsatz; jeder Verlauf trägt
+eine Farbklasse, seine Stopps lesen die Farben daraus.
 
-Die Klassennamen `cls-1` bis `cls-5` stammen aus dem Zeichenprogramm, ihre
-Farben stehen in `style.css`. Der Stilblock des SVG bleibt im Dokument weg,
-weil die CSP kein `<style>` in der Seite zulässt. Die Vorlage liegt weiter
-als `assets/pics/pfote.svg` und ist für sich allein lesbar; wer die Zeichnung
-ändert, pflegt beide Stellen.
+Bildmarke, Favicons und das Vorschaubild `assets/pics/og.png` entstehen mit
+`node tools/bilder.mjs` aus `assets/pics/logo.svg`, der laufenden Startseite
+und `tools/og-vorlage.html`; Anleitung in `tools/README-og.md`. Pfote und
+Katzenlogo liegen in `archiv/alter-stil/pics/`.
 
 ## Runden, Abzeichen und Stufen
 
@@ -348,14 +359,13 @@ weniger Bewegung, nicht weniger Anerkennung.
 ├── impressum.html                Anbieterkennzeichnung nach § 5 TMG
 ├── datenschutz.html              beschreibt den technischen Stand, juristisch prüfen lassen
 ├── ueber.html                    Beschreibung des Projekts
-├── stilprobe.html · .css · .js   Stilprobe in Knete (Claymorphism), kein Teil der Anwendung
 ├── app.js                        Verschlüsselung · i18n · Rendering · Sprache · Speicher · Superliste
 ├── style.css                     das gesamte Erscheinungsbild
 ├── api.php                       Flat-File-Backend, optional mit KI-Proxy
 ├── .htaccess                     Sicherheits-Header, Sperren für Punktdateien
 ├── assets/
 │   ├── fonts/                    WOFF2-Teilmengen und ihre @font-face-Regeln
-│   └── pics/pfote.svg            das Bild im Hero: eine Pfote mit ihrer Leihliste
+│   └── pics/                     Bildmarke logo.svg und Vorschaubild og.png
 ├── data/                         Laufzeitdaten, nicht im Repository
 │   ├── .htaccess                 verbietet jeden HTTP-Zugriff
 │   ├── .ai-key                   optionaler Schlüssel für den KI-Proxy
@@ -368,10 +378,12 @@ weniger Bewegung, nicht weniger Anerkennung.
 │   ├── i18n-check.js             prüft beide Wörterbücher auf denselben Schlüsselsatz
 │   ├── fallback-check.js         prüft die Ersatztexte im HTML gegen das Wörterbuch
 │   ├── pruefe.sh                 alle statischen Prüfungen in einem Aufruf, wie die Action
+│   ├── bilder.mjs                erzeugt Vorschaubild und Favicons aus Bildmarke und Startseite
 │   └── check-deployment.php      prüft eine laufende Installation von außen
 ├── tests/
 │   ├── api-test.php              Funktionstest des Backends, ohne Abhängigkeiten
 │   └── e2e/                      Browsertests: hilfe.mjs, lauf.mjs und die Suiten
+├── archiv/                       alter Stil, alte Bilder, die Stilprobe; im Betrieb gesperrt
 ├── .github/workflows/ci.yml      Syntaxprüfung und Funktionstest
 ├── CLAUDE.md                     Arbeitsgrundlage für eine KI-Sitzung: Regeln, Karte, Prüfbefehle
 ├── CONTRIBUTING.md
@@ -453,6 +465,7 @@ Hinter nginx statt Apache übernimmt folgender Block die Aufgabe von `.htaccess`
 location ^~ /data/    { return 404; }
 location ^~ /tools/   { return 404; }
 location ^~ /tests/   { return 404; }
+location ^~ /archiv/  { return 404; }
 location ^~ /.git/    { return 404; }
 location ^~ /.github/ { return 404; }
 location ~ /\.        { return 404; }
@@ -660,6 +673,7 @@ PHP-Datei in `tools/`; ein 403 darauf kann kein Skript sein.
 ```nginx
 location ^~ /tools/   { return 404; }
 location ^~ /tests/   { return 404; }
+location ^~ /archiv/  { return 404; }
 location ^~ /data/    { return 404; }
 location ^~ /.git/    { return 404; }
 location ^~ /.github/ { return 404; }

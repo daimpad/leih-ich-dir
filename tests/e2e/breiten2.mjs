@@ -9,6 +9,8 @@ for (const w of [1440, 1280, 900, 740, 600, 430, 360]) {
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
   await page.evaluate(() => { localStorage.clear(); localStorage.setItem('lid.lang', 'de'); });
   await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForFunction(() => document.querySelectorAll('#wortmarke .buchstabe').length > 0, null, { timeout: 8000 })
+    .catch(() => {});
   const m = await page.evaluate(() => {
     const h1 = document.querySelector('.hero h1');
     const cs = getComputedStyle(h1);
@@ -20,7 +22,18 @@ for (const w of [1440, 1280, 900, 740, 600, 430, 360]) {
       breite: Math.round(main.width),
       kopfBreite: Math.round(kopf.width),
       bündig: Math.round(kopf.x) === Math.round(main.x),
-      h1Zeilen: Math.round(h1.getBoundingClientRect().height / parseFloat(cs.lineHeight)),
+      /* Seit der Knete ist die sichtbare Ueberschrift die Wortmarke, ein SVG
+         in einer Zeile; der Titel steht nur noch fuer Vorleseprogramme im
+         Dokument. Gemessen wird deshalb, was zu sehen ist: Eine Zeile heisst
+         hier, die Marke steht und ist breiter als dreimal so hoch. */
+      h1Zeilen: (() => {
+        const marke = document.getElementById('wortmarke');
+        if (!document.documentElement.classList.contains('wortmarke-da') || !marke) {
+          return Math.round(h1.getBoundingClientRect().height / parseFloat(cs.lineHeight));
+        }
+        const r = marke.getBoundingClientRect();
+        return r.width > 200 && r.height * 3 < r.width ? 1 : 2;
+      })(),
       spalten,
       ueberlauf: document.documentElement.scrollWidth > window.innerWidth + 1
     };

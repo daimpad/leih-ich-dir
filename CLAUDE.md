@@ -29,12 +29,14 @@ keine Datenbank, kein Framework, kein Bauschritt. Betrieb: leihichdir.de.
   Der Widerruf tauscht beides auf einmal: neuer Schlüssel *und* neues Token
   (`newproof` beim Schreiben). Nur den Schlüssel zu tauschen genügt nicht —
   ein noch offenes Fenster schriebe die alte Verschlüsselung zurück.
-- **Ein Stylesheet**, `style.css`. Farben, Abstände, Radien nur als Merkmale
-  in `:root`, hell und dunkel. Keine Verläufe, keine Emoji; Zeichen sind
-  `<symbol>` in `index.html`, 64×64, Strich 4–5, eckige Enden. Einzige
-  Ausnahme ist die Stilprobe (`stilprobe.*`): eigenes Stylesheet, Verläufe
-  und nur deutsche Texte ohne Wörterbuch, kein Teil der Anwendung. Ihre
-  Farben stehen trotzdem in `:root`.
+- **Ein Stylesheet**, `style.css`, in Knete: Das Rezept steht einmal
+  (Abschnitt 1a), Bausteine setzen nur `--farbe`, `--tief`, `--mass`.
+  Farben, Abstände, Radien nur als Merkmale in `:root`, hell und dunkel —
+  auch die der SVG-Verläufe, die Farbklassen tragen. Verläufe nur für den
+  Lichtfleck der Knete und in den gezeichneten Dingen. Keine Emoji; Zeichen
+  sind `<symbol>` in `index.html`, 64×64, Strich 4–5, eckige Enden. Rollen:
+  Kaugummi führt die Handlung an, Minze heißt frei, Pfirsich verliehen,
+  Butter mahnt, Immergrün zeigt eine Wahl, Rot zerstört.
 - **Sichtbare Texte** stehen in beiden Wörterbüchern (`I18N.de`, `I18N.en`)
   und werden über `t()` ausgegeben. Der deutsche Ersatztext im HTML muss
   dem Wörterbuch gleichen (`tools/fallback-check.js`); Werte mit `{name}`
@@ -64,10 +66,11 @@ den aktuellen Zeilen liefert:
 
 Abschnitte: 0 Konfiguration · 1 Helfer · 2 Kryptografie · 3 i18n (beide
 Wörterbücher) · 4 Katalog · 5 Speicher-Adapter · 6 Zustand · 7 Links und
-Navigation · 8 Rendering · 9 Mutationen und Persistenz · 9a Das Spielerische ·
-10 Laden, Anlegen, Aktualisieren · 10a Die Superliste · 11 Zwischenablage ·
-12 Spracheingabe und KI · 13 Ereignisse (`bindEvents()` und sieben Binder je
-Ansicht) · 14 Router und Start · 14a Einstellungsseite.
+Navigation · 8 Rendering · 8a Die Knete der Startseite · 9 Mutationen und
+Persistenz · 9a Das Spielerische · 10 Laden, Anlegen, Aktualisieren ·
+10a Die Superliste · 11 Zwischenablage · 12 Spracheingabe und KI ·
+13 Ereignisse (`bindEvents()` und sieben Binder je Ansicht) · 14 Router und
+Start · 14a Einstellungsseite.
 
 Einen Abschnitt liest man mit `sed -n A,Bp app.js`, nicht die ganze Datei.
 
@@ -75,9 +78,9 @@ Sonst: `api.php` (Schnittstelle, Drosselung, Sperren), `index.html`
 (Oberfläche und Symbolsatz), `einstellungen.html` (eigener Einstieg
 `initSettings()`, erreicht `bindEvents()` nie), `tests/api-test.php`,
 `tests/e2e/` (Browsertests, `README.md` daneben), `tools/` (Prüfwerkzeuge,
-`purge.php`, Schriften), `stilprobe.html` mit eigenem `.css` und `.js`
-(Stilprobe in Knete, rückstandslos entfernbar, Wächterin
-`tests/e2e/stilprobe.mjs`).
+`purge.php`, Schriften, `bilder.mjs` für Vorschaubild und Favicons),
+`archiv/` (alter Stil, alte Bilder, die Stilprobe; im Betrieb gesperrt,
+`README.md` darin).
 
 ## Wie geprüft wird
 

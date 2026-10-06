@@ -4,48 +4,50 @@
 wenn jemand einen Link auf leihichdir.de einfügt. Es liegt fertig im
 Projekt, damit die Anwendung ohne Bauschritt auskommt.
 
-Die Vorlage ist `tools/og-vorlage.html`. Sie zieht Farben und Schriften aus
-`style.css` und `assets/fonts/`, damit das Bild dieselbe Sprache spricht wie
-die Seite.
+Die Vorlage ist `tools/og-vorlage.html`. Sie zieht Farben, Schrift und Knete
+aus `style.css` und `assets/fonts/`, damit das Bild dieselbe Sprache spricht
+wie die Seite. Wortmarke, Filter und die Dinge schreibt sie nicht ab: Drei
+Platzhalter darin füllt `tools/bilder.mjs` beim Ablichten aus der laufenden
+Startseite. Allein im Browser geöffnet, bleiben sie leer.
 
-Zum Neuerzeugen die Vorlage über einen lokalen Server öffnen — nur so laden
-die Schriften — und auf 1200 × 630 Punkte ablichten:
+Alles neu erzeugen, über einen lokalen Server — nur so laden die Schriften:
 
 ```sh
-php -S 127.0.0.1:8099 -t .
+php -S 127.0.0.1:8099        # in der Wurzel, Fenster 1
+node tools/bilder.mjs         # Fenster 2
 ```
 
-Dann mit einem Browser `http://127.0.0.1:8099/tools/og-vorlage.html`
-aufrufen und den sichtbaren Bereich bei genau 1200 × 630 als PNG sichern.
-Mit Playwright:
-
-```js
-const p = await browser.newPage({ viewport: { width: 1200, height: 630 } });
-await p.goto('http://127.0.0.1:8099/tools/og-vorlage.html', { waitUntil: 'networkidle' });
-await p.evaluate(() => document.fonts.ready);
-await p.screenshot({ path: 'assets/pics/og.png' });
-```
+Das schreibt `assets/pics/og.png` (1200 × 630), die Zeichen in
+`assets/favicon/` und die Kopie von `favicon.ico` in der Wurzel. Playwright
+findet das Werkzeug über `tests/e2e/hilfe.mjs`, mit denselben
+Umgebungsvariablen wie die Browsertests.
 
 1200 × 630 ist das Maß, das die verbreiteten Dienste erwarten. Wer das
 Seitenverhältnis ändert, muss die Angaben `og:image:width` und
-`og:image:height` in den Seitenköpfen mitziehen.
+`og:image:height` in den Seitenköpfen mitziehen, und wer das Bild ändert,
+den Text in `og:image:alt`.
 
 ## Die Zeichen der Anwendung
 
-Favicon, Apple-Symbol und die Symbole des Manifests liegen fertig in
-`assets/favicon/` und stammen nicht aus diesem Verzeichnis — sie werden
-extern erzeugt und hier nur abgelegt. Die Bildmarke im Seitenkopf ist
-`assets/pics/logo.svg`.
+Quelle aller Zeichen ist die Bildmarke `assets/pics/logo.svg`: das L der
+Wortmarke und ihre Kugel aus Knete, auf einem Minzkissen. Das L ist ein Pfad
+und keine Schrift, denn ein Bild im `<img>` erreicht die Schriften der Seite
+nicht. `bilder.mjs` lichtet sie in allen Größen ab; `favicon.svg` ist eine
+Kopie, `favicon.ico` trägt drei PNG-Bilder (16, 32, 48), das Apple-Symbol
+einen Grund in Minzgrün, weil iOS Durchsichtiges schwarz füllt.
 
 Zwei Dinge sind dabei zu beachten:
 
 - `favicon.ico` liegt **zusätzlich** im Wurzelverzeichnis. Browser und fremde
-  Abholer fordern sie dort blind an, ohne auf den `<link>` zu sehen. Wird die
-  Datei in `assets/favicon/` erneuert, muss die Kopie mitgezogen werden.
+  Abholer fordern sie dort blind an, ohne auf den `<link>` zu sehen.
+  `bilder.mjs` zieht die Kopie mit.
 - `site.webmanifest` liegt im Wurzelverzeichnis, nicht bei den Symbolen. Die
   Adressen darin lösen relativ zum Ort des Manifests auf; aus
   `assets/favicon/` heraus zeigte `start_url` in dieses Verzeichnis statt auf
   die Anwendung.
+
+Die früheren Zeichen, die Pfote und das Katzenlogo liegen in
+`archiv/alter-stil/`.
 
 ## Warum die Vorlagen hier liegen
 

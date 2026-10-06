@@ -1056,6 +1056,8 @@
     setAddPlaceholder();
     updateVoiceHint();
     if (window.LeihTheme) { window.LeihTheme.setLang(lang); }
+    /* Der Titel traegt jetzt die Woerter der neuen Sprache. */
+    wortmarkeZeigen();
   }
 
   function formatDate(tsSeconds) {
@@ -1552,6 +1554,8 @@
        landete mitten in der neuen Liste, beim Teilen statt beim Anfang. */
     if (shownView !== null && shownView !== name) { window.scrollTo(0, 0); }
     shownView = name;
+    /* Die Wortmarke laesst sich nur messen, wenn sie zu sehen ist. */
+    if (name === 'viewStart') { wortmarkeZeigen(); }
   }
 
   /** Raeumt beide Kopien: die im DOM und die im Speicher. Der Zaehler steigt
@@ -2758,6 +2762,338 @@
       $('#tabBtn' + key).setAttribute('aria-selected', active ? 'true' : 'false');
       $('#tab' + key).hidden = !active;
     });
+  }
+
+  /* ===================================================================== *
+   * 8a · Die Knete der Startseite
+   *
+   * Die Wortmarke und die sechs Dinge im Hero, uebernommen aus der
+   * Stilprobe (archiv/stilprobe/). Beides ist Bild, nicht Inhalt: Der Titel
+   * bleibt fuer Vorleseprogramme stehen, die Dinge sind verborgen und nicht
+   * anwaehlbar.
+   *
+   * Bewegt wird ueber SVG-Attribute (transform) und Klassen, nie ueber ein
+   * style-Attribut — die Richtlinie wuerde es stumm verwerfen. Alles, was
+   * federt, haengt an einem Takt (requestAnimationFrame); er schlaeft, sobald
+   * nichts mehr schwingt, und haelt an, solange der Reiter verborgen ist.
+   *
+   * Gefeiert wird hier nichts, kein Konfetti und kein Ton: Die Startseite
+   * traegt das Vertrauensversprechen und bleibt ruhig. Wer Bewegung
+   * abbestellt hat (ruhig()), bekommt keine, und die Daueranimationen haelt
+   * das Stylesheet an.
+   * ===================================================================== */
+
+  /* Die Federung: Steifigkeit und Daempfung, fuer alles gleich. */
+  var FEDER = { k: 280, c: 14.5 };
+
+  /** Ein Schritt einer gedaempften Feder, in zwei halben Teilschritten. */
+  function federSchritt(z, ziel, k, c, dt) {
+    var h = dt / 2;
+    for (var n = 0; n < 2; n++) {
+      var a = -k * (z.x - ziel) - c * z.v;
+      z.v += a * h;
+      z.x += z.v * h;
+    }
+  }
+
+  function begrenze(x, a, b) { return x < a ? a : (x > b ? b : x); }
+  function zufall(a, b) { return a + Math.random() * (b - a); }
+  function seite() { return Math.random() < 0.5 ? -1 : 1; }
+
+  /* still wird einmal je Takt gelesen und nicht je Koerper: ruhig() fragt
+     den Speicher des Browsers, und das sechzigmal in der Sekunde fuer jedes
+     Ding waere Verschwendung. */
+  var knete = { dinge: [], buchstaben: [], laeuft: false, letzte: 0, still: false, wortStand: '' };
+
+  function kneteWecken() {
+    if (knete.laeuft || document.hidden) { return; }
+    knete.laeuft = true;
+    knete.letzte = 0;
+    window.requestAnimationFrame(kneteTakt);
+  }
+
+  function kneteTakt(jetzt) {
+    if (document.hidden) { knete.laeuft = false; return; }
+    var dt = knete.letzte ? Math.min((jetzt - knete.letzte) / 1000, 1 / 30) : 1 / 60;
+    knete.letzte = jetzt;
+    knete.still = ruhig();
+    var wach = false;
+    var alle = knete.dinge.concat(knete.buchstaben);
+    for (var i = 0; i < alle.length; i++) {
+      if (alle[i].schritt(dt)) { wach = true; }
+    }
+    if (wach) { window.requestAnimationFrame(kneteTakt); } else { knete.laeuft = false; }
+  }
+
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) { kneteWecken(); }
+  });
+
+  /* -- Die Dinge ---------------------------------------------------------- *
+   * Jedes Ding ist ein kleiner Koerper: eine Feder fuer Stauchen und
+   * Strecken, eine fuer die Drehung, dazu die Schwerkraft fuer den Sprung.
+   * Gestaucht wird volumenerhaltend um die Unterkante: Wird es flacher, wird
+   * es im selben Mass breiter. Gerechnet wird in Einheiten der viewBox
+   * (120), unabhaengig davon, wie gross das Ding gerade gezeichnet ist.
+   *
+   * Gesprungen wird beim Loslassen und nur dort. Die Stilprobe hoerte
+   * zusaetzlich auf den Klick und sprang nach einem langen Druck zweimal;
+   * hier gibt es keinen Klick, denn die Dinge sind keine Schaltflaechen. */
+
+  var SPRUNG = { bohr: 1, leiter: 1.5, zelt: 0.85, wuerfel: 1.1, waffel: 0.9, schalter: 1 };
+  var DREHUNG = { bohr: 2.4, leiter: 0.8, zelt: 1, wuerfel: 3, waffel: 1.2, schalter: 0.6 };
+
+  function Ding(node) {
+    this.node = node;
+    this.g = $('.ding__feder', node);
+    this.art = node.getAttribute('data-ding');
+    this.y = 0; this.vy = 0;
+    this.s = { x: 1, v: 0 };
+    this.r = { x: 0, v: 0 };
+    this.gedrueckt = false;
+    this.fliegt = false;
+    this.wach = false;
+  }
+
+  Ding.prototype.druck = function () {
+    if (this.gedrueckt) { return; }
+    this.gedrueckt = true;
+    this.wach = true;
+    kneteWecken();
+  };
+
+  Ding.prototype.los = function (springen) {
+    if (!this.gedrueckt) { return; }
+    this.gedrueckt = false;
+    if (springen && this.art === 'schalter') { this.node.classList.toggle('ist-aus'); }
+    if (springen && !ruhig()) {
+      this.s.v += 4.2;
+      this.vy = -330 * (SPRUNG[this.art] || 1);
+      this.fliegt = true;
+      this.r.v += seite() * zufall(70, 130) * (DREHUNG[this.art] || 1);
+    }
+    kneteWecken();
+  };
+
+  Ding.prototype.schritt = function (dt) {
+    if (!this.wach || !this.g) { return false; }
+    if (knete.still) {
+      this.s.x = 1; this.s.v = 0; this.r.x = 0; this.r.v = 0;
+      this.y = 0; this.vy = 0; this.fliegt = false;
+    } else {
+      var ziel = this.gedrueckt ? 0.78 : (this.fliegt ? 1.05 : 1);
+      federSchritt(this.s, ziel, FEDER.k, FEDER.c, dt);
+      federSchritt(this.r, 0, FEDER.k * 0.55, FEDER.c * 0.7, dt);
+      if (this.fliegt) {
+        this.vy += 1500 * dt;
+        this.y += this.vy * dt;
+        if (this.y >= 0) {
+          var aufprall = this.vy;
+          this.y = 0;
+          this.s.v -= aufprall * 0.007;
+          if (aufprall > 170) { this.vy = -aufprall * 0.3; } else { this.vy = 0; this.fliegt = false; }
+        }
+      }
+    }
+    var s = begrenze(this.s.x, 0.6, 1.45);
+    var ruhend = !this.gedrueckt && !this.fliegt &&
+      Math.abs(s - 1) < 0.002 && Math.abs(this.s.v) < 0.02 &&
+      Math.abs(this.r.x) < 0.05 && Math.abs(this.r.v) < 0.2;
+    if (ruhend) {
+      this.g.removeAttribute('transform');
+      this.wach = false;
+      return false;
+    }
+    this.g.setAttribute('transform',
+      'translate(60 ' + (108 + this.y).toFixed(2) + ') rotate(' + this.r.x.toFixed(2) + ') ' +
+      'scale(' + (1 / s).toFixed(4) + ' ' + s.toFixed(4) + ') translate(-60 -108)');
+    return true;
+  };
+
+  function dingeBereit() {
+    $$('.ding').forEach(function (node) {
+      var ding = new Ding(node);
+      knete.dinge.push(ding);
+      node.addEventListener('pointerdown', function (e) {
+        if (e.pointerType === 'mouse' && e.button !== 0) { return; }
+        ding.druck();
+      });
+      node.addEventListener('pointerup', function () { ding.los(true); });
+      node.addEventListener('pointerleave', function () { ding.los(false); });
+      node.addEventListener('pointercancel', function () { ding.los(false); });
+    });
+  }
+
+  /* -- Die Wortmarke ------------------------------------------------------ *
+   * Jeder Buchstabe ist ein eigener SVG-Text, dreifach geschichtet: eine
+   * dunklere Kopie darunter als Sockel, eine mit dickem runden Rand fuer
+   * die Pausbacken, darueber die Flaeche mit dem Lichtfleck. Wo die
+   * Buchstaben stehen, wird gemessen, in Nunito und im Text des Titels —
+   * auf Englisch also "Borrow it from me.". Jeder der drei Teile des Titels
+   * hat seine Farbe; ein Punkt am Ende wird eine eigene Kugel.
+   *
+   * Messen geht nur an einem gezeichneten Element: Solange die Startseite
+   * verborgen ist, wartet die Wortmarke, und showView holt sie nach. */
+
+  var WORT_TEILE = [['hero.a', 'kaugummi'], ['hero.b', 'butter'], ['hero.c', 'immergruen']];
+
+  function svgEl(name, attribute) {
+    var node = document.createElementNS(SVG_NS, name);
+    for (var a in attribute) {
+      if (Object.prototype.hasOwnProperty.call(attribute, a)) { node.setAttribute(a, attribute[a]); }
+    }
+    return node;
+  }
+
+  function Buchstabe(federG, mitte) {
+    this.federG = federG;
+    this.mitte = mitte;
+    this.r = { x: 0, v: 0 };
+    this.s = { x: 1, v: 0 };
+    this.wach = false;
+  }
+
+  Buchstabe.prototype.stups = function (staerke) {
+    if (ruhig()) { return; }
+    this.r.v += seite() * zufall(60, 110) * staerke;
+    this.s.v -= 2.4 * staerke;
+    this.wach = true;
+    kneteWecken();
+  };
+
+  Buchstabe.prototype.schritt = function (dt) {
+    if (!this.wach) { return false; }
+    if (knete.still) { this.r.x = 0; this.r.v = 0; this.s.x = 1; this.s.v = 0; }
+    federSchritt(this.r, 0, FEDER.k * 0.7, FEDER.c * 0.8, dt);
+    federSchritt(this.s, 1, FEDER.k, FEDER.c, dt);
+    var s = begrenze(this.s.x, 0.7, 1.35);
+    var ruhend = Math.abs(this.r.x) < 0.05 && Math.abs(this.r.v) < 0.2 &&
+      Math.abs(this.s.x - 1) < 0.002 && Math.abs(this.s.v) < 0.02;
+    if (ruhend) {
+      this.federG.removeAttribute('transform');
+      this.wach = false;
+      return false;
+    }
+    this.federG.setAttribute('transform',
+      'translate(' + this.mitte.toFixed(1) + ' 0) rotate(' + this.r.x.toFixed(2) + ') ' +
+      'scale(' + (1 / s).toFixed(4) + ' ' + s.toFixed(4) + ') translate(' + (-this.mitte).toFixed(1) + ' 0)');
+    return true;
+  };
+
+  /** Liest die drei Teile des Titels: Zeichen und je Zeichen die Farbe. */
+  function wortZeichen() {
+    var zeichen = [], farben = [];
+    WORT_TEILE.forEach(function (paar, i) {
+      var node = $('.hero h1 [data-i18n="' + paar[0] + '"]');
+      var text = node ? node.textContent.replace(/^\s+|\s+$/g, '') : '';
+      if (i > 0 && text) { zeichen.push(' '); farben.push(null); }
+      for (var j = 0; j < text.length; j++) { zeichen.push(text.charAt(j)); farben.push(paar[1]); }
+    });
+    var punkt = zeichen.length > 0 && zeichen[zeichen.length - 1] === '.';
+    if (punkt) { zeichen.pop(); farben.pop(); }
+    return { satz: zeichen.join(''), farben: farben, punkt: punkt };
+  }
+
+  function wortmarkeBauen() {
+    var svg = $('#wortmarke');
+    var start = $('#viewStart');
+    if (!svg || !start || start.hidden) { return; }
+    var wort = wortZeichen();
+    var stand = wort.satz + (wort.punkt ? '.' : '');
+    if (!wort.satz || stand === knete.wortStand) { return; }
+
+    var SPERRE = 6;   // zusaetzlicher Abstand je Buchstabe, gegen das Verschmelzen der Raender
+    var SOCKEL = 10;  // so tief liegt die dunklere Kopie
+    var RAND = 26;    // Platz fuer Rand, Sockel und Filter
+
+    /* Die Klasse schaltet das SVG sichtbar und den Titel unsichtbar —
+       beides im selben Zug, bevor der Browser zeichnet. */
+    document.documentElement.classList.add('wortmarke-da');
+    while (svg.firstChild) { svg.removeChild(svg.firstChild); }
+    knete.buchstaben = [];
+    var mess = svgEl('text', { x: '0', y: '0' });
+    mess.textContent = wort.satz;
+    svg.appendChild(mess);
+    var breite = 0, box = null, xs = [], weiten = [];
+    try {
+      breite = mess.getComputedTextLength();
+      box = mess.getBBox();
+      for (var i = 0; i < wort.satz.length; i++) {
+        xs.push(mess.getStartPositionOfChar(i).x);
+        weiten.push(wort.satz.charAt(i) === ' ' ? 0 : mess.getSubStringLength(i, 1));
+      }
+    } catch (e) { breite = 0; }
+    svg.removeChild(mess);
+    if (!breite || !box || !box.height) {
+      document.documentElement.classList.remove('wortmarke-da');
+      return;
+    }
+
+    var gruppe = svgEl('g', { filter: 'url(#knete)' });
+    var n = 0, ende = 0;
+    for (var j = 0; j < wort.satz.length; j++) {
+      var c = wort.satz.charAt(j);
+      if (c === ' ') { continue; }
+      var x = xs[j] + n * SPERRE;
+      var huelle = svgEl('g', { 'class': 'buchstabe w-' + wort.farben[j], transform: 'translate(' + x.toFixed(1) + ' 0)' });
+      var wippe = svgEl('g', { 'class': 'buchstabe__wippe' });
+      var federG = svgEl('g', { 'class': 'buchstabe__feder' });
+      var schichten = [['b-tiefe', SOCKEL], ['b-rand', 0], ['b-flaeche', 0]];
+      for (var k = 0; k < schichten.length; k++) {
+        var tx = svgEl('text', { 'class': schichten[k][0], x: '0', y: String(schichten[k][1]) });
+        tx.textContent = c;
+        federG.appendChild(tx);
+      }
+      wippe.appendChild(federG);
+      huelle.appendChild(wippe);
+      gruppe.appendChild(huelle);
+      buchstabeVerdrahten(huelle, new Buchstabe(federG, weiten[j] / 2));
+      ende = x + weiten[j];
+      n++;
+    }
+
+    /* Der Punkt: eine Kugel auf der Grundlinie, mit eigenem Sockel. */
+    var rechts = ende;
+    if (wort.punkt) {
+      var r = Math.max(12, box.height * 0.1);
+      var px = ende + SPERRE + r * 1.3;
+      var punkt = svgEl('g', { 'class': 'buchstabe w-pfirsich', transform: 'translate(' + px.toFixed(1) + ' 0)' });
+      var pWippe = svgEl('g', { 'class': 'buchstabe__wippe' });
+      var pFeder = svgEl('g', { 'class': 'buchstabe__feder' });
+      pFeder.appendChild(svgEl('circle', { 'class': 'punkt__tiefe', cx: '0', cy: String(-r + SOCKEL), r: String(r) }));
+      pFeder.appendChild(svgEl('circle', { 'class': 'punkt__kugel', cx: '0', cy: String(-r), r: String(r) }));
+      pWippe.appendChild(pFeder);
+      punkt.appendChild(pWippe);
+      gruppe.appendChild(punkt);
+      buchstabeVerdrahten(punkt, new Buchstabe(pFeder, 0));
+      rechts = px + r;
+    }
+
+    svg.appendChild(gruppe);
+    var links = box.x - RAND;
+    var oben = box.y - RAND;
+    svg.setAttribute('viewBox', links.toFixed(1) + ' ' + oben.toFixed(1) + ' ' +
+      (rechts - links + RAND).toFixed(1) + ' ' + (box.height + SOCKEL + RAND * 2).toFixed(1));
+    knete.wortStand = stand;
+  }
+
+  function buchstabeVerdrahten(huelle, buchstabe) {
+    knete.buchstaben.push(buchstabe);
+    huelle.addEventListener('pointerenter', function () { buchstabe.stups(0.6); });
+    huelle.addEventListener('click', function () { buchstabe.stups(1.3); });
+  }
+
+  /** Formt die Wortmarke, sobald die Startseite zu sehen ist und die Schrift
+      steht. Ohne Nunito gemessen stuenden die Buchstaben an den Stellen
+      der Ersatzschrift und spaeter falsch. */
+  function wortmarkeZeigen() {
+    var start = $('#viewStart');
+    if (!$('#wortmarke') || !start || start.hidden) { return; }
+    if (document.fonts && document.fonts.load) {
+      document.fonts.load('900 120px Nunito').then(wortmarkeBauen, wortmarkeBauen);
+    } else {
+      wortmarkeBauen();
+    }
   }
 
   /* ===================================================================== *
@@ -5409,6 +5745,9 @@
           if (this.checked) { localStorage.setItem(LS_RUHIG, '1'); }
           else { localStorage.removeItem(LS_RUHIG); }
         } catch (e) { /* privater Modus: dann eben nicht */ }
+        /* Die Klasse am Wurzelelement gleich nachziehen, nicht erst beim
+           naechsten Laden: Das Stylesheet haelt unter .ruhig alles an. */
+        if (window.LeihTheme && window.LeihTheme.ruhe) { window.LeihTheme.ruhe(); }
       });
     }
 
@@ -5482,6 +5821,7 @@
     applyStaticI18n();
     fillDatalist();
     bindEvents();
+    dingeBereit();
 
     if (!window.crypto || !window.crypto.subtle || !window.TextEncoder) {
       showError('nocrypto');

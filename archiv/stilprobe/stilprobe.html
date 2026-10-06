@@ -8,11 +8,14 @@
       content="default-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
 <title>Stilprobe: aus Knete · LeihIchDir</title>
 <meta name="description" content="Eine Stilprobe für LeihIchDir: Leihliste, Schalter und Wortmarke in Claymorphism, weich wie Knete.">
+<!-- Geparkt unter archiv/stilprobe/. Die Pfade zeigen zwei Ebenen hinauf,
+     damit die Probe lokal unter php -S weiter laeuft; im Betrieb ist
+     archiv/ gesperrt. -->
 <!-- Eine Probe, kein Inhalt: Sie gehoert in keinen Suchindex. -->
 <meta name="robots" content="noindex, follow">
-<link rel="icon" type="image/png" href="assets/favicon/favicon-96x96.png" sizes="96x96">
-<link rel="icon" type="image/svg+xml" href="assets/favicon/favicon.svg">
-<link rel="shortcut icon" href="favicon.ico">
+<link rel="icon" type="image/png" href="../../assets/favicon/favicon-96x96.png" sizes="96x96">
+<link rel="icon" type="image/svg+xml" href="../../assets/favicon/favicon.svg">
+<link rel="shortcut icon" href="../../favicon.ico">
 <meta name="theme-color" content="#F7F1FF" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#1C1728" media="(prefers-color-scheme: dark)">
 <!-- Ein eigenes Stylesheet und kein style.css: Die Probe soll sich
@@ -21,7 +24,7 @@
 <!-- Die Texte stehen nur deutsch hier im HTML, ohne Woerterbuch und ohne
      t(): eine Probe der Form, nicht der Worte. Wird der Stil uebernommen,
      kommen die Texte wie ueberall aus app.js. -->
-<script src="theme.js"></script>
+<script src="../../theme.js"></script>
 <script src="stilprobe.js" defer></script>
 </head>
 <body>
@@ -95,7 +98,7 @@
 
 <header class="kopf">
   <nav class="kopf__pille knete" aria-label="Stilprobe">
-    <a class="kopf__marke" href="./">Leih<span class="kopf__ich">Ich</span>Dir</a>
+    <a class="kopf__marke" href="../../">Leih<span class="kopf__ich">Ich</span>Dir</a>
     <span class="kopf__probe">Stilprobe</span>
     <ul class="kopf__wege">
       <li><a href="#bauteile">Bauteile</a></li>
@@ -118,7 +121,7 @@
       <svg class="wortmarke" id="wortmarke" aria-hidden="true" focusable="false"></svg>
       <p class="held__satz">Zeig Deinen Freund:innen, was sie bei Dir ausleihen können!</p>
       <p class="held__wege">
-        <a class="knopf knete k-kaugummi" href="./">Leihliste anlegen</a>
+        <a class="knopf knete k-kaugummi" href="../../">Leihliste anlegen</a>
         <a class="knopf knete k-milch" href="#bauteile">Bauteile ansehen</a>
       </p>
       <p class="held__probe">Eine Stilprobe: So sähe LeihIchDir aus Knete aus. Drück auf die Dinge.</p>
@@ -530,7 +533,7 @@
   <section class="aufruf zeige" aria-labelledby="aufrufTitel">
     <div class="aufruf__band knete">
       <h2 id="aufrufTitel">Was liegt bei Dir herum und wird kaum benutzt?</h2>
-      <a class="knopf knopf--gross knete k-milch" href="./">Leihliste anlegen</a>
+      <a class="knopf knopf--gross knete k-milch" href="../../">Leihliste anlegen</a>
     </div>
   </section>
 
@@ -538,7 +541,7 @@
 
 <footer class="fuss">
   <p>Eine Stilprobe für LeihIchDir: Claymorphism, aus Knete geformt. Die Seite speichert nichts und sendet nichts.</p>
-  <p class="fuss__wege"><a href="./">Zur Anwendung</a> · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></p>
+  <p class="fuss__wege"><a href="../../">Zur Anwendung</a> · <a href="../../impressum.html">Impressum</a> · <a href="../../datenschutz.html">Datenschutz</a></p>
 </footer>
 
 <div class="toast knete k-milch" id="toast" role="status" aria-live="polite"></div>

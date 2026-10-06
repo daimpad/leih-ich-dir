@@ -1,0 +1,18 @@
+# Das Archiv gehoert nicht ins Web: alter Stil, alte Bilder, die Stilprobe.
+# Erreichbar ist es ueber Git, nicht ueber HTTP. Das Wurzelverzeichnis sperrt
+# es schon ueber RedirectMatch; diese Datei ist die zweite Schicht, wie in
+# tools/ und tests/.
+#
+# Sie greift NICHT, wenn ein vorgelagerter Server statische Dateien selbst
+# ausliefert (in Plesk "Smart static files processing" von nginx). Die
+# Abhilfe steht im README unter "Vorgelagerter nginx".
+
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>
+
+Options -Indexes
