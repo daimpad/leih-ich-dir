@@ -31,7 +31,10 @@ keine Datenbank, kein Framework, kein Bauschritt. Betrieb: leihichdir.de.
   ein noch offenes Fenster schriebe die alte Verschlüsselung zurück.
 - **Ein Stylesheet**, `style.css`. Farben, Abstände, Radien nur als Merkmale
   in `:root`, hell und dunkel. Keine Verläufe, keine Emoji; Zeichen sind
-  `<symbol>` in `index.html`, 64×64, Strich 4–5, eckige Enden.
+  `<symbol>` in `index.html`, 64×64, Strich 4–5, eckige Enden. Einzige
+  Ausnahme ist die Stilprobe (`stilprobe.*`): eigenes Stylesheet, Verläufe
+  und nur deutsche Texte ohne Wörterbuch, kein Teil der Anwendung. Ihre
+  Farben stehen trotzdem in `:root`.
 - **Sichtbare Texte** stehen in beiden Wörterbüchern (`I18N.de`, `I18N.en`)
   und werden über `t()` ausgegeben. Der deutsche Ersatztext im HTML muss
   dem Wörterbuch gleichen (`tools/fallback-check.js`); Werte mit `{name}`
@@ -72,7 +75,9 @@ Sonst: `api.php` (Schnittstelle, Drosselung, Sperren), `index.html`
 (Oberfläche und Symbolsatz), `einstellungen.html` (eigener Einstieg
 `initSettings()`, erreicht `bindEvents()` nie), `tests/api-test.php`,
 `tests/e2e/` (Browsertests, `README.md` daneben), `tools/` (Prüfwerkzeuge,
-`purge.php`, Schriften).
+`purge.php`, Schriften), `stilprobe.html` mit eigenem `.css` und `.js`
+(Stilprobe in Knete, rückstandslos entfernbar, Wächterin
+`tests/e2e/stilprobe.mjs`).
 
 ## Wie geprüft wird
 

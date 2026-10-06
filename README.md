@@ -348,6 +348,7 @@ weniger Bewegung, nicht weniger Anerkennung.
 ├── impressum.html                Anbieterkennzeichnung nach § 5 TMG
 ├── datenschutz.html              beschreibt den technischen Stand, juristisch prüfen lassen
 ├── ueber.html                    Beschreibung des Projekts
+├── stilprobe.html · .css · .js   Stilprobe in Knete (Claymorphism), kein Teil der Anwendung
 ├── app.js                        Verschlüsselung · i18n · Rendering · Sprache · Speicher · Superliste
 ├── style.css                     das gesamte Erscheinungsbild
 ├── api.php                       Flat-File-Backend, optional mit KI-Proxy

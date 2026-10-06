@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Stilprobe: aus Knete · LeihIchDir</title>
+<meta name="description" content="Eine Stilprobe für LeihIchDir: Leihliste, Schalter und Wortmarke in Claymorphism, weich wie Knete.">
+<!-- Eine Probe, kein Inhalt: Sie gehoert in keinen Suchindex. -->
+<meta name="robots" content="noindex, follow">
+<link rel="icon" type="image/png" href="assets/favicon/favicon-96x96.png" sizes="96x96">
+<link rel="icon" type="image/svg+xml" href="assets/favicon/favicon.svg">
+<link rel="shortcut icon" href="favicon.ico">
+<meta name="theme-color" content="#F7F1FF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1C1728" media="(prefers-color-scheme: dark)">
+<!-- Ein eigenes Stylesheet und kein style.css: Die Probe soll sich
+     rueckstandslos entfernen lassen und nichts an der Anwendung aendern. -->
+<link rel="stylesheet" href="stilprobe.css">
+<!-- Die Texte stehen nur deutsch hier im HTML, ohne Woerterbuch und ohne
+     t(): eine Probe der Form, nicht der Worte. Wird der Stil uebernommen,
+     kommen die Texte wie ueberall aus app.js. -->
+<script src="theme.js"></script>
+<script src="stilprobe.js" defer></script>
+</head>
+<body>
+
+<a class="sprung" href="#inhalt">Zum Inhalt springen</a>
+
+<!-- Der Vorrat: ein Filter und die Verlaeufe, auf die jedes Stueck Knete
+     verweist. Nicht display:none — sonst zeichnen manche Browser die
+     Verlaeufe nicht. -->
+<svg class="vorrat" aria-hidden="true" focusable="false" width="0" height="0">
+  <defs>
+    <!-- Knete: ein Schatten innen unten rechts, ein Licht innen oben links,
+         beide aus der Form selbst gewonnen, dazu ein weicher Wurfschatten. -->
+    <filter id="knete" x="-30%" y="-30%" width="160%" height="175%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3.2" result="weich"/>
+      <feOffset in="weich" dx="-3.5" dy="-4.5" result="hoch"/>
+      <feComposite in="SourceAlpha" in2="hoch" operator="out" result="unterkante"/>
+      <feFlood class="filter-schatten" flood-opacity=".26"/>
+      <feComposite in2="unterkante" operator="in" result="schatten"/>
+      <feOffset in="weich" dx="3.5" dy="4.5" result="tief"/>
+      <feComposite in="SourceAlpha" in2="tief" operator="out" result="oberkante"/>
+      <feFlood class="filter-licht" flood-opacity=".78"/>
+      <feComposite in2="oberkante" operator="in" result="licht"/>
+      <feDropShadow in="SourceGraphic" dx="3" dy="7" stdDeviation="5" class="filter-wurf" result="geworfen"/>
+      <feMerge>
+        <feMergeNode in="geworfen"/>
+        <feMergeNode in="schatten"/>
+        <feMergeNode in="licht"/>
+      </feMerge>
+    </filter>
+    <radialGradient id="v-kaugummi" class="k-kaugummi" cx="36%" cy="28%" r="80%">
+      <stop offset="0" class="verlauf__hell"/><stop offset=".55" class="verlauf__mitte"/><stop offset="1" class="verlauf__satt"/>
+    </radialGradient>
+    <radialGradient id="v-butter" class="k-butter" cx="36%" cy="28%" r="80%">
+      <stop offset="0" class="verlauf__hell"/><stop offset=".55" class="verlauf__mitte"/><stop offset="1" class="verlauf__satt"/>
+    </radialGradient>
+    <radialGradient id="v-minze" class="k-minze" cx="36%" cy="28%" r="80%">
+      <stop offset="0" class="verlauf__hell"/><stop offset=".55" class="verlauf__mitte"/><stop offset="1" class="verlauf__satt"/>
+    </radialGradient>
+    <radialGradient id="v-immergruen" class="k-immergruen" cx="36%" cy="28%" r="80%">
+      <stop offset="0" class="verlauf__hell"/><stop offset=".55" class="verlauf__mitte"/><stop offset="1" class="verlauf__satt"/>
+    </radialGradient>
+    <radialGradient id="v-pfirsich" class="k-pfirsich" cx="36%" cy="28%" r="80%">
+      <stop offset="0" class="verlauf__hell"/><stop offset=".55" class="verlauf__mitte"/><stop offset="1" class="verlauf__satt"/>
+    </radialGradient>
+    <radialGradient id="v-milch" class="k-milch" cx="36%" cy="28%" r="80%">
+      <stop offset="0" class="verlauf__hell"/><stop offset=".6" class="verlauf__mitte"/><stop offset="1" class="verlauf__satt"/>
+    </radialGradient>
+    <radialGradient id="v-waffel" class="k-waffel" cx="36%" cy="28%" r="80%">
+      <stop offset="0" class="verlauf__hell"/><stop offset=".55" class="verlauf__mitte"/><stop offset="1" class="verlauf__satt"/>
+    </radialGradient>
+    <!-- Die Wortmarke steht auf hellem Flieder; die Pastelltoene der Dinge
+         verschwaenden dort. Sie bekommt deshalb sattere Verlaeufe. -->
+    <radialGradient id="s-kaugummi" class="w-kaugummi" cx="36%" cy="24%" r="85%">
+      <stop offset="0" class="verlauf__hell"/><stop offset=".5" class="verlauf__mitte"/><stop offset="1" class="verlauf__satt"/>
+    </radialGradient>
+    <radialGradient id="s-butter" class="w-butter" cx="36%" cy="24%" r="85%">
+      <stop offset="0" class="verlauf__hell"/><stop offset=".5" class="verlauf__mitte"/><stop offset="1" class="verlauf__satt"/>
+    </radialGradient>
+    <radialGradient id="s-immergruen" class="w-immergruen" cx="36%" cy="24%" r="85%">
+      <stop offset="0" class="verlauf__hell"/><stop offset=".5" class="verlauf__mitte"/><stop offset="1" class="verlauf__satt"/>
+    </radialGradient>
+    <radialGradient id="s-pfirsich" class="w-pfirsich" cx="36%" cy="24%" r="85%">
+      <stop offset="0" class="verlauf__hell"/><stop offset=".5" class="verlauf__mitte"/><stop offset="1" class="verlauf__satt"/>
+    </radialGradient>
+    <clipPath id="herz">
+      <path d="M60 104C18 76 14 42 36 32c14-6 22 4 24 10 2-6 10-16 24-10 22 10 18 44-24 72z"/>
+    </clipPath>
+  </defs>
+</svg>
+
+<header class="kopf">
+  <nav class="kopf__pille knete" aria-label="Stilprobe">
+    <a class="kopf__marke" href="./">Leih<span class="kopf__ich">Ich</span>Dir</a>
+    <span class="kopf__probe">Stilprobe</span>
+    <ul class="kopf__wege">
+      <li><a href="#bauteile">Bauteile</a></li>
+      <li><a href="#liste">Leihliste</a></li>
+      <li><a href="#fragen">Fragen</a></li>
+    </ul>
+    <button type="button" class="tonschalter" id="tonSchalter" role="switch" aria-checked="false">
+      <span class="tonschalter__wort">Ton</span>
+      <span class="spur spur--klein" aria-hidden="true"><span class="spur__knauf"></span></span>
+    </button>
+  </nav>
+</header>
+
+<main id="inhalt">
+
+  <!-- ================================================================ -->
+  <section class="held" aria-labelledby="heldTitel">
+    <div class="held__text">
+      <h1 class="held__titel" id="heldTitel">Leih ich Dir.</h1>
+      <svg class="wortmarke" id="wortmarke" aria-hidden="true" focusable="false"></svg>
+      <p class="held__satz">Zeig Deinen Freund:innen, was sie bei Dir ausleihen können!</p>
+      <p class="held__wege">
+        <a class="knopf knete k-kaugummi" href="./">Leihliste anlegen</a>
+        <a class="knopf knete k-milch" href="#bauteile">Bauteile ansehen</a>
+      </p>
+      <p class="held__probe">Eine Stilprobe: So sähe LeihIchDir aus Knete aus. Drück auf die Dinge.</p>
+    </div>
+
+    <div class="held__bild">
+      <div class="kissen" aria-hidden="true"></div>
+      <ul class="dinge" aria-label="Dinge zum Verleihen">
+        <li>
+          <button type="button" class="ding" data-ding="bohr" aria-label="Bohrmaschine">
+            <svg viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+              <g class="ding__feder">
+                <g filter="url(#knete)">
+                  <rect x="38" y="60" width="24" height="42" rx="12" fill="url(#v-kaugummi)" transform="rotate(-10 50 81)"/>
+                  <rect x="26" y="92" width="44" height="16" rx="8" fill="url(#v-immergruen)"/>
+                  <rect x="16" y="30" width="66" height="38" rx="19" fill="url(#v-kaugummi)"/>
+                  <rect x="78" y="38" width="18" height="22" rx="7" fill="url(#v-butter)"/>
+                  <rect x="93" y="45" width="21" height="8" rx="4" fill="url(#v-milch)"/>
+                  <rect x="56" y="64" width="9" height="14" rx="4.5" fill="url(#v-pfirsich)"/>
+                </g>
+                <g class="gesicht">
+                  <ellipse cx="40" cy="46" rx="3.3" ry="4.3"/>
+                  <ellipse cx="55" cy="46" rx="3.3" ry="4.3"/>
+                  <path class="gesicht__mund" d="M42 55q5.5 5 11 0"/>
+                </g>
+              </g>
+            </svg>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="ding" data-ding="leiter" aria-label="Leiter">
+            <svg viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+              <g class="ding__feder">
+                <g transform="rotate(-8 60 64)" filter="url(#knete)">
+                  <rect x="38" y="28" width="44" height="10" rx="5" fill="url(#v-pfirsich)"/>
+                  <rect x="38" y="50" width="44" height="10" rx="5" fill="url(#v-pfirsich)"/>
+                  <rect x="38" y="72" width="44" height="10" rx="5" fill="url(#v-pfirsich)"/>
+                  <rect x="38" y="92" width="44" height="10" rx="5" fill="url(#v-pfirsich)"/>
+                  <rect x="30" y="14" width="13" height="94" rx="6.5" fill="url(#v-butter)"/>
+                  <rect x="77" y="14" width="13" height="94" rx="6.5" fill="url(#v-butter)"/>
+                </g>
+              </g>
+            </svg>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="ding" data-ding="zelt" aria-label="Zelt">
+            <svg viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+              <g class="ding__feder">
+                <g filter="url(#knete)">
+                  <rect x="58" y="4" width="4.5" height="24" rx="2.2" fill="url(#v-immergruen)"/>
+                  <path d="M62.5 6l17 5.5-17 5.5z" fill="url(#v-kaugummi)" stroke="url(#v-kaugummi)" stroke-width="4" stroke-linejoin="round"/>
+                  <path d="M60 24l40 74H20z" fill="url(#v-minze)" stroke="url(#v-minze)" stroke-width="14" stroke-linejoin="round"/>
+                  <path class="zelt__tuer" d="M60 66l13 34H47z" stroke-width="6" stroke-linejoin="round"/>
+                </g>
+                <g class="gesicht gesicht--schlaf">
+                  <path d="M48 52q4 3.5 8 0"/>
+                  <path d="M64 52q4 3.5 8 0"/>
+                </g>
+              </g>
+            </svg>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="ding" data-ding="wuerfel" aria-label="Brettspiel">
+            <svg viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+              <g class="ding__feder">
+                <g transform="rotate(9 60 66)">
+                  <rect x="22" y="28" width="76" height="76" rx="22" fill="url(#v-immergruen)" filter="url(#knete)"/>
+                  <g fill="url(#v-milch)" filter="url(#knete)">
+                    <circle cx="42" cy="48" r="7.5"/><circle cx="78" cy="48" r="7.5"/>
+                    <circle cx="60" cy="66" r="7.5"/>
+                    <circle cx="42" cy="84" r="7.5"/><circle cx="78" cy="84" r="7.5"/>
+                  </g>
+                </g>
+              </g>
+            </svg>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="ding" data-ding="waffel" aria-label="Waffeleisen">
+            <svg viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+              <g class="ding__feder">
+                <g filter="url(#knete)">
+                  <path d="M60 104C18 76 14 42 36 32c14-6 22 4 24 10 2-6 10-16 24-10 22 10 18 44-24 72z" fill="url(#v-waffel)"/>
+                  <g clip-path="url(#herz)" class="waffel__gitter">
+                    <path d="M34 20v96M48 20v96M62 20v96M76 20v96M90 20v96M10 46h100M10 60h100M10 74h100M10 88h100"/>
+                  </g>
+                </g>
+              </g>
+            </svg>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="ding ding--schalter" data-ding="schalter" aria-label="Verfügbar" aria-pressed="true">
+            <svg viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+              <g class="ding__feder">
+                <g filter="url(#knete)">
+                  <rect class="ding__spur" x="12" y="42" width="96" height="50" rx="25"/>
+                  <g class="ding__knauf">
+                    <circle cx="83" cy="67" r="20" fill="url(#v-milch)"/>
+                    <path class="ding__haken" d="M75 67l5.5 5.5L91 61"/>
+                  </g>
+                </g>
+              </g>
+            </svg>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================================================================ -->
+  <section class="abschnitt" id="bauteile" aria-labelledby="bauteileTitel">
+    <div class="abschnitt__kopf zeige">
+      <h2 id="bauteileTitel">Bauteile, aus Knete</h2>
+      <p class="abschnitt__satz">Jedes Teil gibt nach, wenn Du drückst. Mit den Reglern stellst Du ein, wie weich die Knete ist und wie stark sie federt.</p>
+    </div>
+
+    <div class="ablage">
+      <article class="fach knete k-flaeche zeige" aria-labelledby="fKnoepfe">
+        <h3 id="fKnoepfe">Knöpfe</h3>
+        <div class="fach__reihe">
+          <button type="button" class="knopf knete k-kaugummi" data-ton="boop">Leihliste anlegen</button>
+          <button type="button" class="knopf knete k-minze" data-ton="boop">Anfragen</button>
+          <button type="button" class="knopf knete k-milch" data-ton="boop">Kopieren</button>
+          <button type="button" class="knopf knete k-butter" id="merkKnopf" aria-pressed="false">Merken</button>
+        </div>
+        <p class="hinweis">Gedrückt sinkt die Knete ein. „Merken“ bleibt unten, bis Du es löst.</p>
+      </article>
+
+      <article class="fach knete k-flaeche zeige" aria-labelledby="fSchalter">
+        <h3 id="fSchalter">Schalter</h3>
+        <div class="fach__spalte">
+          <button type="button" class="schalter" role="switch" aria-checked="true">
+            <span class="spur" aria-hidden="true"><span class="spur__knauf"></span></span>
+            <span class="schalter__wort">Nur zeigen, was gerade frei ist</span>
+          </button>
+          <button type="button" class="schalter" role="switch" aria-checked="false" id="tonSchalter2">
+            <span class="spur" aria-hidden="true"><span class="spur__knauf"></span></span>
+            <span class="schalter__wort">Kleine Töne beim Verleihen</span>
+          </button>
+          <button type="button" class="schalter" role="switch" aria-checked="false">
+            <span class="spur" aria-hidden="true"><span class="spur__knauf"></span></span>
+            <span class="schalter__wort">Namen der Ausleihenden zeigen</span>
+          </button>
+        </div>
+      </article>
+
+      <article class="fach knete k-flaeche zeige" aria-labelledby="fRegler">
+        <h3 id="fRegler">Knete einstellen</h3>
+        <div class="regler">
+          <label class="regler__wort" for="weichheit">Weichheit <output id="weichheitWert" for="weichheit">100 %</output></label>
+          <input class="regler__feld" type="range" id="weichheit" min="40" max="160" step="1" value="100">
+        </div>
+        <div class="regler">
+          <label class="regler__wort" for="federung">Federung <output id="federungWert" for="federung">50 %</output></label>
+          <input class="regler__feld" type="range" id="federung" min="0" max="100" step="1" value="50">
+        </div>
+        <p class="hinweis">Beide Regler gelten für die ganze Seite. Probier danach die Dinge oben.</p>
+      </article>
+
+      <article class="fach knete k-flaeche zeige" aria-labelledby="fStufe">
+        <h3 id="fStufe">Bis zur nächsten Stufe</h3>
+        <p class="hinweis" id="stufeSatz">Auf dem Weg zu „Kurzer Draht“</p>
+        <div class="gelee mulde" id="gelee" role="progressbar" aria-labelledby="fStufe" aria-describedby="stufeSatz"
+             aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div class="gelee__fuellung" id="geleeFuellung">
+            <span class="gelee__blase"></span><span class="gelee__blase"></span><span class="gelee__blase"></span>
+          </div>
+        </div>
+        <div class="fach__reihe">
+          <button type="button" class="knopf knopf--klein knete k-minze" id="geleePlus">Eine Runde mehr</button>
+          <button type="button" class="knopf knopf--klein knete k-milch" id="geleeNull">Zurücksetzen</button>
+        </div>
+      </article>
+
+      <article class="fach knete k-flaeche zeige" aria-labelledby="fSegment">
+        <h3 id="fSegment">Welcher Link?</h3>
+        <div class="segment mulde" id="segment" role="radiogroup" aria-labelledby="fSegment" data-wahl="0">
+          <span class="segment__knauf knete k-immergruen" aria-hidden="true"></span>
+          <button type="button" class="segment__wahl" role="radio" aria-checked="true" tabindex="0">Ansehen</button>
+          <button type="button" class="segment__wahl" role="radio" aria-checked="false" tabindex="-1">Bearbeiten</button>
+        </div>
+        <p class="hinweis" id="segmentSatz" aria-live="polite">Diesen Link geben Deine Freunde weiter. Er zeigt die Liste, ändern lässt sich damit nichts.</p>
+      </article>
+
+      <article class="fach knete k-flaeche zeige" aria-labelledby="fHaken">
+        <h3 id="fHaken">Abhaken</h3>
+        <div class="fach__spalte">
+          <label class="kaestchen">
+            <input type="checkbox" class="kaestchen__feld">
+            <span class="kaestchen__box knete k-milch" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+            <span class="kaestchen__wort">Ich habe den Link gesichert</span>
+          </label>
+          <label class="kaestchen">
+            <input type="checkbox" class="kaestchen__feld" checked>
+            <span class="kaestchen__box knete k-milch" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+            <span class="kaestchen__wort">Bohrmaschine mit Koffer</span>
+          </label>
+        </div>
+      </article>
+
+      <article class="fach knete k-flaeche zeige" aria-labelledby="fZaehler">
+        <h3 id="fZaehler">Wie lange unterwegs?</h3>
+        <div class="zaehler" role="group" aria-labelledby="fZaehler">
+          <button type="button" class="knopf knopf--rund knete k-pfirsich" data-schritt="-1" aria-label="Einen Tag weniger">−</button>
+          <output class="zaehler__wert mulde" id="zaehlerWert" aria-live="polite">3</output>
+          <button type="button" class="knopf knopf--rund knete k-minze" data-schritt="1" aria-label="Einen Tag mehr">+</button>
+        </div>
+        <p class="hinweis" id="zaehlerSatz">Die Leiter ist seit 3 Tagen unterwegs.</p>
+      </article>
+
+      <article class="fach knete k-flaeche zeige" aria-labelledby="fName">
+        <h3 id="fName">Dein Klumpen</h3>
+        <div class="former">
+          <label class="sr-only" for="nameFeld">Wie heißt Du?</label>
+          <input class="feld mulde" id="nameFeld" type="text" maxlength="24" autocomplete="given-name" placeholder="Wie heißt Du?" spellcheck="false">
+          <span class="klumpen knete k-kaugummi" id="klumpen" aria-hidden="true">?</span>
+        </div>
+        <p class="hinweis" id="nameSatz" aria-live="polite">Aus Deinem Namen wird ein Klumpen. Mit der Eingabetaste formst Du ihn fertig.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ================================================================ -->
+  <section class="abschnitt" id="liste" aria-labelledby="listeTitel">
+    <div class="abschnitt__kopf zeige">
+      <h2 id="listeTitel">Eine Leihliste, aus Knete</h2>
+      <p class="abschnitt__satz">So sähe eine Liste aus. Ein Schalter je Gegenstand sagt, ob er gerade frei ist.</p>
+    </div>
+    <div class="leihliste knete k-flaeche zeige">
+      <div class="leihliste__kopf">
+        <span class="klumpen klumpen--klein knete k-butter" aria-hidden="true">M</span>
+        <div>
+          <h3 class="leihliste__titel">Mias Keller</h3>
+          <p class="leihliste__unter">Liste von Mia · <span id="freiZahl">3 gerade frei</span></p>
+        </div>
+      </div>
+      <ul class="eintraege" id="eintraege">
+        <li class="eintrag knete k-milch" data-name="Bohrmaschine">
+          <div class="eintrag__text"><span class="eintrag__name">Bohrmaschine</span><span class="eintrag__notiz">mit Koffer</span></div>
+          <span class="zustand">Verfügbar</span>
+          <button type="button" class="schalter schalter--nackt" role="switch" aria-checked="true" aria-label="Bohrmaschine verfügbar">
+            <span class="spur" aria-hidden="true"><span class="spur__knauf"></span></span>
+          </button>
+          <button type="button" class="knopf knopf--klein knete k-minze" data-anfrage="die Bohrmaschine">Anfragen</button>
+        </li>
+        <li class="eintrag knete k-milch ist-verliehen" data-name="Leiter">
+          <div class="eintrag__text"><span class="eintrag__name">Leiter</span><span class="eintrag__notiz">drei Meter</span></div>
+          <span class="zustand">Verliehen an Carla</span>
+          <button type="button" class="schalter schalter--nackt" role="switch" aria-checked="false" aria-label="Leiter verfügbar">
+            <span class="spur" aria-hidden="true"><span class="spur__knauf"></span></span>
+          </button>
+          <button type="button" class="knopf knopf--klein knete k-minze" data-anfrage="die Leiter">Anfragen</button>
+        </li>
+        <li class="eintrag knete k-milch" data-name="Zelt">
+          <div class="eintrag__text"><span class="eintrag__name">Zelt</span><span class="eintrag__notiz">für vier Personen</span></div>
+          <span class="zustand">Verfügbar</span>
+          <button type="button" class="schalter schalter--nackt" role="switch" aria-checked="true" aria-label="Zelt verfügbar">
+            <span class="spur" aria-hidden="true"><span class="spur__knauf"></span></span>
+          </button>
+          <button type="button" class="knopf knopf--klein knete k-minze" data-anfrage="das Zelt">Anfragen</button>
+        </li>
+        <li class="eintrag knete k-milch" data-name="Waffeleisen">
+          <div class="eintrag__text"><span class="eintrag__name">Waffeleisen</span><span class="eintrag__notiz">Herzform</span></div>
+          <span class="zustand">Verfügbar</span>
+          <button type="button" class="schalter schalter--nackt" role="switch" aria-checked="true" aria-label="Waffeleisen verfügbar">
+            <span class="spur" aria-hidden="true"><span class="spur__knauf"></span></span>
+          </button>
+          <button type="button" class="knopf knopf--klein knete k-minze" data-anfrage="das Waffeleisen">Anfragen</button>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================================================================ -->
+  <section class="abschnitt" id="sogehts" aria-labelledby="sogehtsTitel">
+    <div class="abschnitt__kopf zeige">
+      <h2 id="sogehtsTitel">So geht’s</h2>
+      <p class="abschnitt__satz">Eine Liste der Dinge, die Du verleihst. Sie liegt verschlüsselt auf dem Server, und sehen kann sie, wer den Link von Dir bekommt.</p>
+    </div>
+    <ol class="karten">
+      <li class="karte knete k-kaugummi zeige">
+        <svg class="karte__bild" viewBox="0 0 120 90" aria-hidden="true" focusable="false">
+          <g filter="url(#knete)">
+            <rect x="18" y="10" width="84" height="70" rx="18" fill="url(#v-milch)"/>
+            <rect x="30" y="24" width="44" height="9" rx="4.5" fill="url(#v-butter)"/>
+            <rect x="30" y="41" width="56" height="9" rx="4.5" fill="url(#v-minze)"/>
+            <rect x="30" y="58" width="36" height="9" rx="4.5" fill="url(#v-immergruen)"/>
+            <circle cx="96" cy="72" r="15" fill="url(#v-kaugummi)"/>
+          </g>
+          <path class="karte__plus" d="M96 65v14M89 72h14"/>
+        </svg>
+        <h3>Gegenstände eintragen</h3>
+        <p>Tippen oder einsprechen. Erst nur der Name, alles Weitere steht hinter dem Eintrag.</p>
+      </li>
+      <li class="karte knete k-butter zeige">
+        <svg class="karte__bild" viewBox="0 0 120 90" aria-hidden="true" focusable="false">
+          <g filter="url(#knete)">
+            <rect x="14" y="14" width="92" height="62" rx="18" fill="url(#v-milch)"/>
+            <circle cx="38" cy="45" r="14" fill="url(#v-pfirsich)"/>
+            <rect x="60" y="32" width="34" height="8" rx="4" fill="url(#v-immergruen)"/>
+            <rect x="60" y="49" width="24" height="8" rx="4" fill="url(#v-minze)"/>
+          </g>
+        </svg>
+        <h3>Kontaktdetails angeben</h3>
+        <p>Name und E-Mail, damit Deine Freund:innen Dich erreichen. Beides wird mitverschlüsselt.</p>
+      </li>
+      <li class="karte knete k-minze zeige">
+        <svg class="karte__bild" viewBox="0 0 120 90" aria-hidden="true" focusable="false">
+          <g filter="url(#knete)" fill="none" stroke-width="13" stroke-linecap="round">
+            <rect x="14" y="30" width="52" height="30" rx="15" stroke="url(#v-immergruen)"/>
+            <rect x="54" y="30" width="52" height="30" rx="15" stroke="url(#v-kaugummi)"/>
+          </g>
+        </svg>
+        <h3>Link weitergeben</h3>
+        <p>Freund:innen sehen, was gerade frei ist, und fragen mit einem Klick an.</p>
+      </li>
+    </ol>
+    <ul class="zusagen zeige" aria-label="Eigenschaften">
+      <li class="zusage knete k-milch"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Kostenlos</li>
+      <li class="zusage knete k-milch"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Werbefrei</li>
+      <li class="zusage knete k-milch"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Ohne Login</li>
+      <li class="zusage knete k-milch"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Verschlüsselt</li>
+    </ul>
+  </section>
+
+  <!-- ================================================================ -->
+  <section class="abschnitt" id="farben" aria-labelledby="farbenTitel">
+    <div class="abschnitt__kopf zeige">
+      <h2 id="farbenTitel">Die Farben der Knete</h2>
+      <p class="abschnitt__satz">Fünf Pastelltöne, dazu Flieder für den hellen Grund. Ein Klick legt den Farbwert in die Zwischenablage.</p>
+    </div>
+    <ul class="farben zeige">
+      <li><button type="button" class="farbe" data-hex="#FFB3C6"><span class="farbe__klecks knete k-kaugummi" aria-hidden="true"></span><span class="farbe__name">Kaugummi</span><span class="farbe__wert">#FFB3C6</span></button></li>
+      <li><button type="button" class="farbe" data-hex="#FFE5A5"><span class="farbe__klecks knete k-butter" aria-hidden="true"></span><span class="farbe__name">Butter</span><span class="farbe__wert">#FFE5A5</span></button></li>
+      <li><button type="button" class="farbe" data-hex="#B8F2E6"><span class="farbe__klecks knete k-minze" aria-hidden="true"></span><span class="farbe__name">Minze</span><span class="farbe__wert">#B8F2E6</span></button></li>
+      <li><button type="button" class="farbe" data-hex="#AAB7FF"><span class="farbe__klecks knete k-immergruen" aria-hidden="true"></span><span class="farbe__name">Immergrün</span><span class="farbe__wert">#AAB7FF</span></button></li>
+      <li><button type="button" class="farbe" data-hex="#FFCFB0"><span class="farbe__klecks knete k-pfirsich" aria-hidden="true"></span><span class="farbe__name">Pfirsich</span><span class="farbe__wert">#FFCFB0</span></button></li>
+      <li><button type="button" class="farbe" data-hex="#F7F1FF"><span class="farbe__klecks knete k-grundfarbe" aria-hidden="true"></span><span class="farbe__name">Flieder</span><span class="farbe__wert">#F7F1FF</span></button></li>
+    </ul>
+  </section>
+
+  <!-- ================================================================ -->
+  <section class="abschnitt" id="preis" aria-labelledby="preisTitel">
+    <div class="abschnitt__kopf zeige">
+      <h2 id="preisTitel">Was kostet das?</h2>
+    </div>
+    <div class="preis knete k-flaeche zeige">
+      <div class="preis__wahl">
+        <span class="preis__seite" id="preisMonat">monatlich</span>
+        <button type="button" class="schalter schalter--nackt schalter--preis" id="preisSchalter" role="switch" aria-checked="false" aria-label="Jährlich abrechnen">
+          <span class="spur" aria-hidden="true"><span class="spur__knauf"></span></span>
+        </button>
+        <span class="preis__seite" id="preisJahr">jährlich</span>
+      </div>
+      <p class="preis__betrag"><span class="preis__zahl" id="preisZahl">0 €</span> <span class="preis__je" id="preisJe">je Monat</span></p>
+      <p class="hinweis">Kostenlos, ob Du monatlich oder jährlich rechnest.</p>
+      <ul class="haken">
+        <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Ohne Konto und ohne Anmeldung</li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Ohne Werbung</li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Verschlüsselt in Deinem Browser</li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Die Superliste gehört dazu</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================================================================ -->
+  <section class="abschnitt" id="fragen" aria-labelledby="fragenTitel">
+    <div class="abschnitt__kopf zeige">
+      <h2 id="fragenTitel">Fragen</h2>
+    </div>
+    <div class="fragen zeige">
+      <div class="frage knete k-flaeche">
+        <h3 class="frage__kopf"><button type="button" class="frage__knopf" id="fk1" aria-expanded="false" aria-controls="fa1">Kann der Server meine Liste lesen?<span class="frage__zeichen knete k-immergruen" aria-hidden="true"></span></button></h3>
+        <div class="frage__antwort" id="fa1" role="region" aria-labelledby="fk1" hidden>
+          <p>Nein. Die Liste wird in Deinem Browser verschlüsselt, bevor sie hochgeladen wird. Der Schlüssel steht im Link hinter dem Rautezeichen, und dieser Teil wird nie an den Server übertragen.</p>
+        </div>
+      </div>
+      <div class="frage knete k-flaeche">
+        <h3 class="frage__kopf"><button type="button" class="frage__knopf" id="fk2" aria-expanded="false" aria-controls="fa2">Was passiert, wenn ich den Bearbeiten-Link verliere?<span class="frage__zeichen knete k-kaugummi" aria-hidden="true"></span></button></h3>
+        <div class="frage__antwort" id="fa2" role="region" aria-labelledby="fk2" hidden>
+          <p>Dann ist der Zugang zu dieser Liste verloren; wiederherstellen kann ihn niemand. Deshalb lässt sich jede Liste als Datei sichern. Daraus entsteht eine neue Liste, mit neuen Links.</p>
+        </div>
+      </div>
+      <div class="frage knete k-flaeche">
+        <h3 class="frage__kopf"><button type="button" class="frage__knopf" id="fk3" aria-expanded="false" aria-controls="fa3">Kann ich einen Ansehen-Link zurückziehen?<span class="frage__zeichen knete k-minze" aria-hidden="true"></span></button></h3>
+        <div class="frage__antwort" id="fa3" role="region" aria-labelledby="fk3" hidden>
+          <p>Ja. Die Liste wird dann unter einem neuen Schlüssel neu verschlüsselt. Alle bisherigen Links gelten danach nicht mehr, auch Dein Bearbeiten-Link, und Du bekommst neue.</p>
+        </div>
+      </div>
+      <div class="frage knete k-flaeche">
+        <h3 class="frage__kopf"><button type="button" class="frage__knopf" id="fk4" aria-expanded="false" aria-controls="fa4">Was ist eine Superliste?<span class="frage__zeichen knete k-butter" aria-hidden="true"></span></button></h3>
+        <div class="frage__antwort" id="fa4" role="region" aria-labelledby="fk4" hidden>
+          <p>Eine Liste der Leihlisten. Sie sammelt die Ansehen-Links Deiner Freund:innen und macht alles darin an einer Stelle durchsuchbar.</p>
+        </div>
+      </div>
+      <div class="frage knete k-flaeche">
+        <h3 class="frage__kopf"><button type="button" class="frage__knopf" id="fk5" aria-expanded="false" aria-controls="fa5">Brauche ich ein Konto?<span class="frage__zeichen knete k-pfirsich" aria-hidden="true"></span></button></h3>
+        <div class="frage__antwort" id="fa5" role="region" aria-labelledby="fk5" hidden>
+          <p>Nein. Es gibt keine Konten und keine Anmeldung. Wer den Link hat, hat den Zugang.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================ -->
+  <section class="aufruf zeige" aria-labelledby="aufrufTitel">
+    <div class="aufruf__band knete">
+      <h2 id="aufrufTitel">Was liegt bei Dir herum und wird kaum benutzt?</h2>
+      <a class="knopf knopf--gross knete k-milch" href="./">Leihliste anlegen</a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="fuss">
+  <p>Eine Stilprobe für LeihIchDir: Claymorphism, aus Knete geformt. Die Seite speichert nichts und sendet nichts.</p>
+  <p class="fuss__wege"><a href="./">Zur Anwendung</a> · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></p>
+</footer>
+
+<div class="toast knete k-milch" id="toast" role="status" aria-live="polite"></div>
+<canvas class="konfetti" id="konfetti" aria-hidden="true"></canvas>
+
+</body>
+</html>

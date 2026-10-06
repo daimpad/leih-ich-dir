@@ -1,0 +1,845 @@
+/*!
+ * Stilprobe · LeihIchDir aus Knete (Claymorphism)
+ * ---------------------------------------------------------------------------
+ * Eine Probe, kein Teil der Anwendung. Sie gehoert allein zu stilprobe.html
+ * und laesst sich mit ihren drei Dateien rueckstandslos entfernen.
+ *
+ * Bewusste Abweichungen von CLAUDE.md, weil eine Probe einer anderen
+ * Formsprache sonst keine waere: ein eigenes Stylesheet statt style.css, und
+ * Verlaeufe — Knete lebt von einem Lichtfleck oben links. Wird der Stil
+ * uebernommen, wandern die Merkmale unten nach style.css.
+ *
+ * Das Rezept fuer Knete steht an einer Stelle (.knete): ein fliederfarbener
+ * Wurfschatten aussen, innen ein dunkler Schatten unten rechts und ein heller
+ * oben links, dazu ein radialer Lichtfleck. Jede Laenge darin wird mit
+ * --weich malgenommen; der Regler "Weichheit" stellt nur diesen einen Wert.
+ * ---------------------------------------------------------------------------
+ */
+
+/* == 1 · Merkmale ======================================================== */
+
+:root {
+  /* Grund und Schrift. Nachgerechnet: --schrift kommt auf --grund auf
+     12,6:1, --schrift-leise auf 6,5:1 und auf --flaeche auf 7,0:1. */
+  --grund:         #F7F1FF;
+  --grund-tief:    #EDE3FC;
+  --flaeche:       #FFFCFA;
+  --flaeche-tief:  146, 122, 198;
+  --schrift:       #2F2552;
+  --schrift-leise: #5B5082;
+  /* Schrift auf farbiger Knete. Sie bleibt in beiden Erscheinungsbildern
+     dunkel, weil die Knete in beiden pastellfarben bleibt. */
+  --tinte:         #2F2552;
+  --tinte-leise:   #5B5082;
+  --mulde-hell:    #EDE3FC;
+  --fokus:         #4F3DC9;
+
+  /* Die fuenf Pastelltoene und ihr Schattenton, als RGB fuer rgba(). */
+  --kaugummi:   #FFB3C6;  --kaugummi-tief:   224, 104, 142;
+  --butter:     #FFE5A5;  --butter-tief:     214, 158, 58;
+  --minze:      #B8F2E6;  --minze-tief:      62, 166, 146;
+  --immergruen: #AAB7FF;  --immergruen-tief: 92, 104, 214;
+  --pfirsich:   #FFCFB0;  --pfirsich-tief:   222, 128, 78;
+  --flieder:    #ECE2FF;  --flieder-tief:    138, 108, 214;
+  --milch:      #FFFCFA;  --milch-tief:      146, 122, 198;
+  /* Der helle Grund als Farbe zum Anfassen. Er bleibt auch im Dunkeln
+     hell, denn das Farbfeld "Flieder" zeigt die Farbe, nicht den Grund
+     der Seite; die Dunkel-Bloecke unten lassen ihn deshalb aus. */
+  --grundfarbe:  #F7F1FF;  --grundfarbe-tief: 138, 108, 214;
+
+  /* Hell und satt: die Enden der Verlaeufe, aus denen die gezeichneten
+     Dinge und das Konfetti geformt sind. Dazwischen liegt der Pastellton. */
+  --kaugummi-hell:   #FFD9E3;  --kaugummi-satt:   #F28FAB;
+  --butter-hell:     #FFF4D3;  --butter-satt:     #F3C96E;
+  --minze-hell:      #E2FAF4;  --minze-satt:      #7CD9C4;
+  --immergruen-hell: #D8DEFF;  --immergruen-satt: #7D8CEF;
+  --pfirsich-hell:   #FFE6D6;  --pfirsich-satt:   #F4A57A;
+  --milch-hell:      #FFFFFF;  --milch-satt:      #DED3F2;
+  --waffel:          #FFD98F;  --waffel-hell:     #FFF1C9;
+  --waffel-satt:     #EDAE5B;  --waffel-gitter:   #DB9A48;
+
+  /* Die Wortmarke steht auf hellem Grund und braucht sattere Toene, dazu
+     einen dunklen Sockel, an dem das Auge die Buchstaben festmacht. */
+  --wort-kaugummi:   #FF9DBA;  --wort-kaugummi-hell:   #FFC7D7;
+  --wort-kaugummi-satt:   #EC7CA0;  --wort-kaugummi-sockel:   #C4567B;
+  --wort-butter:     #FFD27A;  --wort-butter-hell:     #FFEBB8;
+  --wort-butter-satt:     #EBAF4C;  --wort-butter-sockel:     #C58C2E;
+  --wort-immergruen: #97A5FF;  --wort-immergruen-hell: #C7CFFF;
+  --wort-immergruen-satt: #7181EC;  --wort-immergruen-sockel: #5767CF;
+  --wort-pfirsich:   #FFB58A;  --wort-pfirsich-hell:   #FFDCC6;
+  --wort-pfirsich-satt:   #EC915F;  --wort-pfirsich-sockel:   #C7703F;
+
+  /* Kaugummi als Schrift: das "Ich" im Kopf, auf heller Knete 4,6:1. */
+  --kaugummi-schrift: #C2477A;
+
+  /* Licht und Schatten der Knete. */
+  --licht-rgb:    255, 255, 255;
+  --wurf-rgb:     112, 84, 186;
+  --innenschatten:#2A1F4D;
+  --wurf:         .30;
+  --licht:        .80;
+  --licht-flaeche:.85;
+  --kante:        .24;
+  --weich:        1;
+
+  --rund: "SF Pro Rounded", ui-rounded, "Nunito", "Varela Round",
+          "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  /* Ueber das Ziel hinaus und zurueck: die Kurve fuer alles, was federt. */
+  --feder-weg: cubic-bezier(.34, 1.56, .64, 1);
+
+  color-scheme: light;
+}
+
+/* Dunkel: erst nach Systemvorgabe, dann nach ausdruecklicher Wahl, wie in
+   style.css. Die Knete selbst bleibt pastellfarben — sie ist ein Ding im
+   Raum —, nur Grund, Flaechen und Schatten werden dunkel. Nachgerechnet:
+   --schrift auf --grund 15,4:1, --schrift-leise auf --flaeche 8,2:1. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --grund:         #1C1728;
+    --grund-tief:    #15111F;
+    --flaeche:       #2A2340;
+    --flaeche-tief:  0, 0, 0;
+    --schrift:       #F3EEFF;
+    --schrift-leise: #C6BBE4;
+    --fokus:         #C3CBFF;
+    --flieder:       #3A3157;
+    --flieder-tief:  0, 0, 0;
+    --wurf-rgb:      0, 0, 0;
+    --wurf:          .55;
+    --licht:         .70;
+    --licht-flaeche: .07;
+    --kante:         .30;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --grund:         #1C1728;
+  --grund-tief:    #15111F;
+  --flaeche:       #2A2340;
+  --flaeche-tief:  0, 0, 0;
+  --schrift:       #F3EEFF;
+  --schrift-leise: #C6BBE4;
+  --fokus:         #C3CBFF;
+  --flieder:       #3A3157;
+  --flieder-tief:  0, 0, 0;
+  --wurf-rgb:      0, 0, 0;
+  --wurf:          .55;
+  --licht:         .70;
+  --licht-flaeche: .07;
+  --kante:         .30;
+  color-scheme: dark;
+}
+
+/* == 2 · Grundlagen ====================================================== */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; scroll-padding-top: 6rem; }
+
+body {
+  margin: 0;
+  background: var(--grund);
+  color: var(--schrift);
+  font-family: var(--rund);
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { line-height: 1.12; letter-spacing: -.01em; }
+h2 { font-size: clamp(1.9rem, 4.4vw, 2.9rem); font-weight: 900; margin: 0 0 .6rem; }
+h3 { font-size: 1.2rem; font-weight: 850; margin: 0 0 .9rem; }
+p  { margin: 0 0 1rem; }
+a  { color: inherit; }
+
+:focus-visible { outline: 3px solid var(--fokus); outline-offset: 4px; border-radius: 1rem; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.sprung {
+  position: absolute; left: 1rem; top: -4rem; z-index: 90;
+  padding: .7rem 1.1rem; border-radius: 999px;
+  background: var(--milch); color: var(--tinte); font-weight: 800;
+}
+.sprung:focus { top: 1rem; }
+
+/* Der Vorrat aus Filter und Verlaeufen: da, aber nicht zu sehen. Seine
+   Farben kommen aus denselben Merkmalen und Farbklassen wie die Knete aus
+   CSS; im HTML steht keine. */
+.vorrat { position: absolute; width: 0; height: 0; overflow: hidden; }
+.verlauf__hell  { stop-color: var(--hell); }
+.verlauf__mitte { stop-color: var(--farbe); }
+.verlauf__satt  { stop-color: var(--satt); }
+.filter-schatten { flood-color: var(--innenschatten); }
+.filter-licht    { flood-color: rgb(var(--licht-rgb)); }
+.filter-wurf     { flood-color: rgb(var(--wurf-rgb)); flood-opacity: var(--wurf); }
+
+.hinweis { color: var(--schrift-leise); font-size: .95rem; margin: .8rem 0 0; }
+
+/* == 3 · Das Rezept ====================================================== */
+
+.knete {
+  --farbe: var(--milch);
+  --tief: var(--milch-tief);
+  --glanz: var(--licht);
+  background:
+    radial-gradient(130% 100% at 28% 16%, rgba(var(--licht-rgb), calc(var(--glanz) * .6)) 0, rgba(var(--licht-rgb), 0) 55%),
+    var(--farbe);
+  box-shadow:
+    calc(var(--weich) * 8px) calc(var(--weich) * 12px) calc(var(--weich) * 26px) rgba(var(--wurf-rgb), var(--wurf)),
+    inset calc(var(--weich) * -6px) calc(var(--weich) * -8px) calc(var(--weich) * 14px) rgba(var(--tief), var(--kante)),
+    inset calc(var(--weich) * 6px) calc(var(--weich) * 7px) calc(var(--weich) * 12px) rgba(var(--licht-rgb), var(--glanz));
+  color: var(--tinte);
+}
+
+.k-kaugummi   { --farbe: var(--kaugummi);   --tief: var(--kaugummi-tief);   --hell: var(--kaugummi-hell);   --satt: var(--kaugummi-satt); }
+.k-butter     { --farbe: var(--butter);     --tief: var(--butter-tief);     --hell: var(--butter-hell);     --satt: var(--butter-satt); }
+.k-minze      { --farbe: var(--minze);      --tief: var(--minze-tief);      --hell: var(--minze-hell);      --satt: var(--minze-satt); }
+.k-immergruen { --farbe: var(--immergruen); --tief: var(--immergruen-tief); --hell: var(--immergruen-hell); --satt: var(--immergruen-satt); }
+.k-pfirsich   { --farbe: var(--pfirsich);   --tief: var(--pfirsich-tief);   --hell: var(--pfirsich-hell);   --satt: var(--pfirsich-satt); }
+.k-grundfarbe { --farbe: var(--grundfarbe); --tief: var(--grundfarbe-tief); }
+.k-milch      { --farbe: var(--milch);      --tief: var(--milch-tief);      --hell: var(--milch-hell);      --satt: var(--milch-satt); }
+.k-waffel     { --farbe: var(--waffel);     --hell: var(--waffel-hell);     --satt: var(--waffel-satt); }
+/* Flaechen aus heller Knete tragen die Schrift des Grundes: Im Dunkeln
+   werden sie dunkel, und ihr Glanz geht fast ganz zurueck. */
+.k-flaeche    { --farbe: var(--flaeche);    --tief: var(--flaeche-tief); --glanz: var(--licht-flaeche); color: var(--schrift); }
+
+/* Die Mulde: in den Grund gedrueckt statt aus ihm geformt. Das leere
+   Kaestchen ist eine; erst der Haken formt es zu Knete. Als weisse Knete
+   auf weisser Karte war es kaum zu sehen. */
+.mulde,
+.kaestchen__feld:not(:checked) + .kaestchen__box {
+  background: var(--grund-tief);
+  box-shadow:
+    inset calc(var(--weich) * 5px) calc(var(--weich) * 6px) calc(var(--weich) * 12px) rgba(var(--wurf-rgb), calc(var(--wurf) * .9)),
+    inset calc(var(--weich) * -4px) calc(var(--weich) * -5px) calc(var(--weich) * 10px) rgba(var(--licht-rgb), calc(var(--licht) * .9));
+}
+
+/* == 4 · Knoepfe ========================================================= */
+
+.knopf {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  min-height: 3rem; padding: .8rem 1.45rem;
+  border: 0; border-radius: 999px;
+  font: inherit; font-weight: 850; text-decoration: none;
+  cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: scale .45s var(--feder-weg), translate .35s var(--feder-weg), box-shadow .2s ease;
+}
+.knopf:hover { translate: 0 calc(var(--weich) * -2px); }
+
+/* Gedrueckt: die Knete sinkt ein und wird breiter, als druecke ein Daumen
+   von oben. Der Schatten wechselt nach innen. */
+.knopf:active,
+.knopf[aria-pressed="true"] {
+  scale: 1.04 .9;
+  translate: 0 1px;
+  box-shadow:
+    calc(var(--weich) * 2px) calc(var(--weich) * 3px) calc(var(--weich) * 8px) rgba(var(--wurf-rgb), calc(var(--wurf) * .8)),
+    inset calc(var(--weich) * 7px) calc(var(--weich) * 9px) calc(var(--weich) * 16px) rgba(var(--tief), calc(var(--kante) + .1)),
+    inset calc(var(--weich) * -4px) calc(var(--weich) * -5px) calc(var(--weich) * 10px) rgba(var(--licht-rgb), calc(var(--glanz) * .7));
+}
+.knopf[aria-pressed="true"] { scale: 1 .96; }
+
+.knopf--klein { min-height: 2.5rem; padding: .55rem 1.1rem; font-size: .95rem; }
+.knopf--gross { min-height: 3.6rem; padding: 1rem 2rem; font-size: 1.15rem; }
+.knopf--rund  { width: 3.1rem; min-height: 3.1rem; padding: 0; font-size: 1.5rem; line-height: 1; }
+
+/* == 5 · Kopf ============================================================ */
+
+.kopf { position: sticky; top: .75rem; z-index: 40; padding: 0 1rem; }
+
+.kopf__pille {
+  display: flex; align-items: center; gap: .9rem;
+  max-width: 1120px; margin: .75rem auto 0;
+  padding: .55rem .6rem .55rem 1.25rem;
+  border-radius: 999px;
+}
+
+.kopf__marke { font-weight: 900; font-size: 1.15rem; text-decoration: none; color: var(--tinte); }
+.kopf__ich { color: var(--kaugummi-schrift); }
+
+.kopf__probe {
+  font-size: .78rem; font-weight: 850; letter-spacing: .04em; text-transform: uppercase;
+  padding: .25rem .6rem; border-radius: 999px;
+  background: var(--butter); color: var(--tinte);
+}
+
+.kopf__wege { display: flex; gap: .2rem; margin: 0 0 0 auto; padding: 0; list-style: none; }
+.kopf__wege a {
+  display: block; padding: .5rem .85rem; border-radius: 999px;
+  font-weight: 800; text-decoration: none; color: var(--tinte);
+  transition: background-color .2s ease;
+}
+.kopf__wege a:hover { background: rgba(var(--flieder-tief), .14); }
+
+/* == 6 · Schalter ======================================================== */
+
+.schalter, .tonschalter {
+  display: flex; align-items: center; gap: .85rem;
+  padding: .35rem 0; border: 0; background: none;
+  font: inherit; font-weight: 750; color: inherit; text-align: left;
+  cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+}
+.tonschalter { margin-left: .2rem; padding: .35rem .5rem .35rem .8rem; border-radius: 999px; color: var(--tinte); font-weight: 850; }
+.kopf__wege + .tonschalter { margin-left: 0; }
+
+.spur {
+  position: relative; display: inline-block; flex: none;
+  width: 3.4rem; height: 2rem; border-radius: 999px;
+  background: var(--grund-tief);
+  box-shadow:
+    inset calc(var(--weich) * 4px) calc(var(--weich) * 5px) calc(var(--weich) * 10px) rgba(var(--wurf-rgb), calc(var(--wurf) * .9)),
+    inset calc(var(--weich) * -3px) calc(var(--weich) * -4px) calc(var(--weich) * 8px) rgba(var(--licht-rgb), calc(var(--licht) * .8));
+  transition: background-color .3s ease;
+}
+.spur--klein { width: 2.8rem; height: 1.7rem; }
+/* In heller Knete — Kopfleiste, Eintraege — bleibt die Mulde hell, auch im
+   Dunkeln. Die Knete dort bleibt ja auch hell. */
+.kopf__pille .spur, .k-milch .spur { background: var(--mulde-hell); }
+
+.spur__knauf {
+  position: absolute; top: .22rem; left: .22rem;
+  width: 1.56rem; height: 1.56rem; border-radius: 50%;
+  background:
+    radial-gradient(100% 100% at 30% 22%, rgb(var(--licht-rgb)) 0, rgba(var(--licht-rgb), 0) 60%),
+    var(--milch);
+  box-shadow:
+    calc(var(--weich) * 2px) calc(var(--weich) * 4px) calc(var(--weich) * 8px) rgba(var(--wurf-rgb), calc(var(--wurf) + .05)),
+    inset calc(var(--weich) * -2px) calc(var(--weich) * -3px) calc(var(--weich) * 5px) rgba(var(--milch-tief), .35);
+  transition: translate .5s var(--feder-weg);
+}
+.spur--klein .spur__knauf { width: 1.26rem; height: 1.26rem; }
+
+[aria-checked="true"] > .spur { background: var(--minze); }
+[aria-checked="true"] > .spur .spur__knauf { translate: 1.4rem 0; }
+[aria-checked="true"] > .spur--klein .spur__knauf { translate: 1.1rem 0; }
+
+/* Beim Umlegen wird der Knauf unterwegs breit gedrueckt und federt aus. */
+.quetscht .spur__knauf { animation: quetschen .5s ease; }
+@keyframes quetschen {
+  0%   { scale: 1 1; }
+  30%  { scale: 1.4 .72; }
+  60%  { scale: .9 1.1; }
+  100% { scale: 1 1; }
+}
+
+.schalter--nackt { padding: 0; }
+
+/* == 7 · Held ============================================================ */
+
+.held {
+  display: grid; grid-template-columns: 1.05fr 1fr; align-items: center;
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  max-width: 1160px; margin: 0 auto;
+  padding: clamp(2rem, 6vw, 5rem) 1rem clamp(2.5rem, 6vw, 4.5rem);
+}
+
+.held__titel {
+  margin: 0 0 1rem;
+  font-size: clamp(3.2rem, 9vw, 6.4rem); font-weight: 900; letter-spacing: -.02em;
+  color: var(--kaugummi-schrift);
+  text-shadow: 0 3px 0 var(--wort-kaugummi), 0 10px 22px rgba(var(--wurf-rgb), .25);
+}
+/* Steht die geformte Wortmarke, bleibt der Titel fuer Vorleseprogramme. */
+.wortmarke-da .held__titel {
+  position: absolute; width: 1px; height: 1px; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+.wortmarke { display: none; width: 100%; max-width: 660px; height: auto; overflow: visible; margin: 0 0 1.4rem; }
+.wortmarke-da .wortmarke { display: block; }
+
+.wortmarke text { font-family: var(--rund); font-weight: 900; font-size: 120px; }
+/* Der Rand macht die Pausbacken, der Sockel darunter die Kante, an der das
+   Auge die Buchstaben auf dem hellen Grund festmacht. */
+.b-rand, .b-tiefe { stroke-width: 18px; stroke-linejoin: round; }
+/* Die Farbklassen der Wortmarke gelten fuer Buchstaben und Verlaeufe. */
+.w-kaugummi   { --hell: var(--wort-kaugummi-hell);   --farbe: var(--wort-kaugummi);   --satt: var(--wort-kaugummi-satt);   --sockel: var(--wort-kaugummi-sockel); }
+.w-butter     { --hell: var(--wort-butter-hell);     --farbe: var(--wort-butter);     --satt: var(--wort-butter-satt);     --sockel: var(--wort-butter-sockel); }
+.w-immergruen { --hell: var(--wort-immergruen-hell); --farbe: var(--wort-immergruen); --satt: var(--wort-immergruen-satt); --sockel: var(--wort-immergruen-sockel); }
+.w-pfirsich   { --hell: var(--wort-pfirsich-hell);   --farbe: var(--wort-pfirsich);   --satt: var(--wort-pfirsich-satt);   --sockel: var(--wort-pfirsich-sockel); }
+.b-tiefe { fill: var(--sockel); stroke: var(--sockel); }
+.b-rand  { fill: var(--farbe);  stroke: var(--farbe); }
+.w-kaugummi .b-flaeche { fill: url(#s-kaugummi); }
+.w-butter .b-flaeche { fill: url(#s-butter); }
+.w-immergruen .b-flaeche { fill: url(#s-immergruen); }
+.punkt__tiefe { fill: var(--sockel); }
+.punkt__kugel { fill: url(#s-pfirsich); }
+
+.buchstabe { cursor: pointer; }
+.buchstabe__wippe { animation: wippen 3.4s ease-in-out infinite; }
+@keyframes wippen {
+  0%, 100% { translate: 0 0; }
+  50%      { translate: 0 -9px; }
+}
+.buchstabe:nth-child(2)  .buchstabe__wippe { animation-delay: -.2s; }
+.buchstabe:nth-child(3)  .buchstabe__wippe { animation-delay: -.4s; }
+.buchstabe:nth-child(4)  .buchstabe__wippe { animation-delay: -.6s; }
+.buchstabe:nth-child(5)  .buchstabe__wippe { animation-delay: -.8s; }
+.buchstabe:nth-child(6)  .buchstabe__wippe { animation-delay: -1s; }
+.buchstabe:nth-child(7)  .buchstabe__wippe { animation-delay: -1.2s; }
+.buchstabe:nth-child(8)  .buchstabe__wippe { animation-delay: -1.4s; }
+.buchstabe:nth-child(9)  .buchstabe__wippe { animation-delay: -1.6s; }
+.buchstabe:nth-child(10) .buchstabe__wippe { animation-delay: -1.8s; }
+.buchstabe:nth-child(11) .buchstabe__wippe { animation-delay: -2s; }
+.buchstabe:nth-child(12) .buchstabe__wippe { animation-delay: -2.2s; }
+
+.held__satz { font-size: clamp(1.2rem, 2.4vw, 1.5rem); font-weight: 750; max-width: 30rem; }
+.held__wege { display: flex; flex-wrap: wrap; gap: .9rem; margin: 1.6rem 0 1.4rem; }
+.held__probe { color: var(--schrift-leise); font-size: .95rem; max-width: 30rem; }
+
+.held__bild { position: relative; }
+
+/* Der Held ist beim ersten Bild schon da: Er tritt ueber Keyframes auf und
+   haengt nicht an einem Skript, das ihn erst sichtbar schalten muesste. */
+.held__text, .held__bild { animation: auftritt .9s var(--feder-weg) both; }
+.held__bild { animation-delay: .12s; }
+@keyframes auftritt {
+  from { opacity: 0; translate: 0 26px; scale: .97; }
+  to   { opacity: 1; translate: 0 0;    scale: 1; }
+}
+
+/* Das Kissen: ein Klumpen Flieder, auf dem die Dinge liegen. Es veraendert
+   seine Form langsam, als atme es. */
+.kissen {
+  position: absolute; inset: 7% 1% 3% 1%;
+  border-radius: 46% 54% 50% 50% / 52% 48% 52% 48%;
+  background:
+    radial-gradient(120% 90% at 30% 18%, rgba(var(--licht-rgb), calc(var(--licht-flaeche) * .5)) 0, rgba(var(--licht-rgb), 0) 55%),
+    var(--flieder);
+  box-shadow:
+    calc(var(--weich) * 14px) calc(var(--weich) * 22px) calc(var(--weich) * 46px) rgba(var(--wurf-rgb), var(--wurf)),
+    inset calc(var(--weich) * -12px) calc(var(--weich) * -16px) calc(var(--weich) * 30px) rgba(var(--flieder-tief), calc(var(--kante) - .04)),
+    inset calc(var(--weich) * 12px) calc(var(--weich) * 14px) calc(var(--weich) * 26px) rgba(var(--licht-rgb), calc(var(--licht-flaeche) * .8));
+  animation: atmen 11s ease-in-out infinite;
+}
+@keyframes atmen {
+  0%, 100% { border-radius: 46% 54% 50% 50% / 52% 48% 52% 48%; }
+  50%      { border-radius: 54% 46% 44% 56% / 46% 56% 44% 54%; }
+}
+
+.dinge {
+  position: relative; z-index: 1;
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: clamp(.5rem, 2.2vw, 1.6rem);
+  margin: 0; padding: clamp(1.4rem, 4vw, 2.8rem) clamp(1rem, 3.5vw, 2.4rem);
+  list-style: none;
+}
+
+.ding {
+  display: block; width: 100%; aspect-ratio: 1; padding: 0;
+  border: 0; border-radius: 1.6rem; background: none;
+  cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  animation: schaukeln 4.6s ease-in-out infinite;
+}
+.ding svg { display: block; width: 100%; height: 100%; overflow: visible; }
+
+@keyframes schaukeln {
+  0%, 100% { translate: 0 0;    rotate: -2deg; }
+  50%      { translate: 0 -8px; rotate: 2.5deg; }
+}
+.dinge li:nth-child(2) .ding { animation-duration: 5.2s; animation-delay: -1.1s; }
+.dinge li:nth-child(3) .ding { animation-duration: 4.2s; animation-delay: -2.3s; }
+.dinge li:nth-child(4) .ding { animation-duration: 5.6s; animation-delay: -.6s; }
+.dinge li:nth-child(5) .ding { animation-duration: 4.9s; animation-delay: -3s; }
+.dinge li:nth-child(6) .ding { animation-duration: 5.3s; animation-delay: -1.8s; }
+
+.gesicht { fill: var(--tinte); }
+.gesicht__mund, .gesicht--schlaf path { fill: none; stroke: var(--tinte); stroke-width: 3; stroke-linecap: round; }
+
+.zelt__tuer { fill: var(--minze-satt); stroke: var(--minze-satt); }
+.waffel__gitter path { fill: none; stroke: var(--waffel-gitter); stroke-width: 4; opacity: .5; }
+
+.ding__spur { fill: url(#v-minze); }
+.ding__knauf { transition: transform .6s var(--feder-weg); }
+.ding__haken { fill: none; stroke: var(--tinte); stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; transition: opacity .2s ease; }
+.ding--schalter[aria-pressed="false"] .ding__spur { fill: url(#v-pfirsich); }
+.ding--schalter[aria-pressed="false"] .ding__knauf { transform: translateX(-46px); }
+.ding--schalter[aria-pressed="false"] .ding__haken { opacity: 0; }
+
+/* == 8 · Abschnitte ====================================================== */
+
+.abschnitt { max-width: 1160px; margin: 0 auto; padding: clamp(2.5rem, 6vw, 4.5rem) 1rem; }
+.abschnitt__kopf { max-width: 44rem; margin: 0 auto clamp(1.6rem, 4vw, 2.6rem); text-align: center; }
+.abschnitt__satz { color: var(--schrift-leise); font-size: 1.1rem; }
+
+/* == 9 · Die Ablage der Bauteile ========================================= */
+
+.ablage {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr));
+  gap: clamp(1rem, 2.6vw, 1.8rem);
+}
+
+.fach { padding: 1.4rem 1.5rem 1.5rem; border-radius: 2rem; }
+.fach__reihe { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1rem; }
+.fach__spalte { display: grid; gap: .55rem; }
+
+/* Regler */
+.regler + .regler { margin-top: 1.1rem; }
+.regler__wort { display: flex; justify-content: space-between; font-weight: 800; margin-bottom: .45rem; }
+.regler__wort output { color: var(--schrift-leise); font-variant-numeric: tabular-nums; }
+
+.regler__feld {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 1.2rem; margin: 0; border-radius: 999px;
+  background: var(--grund-tief);
+  box-shadow:
+    inset calc(var(--weich) * 3px) calc(var(--weich) * 4px) calc(var(--weich) * 8px) rgba(var(--wurf-rgb), calc(var(--wurf) * .9)),
+    inset calc(var(--weich) * -3px) calc(var(--weich) * -3px) calc(var(--weich) * 7px) rgba(var(--licht-rgb), calc(var(--licht) * .8));
+  cursor: pointer;
+}
+.regler__feld::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 2.1rem; height: 2.1rem; border: 0; border-radius: 50%;
+  background: radial-gradient(100% 100% at 30% 22%, rgb(var(--licht-rgb)) 0, rgba(var(--licht-rgb), 0) 60%), var(--kaugummi);
+  box-shadow:
+    calc(var(--weich) * 3px) calc(var(--weich) * 5px) calc(var(--weich) * 10px) rgba(var(--wurf-rgb), calc(var(--wurf) + .05)),
+    inset calc(var(--weich) * -3px) calc(var(--weich) * -4px) calc(var(--weich) * 7px) rgba(var(--kaugummi-tief), .35);
+  transition: scale .3s var(--feder-weg);
+}
+.regler__feld:active::-webkit-slider-thumb { scale: 1.15 .9; }
+.regler__feld::-moz-range-thumb {
+  width: 2.1rem; height: 2.1rem; border: 0; border-radius: 50%;
+  background: radial-gradient(100% 100% at 30% 22%, rgb(var(--licht-rgb)) 0, rgba(var(--licht-rgb), 0) 60%), var(--kaugummi);
+  box-shadow:
+    calc(var(--weich) * 3px) calc(var(--weich) * 5px) calc(var(--weich) * 10px) rgba(var(--wurf-rgb), calc(var(--wurf) + .05)),
+    inset calc(var(--weich) * -3px) calc(var(--weich) * -4px) calc(var(--weich) * 7px) rgba(var(--kaugummi-tief), .35);
+}
+.regler__feld:focus-visible { outline: 3px solid var(--fokus); outline-offset: 6px; }
+
+/* Gelee: Die Fuellung schiesst ueber und wackelt nach; die Physik steht in
+   stilprobe.js. Die Blasen steigen von allein. */
+.gelee { position: relative; height: 2.3rem; padding: .32rem; border-radius: 999px; overflow: hidden; }
+.gelee__fuellung {
+  position: relative; width: 0; height: 100%; border-radius: 999px; overflow: hidden;
+  transform-origin: left center;
+  background: linear-gradient(90deg, var(--minze), var(--immergruen));
+  box-shadow:
+    inset 0 -6px 10px rgba(var(--immergruen-tief), .35),
+    inset 0 5px 8px rgba(var(--licht-rgb), .75);
+}
+.gelee__blase {
+  position: absolute; bottom: -.5rem; width: .5rem; height: .5rem; border-radius: 50%;
+  background: rgba(var(--licht-rgb), .8);
+  animation: blase 2.6s ease-in infinite;
+}
+.gelee__blase:nth-child(1) { left: 14%; }
+.gelee__blase:nth-child(2) { left: 46%; width: .38rem; height: .38rem; animation-delay: -.9s; }
+.gelee__blase:nth-child(3) { left: 78%; animation-delay: -1.7s; }
+@keyframes blase {
+  from { translate: 0 0;      opacity: 0; }
+  25%  { opacity: .9; }
+  to   { translate: 0 -2.2rem; opacity: 0; }
+}
+
+/* Segmente */
+.segment {
+  position: relative; display: grid; grid-template-columns: 1fr 1fr;
+  padding: .35rem; border-radius: 999px;
+}
+.segment__knauf {
+  position: absolute; top: .35rem; bottom: .35rem; left: .35rem;
+  width: calc(50% - .35rem); border-radius: 999px;
+  transition: translate .55s var(--feder-weg);
+}
+.segment[data-wahl="1"] .segment__knauf { translate: 100% 0; }
+/* Unterwegs zieht sich der Knauf in die Laenge. */
+.segment__knauf.dehnt { animation: dehnen .55s ease; }
+@keyframes dehnen {
+  0%   { scale: 1 1; }
+  35%  { scale: 1.28 .84; }
+  70%  { scale: .95 1.05; }
+  100% { scale: 1 1; }
+}
+.segment__wahl {
+  position: relative; z-index: 1;
+  padding: .65rem .5rem; border: 0; border-radius: 999px; background: none;
+  font: inherit; font-weight: 850; color: var(--schrift); cursor: pointer;
+  transition: color .3s ease;
+}
+.segment__wahl[aria-checked="true"] { color: var(--tinte); }
+
+/* Kaestchen: Der Haken zeichnet sich selbst. */
+.kaestchen { position: relative; display: flex; align-items: center; gap: .85rem; padding: .3rem 0; font-weight: 750; cursor: pointer; }
+.kaestchen__feld { position: absolute; width: 1px; height: 1px; opacity: 0; margin: 0; }
+.kaestchen__box {
+  display: grid; place-items: center; flex: none;
+  width: 2.1rem; height: 2.1rem; border-radius: .75rem;
+  transition: scale .35s var(--feder-weg);
+}
+.kaestchen__box svg { width: 1.4rem; height: 1.4rem; }
+.kaestchen__box path {
+  fill: none; stroke: var(--tinte); stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 24; stroke-dashoffset: 24;
+  transition: stroke-dashoffset .4s ease .05s;
+}
+.kaestchen__feld:checked + .kaestchen__box { --farbe: var(--minze); --tief: var(--minze-tief); }
+.kaestchen__feld:checked + .kaestchen__box path { stroke-dashoffset: 0; }
+.kaestchen__feld:focus-visible + .kaestchen__box { outline: 3px solid var(--fokus); outline-offset: 3px; }
+.kaestchen:active .kaestchen__box { scale: 1.1 .85; }
+
+/* Zaehler */
+.zaehler { display: flex; align-items: center; gap: .8rem; }
+.zaehler__wert {
+  display: inline-block; min-width: 4.4rem; padding: .4rem .9rem; border-radius: 1.1rem;
+  font-size: 1.6rem; font-weight: 900; text-align: center; font-variant-numeric: tabular-nums;
+}
+
+/* Former: Aus dem Namen wird ein Klumpen. */
+.former { display: flex; align-items: center; gap: .9rem; }
+.feld {
+  flex: 1; min-width: 0; padding: .85rem 1.1rem; border: 0; border-radius: 1.2rem;
+  font: inherit; font-weight: 750; color: var(--schrift);
+}
+.feld::placeholder { color: var(--schrift-leise); opacity: 1; }
+.klumpen {
+  display: grid; place-items: center; flex: none;
+  width: 3.5rem; height: 3.5rem;
+  font-size: 1.5rem; font-weight: 900;
+  border-radius: 46% 54% 52% 48% / 55% 45% 55% 45%;
+  animation: klumpen 6s ease-in-out infinite;
+}
+.klumpen--klein { width: 2.9rem; height: 2.9rem; font-size: 1.2rem; }
+@keyframes klumpen {
+  0%, 100% { border-radius: 46% 54% 52% 48% / 55% 45% 55% 45%; }
+  50%      { border-radius: 58% 42% 44% 56% / 44% 58% 42% 56%; }
+}
+
+/* == 10 · Die Leihliste ================================================== */
+
+.leihliste { max-width: 780px; margin: 0 auto; padding: clamp(1.1rem, 3.4vw, 2rem); border-radius: 2.2rem; }
+.leihliste__kopf { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.3rem; }
+.leihliste__titel { margin: 0; font-size: 1.45rem; }
+.leihliste__unter { margin: 0; color: var(--schrift-leise); font-weight: 700; }
+
+.eintraege { display: grid; gap: .9rem; margin: 0; padding: 0; list-style: none; }
+.eintrag {
+  display: grid; align-items: center; gap: .6rem 1rem;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  grid-template-areas: "text zustand schalter anfrage";
+  padding: .85rem 1rem .85rem 1.25rem; border-radius: 1.5rem;
+}
+.eintrag__text { grid-area: text; display: grid; min-width: 0; }
+.eintrag__name { font-weight: 900; font-size: 1.1rem; }
+.eintrag__notiz { color: var(--tinte-leise); font-size: .92rem; }
+.eintrag .zustand { grid-area: zustand; }
+.eintrag .schalter { grid-area: schalter; }
+.eintrag [data-anfrage] { grid-area: anfrage; }
+
+.zustand {
+  padding: .3rem .8rem; border-radius: 999px;
+  font-size: .85rem; font-weight: 850; white-space: nowrap;
+  background: var(--minze); color: var(--tinte);
+  transition: background-color .3s ease;
+}
+.ist-verliehen .zustand { background: var(--pfirsich); }
+
+/* == 11 · Karten, Zusagen, Farben ======================================== */
+
+.karten {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+  gap: clamp(1.2rem, 3vw, 2.2rem); margin: 0; padding: 0; list-style: none;
+}
+.karte {
+  --neigung: -1.6deg;
+  padding: 1.4rem 1.5rem 1.6rem; border-radius: 2.2rem;
+  transform: rotate(var(--neigung));
+  transition: transform .6s var(--feder-weg);
+}
+.karte:nth-child(2) { --neigung: 1.3deg; }
+.karte:nth-child(3) { --neigung: -.8deg; }
+.karte:hover { transform: rotate(0deg) translateY(-6px); }
+.karte__bild { display: block; width: 100%; max-width: 13rem; height: auto; margin: 0 auto 1rem; overflow: visible; }
+.karte__plus { fill: none; stroke: var(--tinte); stroke-width: 3.4; stroke-linecap: round; }
+.karte p { margin: 0; }
+
+.zusagen { display: flex; flex-wrap: wrap; justify-content: center; gap: .8rem; margin: clamp(2rem, 4vw, 3rem) 0 0; padding: 0; list-style: none; }
+.zusage {
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .55rem 1.1rem .55rem .7rem; border-radius: 999px; font-weight: 850;
+}
+.zusage svg { width: 1.5rem; height: 1.5rem; padding: .2rem; border-radius: 50%; background: var(--minze); }
+.zusage path, .haken path { fill: none; stroke: var(--tinte); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+
+.farben {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr));
+  gap: 1rem; margin: 0; padding: 0; list-style: none;
+}
+.farbe {
+  display: grid; justify-items: center; gap: .25rem; width: 100%;
+  padding: 1rem .4rem; border: 0; border-radius: 1.6rem; background: none;
+  font: inherit; color: var(--schrift); cursor: pointer;
+}
+.farbe__klecks {
+  width: 5.4rem; height: 5.4rem; margin-bottom: .55rem;
+  border-radius: 48% 52% 55% 45% / 52% 46% 54% 48%;
+  animation: klumpen 7s ease-in-out infinite;
+  transition: scale .45s var(--feder-weg);
+}
+.farben li:nth-child(2) .farbe__klecks { animation-delay: -1.2s; }
+.farben li:nth-child(3) .farbe__klecks { animation-delay: -2.4s; }
+.farben li:nth-child(4) .farbe__klecks { animation-delay: -3.6s; }
+.farben li:nth-child(5) .farbe__klecks { animation-delay: -4.8s; }
+.farben li:nth-child(6) .farbe__klecks { animation-delay: -6s; }
+.farbe:hover .farbe__klecks { scale: 1.08; }
+.farbe:active .farbe__klecks { scale: 1.12 .84; }
+.farbe__name { font-weight: 850; }
+.farbe__wert { color: var(--schrift-leise); font-size: .9rem; font-variant-numeric: tabular-nums; }
+
+/* == 12 · Preis ========================================================== */
+
+.preis { max-width: 520px; margin: 0 auto; padding: clamp(1.5rem, 4vw, 2.2rem); border-radius: 2.4rem; text-align: center; }
+.preis__wahl { display: flex; justify-content: center; align-items: center; gap: .8rem; font-weight: 850; }
+.preis__seite { color: var(--schrift-leise); transition: color .3s ease; }
+.preis__seite.ist-aktiv { color: var(--schrift); }
+.schalter--preis > .spur,
+.schalter--preis[aria-checked="true"] > .spur { background: var(--immergruen); }
+.preis__betrag { margin: .7rem 0 .1rem; font-size: clamp(3rem, 9vw, 4.5rem); font-weight: 900; line-height: 1.1; }
+.preis__zahl { display: inline-block; }
+.preis__je { font-size: 1.1rem; font-weight: 750; color: var(--schrift-leise); }
+
+.haken { display: grid; gap: .55rem; max-width: 22rem; margin: 1.3rem auto 0; padding: 0; list-style: none; text-align: left; }
+.haken li { display: flex; align-items: center; gap: .65rem; font-weight: 750; }
+.haken svg { width: 1.6rem; height: 1.6rem; flex: none; padding: .22rem; border-radius: 50%; background: var(--minze); }
+.haken path { stroke-dasharray: 24; stroke-dashoffset: 24; transition: stroke-dashoffset .5s ease; }
+.da .haken path { stroke-dashoffset: 0; }
+.da .haken li:nth-child(2) path { transition-delay: .12s; }
+.da .haken li:nth-child(3) path { transition-delay: .24s; }
+.da .haken li:nth-child(4) path { transition-delay: .36s; }
+
+/* == 13 · Fragen ========================================================= */
+
+.fragen { display: grid; gap: 1rem; max-width: 780px; margin: 0 auto; }
+.frage { border-radius: 1.7rem; }
+.frage__kopf { margin: 0; font-size: 1.1rem; }
+.frage__knopf {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  width: 100%; padding: 1.15rem 1.15rem 1.15rem 1.4rem;
+  border: 0; border-radius: 1.7rem; background: none;
+  font: inherit; font-weight: 850; text-align: left; color: var(--schrift); cursor: pointer;
+}
+.frage__zeichen {
+  position: relative; flex: none; width: 2.3rem; height: 2.3rem; border-radius: 50%;
+  transition: rotate .55s var(--feder-weg);
+}
+.frage__zeichen::before, .frage__zeichen::after {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: 1rem; height: .24rem; margin: -.12rem 0 0 -.5rem;
+  border-radius: 1rem; background: var(--tinte);
+}
+.frage__zeichen::after { rotate: 90deg; transition: rotate .45s var(--feder-weg); }
+[aria-expanded="true"] > .frage__zeichen { rotate: 180deg; }
+[aria-expanded="true"] > .frage__zeichen::after { rotate: 0deg; }
+
+.frage__antwort { overflow: hidden; }
+.frage__antwort p { margin: 0; padding: 0 1.4rem 1.3rem; }
+
+/* == 14 · Aufruf und Fuss ================================================ */
+
+.aufruf { padding: clamp(2rem, 6vw, 4rem) 1rem; }
+.aufruf__band {
+  --tief: var(--pfirsich-tief);
+  max-width: 1000px; margin: 0 auto; padding: clamp(2rem, 6vw, 3.6rem) clamp(1.2rem, 4vw, 3rem);
+  border-radius: 2.8rem; text-align: center;
+  background:
+    radial-gradient(120% 100% at 26% 12%, rgba(var(--licht-rgb), .55) 0, rgba(var(--licht-rgb), 0) 50%),
+    linear-gradient(120deg, var(--butter), var(--pfirsich));
+}
+.aufruf__band h2 { margin: 0 auto 1.5rem; max-width: 30rem; color: var(--tinte); }
+
+.fuss { max-width: 1160px; margin: 0 auto; padding: 1rem 1rem 3rem; text-align: center; color: var(--schrift-leise); font-size: .95rem; }
+.fuss__wege a { font-weight: 800; color: var(--schrift); }
+
+/* == 15 · Meldung und Konfetti =========================================== */
+
+.toast {
+  position: fixed; left: 50%; bottom: 1.4rem; z-index: 50;
+  max-width: calc(100vw - 2rem); padding: .85rem 1.35rem; border-radius: 999px;
+  font-weight: 850; text-align: center;
+  translate: -50% 160%; opacity: 0; pointer-events: none;
+  transition: translate .55s var(--feder-weg), opacity .25s ease;
+}
+.toast.da { translate: -50% 0; opacity: 1; }
+
+.konfetti { position: fixed; inset: 0; z-index: 60; width: 100%; height: 100%; pointer-events: none; }
+
+/* Ein kurzes Huepfen. Es steht bewusst hier am Ende: Gleich spezifisch wie
+   .klumpen und .farbe__klecks, loest es deren Dauer-Animation nur ab, wenn
+   es spaeter in der Datei steht. */
+.huepft { animation: huepfen .5s ease; }
+@keyframes huepfen {
+  0%   { scale: 1 1; }
+  30%  { scale: 1.25 .8; }
+  60%  { scale: .92 1.1; }
+  100% { scale: 1 1; }
+}
+
+/* == 16 · Auftritt ======================================================= *
+ *
+ * Ueber die einzelnen Eigenschaften translate und scale und nicht ueber
+ * transform: So ueberschreibt der Auftritt weder die Neigung der Karten noch
+ * ihr Anheben beim Darueberfahren. Versteckt wird nur, wenn ein Skript laeuft
+ * — sonst bliebe die Seite ohne Skript leer.
+ * ===================================================================== */
+
+@media (scripting: enabled) {
+  .zeige {
+    opacity: 0; translate: 0 28px; scale: .96;
+    transition: opacity .6s ease, translate .85s var(--feder-weg), scale .85s var(--feder-weg);
+  }
+  .zeige.da { opacity: 1; translate: 0 0; scale: 1; }
+}
+
+/* == 17 · Ruhe =========================================================== *
+ *
+ * Wer weniger Bewegung will — ueber das System oder ueber die Einstellung
+ * der Anwendung (lid.ruhig, stilprobe.js setzt dann .ruhig) —, bekommt keine
+ * Daueranimation und keine Federwege. Der Auftritt bleibt ein Einblenden.
+ * ===================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition-timing-function: ease !important;
+    transition-duration: .15s !important;
+    scroll-behavior: auto !important;
+  }
+  .zeige, .zeige.da { translate: none !important; scale: none !important; transition: opacity .4s ease !important; }
+}
+.ruhig *, .ruhig *::before, .ruhig *::after {
+  animation: none !important;
+  transition-timing-function: ease !important;
+  transition-duration: .15s !important;
+}
+.ruhig .zeige, .ruhig .zeige.da { translate: none !important; scale: none !important; transition: opacity .4s ease !important; }
+.ruhig { scroll-behavior: auto; }
+
+/* == 18 · Schmale Schirme ================================================ */
+
+@media (max-width: 900px) {
+  .held { grid-template-columns: 1fr; }
+  .held__bild { max-width: 560px; width: 100%; margin: 0 auto; }
+}
+
+@media (max-width: 640px) {
+  .kopf__wege { display: none; }
+  .kopf__pille { gap: .6rem; padding-left: 1rem; }
+  .tonschalter { margin-left: auto; }
+  .eintrag {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "text schalter" "zustand anfrage";
+  }
+  .eintrag .zustand { justify-self: start; }
+  .fach { padding: 1.2rem 1.15rem 1.3rem; }
+}
+
+@media (max-width: 380px) {
+  .kopf__probe { display: none; }
+  .held__wege .knopf { flex: 1 1 100%; }
+}
