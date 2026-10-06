@@ -8,15 +8,19 @@
  * Ton bleibt aus, bis jemand ihn einschaltet, und wer Bewegung abbestellt
  * hat — im System oder in der Anwendung —, bekommt keine.
  *
+ * Geparkt mit der Probe unter archiv/stilprobe/. lauf.mjs sieht die Suite
+ * nicht mehr; von Hand: node archiv/stilprobe/stilprobe.mjs, bei laufendem
+ * php -S in der Wurzel.
+ *
  * Die Zwischenablage wird in der Seite abgefangen: Geprueft wird, was die
  * Probe kopiert und meldet, nicht die Zwischenablage des Rechners, die es
  * auf einem Rechner von GitHub nicht verlaesslich gibt.
  */
-import { starteBrowser, BASE, pruefer } from './hilfe.mjs';
+import { starteBrowser, BASE, pruefer } from '../../tests/e2e/hilfe.mjs';
 
 const { ok, bilanz } = pruefer();
 const br = await starteBrowser();
-const SEITE = BASE + '/stilprobe.html';
+const SEITE = BASE + '/archiv/stilprobe/stilprobe.html';
 
 /* Laeuft vor dem ersten Skript der Seite: zaehlt AudioContexte und
    Oszillatoren, sammelt Verstoesse gegen die Inhaltsrichtlinie und faengt

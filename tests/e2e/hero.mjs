@@ -32,18 +32,26 @@ ok('Auszeichnungen in einer Reihe', await page.evaluate(() => {
   const ys = [...document.querySelectorAll('.trust li')].map(n => Math.round(n.getBoundingClientRect().y));
   return new Set(ys).size === 1;
 }));
-// Der Rahmen steht flach: keine Verlaeufe, kein Punktraster, kein Schatten.
+// Der Rahmen stand flach — keine Verlaeufe, kein Punktraster, kein Schatten —,
+// bis die Anwendung in Knete umgestellt wurde (Oktober 2026, auf ausdruecklichen
+// Wunsch; der alte Stil liegt in archiv/alter-stil/). Seitdem ist er Knete:
+// ein Lichtfleck als einziger Verlauf, aussen ein Wurfschatten, innen zwei.
+// Das Punktraster bleibt fort.
 const panel = await page.locator('.hero-panel').evaluate(n => {
   const s = getComputedStyle(n);
   return { bild: s.backgroundImage, farbe: s.backgroundColor, schatten: s.boxShadow,
            raster: getComputedStyle(n, '::before').backgroundImage };
 });
-ok('Hero ohne Verlauf', panel.bild === 'none', panel.bild.slice(0, 40));
+ok('Hero aus Knete: der Lichtfleck', /^radial-gradient/.test(panel.bild) && !/linear-gradient/.test(panel.bild), panel.bild.slice(0, 40));
 ok('Hero ohne Punktraster', panel.raster === 'none', panel.raster.slice(0, 40));
-ok('Hero ohne Schatten', panel.schatten === 'none', panel.schatten.slice(0, 40));
-ok('Hero auf weisser Flaeche', panel.farbe === 'rgb(255, 255, 255)', panel.farbe);
-ok('Grund der Seite ist das helle Gruen',
-  await page.evaluate(() => getComputedStyle(document.body).backgroundColor) === 'rgb(232, 250, 233)',
+{
+  const teile = panel.schatten.split(/,(?![^(]*\))/).map(x => x.trim());
+  ok('Hero aus Knete: aussen ein Schatten, innen zwei',
+     teile.length === 3 && teile.filter(x => x.includes('inset')).length === 2, panel.schatten.slice(0, 60));
+}
+ok('Hero auf heller Knete', panel.farbe === 'rgb(255, 252, 250)', panel.farbe);
+ok('Grund der Seite ist Minzgruen',
+  await page.evaluate(() => getComputedStyle(document.body).backgroundColor) === 'rgb(233, 249, 241)',
   await page.evaluate(() => getComputedStyle(document.body).backgroundColor));
 
 // Schritte nebeneinander mit Pfeilen, je Erklaerkasten. Es gibt jetzt zwei
@@ -56,8 +64,11 @@ const kaesten = await page.evaluate(() => [...document.querySelectorAll('.howto'
   zeichen: h.querySelector('.howto__mark use').getAttribute('href')
 })));
 ok('zwei Erklaerkaesten', kaesten.length === 2, kaesten.length);
+// Die Karten liegen leicht verkantet, ihre Oberkanten weichen deshalb um
+// einen Punkt voneinander ab; eine Reihe bleibt es.
 ok('je drei Schritte nebeneinander',
-  kaesten.every(k => k.schritte.length === 3 && new Set(k.schritte).size === 1), JSON.stringify(kaesten.map(k => k.schritte)));
+  kaesten.every(k => k.schritte.length === 3 && Math.max(...k.schritte) - Math.min(...k.schritte) <= 6),
+  JSON.stringify(kaesten.map(k => k.schritte)));
 ok('je zwei Pfeile dazwischen', kaesten.every(k => k.pfeile === 2), JSON.stringify(kaesten.map(k => k.pfeile)));
 ok('und je ein eigenes Zeichen',
   kaesten[0].zeichen === '#i-leihliste' && kaesten[1].zeichen === '#i-kreis', JSON.stringify(kaesten.map(k => k.zeichen)));

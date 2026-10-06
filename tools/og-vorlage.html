@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" class="wortmarke-da ruhig">
 <head>
 <meta charset="utf-8">
 <!-- Diese Vorlage gehoert nicht ins Netz. Auf Apache sperrt .htaccess das
@@ -12,72 +12,46 @@
 <!--
   Vorlage für assets/pics/og.png, das Bild der Link-Vorschau.
 
-  Diese Datei gehört nicht zur ausgelieferten Anwendung. Sie wird einmalig
-  mit einem Browser auf 1200 mal 630 Punkte abgelichtet; das Ergebnis liegt
-  als PNG im Projekt. So braucht die Anwendung selbst keinen Bauschritt, und
-  das Bild lässt sich trotzdem jederzeit aus dem Quelltext neu erzeugen.
-  Die Anleitung steht in tools/README-og.md.
+  Diese Datei gehört nicht zur ausgelieferten Anwendung. tools/bilder.mjs
+  lichtet sie auf 1200 mal 630 Punkte ab; das Ergebnis liegt als PNG im
+  Projekt. So braucht die Anwendung keinen Bauschritt, und das Bild lässt
+  sich trotzdem jederzeit aus dem Quelltext neu erzeugen.
 
-  Farben und Schriften stammen aus style.css und assets/fonts/fonts.css,
-  damit das Vorschaubild dieselbe Sprache spricht wie die Seite.
+  Sie schreibt nichts ab: Farben, Schrift und Knete kommen aus style.css und
+  assets/fonts/, und die drei Platzhalter unten — Vorrat, Wortmarke, Dinge —
+  füllt bilder.mjs beim Ablichten aus der laufenden Startseite. Allein im
+  Browser geöffnet, bleiben sie deshalb leer. Die Klasse ruhig am
+  Wurzelelement hält die Knete still, damit das Bild nicht vom Zeitpunkt
+  der Aufnahme abhängt. Anleitung in tools/README-og.md.
 -->
 <link rel="stylesheet" href="../assets/fonts/fonts.css">
+<link rel="stylesheet" href="../style.css">
 <style>
-  :root {
-    --paper: #FCF9F4;
-    --surface: #FFFFFF;
-    --surface-alt: #F4F0E8;
-    --ink: #1B1813;
-    --muted: #6B6459;
-    --line: #EAE3D8;
-    --green: #0F7A55;
-    --display: 'Ranchers', 'Zilla Slab', Georgia, sans-serif;
-    --sans: 'Inter', system-ui, sans-serif;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { width: 1200px; height: 630px; background: var(--paper); color: var(--ink); }
-
+  body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
   .blatt {
-    position: relative; width: 1200px; height: 630px; overflow: hidden;
-    display: flex; align-items: center; gap: 44px;
-    padding: 0 76px;
-    background: linear-gradient(160deg, var(--surface) 0%, var(--surface-alt) 100%);
+    position: absolute; inset: 44px 52px;
+    display: flex; align-items: center; gap: 36px;
+    padding: 46px 52px;
+    border-radius: 56px;
   }
-  /* Das Punktraster der Startseite, damit das Bild erkennbar zur Seite gehört. */
-  .blatt::before {
-    content: ""; position: absolute; inset: 0;
-    background-image: radial-gradient(currentColor 2px, transparent 2px);
-    background-size: 34px 34px; opacity: .05;
-  }
-  .wort { position: relative; flex: 1 1 auto; min-width: 0; }
-  h1 {
-    font-family: var(--display); font-weight: 400;
-    font-size: 132px; line-height: 1.02; letter-spacing: 0;
-  }
-  h1 em { font-style: normal; color: var(--green); }
-  .satz {
-    font-family: var(--sans); font-weight: 400;
-    font-size: 34px; line-height: 1.35; color: var(--muted);
-    margin-top: 26px; max-width: 15em;
-  }
-  .fuss {
-    font-family: var(--sans); font-weight: 600;
-    font-size: 27px; color: var(--green); margin-top: 38px;
-    letter-spacing: .01em;
-  }
-  /* Die Pfote steht ganz im Bild: Am Rand einer Vorschaukarte laese sich ein
-     angeschnittenes Ohr wie ein Fehler, nicht wie eine Geste. */
-  .bild { position: relative; flex: 0 0 auto; width: 292px; height: auto; margin-top: 8px; }
+  .wort { flex: 1 1 auto; min-width: 0; }
+  .wort .wortmarke { max-width: none; width: 560px; margin-left: -18px; }
+  .satz { font-size: 33px; line-height: 1.32; font-weight: 700; color: var(--muted); margin-top: 18px; max-width: 15em; }
+  .fuss { font-size: 27px; font-weight: 900; color: var(--link); margin-top: 26px; }
+  .hero-bild { flex: 0 0 auto; width: 430px; }
+  .hero-bild .dinge { grid-template-columns: repeat(3, 1fr); gap: 12px 16px; padding: 40px 26px 30px; }
+  .hero-bild .kissen { inset: 6% 0 0 0; }
 </style>
 </head>
 <body>
-  <div class="blatt">
+  <div id="vorrat"></div>
+  <div class="blatt hero-panel">
     <div class="wort">
-      <h1>Leih <em>ich</em> Dir.</h1>
+      <div id="wortmarke-platz"></div>
       <p class="satz">Zeig Deinen Freund:innen, was sie bei Dir ausleihen können.</p>
       <p class="fuss">leihichdir.de</p>
     </div>
-    <img class="bild" src="../assets/pics/pfote.svg" alt="">
+    <div id="dinge-platz"></div>
   </div>
 </body>
 </html>

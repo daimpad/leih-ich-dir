@@ -119,7 +119,8 @@ for (const w of [900, 1280]) {
  *
  * Bei 42rem wechselt die Kopfleiste zur schwebenden Schaltflaeche, und die
  * Zahl ist gemessen und nicht gegriffen: Damit Marke, beide Wege und die drei
- * Schalter in eine Zeile passen, braucht Deutsch 635 Punkte und Englisch 665.
+ * Schalter in eine Zeile passen, braucht Deutsch 634 Punkte und Englisch 653
+ * (in Nunito, seit der Knete; mit Ranchers waren es 635 und 665).
  * Genau ueber der Schwelle muss die Zeile also auch auf Englisch halten —
  * andernfalls rutschten die Schalter unter die Marke und schoeben den Inhalt
  * nach unten, und zwar nur fuer die eine Sprache, in der niemand nachsieht.

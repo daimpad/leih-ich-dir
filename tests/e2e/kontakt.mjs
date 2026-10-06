@@ -24,7 +24,8 @@ const apply = page.locator('#btnVoiceApply');
 ok('Übernehmen trägt die Fläche', (await apply.getAttribute('class')).includes('btn--primary'),
    await apply.getAttribute('class'));
 const bg = await apply.evaluate(n => getComputedStyle(n).backgroundColor);
-ok('und ist grün gefüllt', bg === 'rgb(15, 122, 85)', bg);
+// Die Handlung fuehrt seit der Knete Kaugummi an, nicht mehr das Gruen.
+ok('und ist als Hauptknopf gefüllt, in Kaugummi', bg === 'rgb(255, 179, 198)', bg);
 ok('keine Hinweiszeile ohne Übertragung', await page.locator('#voiceHint').isHidden());
 const alleTexte = await page.evaluate(() => document.body.innerText);
 ok('Satz über fehlende Spracherkennung ist weg', !/kennt keine Spracherkennung/.test(alleTexte));

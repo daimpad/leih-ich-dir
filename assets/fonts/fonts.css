@@ -1,49 +1,15 @@
 /* Schriften, selbst ausgeliefert. Erzeugt von tools/build-fonts.py.
    Nicht von Hand bearbeiten.
 
-   Ranchers · Impallari Type · SIL OFL 1.1
-   Inter · Rasmus Andersson · SIL OFL 1.1
-   Zilla Slab · Typotheque · SIL OFL 1.1
+   Nunito · Vernon Adams, Cyreal, Jacques Le Bailly · SIL OFL 1.1
    Space Mono · Colophon Foundry · SIL OFL 1.1 */
 
 @font-face {
-  font-family: 'Ranchers';
+  font-family: 'Nunito';
   font-style: normal;
-  font-weight: 400;
+  font-weight: 200 1000;
   font-display: swap;
-  src: url('ranchers-400.woff2') format('woff2');
-}
-
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('inter-400.woff2') format('woff2');
-}
-
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url('inter-600.woff2') format('woff2');
-}
-
-@font-face {
-  font-family: 'Zilla Slab';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url('zillaslab-500.woff2') format('woff2');
-}
-
-@font-face {
-  font-family: 'Zilla Slab';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url('zillaslab-700.woff2') format('woff2');
+  src: url('nunito.woff2') format('woff2');
 }
 
 @font-face {

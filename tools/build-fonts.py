@@ -9,14 +9,19 @@ Das hat zwei Gründe: Die Anwendung soll ohne externe Ressourcen auskommen, und
 ein Nachladen von fonts.gstatic.com würde die IP-Adresse jeder Besucherin an
 einen Dritten übertragen.
 
-Alle vier Familien stehen unter der SIL Open Font License. Die Quelldateien
+Beide Familien stehen unter der SIL Open Font License. Die Quelldateien
 liegen nicht im Repository; --source darf mehrfach angegeben werden und wird
 der Reihe nach durchsucht:
 
     pip install fonttools brotli
     git clone --depth 1 --filter=blob:none --sparse https://github.com/google/fonts
-    cd fonts && git sparse-checkout set ofl/ranchers ofl/inter ofl/zillaslab ofl/spacemono
-    python3 tools/build-fonts.py --source fonts/ofl/ranchers --source …
+    cd fonts && git sparse-checkout set ofl/nunito ofl/spacemono
+    python3 tools/build-fonts.py --source fonts/ofl/nunito --source fonts/ofl/spacemono
+
+Nunito kommt als eine variable Datei fuer alle Staerken von 200 bis 1000:
+Die Knete braucht viele Zwischenstufen (750, 850), und eine Datei ist kleiner
+als vier feste Schnitte. Die Schriften des alten Erscheinungsbilds (Ranchers,
+Inter, Zilla Slab) liegen in archiv/alter-stil/fonts/.
 
 Die erzeugten .woff2-Dateien gehören ins Repository; dieses Skript muss nur
 laufen, wenn eine Schrift dazukommt oder sich ändert.
@@ -35,13 +40,10 @@ UNICODES = (
     "U+2000-206F,U+2074,U+20AC,U+2122,U+2190-2193,U+2212,U+2215,U+FEFF,U+FFFD"
 )
 
-# Quelldatei → Zieldatei, Familie, Schnitt, Stil
+# Quelldatei → Zieldatei, Familie, Schnitt, Stil. Ein Schnitt mit zwei Zahlen
+# ist ein Bereich: die variable Datei, die alle Staerken dazwischen traegt.
 FACES = [
-    ("Ranchers-Regular.ttf",  "ranchers-400.woff2",   "Ranchers",   400, "normal"),
-    ("Inter-Regular.ttf",     "inter-400.woff2",      "Inter",      400, "normal"),
-    ("Inter-SemiBold.ttf",    "inter-600.woff2",      "Inter",      600, "normal"),
-    ("ZillaSlab-Medium.ttf",  "zillaslab-500.woff2",  "Zilla Slab", 500, "normal"),
-    ("ZillaSlab-Bold.ttf",    "zillaslab-700.woff2",  "Zilla Slab", 700, "normal"),
+    ("Nunito[wght].ttf",      "nunito.woff2",         "Nunito",     "200 1000", "normal"),
     ("SpaceMono-Regular.ttf", "spacemono-400.woff2",  "Space Mono", 400, "normal"),
     ("SpaceMono-Bold.ttf",    "spacemono-700.woff2",  "Space Mono", 700, "normal"),
 ]
@@ -49,14 +51,12 @@ FACES = [
 FONTS_CSS_HEAD = """/* Schriften, selbst ausgeliefert. Erzeugt von tools/build-fonts.py.
    Nicht von Hand bearbeiten.
 
-   Ranchers · Impallari Type · SIL OFL 1.1
-   Inter · Rasmus Andersson · SIL OFL 1.1
-   Zilla Slab · Typotheque · SIL OFL 1.1
+   Nunito · Vernon Adams, Cyreal, Jacques Le Bailly · SIL OFL 1.1
    Space Mono · Colophon Foundry · SIL OFL 1.1 */
 """
 
 
-def regel(family: str, style: str, weight: int, outname: str) -> str:
+def regel(family: str, style: str, weight, outname: str) -> str:
     return (
         "\n@font-face {\n"
         f"  font-family: '{family}';\n"
@@ -133,7 +133,7 @@ if __name__ == "__main__":
                         help="Ordner mit TrueType-Dateien, mehrfach angebbar")
     parser.add_argument("--target", default="assets/fonts", help="Zielordner (Vorgabe: assets/fonts)")
     parser.add_argument("--only", action="append",
-                        help="nur diese Familie bauen, etwa ranchers; mehrfach angebbar")
+                        help="nur diese Familie bauen, etwa nunito; mehrfach angebbar")
     args = parser.parse_args()
     nur = {n.lower().replace(" ", "") for n in args.only} if args.only else None
     sys.exit(build([pathlib.Path(q) for q in args.source], pathlib.Path(args.target), nur))

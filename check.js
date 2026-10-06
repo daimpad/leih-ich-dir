@@ -215,9 +215,8 @@
       ['impressum.html', 'text/html'],
       ['datenschutz.html', 'text/html'],
       ['assets/fonts/fonts.css', 'text/css'],
-      ['assets/fonts/ranchers-400.woff2', 'font/woff2'],
-      ['assets/fonts/inter-400.woff2', 'font/woff2'],
-      ['assets/pics/pfote.svg', 'image/svg+xml'],
+      ['assets/fonts/nunito.woff2', 'font/woff2'],
+      ['assets/fonts/spacemono-400.woff2', 'font/woff2'],
       ['assets/pics/og.png', 'image/png'],
       ['assets/pics/logo.svg', 'image/svg+xml'],
       ['assets/favicon/favicon.svg', 'image/svg+xml'],
@@ -420,8 +419,8 @@
     return document.fonts.ready.then(function () {
       var h1 = document.querySelector('h1');
       var family = h1 ? getComputedStyle(h1).fontFamily : '';
-      check(LEVEL_SHOULD, 'Ueberschrift nutzt Ranchers',
-        family.indexOf('Ranchers') !== -1, family || 'unbekannt');
+      check(LEVEL_SHOULD, 'Ueberschrift nutzt Nunito',
+        family.indexOf('Nunito') !== -1, family || 'unbekannt');
       var loaded = 0;
       document.fonts.forEach(function (f) { if (f.status === 'loaded') { loaded++; } });
       check(LEVEL_SHOULD, 'Schriftdateien geladen', loaded > 0, loaded + ' von ' + document.fonts.size);

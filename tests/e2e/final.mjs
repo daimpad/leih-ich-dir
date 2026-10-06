@@ -63,9 +63,10 @@ await page.click('#toastAct');
 await page.waitForTimeout(300);
 ok('Eintrag zurück', await page.locator('.items li').count() === 3);
 
-// Farben: gefüllte Fläche der Hauptschaltfläche ist grün
+// Farben: gefüllte Fläche der Hauptschaltfläche. Seit der Knete fuehrt
+// Kaugummi die Handlung an; frueher war es das Gruen der Anwendung.
 const btnBg = await page.locator('#addForm button[type=submit]').evaluate(n => getComputedStyle(n).backgroundColor);
-ok('Hauptschaltfläche grün', btnBg === 'rgb(15, 122, 85)', btnBg);
+ok('Hauptschaltfläche in Kaugummi', btnBg === 'rgb(255, 179, 198)', btnBg);
 const delColor = await page.locator('.btn--danger').first().evaluate(n => getComputedStyle(n).backgroundColor);
 ok('Löschen ohne Fläche', delColor === 'rgba(0, 0, 0, 0)', delColor);
 
@@ -125,7 +126,8 @@ const p3 = await c3.newPage();
 await p3.goto(editUrl, { waitUntil: 'networkidle' });
 await p3.waitForTimeout(900);
 const bg = await p3.evaluate(() => getComputedStyle(document.body).backgroundColor);
-ok('Dunkel greift', bg === 'rgb(22, 19, 15)', bg);
+// Der dunkle Grund ist seit der Knete ein tiefes Minzgruen.
+ok('Dunkel greift', bg === 'rgb(9, 31, 22)', bg);
 await p3.screenshot({ path: OUT + '/F-dunkel.png', fullPage: true });
 await c3.close();
 

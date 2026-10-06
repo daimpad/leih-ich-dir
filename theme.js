@@ -5,7 +5,10 @@
  *
  * Das Erscheinungsbild folgt von sich aus prefers-color-scheme. Ein Attribut
  * data-theme am Wurzelelement hat Vorrang, so ist das Stylesheet gebaut. Diese
- * Datei setzt nur dieses Attribut und merkt sich die Wahl im Browser.
+ * Datei setzt dieses Attribut und merkt sich die Wahl im Browser. Dazu setzt
+ * sie die Klasse ruhig, wenn in den Einstellungen "Bewegte Anteile
+ * ruhigstellen" gewaehlt ist (lid.ruhig): Das Stylesheet haelt darunter jede
+ * Animation an, wie unter prefers-reduced-motion.
  *
  * Sie laeuft bewusst nicht mit defer, sondern gleich beim Einlesen des Kopfes:
  * Sonst waere fuer einen Augenblick das falsche Erscheinungsbild zu sehen.
@@ -83,8 +86,17 @@
     refresh();
   }
 
+  /* Die Ruhe aus der Anwendung, ebenso frueh: Sonst wiegte sich die Knete
+     auf der Startseite einen Augenblick, bevor app.js geladen ist. */
+  function ruhe() {
+    var still = false;
+    try { still = localStorage.getItem('lid.ruhig') === '1'; } catch (e) { still = false; }
+    document.documentElement.classList.toggle('ruhig', still);
+  }
+
   /* Sofort anwenden, noch bevor der Koerper gezeichnet wird. */
   apply();
+  ruhe();
 
   function wire() {
     refresh();
@@ -124,6 +136,7 @@
     set: set,
     effective: effective,
     refresh: refresh,
+    ruhe: ruhe,
     setLang: function (next) { lang = (next === 'en') ? 'en' : 'de'; refresh(); }
   };
 })();
