@@ -22,7 +22,10 @@ await page.waitForTimeout(700);
 ok('Zugangskarte sichtbar', await page.isVisible('#keyBox'));
 ok('Zugangslink gefüllt', (await page.inputValue('#keyLink')).includes('#e='));
 ok('Titel vorbelegt', (await page.inputValue('#listTitleInput')).length > 0);
-ok('Kontakt zugeklappt', !(await page.locator('#contactBox').evaluate(n => n.open)));
+// Bis Oktober 2026 stand der Kontakt zugeklappt unter dem Inventar; seitdem
+// ist er der zweite von drei Reitern und anfangs nicht zu sehen.
+ok('Kontakt erst im zweiten Schritt', await page.locator('#contactBox').isHidden() &&
+   await page.locator('#schrittTab2').getAttribute('aria-selected') === 'false');
 ok('Einstellungen als eigene Seite', await page.locator('#lnkSettings').count() === 1);
 const editUrl = page.url();
 await page.check('#chkKeyDone');

@@ -231,9 +231,12 @@
       'key.remember': 'Auf diesem Gerät gemerkt — beim nächsten Besuch findest Du die Liste auf der Startseite wieder.',
       'key.done': 'Ich habe den Link gesichert',
 
+      'flow.label': 'Schritte',
+      'flow.toContact': 'Weiter: Kontakt',
+      'flow.toShare': 'Weiter: Link teilen',
+      'flow.hints': 'Erklärungen',
+
       'share.headline': 'Link teilen',
-      'share.tabView': 'Ansehen',
-      'share.tabEdit': 'Bearbeiten',
       'share.viewHint': 'Diesen Link geben Deine Freunde weiter. Er zeigt die Liste, ändern lässt sich damit nichts.',
       'share.editHint': 'Dieser Link ist Dein Zugang. Gib ihn niemandem und speichere ihn als Lesezeichen.',
       'share.viewLabel': 'Ansehen-Link für Freunde',
@@ -313,7 +316,6 @@
       'settings.back': 'Zurück zur Liste',
       'settings.backStart': 'Zurück zur Startseite',
       'contact.headline': 'Kontakt',
-      'contact.sub': 'Name, E-Mail und Telefon für Anfragen',
       'contact.name': 'Dein Name, freiwillig',
       'contact.namePlaceholder': '',
       'contact.nameHint': 'Steht über der Liste und in der Anrede, wenn jemand anfragt.',
@@ -605,9 +607,12 @@
       'key.remember': 'Remembered on this device — next time you will find the list on the start page.',
       'key.done': 'I have saved the link',
 
+      'flow.label': 'Steps',
+      'flow.toContact': 'Next: contact',
+      'flow.toShare': 'Next: share link',
+      'flow.hints': 'Explanations',
+
       'share.headline': 'Share link',
-      'share.tabView': 'View',
-      'share.tabEdit': 'Edit',
       'share.viewHint': 'This is the link your friends get. It shows the list; nothing can be changed with it.',
       'share.editHint': 'This link is your way in. Give it to nobody and bookmark it.',
       'share.viewLabel': 'View link for friends',
@@ -687,7 +692,6 @@
       'settings.back': 'Back to the list',
       'settings.backStart': 'Back to the start page',
       'contact.headline': 'Contact',
-      'contact.sub': 'Name, e-mail and phone for requests',
       'contact.name': 'Your name, optional',
       'contact.namePlaceholder': '',
       'contact.nameHint': 'Shown above the list and in the greeting when somebody asks.',
@@ -1655,12 +1659,12 @@
        trotzdem im Reiter, damit sich zwei offene Reiter unterscheiden. */
     document.title = t(isEdit ? 'title.edit' : 'title.view');
 
-    /* Bereiche, die nur im Bearbeitenmodus sichtbar sind */
-    $('#shareBox').hidden = !isEdit;
+    /* Bereiche, die nur im Bearbeitenmodus sichtbar sind. Kontakt und
+       Teilen zeigt die Abfolge, je nach Schritt; der Freund sieht allein
+       das Inventar. */
     $('#addForm').hidden = !isEdit;
-    $('#contactBox').hidden = !isEdit;
-    $('#backupBox').hidden = !isEdit;
     $('#btnRefresh').hidden = isEdit;
+    abfolgeZeigen(isEdit);
     /* Nur in der Liste eines Freundes: Die eigene Liste in den eigenen Kreis
        zu legen ergibt nichts, sie steht schon im Kasten darunter. */
     $('#circleAddHereRow').hidden = isEdit;
@@ -2727,13 +2731,59 @@
     return nodes;
   }
 
-  /** Schaltet zwischen den Reitern im Abschnitt Link teilen. */
-  function selectTab(name) {
-    ['View', 'Edit'].forEach(function (key) {
-      var active = (key === name);
-      $('#tabBtn' + key).setAttribute('aria-selected', active ? 'true' : 'false');
-      $('#tab' + key).hidden = !active;
+  /* -- Die Abfolge der Leihliste ------------------------------------------ *
+   * Im Bearbeitenmodus stehen Inventar, Kontakt und Link teilen als drei
+   * Reiter hintereinander, in der Reihenfolge, in der eine Liste entsteht.
+   * Zu sehen ist immer ein Schritt. Welcher, gilt nur fuer die offene
+   * Liste; wird eine andere geoeffnet, beginnt es wieder beim Inventar.
+   * Beim Freund gibt es keine Reiter: Er sieht das Inventar, und die
+   * Kaesten, die nur fuer die eigene Liste gelten, bleiben verborgen. */
+
+  var SCHRITTE = ['inventoryBox', 'contactBox', 'shareBox'];
+  var abfolge = { schritt: 1, liste: null };
+
+  /** Stellt die Abfolge auf den Modus der Liste; renderList ruft das bei
+      jedem Zeichnen, deshalb nimmt es nie den Fokus. */
+  function abfolgeZeigen(isEdit) {
+    if (abfolge.liste !== state.id) { abfolge.liste = state.id; abfolge.schritt = 1; }
+    $('#viewList').classList.toggle('ist-abfolge', isEdit);
+    $('#schritte').hidden = !isEdit;
+    SCHRITTE.forEach(function (id, i) {
+      var feld = document.getElementById(id);
+      if (isEdit) {
+        feld.setAttribute('role', 'tabpanel');
+        feld.setAttribute('aria-labelledby', 'schrittTab' + (i + 1));
+      } else {
+        feld.removeAttribute('role');
+        feld.removeAttribute('aria-labelledby');
+      }
     });
+    schrittWaehlen(isEdit ? abfolge.schritt : 1, false);
+  }
+
+  /**
+   * Waehlt einen Schritt. Mit fokus kommt sein Reiter in den Fokus und die
+   * Leiste in Sicht: Wer unten im Inventar auf Weiter drueckt, landet am
+   * Anfang des naechsten Schritts und nicht irgendwo in dessen Mitte.
+   *
+   * @param {number} n  1, 2 oder 3
+   * @param {boolean} fokus
+   */
+  function schrittWaehlen(n, fokus) {
+    abfolge.schritt = n;
+    for (var i = 1; i <= SCHRITTE.length; i++) {
+      var tab = document.getElementById('schrittTab' + i);
+      var an = (i === n);
+      tab.setAttribute('aria-selected', an ? 'true' : 'false');
+      /* Nur der gewaehlte Reiter liegt in der Tabulatorfolge; zwischen den
+         Reitern wechseln die Pfeiltasten. */
+      tab.setAttribute('tabindex', an ? '0' : '-1');
+      document.getElementById(SCHRITTE[i - 1]).hidden = !an;
+    }
+    if (fokus) {
+      document.getElementById('schrittTab' + n).focus({ preventScroll: true });
+      $('#schritte').scrollIntoView({ block: 'nearest', behavior: ruhig() ? 'auto' : 'smooth' });
+    }
   }
 
   /* ===================================================================== *
@@ -5363,11 +5413,12 @@
 
   /**
    * Die Leihliste: anlegen, aktualisieren, eintragen, benennen, oeffnen, und
-   * der Zugangskasten am Ende des Anlegens. Dazu der Kontaktkasten — ein
-   * eigener Aufklapper, aber er schreibt in dasselbe state.doc und steht und
-   * faellt mit ihm.
+   * der Zugangskasten am Ende des Anlegens. Dazu der Kontakt — ein eigener
+   * Schritt, aber er schreibt in dasselbe state.doc und steht und faellt
+   * mit ihm — und die Abfolge der drei Schritte selbst (bindAbfolge).
    */
   function bindListe() {
+    bindAbfolge();
     $$('[data-create]').forEach(function (btn) {
       btn.addEventListener('click', createList);
     });
@@ -5425,6 +5476,41 @@
   }
 
   /**
+   * Die drei Reiter der Leihliste, die Knoepfe zum naechsten Schritt und die
+   * Erklaerungen auf Zuruf. Die Reiter folgen dem Muster, das Tastatur und
+   * Vorleseprogramme erwarten: Pfeile wechseln und waehlen zugleich, Pos1
+   * und Ende springen an die Raender, Tab verlaesst die Leiste.
+   */
+  function bindAbfolge() {
+    $$('#schritte .tab').forEach(function (tab) {
+      tab.addEventListener('click', function () { schrittWaehlen(Number(tab.getAttribute('data-schritt')), false); });
+    });
+    $('#schritte').addEventListener('keydown', function (ev) {
+      var n = abfolge.schritt;
+      if (ev.key === 'ArrowRight') { n = n % SCHRITTE.length + 1; }
+      else if (ev.key === 'ArrowLeft') { n = (n + SCHRITTE.length - 2) % SCHRITTE.length + 1; }
+      else if (ev.key === 'Home') { n = 1; }
+      else if (ev.key === 'End') { n = SCHRITTE.length; }
+      else { return; }
+      ev.preventDefault();
+      schrittWaehlen(n, false);
+      document.getElementById('schrittTab' + n).focus();
+    });
+    $$('[data-weiter]').forEach(function (btn) {
+      btn.addEventListener('click', function () { schrittWaehlen(Number(btn.getAttribute('data-weiter')), true); });
+    });
+    /* Das Zeichen in der Kopfzeile eines Schritts blendet alle Erklaerungen
+       darin an ihrer Stelle ein und wieder aus. Zu sehen ist sonst nur, was
+       es zum Ausfuellen braucht. */
+    $$('[data-hinweise]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var offen = btn.closest('.card').classList.toggle('zeigt-hinweise');
+        btn.setAttribute('aria-expanded', offen ? 'true' : 'false');
+      });
+    });
+  }
+
+  /**
    * Sprechen und Sammeleingabe. Beide fuehren in dieselbe Box: Wer kein
    * Mikrofon hat oder keines geben moechte, tippt dort mehrere Sachen am Stueck.
    */
@@ -5441,18 +5527,14 @@
   }
 
   /**
-   * Der Kasten zum Weitergeben: die beiden Reiter, das Kopieren, das Aufdecken
-   * des geheimen Links und die Weitergabe ueber das Geraet.
+   * Der Kasten zum Weitergeben: das Kopieren, das Aufdecken des geheimen
+   * Links, das Zurueckziehen und die Weitergabe ueber das Geraet.
    *
    * [data-copy] steht auch an den Feldern der Superliste. Das ist kein
    * Versehen: Es ist ein Muster und keine Ansicht, und der Handgriff
    * unterscheidet die Faelle an der Kennung des Ziels.
    */
   function bindTeilen() {
-    /* Reiter im Abschnitt Link teilen */
-    $$('.tab').forEach(function (tab) {
-      tab.addEventListener('click', function () { selectTab(tab.getAttribute('data-tab')); });
-    });
     $('#btnRevoke').addEventListener('click', schluesselWechseln);
     $$('[data-copy]').forEach(function (btn) {
       btn.addEventListener('click', function () {

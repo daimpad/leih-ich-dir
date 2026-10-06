@@ -146,9 +146,26 @@ for (const breite of [320, 390]) {
   await p.locator('#modalClose').click();
   await p.waitForTimeout(250);
 
-  console.log('· Kontakt und Teilen aufgeklappt');
-  await p.locator('#contactBox summary').click();
+  /* Seit Oktober 2026 sind Kontakt und Teilen eigene Schritte; gemessen
+     wird jeder fuer sich, das Teilen mit beiden Aufklappern offen und mit
+     den Erklaerungen. */
+  console.log('· Kontakt und Teilen');
+  /* Gut eine Sekunde nach dem Oeffnen erinnert eine Meldung an lange
+     Verliehenes (hinweisLangeDraussen) und liegt dann 3,6 Sekunden ueber
+     dem unteren Rand — seit die Schritte kurz sind, genau ueber ihrem
+     Weiter-Knopf. Fuer ihre Dauer ueber dem Inhalt zu liegen ist der Zweck
+     einer Meldung; nur die schwebende Schaltflaeche haelt Abstand zu ihr.
+     Gemessen wird deshalb das Bild danach: erst erscheinen lassen, dann
+     abwarten. Eine Meldung, die stehen bliebe, fiele weiterhin auf. */
+  await p.waitForSelector('#toast:not([hidden])', { timeout: 6000 }).catch(() => {});
+  await p.waitForSelector('#toast', { state: 'hidden', timeout: 8000 });
+  await p.locator('#schrittTab2').click();
   await pruefe(p, 'Kontakt', breite, sprache);
+  await p.locator('#schrittTab3').click();
+  await p.locator('#editFold summary').click();
+  await p.locator('#backupBox summary').click();
+  await p.locator('#shareBox [data-hinweise]').click();
+  await pruefe(p, 'Teilen', breite, sprache);
 
   console.log('· Superliste');
   await p.goto(BASE + '/', { waitUntil:'networkidle' });

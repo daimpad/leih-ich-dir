@@ -42,12 +42,18 @@ ok('ohne Beschriftung', !/Zuletzt|aktualisiert/i.test(txt), txt);
 const gr = await stamp.evaluate(n => parseFloat(getComputedStyle(n).fontSize));
 const h2 = await page.locator('#viewList .items-head .card__title').evaluate(n => parseFloat(getComputedStyle(n).fontSize));
 ok('kleiner als die Überschrift', gr < h2, gr + 'px gegen ' + h2 + 'px');
+// Bis Oktober 2026 stand der Zeitstempel rechts neben der sichtbaren
+// Ueberschrift "Inventar". Seit die eigene Liste in drei Reitern steht,
+// nennt der Reiter den Schritt, und die Ueberschrift bleibt nur fuer
+// Vorleseprogramme im Dokument; der Zeitstempel steht allein oben rechts
+// in der Karte.
 const rechts = await page.evaluate(() => {
-  const a = document.querySelector('#viewList .items-head .card__title').getBoundingClientRect();
+  const k = document.getElementById('inventoryBox').getBoundingClientRect();
   const b = document.getElementById('listUpdated').getBoundingClientRect();
-  return b.left >= a.right && Math.abs((a.top + a.height / 2) - (b.top + b.height / 2)) < 12;
+  return { rechts: Math.round(k.right - b.right), oben: Math.round(b.top - k.top) };
 });
-ok('rechts neben der Überschrift, auf gleicher Höhe', rechts);
+ok('oben rechts in der Karte', rechts.rechts >= 0 && rechts.rechts <= 40 && rechts.oben >= 0 && rechts.oben <= 48,
+   JSON.stringify(rechts));
 const meta = await page.locator('#listMeta').innerText();
 ok('die alte Zeile über der Liste ist leer', meta.trim() === '', meta);
 
