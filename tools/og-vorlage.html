@@ -20,7 +20,9 @@
   Sie schreibt nichts ab: Farben, Schrift und Knete kommen aus style.css und
   assets/fonts/, und die drei Platzhalter unten — Vorrat, Wortmarke, Dinge —
   füllt bilder.mjs beim Ablichten aus der laufenden Startseite. Allein im
-  Browser geöffnet, bleiben sie deshalb leer. Die Klasse ruhig am
+  Browser geöffnet, bleiben sie deshalb leer. Wie der Hero steht das Bild
+  ohne Rahmen: links Wortmarke und Satz, rechts schweben die Dinge, in
+  derselben Anordnung wie auf der Startseite. Die Klasse ruhig am
   Wurzelelement hält die Knete still, damit das Bild nicht vom Zeitpunkt
   der Aufnahme abhängt. Anleitung in tools/README-og.md.
 -->
@@ -29,23 +31,20 @@
 <style>
   body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
   .blatt {
-    position: absolute; inset: 44px 52px;
-    display: flex; align-items: center; gap: 36px;
-    padding: 46px 52px;
-    border-radius: 56px;
+    position: absolute; inset: 0;
+    display: flex; align-items: center; gap: 40px;
+    padding: 56px 64px;
   }
   .wort { flex: 1 1 auto; min-width: 0; }
-  .wort .wortmarke { max-width: none; width: 560px; margin-left: -18px; }
-  .satz { font-size: 33px; line-height: 1.32; font-weight: 700; color: var(--muted); margin-top: 18px; max-width: 15em; }
+  .wort .wortmarke { width: 600px; margin-left: -18px; }
+  .satz { font-size: 34px; line-height: 1.3; font-weight: 800; color: var(--muted); margin-top: 18px; max-width: 15em; }
   .fuss { font-size: 27px; font-weight: 900; color: var(--link); margin-top: 26px; }
-  .hero-bild { flex: 0 0 auto; width: 430px; }
-  .hero-bild .dinge { grid-template-columns: repeat(3, 1fr); gap: 12px 16px; padding: 40px 26px 30px; }
-  .hero-bild .kissen { inset: 6% 0 0 0; }
+  .hero-bild { flex: 0 0 auto; width: 420px; max-width: none; }
 </style>
 </head>
 <body>
   <div id="vorrat"></div>
-  <div class="blatt hero-panel">
+  <div class="blatt">
     <div class="wort">
       <div id="wortmarke-platz"></div>
       <p class="satz">Zeig Deinen Freund:innen, was sie bei Dir ausleihen können.</p>

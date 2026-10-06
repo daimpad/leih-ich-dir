@@ -42,13 +42,13 @@
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Die Wortmarke Leih ich Dir. aus Knete, daneben auf einem Kissen sechs Dinge zum Verleihen: Bohrmaschine, Leiter, Zelt, Würfel, Waffeleisen und ein Schalter.">
+<meta property="og:image:alt" content="Die Wortmarke Leih ich Dir. aus Knete, daneben schweben sechs Dinge zum Verleihen: Bohrmaschine, Leiter, Zelt, Würfel, Waffeleisen und ein Schalter.">
 <!-- Ohne diese Angabe zeigen Slack, Discord und X ein Randbildchen statt der grossen Karte. -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="LeihIchDir · Dinge an Freunde verleihen, ohne Konto">
 <meta name="twitter:description" content="Trage ein, was Du verleihst, und schick Deinen Freund:innen einen Link. Verschlüsselt im Browser, ohne Konto.">
 <meta name="twitter:image" content="https://leihichdir.de/assets/pics/og.png">
-<meta name="twitter:image:alt" content="Die Wortmarke Leih ich Dir. aus Knete, daneben auf einem Kissen sechs Dinge zum Verleihen: Bohrmaschine, Leiter, Zelt, Würfel, Waffeleisen und ein Schalter.">
+<meta name="twitter:image:alt" content="Die Wortmarke Leih ich Dir. aus Knete, daneben schweben sechs Dinge zum Verleihen: Bohrmaschine, Leiter, Zelt, Würfel, Waffeleisen und ein Schalter.">
 <!-- Strukturierte Angaben zur Anwendung.
 
      Warum das unter dieser CSP geht: Nicht weil script-src es erlaubte,
@@ -418,149 +418,144 @@
   <!-- ==================================================================== -->
   <section id="viewStart" class="view" hidden>
 
-    <!-- Der Hero fasst Zusage, Satz und Aufruf in einem Rahmen aus Knete
-         zusammen, darunter liegen sechs Dinge auf einem Kissen. -->
+    <!-- Der Hero ist die eine Ausnahme vom Geruest: ohne Rahmen und ueber
+         die ganze Breite des Fensters, bis 1600 Punkte. Links steht die
+         Wortmarke, darunter Satz und Aufruf, rechts schweben die Dinge;
+         schmal stehen die Dinge oben. Beim ersten Zeigen treten die drei
+         nacheinander auf, erst die Dinge, dann die Wortmarke, dann der Satz
+         (app.js, 8a). -->
     <div class="hero">
-      <div class="hero-panel">
-        <div class="hero-body">
-          <div class="hero-top">
-            <div class="hero-sagt">
-              <h1><span data-i18n="hero.a">Leih</span> <mark data-i18n="hero.b">ich</mark> <span data-i18n="hero.c">Dir.</span></h1>
-              <!-- Die Wortmarke aus Knete. app.js formt sie aus den drei Teilen des
-                   Titels, in der geladenen Schrift und der gewaehlten Sprache;
-                   der Titel bleibt dann nur fuer Vorleseprogramme stehen. -->
-              <svg class="wortmarke" id="wortmarke" aria-hidden="true" focusable="false"></svg>
-              <p class="lead" data-i18n="hero.lead">Zeig Deinen Freund:innen, was sie bei Dir ausleihen können!</p>
-              <!-- Der Aufruf steht in der Textspalte, nicht unter der ganzen
-                   Reihe: Sonst bliebe neben dem Bild eine leere Flaeche. -->
-              <p class="hero-act">
-                <button type="button" id="btnCreateHero" class="btn btn--primary btn--lg" data-create
-                        data-i18n="start.create">Leihliste anlegen</button>
-              </p>
-            </div>
-            <!-- Das Bild sagt, wofuer die Liste da ist: Dinge, die man
-                 verleiht, aus Knete, auf einem Kissen. Es traegt keine
-                 Aussage, die nicht schon im Satz stuende, und ist deshalb
-                 fuer Vorleseprogramme verborgen und nicht anwaehlbar. Wer
-                 ein Ding anfasst, bringt es zum Springen (app.js, 8a); mehr
-                 geschieht nicht. Das Bild steht im Dokument und nicht in
-                 einem <img>: Nur so erreichen es die Farben aus style.css und
-                 der Wechsel zwischen hell und dunkel. Das alte Bild, die
-                 Pfote, liegt in archiv/alter-stil/pics/. -->
-            <div class="hero-bild" aria-hidden="true">
-              <div class="kissen"></div>
-              <ul class="dinge">
-                <li>
-                  <span class="ding" data-ding="bohr">
-                    <svg viewBox="0 0 120 120" focusable="false">
-                      <g class="ding__feder">
-                        <g filter="url(#knete)">
-                          <rect x="38" y="60" width="24" height="42" rx="12" fill="url(#v-kaugummi)" transform="rotate(-10 50 81)"/>
-                          <rect x="26" y="92" width="44" height="16" rx="8" fill="url(#v-immergruen)"/>
-                          <rect x="16" y="30" width="66" height="38" rx="19" fill="url(#v-kaugummi)"/>
-                          <rect x="78" y="38" width="18" height="22" rx="7" fill="url(#v-butter)"/>
-                          <rect x="93" y="45" width="21" height="8" rx="4" fill="url(#v-milch)"/>
-                          <rect x="56" y="64" width="9" height="14" rx="4.5" fill="url(#v-pfirsich)"/>
-                        </g>
-                        <g class="gesicht">
-                          <ellipse cx="40" cy="46" rx="3.3" ry="4.3"/>
-                          <ellipse cx="55" cy="46" rx="3.3" ry="4.3"/>
-                          <path class="gesicht__mund" d="M42 55q5.5 5 11 0"/>
-                        </g>
-                      </g>
-                    </svg>
-                  </span>
-                </li>
-                <li>
-                  <span class="ding" data-ding="leiter">
-                    <svg viewBox="0 0 120 120" focusable="false">
-                      <g class="ding__feder">
-                        <g transform="rotate(-8 60 64)" filter="url(#knete)">
-                          <rect x="38" y="28" width="44" height="10" rx="5" fill="url(#v-pfirsich)"/>
-                          <rect x="38" y="50" width="44" height="10" rx="5" fill="url(#v-pfirsich)"/>
-                          <rect x="38" y="72" width="44" height="10" rx="5" fill="url(#v-pfirsich)"/>
-                          <rect x="38" y="92" width="44" height="10" rx="5" fill="url(#v-pfirsich)"/>
-                          <rect x="30" y="14" width="13" height="94" rx="6.5" fill="url(#v-butter)"/>
-                          <rect x="77" y="14" width="13" height="94" rx="6.5" fill="url(#v-butter)"/>
-                        </g>
-                      </g>
-                    </svg>
-                  </span>
-                </li>
-                <li>
-                  <span class="ding" data-ding="zelt">
-                    <svg viewBox="0 0 120 120" focusable="false">
-                      <g class="ding__feder">
-                        <g filter="url(#knete)">
-                          <rect x="58" y="4" width="4.5" height="24" rx="2.2" fill="url(#v-immergruen)"/>
-                          <path d="M62.5 6l17 5.5-17 5.5z" fill="url(#v-kaugummi)" stroke="url(#v-kaugummi)" stroke-width="4" stroke-linejoin="round"/>
-                          <path d="M60 24l40 74H20z" fill="url(#v-minze)" stroke="url(#v-minze)" stroke-width="14" stroke-linejoin="round"/>
-                          <path class="zelt__tuer" d="M60 66l13 34H47z" stroke-width="6" stroke-linejoin="round"/>
-                        </g>
-                        <g class="gesicht gesicht--schlaf">
-                          <path d="M48 52q4 3.5 8 0"/>
-                          <path d="M64 52q4 3.5 8 0"/>
-                        </g>
-                      </g>
-                    </svg>
-                  </span>
-                </li>
-                <li>
-                  <span class="ding" data-ding="wuerfel">
-                    <svg viewBox="0 0 120 120" focusable="false">
-                      <g class="ding__feder">
-                        <g transform="rotate(9 60 66)">
-                          <rect x="22" y="28" width="76" height="76" rx="22" fill="url(#v-immergruen)" filter="url(#knete)"/>
-                          <g fill="url(#v-milch)" filter="url(#knete)">
-                            <circle cx="42" cy="48" r="7.5"/><circle cx="78" cy="48" r="7.5"/>
-                            <circle cx="60" cy="66" r="7.5"/>
-                            <circle cx="42" cy="84" r="7.5"/><circle cx="78" cy="84" r="7.5"/>
-                          </g>
-                        </g>
-                      </g>
-                    </svg>
-                  </span>
-                </li>
-                <li>
-                  <span class="ding" data-ding="waffel">
-                    <svg viewBox="0 0 120 120" focusable="false">
-                      <g class="ding__feder">
-                        <g filter="url(#knete)">
-                          <path d="M60 104C18 76 14 42 36 32c14-6 22 4 24 10 2-6 10-16 24-10 22 10 18 44-24 72z" fill="url(#v-waffel)"/>
-                          <g clip-path="url(#herz)" class="waffel__gitter">
-                            <path d="M34 20v96M48 20v96M62 20v96M76 20v96M90 20v96M10 46h100M10 60h100M10 74h100M10 88h100"/>
-                          </g>
-                        </g>
-                      </g>
-                    </svg>
-                  </span>
-                </li>
-                <li>
-                  <span class="ding ding--schalter" data-ding="schalter">
-                    <svg viewBox="0 0 120 120" focusable="false">
-                      <g class="ding__feder">
-                        <g filter="url(#knete)">
-                          <rect class="ding__spur" x="12" y="42" width="96" height="50" rx="25"/>
-                          <g class="ding__knauf">
-                            <circle cx="83" cy="67" r="20" fill="url(#v-milch)"/>
-                            <path class="ding__haken" d="M75 67l5.5 5.5L91 61"/>
-                          </g>
-                        </g>
-                      </g>
-                    </svg>
-                  </span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-        </div>
+      <div class="hero-sagt">
+        <h1><span data-i18n="hero.a">Leih</span> <mark data-i18n="hero.b">ich</mark> <span data-i18n="hero.c">Dir.</span></h1>
+        <!-- Die Wortmarke aus Knete. app.js formt sie aus den drei Teilen des
+             Titels, in der geladenen Schrift und der gewaehlten Sprache;
+             der Titel bleibt dann nur fuer Vorleseprogramme stehen. -->
+        <svg class="wortmarke" id="wortmarke" aria-hidden="true" focusable="false"></svg>
+        <p class="lead" data-i18n="hero.lead">Zeig Deinen Freund:innen, was sie bei Dir ausleihen können!</p>
+        <!-- Der Aufruf steht in der Textspalte, nicht unter der ganzen
+             Reihe: Sonst bliebe neben dem Bild eine leere Flaeche. -->
+        <p class="hero-act">
+          <button type="button" id="btnCreateHero" class="btn btn--primary btn--lg" data-create
+                  data-i18n="start.create">Leihliste anlegen</button>
+        </p>
+      </div>
+      <!-- Das Bild sagt, wofuer die Liste da ist: Dinge, die man
+           verleiht, aus Knete. Sie schweben frei neben der Schrift, ohne
+           Kissen und ohne Rahmen. Es traegt keine Aussage, die nicht schon
+           im Satz stuende, und ist deshalb fuer Vorleseprogramme verborgen
+           und nicht anwaehlbar. Wer ein Ding anfasst, bringt es zum
+           Springen (app.js, 8a); mehr geschieht nicht. Das Bild steht im
+           Dokument und nicht in einem <img>: Nur so erreichen es die Farben
+           aus style.css und der Wechsel zwischen hell und dunkel. Das alte
+           Bild, die Pfote, liegt in archiv/alter-stil/pics/. -->
+      <div class="hero-bild" aria-hidden="true">
+        <ul class="dinge">
+          <li>
+            <span class="ding" data-ding="bohr">
+              <svg viewBox="0 0 120 120" focusable="false">
+                <g class="ding__feder">
+                  <g filter="url(#knete)">
+                    <rect x="38" y="60" width="24" height="42" rx="12" fill="url(#v-kaugummi)" transform="rotate(-10 50 81)"/>
+                    <rect x="26" y="92" width="44" height="16" rx="8" fill="url(#v-immergruen)"/>
+                    <rect x="16" y="30" width="66" height="38" rx="19" fill="url(#v-kaugummi)"/>
+                    <rect x="78" y="38" width="18" height="22" rx="7" fill="url(#v-butter)"/>
+                    <rect x="93" y="45" width="21" height="8" rx="4" fill="url(#v-milch)"/>
+                    <rect x="56" y="64" width="9" height="14" rx="4.5" fill="url(#v-pfirsich)"/>
+                  </g>
+                  <g class="gesicht">
+                    <ellipse cx="40" cy="46" rx="3.3" ry="4.3"/>
+                    <ellipse cx="55" cy="46" rx="3.3" ry="4.3"/>
+                    <path class="gesicht__mund" d="M42 55q5.5 5 11 0"/>
+                  </g>
+                </g>
+              </svg>
+            </span>
+          </li>
+          <li>
+            <span class="ding" data-ding="leiter">
+              <svg viewBox="0 0 120 120" focusable="false">
+                <g class="ding__feder">
+                  <g transform="rotate(-8 60 64)" filter="url(#knete)">
+                    <rect x="38" y="28" width="44" height="10" rx="5" fill="url(#v-pfirsich)"/>
+                    <rect x="38" y="50" width="44" height="10" rx="5" fill="url(#v-pfirsich)"/>
+                    <rect x="38" y="72" width="44" height="10" rx="5" fill="url(#v-pfirsich)"/>
+                    <rect x="38" y="92" width="44" height="10" rx="5" fill="url(#v-pfirsich)"/>
+                    <rect x="30" y="14" width="13" height="94" rx="6.5" fill="url(#v-butter)"/>
+                    <rect x="77" y="14" width="13" height="94" rx="6.5" fill="url(#v-butter)"/>
+                  </g>
+                </g>
+              </svg>
+            </span>
+          </li>
+          <li>
+            <span class="ding" data-ding="zelt">
+              <svg viewBox="0 0 120 120" focusable="false">
+                <g class="ding__feder">
+                  <g filter="url(#knete)">
+                    <rect x="58" y="4" width="4.5" height="24" rx="2.2" fill="url(#v-immergruen)"/>
+                    <path d="M62.5 6l17 5.5-17 5.5z" fill="url(#v-kaugummi)" stroke="url(#v-kaugummi)" stroke-width="4" stroke-linejoin="round"/>
+                    <path d="M60 24l40 74H20z" fill="url(#v-minze)" stroke="url(#v-minze)" stroke-width="14" stroke-linejoin="round"/>
+                    <path class="zelt__tuer" d="M60 66l13 34H47z" stroke-width="6" stroke-linejoin="round"/>
+                  </g>
+                  <g class="gesicht gesicht--schlaf">
+                    <path d="M48 52q4 3.5 8 0"/>
+                    <path d="M64 52q4 3.5 8 0"/>
+                  </g>
+                </g>
+              </svg>
+            </span>
+          </li>
+          <li>
+            <span class="ding" data-ding="wuerfel">
+              <svg viewBox="0 0 120 120" focusable="false">
+                <g class="ding__feder">
+                  <g transform="rotate(9 60 66)">
+                    <rect x="22" y="28" width="76" height="76" rx="22" fill="url(#v-immergruen)" filter="url(#knete)"/>
+                    <g fill="url(#v-milch)" filter="url(#knete)">
+                      <circle cx="42" cy="48" r="7.5"/><circle cx="78" cy="48" r="7.5"/>
+                      <circle cx="60" cy="66" r="7.5"/>
+                      <circle cx="42" cy="84" r="7.5"/><circle cx="78" cy="84" r="7.5"/>
+                    </g>
+                  </g>
+                </g>
+              </svg>
+            </span>
+          </li>
+          <li>
+            <span class="ding" data-ding="waffel">
+              <svg viewBox="0 0 120 120" focusable="false">
+                <g class="ding__feder">
+                  <g filter="url(#knete)">
+                    <path d="M60 104C18 76 14 42 36 32c14-6 22 4 24 10 2-6 10-16 24-10 22 10 18 44-24 72z" fill="url(#v-waffel)"/>
+                    <g clip-path="url(#herz)" class="waffel__gitter">
+                      <path d="M34 20v96M48 20v96M62 20v96M76 20v96M90 20v96M10 46h100M10 60h100M10 74h100M10 88h100"/>
+                    </g>
+                  </g>
+                </g>
+              </svg>
+            </span>
+          </li>
+          <li>
+            <span class="ding ding--schalter" data-ding="schalter">
+              <svg viewBox="0 0 120 120" focusable="false">
+                <g class="ding__feder">
+                  <g filter="url(#knete)">
+                    <rect class="ding__spur" x="12" y="42" width="96" height="50" rx="25"/>
+                    <g class="ding__knauf">
+                      <circle cx="83" cy="67" r="20" fill="url(#v-milch)"/>
+                      <path class="ding__haken" d="M75 67l5.5 5.5L91 61"/>
+                    </g>
+                  </g>
+                </g>
+              </svg>
+            </span>
+          </li>
+        </ul>
       </div>
     </div>
 
-    <!-- Die vier Zusagen stehen unter dem Rahmen statt darin. Im Rahmen
-         steht, wozu die Liste da ist; darunter, was sie kostet und was sie
-         nicht verlangt. -->
+    <!-- Die vier Zusagen stehen unter dem Hero. Dort steht, wozu die Liste
+         da ist; hier, was sie kostet und was sie nicht verlangt. -->
     <ul class="trust" data-i18n-label="trust.label" aria-label="Eigenschaften">
       <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.nocost">Kostenlos</span></li>
       <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.noads">Werbefrei</span></li>
@@ -568,79 +563,44 @@
       <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.crypto">Verschlüsselt</span></li>
     </ul>
 
-    <!-- Zwei Kaesten, weil es zwei Arten von Liste gibt. Jeder traegt sein
-         Zeichen in der Ueberschrift: Wer die Seite ueberfliegt, soll ohne
-         Lesen sehen, dass hier zwei verschiedene Dinge erklaert werden.
-         Drei Schritte in einer Reihe, mit Pfeilen dazwischen. Schmal
-         untereinander, die Pfeile drehen sich dann mit. -->
-    <section class="howto">
-      <h2 class="howto__head">
-        <span class="howto__mark" aria-hidden="true">
-          <svg class="ico" focusable="false"><use href="#i-leihliste"/></svg>
-        </span>
-        <span data-i18n="steps.headline">So geht’s: eine eigene Leihliste einstellen</span>
-      </h2>
-      <p class="hint howto__lead" data-i18n="steps.lead"></p>
-      <ol class="steps">
-        <li>
-          <span class="step-no" aria-hidden="true">1</span>
-          <h3 data-i18n="steps.one">Gegenstände eintragen</h3>
-          <p data-i18n="steps.oneText">Tippen oder einsprechen. Erst nur der Name, alles Weitere steht hinter dem Eintrag.</p>
-        </li>
-        <li>
-          <span class="step-no" aria-hidden="true">2</span>
-          <h3 data-i18n="steps.two">Kontaktdetails angeben</h3>
-          <p data-i18n="steps.twoText">Name und E-Mail, damit Deine Freunde Dich erreichen. Beides wird mitverschlüsselt.</p>
-        </li>
-        <li>
-          <span class="step-no" aria-hidden="true">3</span>
-          <h3 data-i18n="steps.three">Link weitergeben</h3>
-          <p data-i18n="steps.threeText">Freunde sehen, was gerade frei ist, und fragen mit einem Klick an.</p>
-        </li>
-      </ol>
-      <p class="actions spaced-lg">
+    <!-- Zwei Einstiege, weil es zwei Arten von Liste gibt. Jeder traegt das
+         Zeichen seiner Art: Wer die Seite ueberfliegt, soll ohne Lesen
+         sehen, dass hier zwei verschiedene Dinge beginnen. Mehr als
+         Ueberschrift und Aufruf steht hier nicht; wie es weitergeht, zeigt
+         die Liste selbst. -->
+    <section class="card einstieg">
+      <span class="einstieg__mark" aria-hidden="true">
+        <svg class="ico" focusable="false"><use href="#i-leihliste"/></svg>
+      </span>
+      <div class="einstieg__text">
+        <h2 data-i18n="start.listHead">Leihliste erstellen</h2>
+      </div>
+      <p class="einstieg__act">
         <button type="button" class="btn btn--primary" data-create
                 data-i18n="start.create">Leihliste anlegen</button>
       </p>
       <!-- Wer schon eine hatte: Der Weg zurueck steht neben dem Anlegen, weil
            genau hier jemand steht, der seine Liste verloren hat. Das Dateifeld
            bleibt verborgen, der Verweis oeffnet es. -->
-      <p class="spaced">
+      <p class="einstieg__nach">
         <button type="button" id="btnRestore" class="linkbtn" data-i18n="backup.restore">Aus einer Sicherung wiederherstellen</button>
         <input type="file" id="backupFile" accept="application/json,.json" hidden>
       </p>
     </section>
 
-    <!-- Die Superliste. Dieselbe Bauform, damit der Vergleich leicht
-         faellt, aber ein eigenes Zeichen und ein eigener Aufruf: Der zweite
-         Knopf traegt bewusst nicht die volle Farbe, weil eine eigene Liste
-         der Anfang ist und der Kreis der zweite Schritt. -->
-    <section class="howto">
-      <h2 class="howto__head">
-        <span class="howto__mark howto__mark--kreis" aria-hidden="true">
-          <svg class="ico" focusable="false"><use href="#i-kreis"/></svg>
-        </span>
-        <span data-i18n="circleSteps.headline">So geht’s: aus vielen Leihlisten eine Superliste</span>
-      </h2>
-      <p class="hint howto__lead" data-i18n="circleSteps.lead"></p>
-      <ol class="steps">
-        <li>
-          <span class="step-no step-no--kreis" aria-hidden="true">1</span>
-          <h3 data-i18n="circleSteps.one">Ansehen-Links sammeln</h3>
-          <p data-i18n="circleSteps.oneText"></p>
-        </li>
-        <li>
-          <span class="step-no step-no--kreis" aria-hidden="true">2</span>
-          <h3 data-i18n="circleSteps.two">In die Superliste legen</h3>
-          <p data-i18n="circleSteps.twoText"></p>
-        </li>
-        <li>
-          <span class="step-no step-no--kreis" aria-hidden="true">3</span>
-          <h3 data-i18n="circleSteps.three">An einer Stelle suchen</h3>
-          <p data-i18n="circleSteps.threeText"></p>
-        </li>
-      </ol>
-      <p class="actions spaced-lg">
+    <!-- Die Superliste. Dieselbe Bauform, aber ein eigenes Zeichen und ein
+         eigener Aufruf: Der zweite Knopf traegt bewusst nicht die volle
+         Farbe, weil eine eigene Liste der Anfang ist und der Kreis der
+         zweite Schritt. -->
+    <section class="card einstieg">
+      <span class="einstieg__mark einstieg__mark--kreis" aria-hidden="true">
+        <svg class="ico" focusable="false"><use href="#i-kreis"/></svg>
+      </span>
+      <div class="einstieg__text">
+        <h2 data-i18n="start.circleHead">Die Superliste</h2>
+        <p data-i18n="start.circleText">Eine Liste aus verschiedenen Leihlisten.</p>
+      </div>
+      <p class="einstieg__act">
         <button type="button" id="btnStartCircle" class="btn" data-i18n="circle.startNew">Superliste anlegen</button>
       </p>
     </section>

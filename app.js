@@ -205,26 +205,11 @@
       'trust.nologin': 'Ohne Login',
       'trust.crypto': 'Verschlüsselt',
 
-      'steps.headline': 'So geht\u2019s: eine eigene Leihliste einstellen',
-      'steps.lead': 'Eine Liste der Dinge, die Du verleihst. Sie liegt verschlüsselt auf dem Server, und sehen kann sie, wer den Link von Dir bekommt.',
-      'steps.one': 'Gegenstände eintragen',
-      'steps.oneText': 'Tippen oder einsprechen. Erst nur der Name, alles Weitere steht hinter dem Eintrag.',
-      'steps.two': 'Kontaktdetails angeben',
-      'steps.twoText': 'Name und E-Mail, damit Deine Freunde Dich erreichen. Beides wird mitverschlüsselt.',
-      'steps.three': 'Link weitergeben',
-      'steps.threeText': 'Freunde sehen, was gerade frei ist, und fragen mit einem Klick an.',
-
       'start.create': 'Leihliste anlegen',
       'start.creating': 'Leihliste wird angelegt …',
-
-      'circleSteps.headline': 'So geht\u2019s: aus vielen Leihlisten eine Superliste',
-      'circleSteps.lead': 'Du hast schon ein paar Leihlisten von Freunden zusammengetragen und möchtest sie zusammen durchsuchen. Genau dafür ist eine Superliste da: eine Liste der Leihlisten. Sie führt alle zusammen, die Dir geteilt wurden, und macht sie nach Gegenstand und Verfügbarkeit durchsuchbar.',
-      'circleSteps.one': 'Ansehen-Links sammeln',
-      'circleSteps.oneText': 'Deine Freunde schicken Dir die Links zu ihren Leihlisten, so wie Du ihnen Deinen schickst.',
-      'circleSteps.two': 'In die Superliste legen',
-      'circleSteps.twoText': 'Den Link einfügen und einen Namen dazu vergeben. Gespeichert werden Kennung und Schlüssel, keine Gegenstände.',
-      'circleSteps.three': 'An einer Stelle suchen',
-      'circleSteps.threeText': 'Alle Sachen aus allen gesammelten Leihlisten in einer Liste, durchsuchbar nach Gegenstand, Person und Notiz, mit frei oder verliehen daneben.',
+      'start.listHead': 'Leihliste erstellen',
+      'start.circleHead': 'Die Superliste',
+      'start.circleText': 'Eine Liste aus verschiedenen Leihlisten.',
 
       'list.titleLabel': 'Titel der Liste, freiwillig',
       'list.titlePlaceholder': 'Titel der Liste',
@@ -594,26 +579,11 @@
       'trust.nologin': 'No login',
       'trust.crypto': 'Encrypted',
 
-      'steps.headline': 'How it works: set up your own lending list',
-      'steps.lead': 'A list of the things you lend out. It lives encrypted on the server, and whoever gets the link from you can see it.',
-      'steps.one': 'Add your things',
-      'steps.oneText': 'Type or speak. Just the name at first, everything else sits behind the entry.',
-      'steps.two': 'Add your contact details',
-      'steps.twoText': 'Name and e-mail, so your friends can reach you. Both are encrypted with the list.',
-      'steps.three': 'Pass the link on',
-      'steps.threeText': 'Friends see what is free right now and ask with one click.',
-
       'start.create': 'Create a lending list',
       'start.creating': 'Creating lending list …',
-
-      'circleSteps.headline': 'How it works: many lending lists, one super list',
-      'circleSteps.lead': 'You have collected a few lending lists from friends and would like to search them together. That is what a super list is for: a list of lending lists. It brings together everything shared with you and makes it searchable by thing and availability.',
-      'circleSteps.one': 'Collect view links',
-      'circleSteps.oneText': 'Your friends send you the links to their lending lists, just as you send them yours.',
-      'circleSteps.two': 'Put them in the super list',
-      'circleSteps.twoText': 'Paste the link and give it a name. The id and the key are stored, no things.',
-      'circleSteps.three': 'Search in one place',
-      'circleSteps.threeText': 'Everything from all collected lending lists in one list, searchable by thing, person and note, with free or lent beside it.',
+      'start.listHead': 'Make a lending list',
+      'start.circleHead': 'The super list',
+      'start.circleText': 'One list made of several lending lists.',
 
       'list.titleLabel': 'List title, optional',
       'list.titlePlaceholder': 'List title',
@@ -1554,8 +1524,10 @@
        landete mitten in der neuen Liste, beim Teilen statt beim Anfang. */
     if (shownView !== null && shownView !== name) { window.scrollTo(0, 0); }
     shownView = name;
-    /* Die Wortmarke laesst sich nur messen, wenn sie zu sehen ist. */
-    if (name === 'viewStart') { wortmarkeZeigen(); }
+    /* Die Wortmarke laesst sich nur messen, wenn sie zu sehen ist. Der
+       Auftritt kommt vorher: Die Buchstaben, die gleich entstehen, sollen
+       ihn schon mitmachen. */
+    if (name === 'viewStart') { heroAuftritt(); wortmarkeZeigen(); }
   }
 
   /** Raeumt beide Kopien: die im DOM und die im Speicher. Der Zaehler steigt
@@ -2780,7 +2752,9 @@
    * Gefeiert wird hier nichts, kein Konfetti und kein Ton: Die Startseite
    * traegt das Vertrauensversprechen und bleibt ruhig. Wer Bewegung
    * abbestellt hat (ruhig()), bekommt keine, und die Daueranimationen haelt
-   * das Stylesheet an.
+   * das Stylesheet an. Das gilt auch fuer den Auftritt am Ende des
+   * Abschnitts: Dinge, Wortmarke und Satz erscheinen beim ersten Zeigen
+   * nacheinander.
    * ===================================================================== */
 
   /* Die Federung: Steifigkeit und Daempfung, fuer alles gleich. */
@@ -2803,7 +2777,7 @@
   /* still wird einmal je Takt gelesen und nicht je Koerper: ruhig() fragt
      den Speicher des Browsers, und das sechzigmal in der Sekunde fuer jedes
      Ding waere Verschwendung. */
-  var knete = { dinge: [], buchstaben: [], laeuft: false, letzte: 0, still: false, wortStand: '' };
+  var knete = { dinge: [], buchstaben: [], laeuft: false, letzte: 0, still: false, wortStand: '', aufgetreten: false };
 
   function kneteWecken() {
     if (knete.laeuft || document.hidden) { return; }
@@ -3081,6 +3055,27 @@
     knete.buchstaben.push(buchstabe);
     huelle.addEventListener('pointerenter', function () { buchstabe.stups(0.6); });
     huelle.addEventListener('click', function () { buchstabe.stups(1.3); });
+  }
+
+  /* -- Der Auftritt -------------------------------------------------------- *
+   * Beim ersten Zeigen der Startseite treten die Dinge, die Wortmarke und
+   * der Satz nacheinander auf; die Zeiten stehen in style.css, Abschnitt 7.
+   * Einmal je Laden: Wer von einer Liste zurueckkehrt, kennt die Seite
+   * schon. Deshalb geht die Klasse nach dem letzten Schritt wieder ab —
+   * bliebe sie stehen, zoege jede Rueckkehr den Auftritt noch einmal auf,
+   * denn der Browser startet Animationen neu, sobald ein verborgener Teil
+   * wieder erscheint. Eine Wortmarke, die erst nach dieser Frist steht,
+   * erscheint ohne Auftritt. */
+
+  var AUFTRITT_MS = 2600;
+
+  function heroAuftritt() {
+    var hero = $('.hero');
+    if (!hero || knete.aufgetreten) { return; }
+    knete.aufgetreten = true;
+    if (ruhig()) { return; }
+    hero.classList.add('hero--auftritt');
+    window.setTimeout(function () { hero.classList.remove('hero--auftritt'); }, AUFTRITT_MS);
   }
 
   /** Formt die Wortmarke, sobald die Startseite zu sehen ist und die Schrift

@@ -68,8 +68,6 @@
   --immergruen: #AAB7FF;  --immergruen-tief: 92, 104, 214;
   --pfirsich:   #FFCFB0;  --pfirsich-tief:   222, 128, 78;
   --milch:      #FFFCFA;  --milch-tief:      52, 159, 120;
-  /* Das Kissen, auf dem die Dinge im Hero liegen. */
-  --kissen:     #D0F1E1;  --kissen-tief:     52, 159, 120;
 
   /* Hell und satt: die Enden der Verlaeufe, aus denen die gezeichneten
      Dinge geformt sind. Dazwischen liegt der Pastellton. */
@@ -132,10 +130,7 @@
   --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 64px;
 
   --shell: 41.25rem;   /* 660px — dieselbe Breite auf jeder Seite */
-
-  /* Pfeil zwischen den Schritten, als Maske eingebettet: eine Form, die der
-     Linienfarbe folgt, ohne eine Datei nachzuladen. */
-  --pfeil: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M8 32 L52 32 M36 16 L52 32 L36 48' fill='none' stroke='%23000' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --hero:  100rem;     /* 1600px — die eine Ausnahme: der Hero der Startseite */
 
   /* Bewegungsmerkmale. Ein gemeinsames Vokabular statt fuenfzehn einzeln
      gewaehlter Kurven: Was federt, federt ueberall gleich. */
@@ -170,7 +165,6 @@
     --faint:       #8FC2AB;
     --line:        #12402E;
     --line-firm:   #1F5A43;
-    --kissen:      #0A4330;  --kissen-tief: 0, 0, 0;
     --link:        #7FE0BD;
     --link-hover:  #E4F6ED;
     --focus:       #A2DFC3;
@@ -201,7 +195,6 @@
   --faint:       #8FC2AB;
   --line:        #12402E;
   --line-firm:   #1F5A43;
-  --kissen:      #0A4330;  --kissen-tief: 0, 0, 0;
   --link:        #7FE0BD;
   --link-hover:  #E4F6ED;
   --focus:       #A2DFC3;
@@ -230,15 +223,15 @@
  * und, wo noetig, --mass.
  * ===================================================================== */
 
-.card, .fold, .hero-panel, .modal, .klappe, .toast, .mine a, .itemrow, .keybox, .note {
+.card, .fold, .modal, .klappe, .toast, .mine a, .itemrow, .keybox, .note {
   --farbe: var(--surface);
   --tief:  var(--flaeche-tief);
   --glanz: var(--licht-flaeche);
 }
 
 .btn, .ctl-square, .modal__x, .fab__btn, .fab__item, .skiplink, .trust li,
-.step-no, .chip--level, .chip--ok, .item-badge, .howto__mark, .mine .kind,
-.steps li, .tab[aria-selected="true"], .seg button[aria-pressed="true"],
+.chip--level, .chip--ok, .item-badge, .einstieg__mark, .mine .kind,
+.tab[aria-selected="true"], .seg button[aria-pressed="true"],
 .check input:checked + .check__box {
   --farbe: var(--milch);
   --tief:  var(--milch-tief);
@@ -246,10 +239,10 @@
   color: var(--tinte);
 }
 
-.card, .fold, .hero-panel, .modal, .klappe, .toast, .mine a, .itemrow, .keybox, .note,
+.card, .fold, .modal, .klappe, .toast, .mine a, .itemrow, .keybox, .note,
 .btn, .ctl-square, .modal__x, .fab__btn, .fab__item, .skiplink, .trust li,
-.step-no, .chip--level, .chip--ok, .item-badge, .howto__mark, .mine .kind,
-.steps li, .tab[aria-selected="true"], .seg button[aria-pressed="true"],
+.chip--level, .chip--ok, .item-badge, .einstieg__mark, .mine .kind,
+.tab[aria-selected="true"], .seg button[aria-pressed="true"],
 .check input:checked + .check__box {
   background:
     radial-gradient(130% 100% at 28% 16%, rgba(var(--licht-rgb), calc(var(--glanz) * .6)) 0, rgba(var(--licht-rgb), 0) 55%),
@@ -675,40 +668,45 @@ header.site { padding-block: var(--s-4); }
 
 /* == 7 · Startseite ==================================================== */
 
-.hero { padding-block: var(--s-3) 0; }
-
-/* Der Rahmen ist eine grosse Flaeche aus Knete. Er laesst ueberstehen, was
-   springt: Die Dinge darin hopsen ueber seinen Rand hinaus. */
-.hero-panel {
-  position: relative;
-  border: 0; border-radius: 36px;
-  padding: clamp(var(--s-5), 4vw, var(--s-6)) clamp(var(--s-5), 3vw, var(--s-6));
+.hero {
+  /* Der Hero ist die eine Ausnahme vom Geruest: Er reicht ueber die ganze
+     Breite des Fensters, bis --hero, ohne Rahmen. Die Rechnung zieht ihn
+     aus der Mitte des Geruests nach beiden Seiten auf; der Rand von --s-5
+     haelt ihn auch dort vom Fensterrand fern, wo eine Bildlaufleiste in
+     100vw mitzaehlt. Schmal ist er so breit wie alles andere (Abschnitt 12). */
+  --hero-breite: min(100vw - 2 * var(--s-5), var(--hero));
+  width: var(--hero-breite);
+  margin-inline: calc(50% - var(--hero-breite) / 2);
+  padding-block: clamp(var(--s-4), 3vw, var(--s-7)) clamp(var(--s-4), 3vw, var(--s-6));
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  align-items: center;
+  column-gap: clamp(var(--s-5), 4vw, var(--s-8));
 }
 
-.hero-body { position: relative; }
-
-/* Oben die Zusage, der Satz und der Aufruf, darunter das Bild in voller
-   Breite: sechs Dinge auf einem Kissen. Neben dem Text waere im Geruest
-   von 660 Punkten fuer sechs Dinge kein Platz. */
-.hero-top { display: flex; flex-direction: column; gap: var(--s-5); }
-.hero-sagt { flex: 1 1 auto; min-width: 0; }
-
-/* Der Aufruf im Rahmen selbst: erst die Zusage, dann die Handlung. */
+/* Links die Marke, darunter Satz und Aufruf. */
+.hero-sagt { min-width: 0; }
 .hero-act { margin-top: var(--s-5); }
 /* Die Ueberschrift bleibt gross — sie ist die Marke. Steht die Wortmarke
    aus Knete, bleibt der Titel nur fuer Vorleseprogramme im Dokument. */
-.hero h1 { font-size: clamp(2.4rem, 7vw, 3.5rem); line-height: 1.04; }
+.hero h1 { font-size: clamp(2.6rem, 7vw, 6rem); line-height: 1.04; }
 .hero h1 mark { background: none; color: var(--brand-ich); }
 .wortmarke-da .hero h1 {
   position: absolute; width: 1px; height: 1px; margin: -1px;
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
 }
-.hero .lead { margin-top: var(--s-3); max-width: 30rem; font-size: clamp(1.02rem, 2vw, 1.12rem); }
+/* Die Erklaerung zur Marke: kraeftiger als der Fliesstext und groesser,
+   aber leiser als die Marke selbst. */
+.hero .lead {
+  margin-top: var(--s-4); max-width: 30ch;
+  font-size: clamp(1.15rem, .9rem + .9vw, 1.6rem); font-weight: 800; line-height: 1.35;
+}
 
 /* Die Wortmarke: jeder Buchstabe dreifach — Sockel, Rand fuer die
    Pausbacken, Flaeche mit Lichtfleck. app.js misst und baut sie in der
-   gerade geladenen Schrift und in der gewaehlten Sprache. */
-.wortmarke { display: none; width: 100%; max-width: 34rem; height: auto; overflow: visible; }
+   gerade geladenen Schrift und in der gewaehlten Sprache. Sie nimmt die
+   ganze Breite ihrer Spalte ein. */
+.wortmarke { display: none; width: 100%; height: auto; overflow: visible; }
 .wortmarke-da .wortmarke { display: block; }
 .wortmarke text { font-family: var(--display); font-weight: 900; font-size: 120px; }
 .b-rand, .b-tiefe { stroke-width: 18px; stroke-linejoin: round; }
@@ -742,34 +740,25 @@ header.site { padding-block: var(--s-4); }
 .buchstabe:nth-child(16) .buchstabe__wippe { animation-delay: -3s; }
 
 /* Das Bild sagt, wofuer die Liste da ist: Dinge, die man verleiht, aus
-   Knete, auf einem Kissen. Wer sie anfasst, bringt sie zum Springen; sie
-   tragen keine Aussage und sind deshalb fuer Vorleseprogramme verborgen.
-   Gefeiert wird hier nichts — kein Konfetti, kein Ton: Die Startseite
-   traegt das Vertrauensversprechen und bleibt ruhig. */
-.hero-bild { position: relative; }
-.kissen {
-  position: absolute; inset: 10% 0 0 0;
-  border-radius: 46% 54% 50% 50% / 52% 48% 52% 48%;
-  background:
-    radial-gradient(120% 90% at 30% 18%, rgba(var(--licht-rgb), calc(var(--licht-flaeche) * .5)) 0, rgba(var(--licht-rgb), 0) 55%),
-    var(--kissen);
-  box-shadow:
-    calc(var(--weich) * 10px) calc(var(--weich) * 16px) calc(var(--weich) * 34px) rgba(var(--wurf-rgb), var(--wurf)),
-    inset calc(var(--weich) * -10px) calc(var(--weich) * -14px) calc(var(--weich) * 26px) rgba(var(--kissen-tief), calc(var(--kante) - .04)),
-    inset calc(var(--weich) * 10px) calc(var(--weich) * 12px) calc(var(--weich) * 22px) rgba(var(--licht-rgb), calc(var(--licht-flaeche) * .8));
-  animation: lid-atmen 11s ease-in-out infinite;
-}
-@keyframes lid-atmen {
-  0%, 100% { border-radius: 46% 54% 50% 50% / 52% 48% 52% 48%; }
-  50%      { border-radius: 54% 46% 44% 56% / 46% 56% 44% 54%; }
-}
+   Knete. Sie schweben frei rechts neben der Schrift, ein loser Haufen statt
+   einer Reihe; jedes hat seinen Platz in Hundertsteln der Flaeche, damit
+   der Haufen mit der Spalte waechst. Wer sie anfasst, bringt sie zum
+   Springen; sie tragen keine Aussage und sind deshalb fuer
+   Vorleseprogramme verborgen. Gefeiert wird hier nichts — kein Konfetti,
+   kein Ton: Die Startseite traegt das Vertrauensversprechen und bleibt
+   ruhig. */
+.hero-bild { position: relative; min-width: 0; width: 100%; max-width: 34rem; justify-self: end; }
 .dinge {
-  position: relative; z-index: 1;
-  display: grid; grid-template-columns: repeat(6, 1fr);
-  gap: clamp(.4rem, 1.6vw, .9rem);
-  margin: 0; padding: var(--s-5) var(--s-4) var(--s-4);
-  list-style: none;
+  position: relative; aspect-ratio: 20 / 19;
+  margin: 0; padding: 0; list-style: none;
 }
+.dinge li { position: absolute; }
+.dinge li:nth-child(1) { left: 30%; top: 0;   width: 34%; }   /* Bohrmaschine */
+.dinge li:nth-child(2) { left: 0;   top: 21%; width: 28%; }   /* Leiter */
+.dinge li:nth-child(3) { left: 64%; top: 15%; width: 36%; }   /* Zelt */
+.dinge li:nth-child(4) { left: 35%; top: 42%; width: 24%; }   /* Wuerfel */
+.dinge li:nth-child(5) { left: 3%;  top: 59%; width: 34%; }   /* Waffeleisen */
+.dinge li:nth-child(6) { left: 53%; top: 64%; width: 32%; }   /* Schalter */
 .ding {
   display: block; width: 100%; aspect-ratio: 1;
   cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
@@ -785,6 +774,42 @@ header.site { padding-block: var(--s-4); }
 .dinge li:nth-child(4) .ding { animation-duration: 5.6s; animation-delay: -.6s; }
 .dinge li:nth-child(5) .ding { animation-duration: 4.9s; animation-delay: -3s; }
 .dinge li:nth-child(6) .ding { animation-duration: 5.3s; animation-delay: -1.8s; }
+
+/* Der Auftritt, einmal je Laden: Erst schweben die Dinge herein, dann
+   tauchen die Worte der Marke auf, eines nach dem anderen, dann folgen Satz
+   und Aufruf — zusammen gut anderthalb Sekunden. app.js setzt die Klasse
+   beim ersten Zeigen der Startseite und nimmt sie danach wieder ab; wer
+   Bewegung abbestellt hat, bekommt sie nicht, und die Sammelregel am Ende
+   haelt sie ohnehin an. Bewegt werden nur die Huellen: Das Schaukeln der
+   Dinge und das Wippen der Buchstaben sitzen eine Ebene tiefer und laufen
+   unberuehrt weiter. Der Titel tritt mit dem ersten Wort auf; er ist zu
+   sehen, solange die Wortmarke noch nicht steht. */
+.hero--auftritt .dinge li { animation: lid-hereinschweben .7s var(--feder) both; }
+.hero--auftritt .dinge li:nth-child(2) { animation-delay: 70ms; }
+.hero--auftritt .dinge li:nth-child(3) { animation-delay: 140ms; }
+.hero--auftritt .dinge li:nth-child(4) { animation-delay: 210ms; }
+.hero--auftritt .dinge li:nth-child(5) { animation-delay: 280ms; }
+.hero--auftritt .dinge li:nth-child(6) { animation-delay: 350ms; }
+.hero--auftritt h1,
+.hero--auftritt .buchstabe.w-kaugummi   { animation: lid-auftauchen .5s var(--feder) 450ms both; }
+.hero--auftritt .buchstabe.w-butter     { animation: lid-auftauchen .5s var(--feder) 600ms both; }
+.hero--auftritt .buchstabe.w-immergruen { animation: lid-auftauchen .5s var(--feder) 750ms both; }
+.hero--auftritt .buchstabe.w-pfirsich   { animation: lid-auftauchen .5s var(--feder) 900ms both; }
+.hero--auftritt .lead     { animation: lid-einblenden .45s ease-out 1050ms both; }
+.hero--auftritt .hero-act { animation: lid-einblenden .45s ease-out 1150ms both; }
+@keyframes lid-hereinschweben {
+  from { opacity: 0; translate: 0 3rem; scale: .5; }
+  to   { opacity: 1; translate: 0 0;    scale: 1; }
+}
+/* In Einheiten der Wortmarke: 48 sind gut ein Drittel eines Buchstabens. */
+@keyframes lid-auftauchen {
+  from { opacity: 0; translate: 0 48px; }
+  to   { opacity: 1; translate: 0 0; }
+}
+@keyframes lid-einblenden {
+  from { opacity: 0; translate: 0 .75rem; }
+  to   { opacity: 1; translate: 0 0; }
+}
 
 .gesicht { fill: var(--tinte); }
 .gesicht__mund, .gesicht--schlaf path { fill: none; stroke: var(--tinte); stroke-width: 3; stroke-linecap: round; }
@@ -814,71 +839,32 @@ header.site { padding-block: var(--s-4); }
   background: var(--minze); color: var(--tinte);
 }
 
-/* Drei Schritte nebeneinander. Die Pfeile sitzen in den Lücken und gehören
-   zur Darstellung, nicht zum Text; deshalb sind sie gezeichnet und nicht
-   geschrieben. */
-.howto { margin-top: var(--s-7); }
-.howto h2 { font-size: clamp(1.8rem, 4vw, 2.4rem); }
+/* Zwei Einstiege, je eine Karte: das Zeichen der Art, die Ueberschrift,
+   der Aufruf. Breit stehen sie in einer Zeile, schmal rutscht der Aufruf
+   darunter. */
+.einstieg {
+  margin: var(--s-5) 0 0;
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center; gap: var(--s-3) var(--s-4);
+}
+.trust + .einstieg { margin-top: var(--s-7); }
+.einstieg h2 { font-size: clamp(1.45rem, 3.2vw, 1.8rem); }
+.einstieg__text p { margin-top: .2rem; color: var(--muted); font-weight: 700; }
+.einstieg__nach { grid-column: 2 / -1; }
 
-/* Die Ueberschrift traegt das Zeichen ihrer Art. Es steht davor und nicht
-   darueber: So bleibt der Zusammenhang auch dann sichtbar, wenn die
-   Ueberschrift auf dem Telefon in drei Zeilen umbricht. */
-.howto__head { display: flex; align-items: center; gap: var(--s-4); }
-.howto__head > span:last-child { min-width: 0; }
-.howto__mark {
-  flex: 0 0 auto; width: 3.2rem; height: 3.2rem; border-radius: 18px;
+/* Das Zeichen der Art steht vor der Ueberschrift: Wer die Seite
+   ueberfliegt, sieht ohne Lesen, dass hier zwei verschiedene Dinge
+   beginnen. */
+.einstieg__mark {
+  width: 3.2rem; height: 3.2rem; border-radius: 18px;
   display: grid; place-items: center; --mass: .55;
   --farbe: var(--minze); --tief: var(--minze-tief);
 }
 /* Der Kreis bekommt einen eigenen Ton. Nicht Pfirsich, das heisst in
    dieser Anwendung verliehen, und nicht Rot: Beides waere eine Aussage, die
    hier niemand macht. */
-.howto__mark--kreis { --farbe: var(--immergruen); --tief: var(--immergruen-tief); }
-.howto__mark .ico { width: 1.9rem; height: 1.9rem; }
-.howto__lead { margin-top: var(--s-3); max-width: 60ch; }
-@media (max-width: 34rem) {
-  .howto__mark { width: 2.6rem; height: 2.6rem; }
-  .howto__mark .ico { width: 1.5rem; height: 1.5rem; }
-}
-
-/* Die Schritte sind Karten aus Pastell, leicht verkantet wie hingelegt. */
-.steps {
-  list-style: none; padding: 0; margin-top: var(--s-5);
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-5);
-}
-.steps li {
-  position: relative; border: 0; border-radius: var(--r-card); --mass: .8;
-  padding: var(--s-4);
-  --farbe: var(--kaugummi); --tief: var(--kaugummi-tief);
-  rotate: -1.2deg;
-  transition: rotate var(--takt-lang) var(--feder), translate var(--takt-lang) var(--feder);
-}
-.steps li:nth-child(2) { --farbe: var(--butter); --tief: var(--butter-tief); rotate: 1deg; }
-.steps li:nth-child(3) { --farbe: var(--minze);  --tief: var(--minze-tief);  rotate: -.6deg; }
-.steps li:hover { rotate: 0deg; translate: 0 -3px; }
-/* Die Superliste in ihren eigenen Toenen. */
-.howto + .howto .steps li { --farbe: var(--immergruen); --tief: var(--immergruen-tief); }
-.howto + .howto .steps li:nth-child(2) { --farbe: var(--pfirsich); --tief: var(--pfirsich-tief); }
-.howto + .howto .steps li:nth-child(3) { --farbe: var(--butter); --tief: var(--butter-tief); }
-.steps li + li::before {
-  content: ""; position: absolute; top: 50%; left: calc(var(--s-5) * -1);
-  width: var(--s-5); height: 1.2rem; transform: translateY(-50%);
-  background: currentColor; color: var(--faint);
-  -webkit-mask: var(--pfeil) center / 1.2rem 1.2rem no-repeat;
-  mask: var(--pfeil) center / 1.2rem 1.2rem no-repeat;
-}
-.step-no {
-  width: 2rem; height: 2rem; border-radius: 999px; --mass: .35;
-  display: grid; place-items: center; font-size: 1rem; font-weight: 900;
-  margin-bottom: var(--s-3);
-}
-/* Dieselbe Unterscheidung wie oben, eine Stufe kleiner: Die Kugel bleibt
-   hell, ihre Zahl spricht die Art nicht aus. */
-.step-no--kreis { color: var(--tinte); }
-.steps h3 { font-size: 1.1rem; color: var(--tinte); }
-/* Auf Pastell nur die volle Tinte: --tinte-leise kaeme auf Kaugummi und
-   Immergruen unter 4,5:1. */
-.steps p { color: var(--tinte); font-size: .9rem; margin-top: .25rem; }
+.einstieg__mark--kreis { --farbe: var(--immergruen); --tief: var(--immergruen-tief); }
+.einstieg__mark .ico { width: 1.9rem; height: 1.9rem; }
 
 /* Eigene Listen, auf diesem Gerät gemerkt. */
 .mine { margin-top: var(--s-7); }
@@ -1361,17 +1347,21 @@ header.site { padding-block: var(--s-4); }
 /* == 12 · Telefon ====================================================== */
 
 @media (max-width: 46rem) {
-  /* Untereinander, und die Pfeile drehen sich mit. Die Karten liegen
-     schmal gerade: Verkantet ragten sie ueber den Rand des Geruests. */
-  .steps { grid-template-columns: 1fr; gap: var(--s-5); }
-  .steps li, .steps li:nth-child(2), .steps li:nth-child(3) { rotate: 0deg; }
-  .steps li + li::before {
-    top: calc(var(--s-5) * -1); left: 50%; width: 1.2rem; height: var(--s-5);
-    transform: translateX(-50%) rotate(90deg);
-  }
-  /* Schmal stehen die Dinge in zwei Reihen zu dreien. */
-  .dinge { grid-template-columns: repeat(3, 1fr); gap: var(--s-3) var(--s-4); padding: var(--s-6) var(--s-5) var(--s-5); }
-  .kissen { inset: 6% 0 0 0; }
+  /* Schmal steht der Hero im Geruest wie alles andere, und untereinander:
+     die Dinge zuerst, so wie sie auch zuerst auftreten. Das Bild ist
+     verborgen und nicht anwaehlbar, die Reihenfolge fuer Tastatur und
+     Vorleseprogramme bleibt die des Dokuments. */
+  .hero { width: auto; margin-inline: 0; grid-template-columns: minmax(0, 1fr); row-gap: var(--s-4); }
+  .hero-bild { order: -1; max-width: none; }
+  /* Der Haufen wird flacher und breiter: zwei lose Reihen statt eines
+     Turms, damit Marke und Aufruf noch auf den ersten Blick passen. */
+  .dinge { aspect-ratio: 20 / 11; }
+  .dinge li:nth-child(1) { left: 0;   top: 4%;  width: 26%; }
+  .dinge li:nth-child(2) { left: 75%; top: 8%;  width: 23%; }
+  .dinge li:nth-child(3) { left: 41%; top: 0;   width: 30%; }
+  .dinge li:nth-child(4) { left: 26%; top: 14%; width: 17%; }
+  .dinge li:nth-child(5) { left: 10%; top: 50%; width: 28%; }
+  .dinge li:nth-child(6) { left: 51%; top: 52%; width: 26%; }
 }
 
 /* Die schwebende Schaltflaeche loest die Kopfleiste ab, sobald deren beide
@@ -1392,10 +1382,14 @@ header.site { padding-block: var(--s-4); }
 
 @media (max-width: 34rem) {
   .shell { padding-inline: var(--s-4); }
-  .hero-panel { border-radius: 30px; }
   .trust li { font-size: .88rem; }
-  /* Schmal nimmt der Aufruf die ganze Zeile: Daneben steht ohnehin nichts. */
-  .hero-act .btn { width: 100%; }
+  /* Schmal nimmt der Aufruf die ganze Zeile: Daneben steht ohnehin nichts.
+     In den Einstiegen rutscht er dafuer unter Zeichen und Ueberschrift. */
+  .hero-act .btn, .einstieg__act .btn { width: 100%; }
+  .einstieg { grid-template-columns: auto minmax(0, 1fr); }
+  .einstieg__act, .einstieg__nach { grid-column: 1 / -1; }
+  .einstieg__mark { width: 2.6rem; height: 2.6rem; }
+  .einstieg__mark .ico { width: 1.5rem; height: 1.5rem; }
   /* Schmal steht der Zusatz unter den Verweisen statt neben ihnen. */
   .footer-row { flex-direction: column; align-items: flex-start; }
   .footer-claim { white-space: normal; flex-wrap: wrap; }
@@ -1403,7 +1397,6 @@ header.site { padding-block: var(--s-4); }
   .card, .fold__body { padding: var(--s-4); }
   .fold > summary { padding: var(--s-4); }
   .hero h1 { font-size: 2.4rem; }
-  .hero .lead { font-size: 1.06rem; }
   .titleblock h1, .title-input { font-size: 1.9rem; }
 
   /* Der Aufklapper-Zusatz rutscht unter den Namen statt ihn zu drängen. */

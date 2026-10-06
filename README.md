@@ -199,21 +199,23 @@ schlicht `data/.ai-key`. Beides wirkt sofort.
 
 ## Erscheinungsbild
 
-Ein helles Grün als Grund, weiße Flächen darauf, weiche Kanten. Der Aufruf
-oben steht flach: keine Verläufe, kein Punktraster, kein Schatten. Die Farbe
-trägt Bedeutung und nicht Schmuck:
+Minzgrün als Grund, darauf Knete: weiche Flächen mit Licht und Schatten,
+runde Kanten. Die Farbe trägt Bedeutung und nicht Schmuck:
 
 | Farbe | Heißt |
 | --- | --- |
-| Grün | frei — und führt die Handlung an |
-| Bernstein | verliehen |
+| Kaugummi | führt die Handlung an |
+| Minze | frei |
+| Pfirsich | verliehen |
+| Butter | mahnt |
+| Immergrün | zeigt eine Wahl |
 | Rot | zerstörend, und nur dort |
 
 Zwei Arten von Liste, zwei Zeichen. Ein Blatt mit Zeilen steht für die
 Leihliste, drei Köpfe über zwei Schultern für die Superliste. Sie sind
 verschieden gebaut und nicht nur verschieden gefärbt, damit sie sich auch in
 16 Punkten Größe und im dunklen Erscheinungsbild unterscheiden. Beide stehen
-auf der Startseite über ihrem Erklärkasten, in jeder Zeile des gemerkten
+auf der Startseite vor ihrem Einstieg, in jeder Zeile des gemerkten
 Kastens und dort zusätzlich als Wort auf einer Marke: Das Zeichen trägt den
 Blick, die Marke trägt die Vorlesestimme und die Übersetzung.
 
@@ -237,10 +239,9 @@ Karten, Ranchers — liegt in `archiv/alter-stil/`.
   die Tiefe geht — Felder, die Reiterleiste, leere Kästen, Verliehenes beim
   Ansehen —, ist eine Mulde. Verläufe gibt es nur für diesen Lichtfleck und
   in den gezeichneten Dingen.
-* Der Grund ist Minzgrün. Kaugummi führt die Handlung an, Minze heißt frei,
-  Pfirsich verliehen, Butter mahnt, Immergrün zeigt eine Wahl; Rot bleibt
-  dem Zerstörenden. Knöpfe und Kugeln bleiben auch im Dunkeln helle Knete,
-  Flächen und Grund werden dunkel.
+* Der Grund ist Minzgrün, die Rollen der Farben stehen in der Tafel oben.
+  Knöpfe und Kugeln bleiben auch im Dunkeln helle Knete, Flächen und Grund
+  werden dunkel.
 * Farben, Abstände, Radien und Schatten stehen als Merkmale in `:root`, einmal
   hell und einmal dunkel. Im Rumpf der Datei steht kein einziger Farbwert,
   auch nicht für die SVG-Verläufe: Sie tragen Farbklassen.
@@ -272,6 +273,11 @@ unterbindet das ohnehin.
 
 ### Wortmarke und Bild im Hero
 
+Der Hero ist die eine Ausnahme vom Gerüst von 660 Punkten: Er steht ohne
+Rahmen und reicht über die ganze Breite des Fensters, bis 1600 Punkte. Links
+steht die Wortmarke, sehr groß, darunter Satz und Aufruf; rechts schweben
+die Dinge. Schmal steht alles untereinander, die Dinge zuerst.
+
 Die Wortmarke ist aus Knete: Jeder Buchstabe dreifach geschichtet, ein
 dunkler Sockel, ein Rand für die Pausbacken, die Fläche mit Lichtfleck.
 `app.js` formt sie zur Laufzeit (Abschnitt 8a) aus den drei Teilen des
@@ -279,12 +285,18 @@ Titels, gemessen in Nunito und in der gewählten Sprache — auf Englisch
 heißt sie „Borrow it from me.“. Der Titel bleibt für Vorleseprogramme im
 Dokument.
 
-Darunter liegen sechs Dinge auf einem Kissen: Bohrmaschine, Leiter, Zelt,
-Würfel, Waffeleisen, ein Schalter. Sie sagen, wofür die Liste da ist, und
+Neben ihr schweben sechs Dinge, ein loser Haufen: Bohrmaschine, Leiter,
+Zelt, Würfel, Waffeleisen, ein Schalter. Sie sagen, wofür die Liste da ist, und
 tragen keine Aussage, die nicht schon im Satz stünde; sie sind deshalb für
 Vorleseprogramme verborgen und nicht anwählbar. Wer eines anfasst, bringt es
 zum Springen. Mehr geschieht nicht — kein Konfetti, kein Ton —, denn die
 Startseite bleibt ruhig.
+
+Beim ersten Zeigen der Startseite treten die drei nacheinander auf: erst die
+Dinge, dann Wort für Wort die Marke, dann Satz und Aufruf, zusammen gut
+anderthalb Sekunden. Das geschieht einmal je Laden; wer von einer Liste
+zurückkehrt, sieht die Seite gleich ganz. Wer weniger Bewegung eingestellt
+hat, ebenfalls.
 
 Die Zeichnungen stehen als `<svg>` im Dokument, nicht in einem `<img>`: Nur
 so erreichen sie die Merkmale aus `style.css` und der Wechsel zwischen hell
