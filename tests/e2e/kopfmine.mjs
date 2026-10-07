@@ -234,6 +234,39 @@ for (const datei of ['ueber.html', 'impressum.html', 'datenschutz.html']) {
      JSON.stringify({ marke: Math.round(m.marke.top), ctl: Math.round(m.ctl.top), mine: m.mine, fab: m.fab }));
 }
 
+console.log('\n· Zurueck zu den gemerkten Listen, ohne neu zu laden');
+{
+  /* Nach dem Anlegen blieben beide Knoepfe zum Anlegen gesperrt und trugen
+     "Leihliste wird angelegt …". Wer danach mit zwei Listen ueber die
+     Kopfleiste zu den gemerkten Listen ging — ein Wechsel des Fragments,
+     kein Neuladen —, fand sie so vor und konnte erst nach dem Neuladen eine
+     weitere Liste anlegen. */
+  const ctx2 = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'de-DE' });
+  const p = await ctx2.newPage();
+  p.on('pageerror', e => problems.push('pageerror: ' + e.message));
+  await p.goto(URL, { waitUntil: 'networkidle' });
+  await p.evaluate(() => { localStorage.clear(); localStorage.setItem('lid.lang', 'de'); });
+  await p.reload({ waitUntil: 'networkidle' });
+  await p.locator('#btnCreateHero').click();
+  await p.waitForSelector('#viewList:not([hidden])', { timeout: 15000 });
+  await p.goto(URL, { waitUntil: 'networkidle' });
+  await p.locator('#btnCreateHero').click();
+  await p.waitForSelector('#viewList:not([hidden])', { timeout: 15000 });
+  await p.waitForTimeout(500);
+  ok('mit zwei Listen fuehrt der Weg zu den gemerkten', await p.locator('#lnkMine').getAttribute('href') === './#meine',
+     await p.locator('#lnkMine').getAttribute('href'));
+  await p.locator('#lnkMine').click();
+  await p.waitForSelector('#viewStart:not([hidden])');
+  await p.waitForTimeout(300);
+  ok('ohne neu zu laden', await p.evaluate(() => performance.getEntriesByType('navigation').length === 1 &&
+     location.hash === '#meine'));
+  const knoepfe = await p.evaluate(() => [...document.querySelectorAll('[data-create]')]
+    .map(b => (b.disabled ? 'gesperrt: ' : '') + b.textContent.trim()));
+  ok('beide Knoepfe zum Anlegen sind wieder frei und heissen wieder so',
+     knoepfe.length === 2 && knoepfe.every(k => k === 'Leihliste anlegen'), knoepfe.join(' | '));
+  await ctx2.close();
+}
+
 console.log('\n· Konsole');
 ok('keine Fehler', problems.length === 0, problems.slice(0, 3).join(' | '));
 console.log('\n' + pass + ' erfüllt, ' + fail + ' offen');
