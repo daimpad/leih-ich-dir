@@ -1664,7 +1664,7 @@
        das Inventar. */
     $('#addForm').hidden = !isEdit;
     $('#btnRefresh').hidden = isEdit;
-    abfolgeZeigen(isEdit);
+    abfolgeListe.zeigen(isEdit, state.id);
     /* Nur in der Liste eines Freundes: Die eigene Liste in den eigenen Kreis
        zu legen ergibt nichts, sie steht schon im Kasten darunter. */
     $('#circleAddHereRow').hidden = isEdit;
@@ -2731,60 +2731,110 @@
     return nodes;
   }
 
-  /* -- Die Abfolge der Leihliste ------------------------------------------ *
-   * Im Bearbeitenmodus stehen Inventar, Kontakt und Link teilen als drei
-   * Reiter hintereinander, in der Reihenfolge, in der eine Liste entsteht.
+  /* -- Die Abfolgen ------------------------------------------------------- *
+   * Im Bearbeitenmodus steht die eigene Leihliste in drei Reitern: Inventar,
+   * Kontakt und Link teilen, in der Reihenfolge, in der eine Liste entsteht.
    * Zu sehen ist immer ein Schritt. Welcher, gilt nur fuer die offene
-   * Liste; wird eine andere geoeffnet, beginnt es wieder beim Inventar.
-   * Beim Freund gibt es keine Reiter: Er sieht das Inventar, und die
-   * Kaesten, die nur fuer die eigene Liste gelten, bleiben verborgen. */
+   * Liste; wird eine andere geoeffnet, beginnt es wieder beim ersten. Beim
+   * Freund gibt es keine Reiter: Er sieht das Inventar, und die Kaesten, die
+   * nur fuer die eigene Liste gelten, bleiben verborgen.
+   *
+   * Eine Abfolge kennt ihre Ansicht, ihre Reiterleiste und ihre Kaesten in
+   * der Reihenfolge der Reiter. Die Reiter selbst findet sie an
+   * data-schritt, die Knoepfe zum naechsten Schritt an data-weiter in ihrer
+   * Ansicht. So traegt eine zweite Ansicht dieselben Reiter, ohne dass der
+   * Code ein zweites Mal geschrieben wird. */
 
-  var SCHRITTE = ['inventoryBox', 'contactBox', 'shareBox'];
-  var abfolge = { schritt: 1, liste: null };
+  /**
+   * @param {string} ansicht  Kennung der Ansicht, etwa viewList
+   * @param {string} leiste   Kennung der Reiterleiste
+   * @param {string[]} felder Kennungen der Kaesten, in der Reihenfolge der Reiter
+   */
+  function Abfolge(ansicht, leiste, felder) {
+    this.ansicht = ansicht;
+    this.leiste = leiste;
+    this.felder = felder;
+    this.schritt = 1;
+    this.fuer = null;
+  }
 
-  /** Stellt die Abfolge auf den Modus der Liste; renderList ruft das bei
-      jedem Zeichnen, deshalb nimmt es nie den Fokus. */
-  function abfolgeZeigen(isEdit) {
-    if (abfolge.liste !== state.id) { abfolge.liste = state.id; abfolge.schritt = 1; }
-    $('#viewList').classList.toggle('ist-abfolge', isEdit);
-    $('#schritte').hidden = !isEdit;
-    SCHRITTE.forEach(function (id, i) {
+  Abfolge.prototype.reiter = function (n) {
+    return $('#' + this.leiste + ' [data-schritt="' + n + '"]');
+  };
+
+  /** Stellt die Abfolge an oder ab, fuer die Liste mit der Kennung fuer.
+      renderList ruft das bei jedem Zeichnen, deshalb nimmt es nie den Fokus. */
+  Abfolge.prototype.zeigen = function (an, fuer) {
+    var self = this;
+    if (this.fuer !== fuer) { this.fuer = fuer; this.schritt = 1; }
+    $('#' + this.ansicht).classList.toggle('ist-abfolge', an);
+    $('#' + this.leiste).hidden = !an;
+    this.felder.forEach(function (id, i) {
       var feld = document.getElementById(id);
-      if (isEdit) {
+      if (an) {
         feld.setAttribute('role', 'tabpanel');
-        feld.setAttribute('aria-labelledby', 'schrittTab' + (i + 1));
+        feld.setAttribute('aria-labelledby', self.reiter(i + 1).id);
       } else {
         feld.removeAttribute('role');
         feld.removeAttribute('aria-labelledby');
       }
     });
-    schrittWaehlen(isEdit ? abfolge.schritt : 1, false);
-  }
+    this.waehlen(an ? this.schritt : 1, false);
+  };
 
   /**
    * Waehlt einen Schritt. Mit fokus kommt sein Reiter in den Fokus und die
    * Leiste in Sicht: Wer unten im Inventar auf Weiter drueckt, landet am
    * Anfang des naechsten Schritts und nicht irgendwo in dessen Mitte.
    *
-   * @param {number} n  1, 2 oder 3
+   * @param {number} n  der Schritt, ab 1
    * @param {boolean} fokus
    */
-  function schrittWaehlen(n, fokus) {
-    abfolge.schritt = n;
-    for (var i = 1; i <= SCHRITTE.length; i++) {
-      var tab = document.getElementById('schrittTab' + i);
+  Abfolge.prototype.waehlen = function (n, fokus) {
+    this.schritt = n;
+    for (var i = 1; i <= this.felder.length; i++) {
+      var tab = this.reiter(i);
       var an = (i === n);
       tab.setAttribute('aria-selected', an ? 'true' : 'false');
       /* Nur der gewaehlte Reiter liegt in der Tabulatorfolge; zwischen den
          Reitern wechseln die Pfeiltasten. */
       tab.setAttribute('tabindex', an ? '0' : '-1');
-      document.getElementById(SCHRITTE[i - 1]).hidden = !an;
+      document.getElementById(this.felder[i - 1]).hidden = !an;
     }
     if (fokus) {
-      document.getElementById('schrittTab' + n).focus({ preventScroll: true });
-      $('#schritte').scrollIntoView({ block: 'nearest', behavior: ruhig() ? 'auto' : 'smooth' });
+      this.reiter(n).focus({ preventScroll: true });
+      $('#' + this.leiste).scrollIntoView({ block: 'nearest', behavior: ruhig() ? 'auto' : 'smooth' });
     }
-  }
+  };
+
+  /**
+   * Die Reiter folgen dem Muster, das Tastatur und Vorleseprogramme
+   * erwarten: Pfeile wechseln und waehlen zugleich, Pos1 und Ende springen
+   * an die Raender, Tab verlaesst die Leiste.
+   */
+  Abfolge.prototype.binden = function () {
+    var self = this;
+    var zahl = this.felder.length;
+    $$('#' + this.leiste + ' [data-schritt]').forEach(function (tab) {
+      tab.addEventListener('click', function () { self.waehlen(Number(tab.getAttribute('data-schritt')), false); });
+    });
+    $('#' + this.leiste).addEventListener('keydown', function (ev) {
+      var n = self.schritt;
+      if (ev.key === 'ArrowRight') { n = n % zahl + 1; }
+      else if (ev.key === 'ArrowLeft') { n = (n + zahl - 2) % zahl + 1; }
+      else if (ev.key === 'Home') { n = 1; }
+      else if (ev.key === 'End') { n = zahl; }
+      else { return; }
+      ev.preventDefault();
+      self.waehlen(n, false);
+      self.reiter(n).focus();
+    });
+    $$('#' + this.ansicht + ' [data-weiter]').forEach(function (btn) {
+      btn.addEventListener('click', function () { self.waehlen(Number(btn.getAttribute('data-weiter')), true); });
+    });
+  };
+
+  var abfolgeListe = new Abfolge('viewList', 'schritte', ['inventoryBox', 'contactBox', 'shareBox']);
 
   /* ===================================================================== *
    * 8a · Die Knete der Startseite
@@ -5484,29 +5534,11 @@
   }
 
   /**
-   * Die drei Reiter der Leihliste, die Knoepfe zum naechsten Schritt und die
-   * Erklaerungen auf Zuruf. Die Reiter folgen dem Muster, das Tastatur und
-   * Vorleseprogramme erwarten: Pfeile wechseln und waehlen zugleich, Pos1
-   * und Ende springen an die Raender, Tab verlaesst die Leiste.
+   * Die drei Reiter der Leihliste mit ihren Knoepfen zum naechsten Schritt
+   * (Abfolge.prototype.binden) und die Erklaerungen auf Zuruf.
    */
   function bindAbfolge() {
-    $$('#schritte .tab').forEach(function (tab) {
-      tab.addEventListener('click', function () { schrittWaehlen(Number(tab.getAttribute('data-schritt')), false); });
-    });
-    $('#schritte').addEventListener('keydown', function (ev) {
-      var n = abfolge.schritt;
-      if (ev.key === 'ArrowRight') { n = n % SCHRITTE.length + 1; }
-      else if (ev.key === 'ArrowLeft') { n = (n + SCHRITTE.length - 2) % SCHRITTE.length + 1; }
-      else if (ev.key === 'Home') { n = 1; }
-      else if (ev.key === 'End') { n = SCHRITTE.length; }
-      else { return; }
-      ev.preventDefault();
-      schrittWaehlen(n, false);
-      document.getElementById('schrittTab' + n).focus();
-    });
-    $$('[data-weiter]').forEach(function (btn) {
-      btn.addEventListener('click', function () { schrittWaehlen(Number(btn.getAttribute('data-weiter')), true); });
-    });
+    abfolgeListe.binden();
     /* Das Zeichen in der Kopfzeile eines Schritts blendet alle Erklaerungen
        darin an ihrer Stelle ein und wieder aus. Zu sehen ist sonst nur, was
        es zum Ausfuellen braucht. */
