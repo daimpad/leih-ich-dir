@@ -6,8 +6,13 @@
  * Reihenfolge, in der eine Liste entsteht. Festgehalten wird, was das
  * zusagt: Anfangs ist das Inventar offen, ein Knopf fuehrt jeweils zum
  * naechsten Schritt, die Reiter folgen dem Muster fuer Tastatur und
- * Vorleseprogramme, der Zugang steht ueber ihnen, und die Erklaerungen
- * erscheinen erst auf Zuruf. Beim Freund gibt es keine Reiter.
+ * Vorleseprogramme, und die Erklaerungen erscheinen erst auf Zuruf. Beim
+ * Freund gibt es keine Reiter.
+ *
+ * Der Zugang stand zuerst ueber den Reitern und nur nach dem Anlegen. Seit
+ * Oktober 2026 steht er als Feld unter dem offenen Schritt, immer und
+ * verdeckt; gelb mit der Bitte, ihn zu sichern, ist er nur nach dem Anlegen
+ * und bis zur Bestaetigung — und nur fuer die Liste, die er meint.
  */
 import { starteBrowser, BASE, pruefer } from './hilfe.mjs';
 
@@ -70,7 +75,15 @@ const { ctx, p } = await neueListe('de');
     const y = (s) => document.querySelector(s).getBoundingClientRect().top;
     return { zugang: y('#keyBox'), reiter: y('#schritte'), inventar: y('#inventoryBox') };
   });
-  ok('der Zugang steht ueber den Reitern', lage.zugang < lage.reiter && lage.reiter < lage.inventar, JSON.stringify(lage));
+  ok('der Zugang steht unter dem offenen Schritt', lage.reiter < lage.inventar && lage.inventar < lage.zugang, JSON.stringify(lage));
+  const frisch = await p.evaluate(() => {
+    const box = document.getElementById('keyBox');
+    return { frisch: box.classList.contains('keybox--frisch'), grund: getComputedStyle(box).backgroundColor,
+             verdeckt: document.getElementById('keyLink').type === 'password' };
+  });
+  ok('frisch angelegt: Butter, mit Bitte und Haken, der Link verdeckt',
+     frisch.frisch && frisch.grund === 'rgb(255, 229, 165)' && frisch.verdeckt &&
+     await sichtbar(p, '#keyBox .keybox__title') && await sichtbar(p, '#chkKeyDone'), JSON.stringify(frisch));
   ok('die Ueberschrift der Karte nur fuer Vorleseprogramme',
      await p.locator('#inventoryBox .card__title').evaluate(n => n.getBoundingClientRect().width <= 1));
 }
@@ -133,12 +146,36 @@ console.log('· Link teilen');
   ok('der Ansehen-Link steht vorn, mit sichtbarer Beschriftung',
      await sichtbar(p, '#linkView') && await sichtbar(p, 'label[for="linkView"]'));
   ok('keine Reiter im Reiter mehr', await p.locator('#tabBtnView, #tabBtnEdit').count() === 0);
-  ok('der Bearbeiten-Link liegt zugeklappt darunter', !(await p.locator('#editFold').evaluate(n => n.open)) &&
-     !(await sichtbar(p, '#linkEdit')));
+  ok('kein eigener Aufklapper mehr fuer den Bearbeiten-Link', await p.locator('#editFold, #linkEdit').count() === 0);
   ok('das Sichern ebenso', !(await p.locator('#backupBox').evaluate(n => n.open)) && !(await sichtbar(p, '#btnBackup')));
-  await p.locator('#editFold summary').click();
-  ok('aufgeklappt ist er da, verdeckt', await sichtbar(p, '#linkEdit') &&
-     await p.locator('#linkEdit').getAttribute('type') === 'password');
+  ok('er steht im Zugang darunter, verdeckt', await sichtbar(p, '#keyLink') &&
+     await p.locator('#keyLink').getAttribute('type') === 'password');
+}
+
+console.log('· Der Zugang');
+{
+  /* Nach dem Anlegen weiter oben bestaetigt: Jetzt steht er ruhig unter
+     jedem Schritt, an derselben Stelle. */
+  const lagen = [];
+  for (const n of [1, 2, 3]) {
+    await p.locator('#schrittTab' + n).click();
+    lagen.push(await p.evaluate((id) => {
+      const feld = document.getElementById(id).getBoundingClientRect();
+      const zugang = document.getElementById('keyBox');
+      return { unter: zugang.getBoundingClientRect().top >= feld.bottom, da: !zugang.hidden,
+               ruhig: !zugang.classList.contains('keybox--frisch') };
+    }, ['inventoryBox', 'contactBox', 'shareBox'][n - 1]));
+  }
+  ok('unter jedem der drei Schritte', lagen.every(l => l.da && l.unter), JSON.stringify(lagen));
+  ok('nach der Bestaetigung ruhig: ohne Bitte und ohne Haken', lagen.every(l => l.ruhig) &&
+     !(await sichtbar(p, '#keyBox .keybox__title')) && !(await sichtbar(p, '#chkKeyDone')));
+  const link = await p.locator('#keyLink').inputValue();
+  ok('mit dem Bearbeiten-Link dieser Liste', link.endsWith(await p.evaluate(() => location.hash)) && /#e=/.test(link));
+  await p.locator('#btnRevealEdit').click();
+  ok('Zeigen deckt ihn auf', await p.locator('#keyLink').getAttribute('type') === 'text' &&
+     (await p.locator('#btnRevealEdit').innerText()).trim() === 'Verbergen');
+  await p.locator('#btnRevealEdit').click();
+  ok('und Verbergen wieder zu', await p.locator('#keyLink').getAttribute('type') === 'password');
 }
 
 console.log('· Neu geladen');
@@ -155,6 +192,7 @@ console.log('· Eine andere Liste, ohne neu zu laden');
   /* Der gewaehlte Schritt gilt nur fuer die offene Liste. Neu laden setzt
      ohnehin alles zurueck; hier bleibt die Seite stehen und wechselt nur
      die Liste. */
+  const ersteListe = await p.evaluate(() => location.hash);
   await p.locator('#schrittTab3').click();
   await p.evaluate(() => { location.hash = ''; });
   await p.waitForSelector('#viewStart:not([hidden])');
@@ -163,6 +201,24 @@ console.log('· Eine andere Liste, ohne neu zu laden');
   await p.waitForTimeout(500);
   const z = await zustand(p);
   ok('beginnt sie beim Inventar', z.gewaehlt.join() === 'schrittTab1' && z.zu.join() === 'inventoryBox', JSON.stringify(z));
+  ok('und bittet um ihren Zugang', await p.locator('#keyBox').evaluate(n => n.classList.contains('keybox--frisch')));
+  /* Zurueck zur ersten Liste, ueber die Kopfleiste und die gemerkten Listen,
+     wieder ohne neu zu laden. Bis Oktober 2026 stand dort die Bitte der
+     neuen Liste weiter, mit deren Bearbeiten-Link. */
+  await p.locator('#lnkMine').click();
+  await p.waitForSelector('#viewStart:not([hidden])');
+  await p.locator('#mineList a[href$="' + ersteListe + '"]').click();
+  await p.waitForFunction((h) => location.hash === h, ersteListe);
+  await p.waitForSelector('#viewList:not([hidden])');
+  await p.waitForTimeout(800);
+  const zurueck = await p.evaluate(() => ({
+    frisch: document.getElementById('keyBox').classList.contains('keybox--frisch'),
+    da: !document.getElementById('keyBox').hidden,
+    link: document.getElementById('keyLink').value,
+    verdeckt: document.getElementById('keyLink').type === 'password'
+  }));
+  ok('zurueck bei der ersten: ihr Zugang, ruhig und verdeckt', zurueck.da && !zurueck.frisch && zurueck.verdeckt &&
+     zurueck.link.endsWith(ersteListe), JSON.stringify(Object.assign({}, zurueck, { link: zurueck.link.slice(-12) })));
 }
 
 console.log('· Beim Freund');
@@ -179,11 +235,12 @@ console.log('· Beim Freund');
     teilen: document.getElementById('shareBox').hidden,
     inventar: !document.getElementById('inventoryBox').hidden,
     rolle: document.getElementById('inventoryBox').getAttribute('role'),
+    zugang: document.getElementById('keyBox').hidden,
     weiter: document.querySelector('[data-weiter="2"]').getClientRects().length,
     titel: document.querySelector('#inventoryBox .card__title').getBoundingClientRect().width
   }));
   ok('keine Reiter', r.leiste, JSON.stringify(r));
-  ok('kein Kontakt und kein Teilen', r.kontakt && r.teilen);
+  ok('kein Kontakt, kein Teilen und kein Zugang', r.kontakt && r.teilen && r.zugang);
   ok('das Inventar steht allein, ohne Rolle eines Reiterkastens', r.inventar && r.rolle === null, String(r.rolle));
   ok('ohne Weiter-Knopf', r.weiter === 0, String(r.weiter));
   ok('mit sichtbarer Ueberschrift', r.titel > 20, String(r.titel));

@@ -227,7 +227,6 @@
       'nav.circle': 'Superliste',
 
       'key.headline': 'Bewahre diesen Link auf!',
-      'key.label': 'Bearbeiten-Link',
       'key.remember': 'Auf diesem Gerät gemerkt — beim nächsten Besuch findest Du die Liste auf der Startseite wieder.',
       'key.done': 'Ich habe den Link gesichert',
 
@@ -238,7 +237,6 @@
 
       'share.headline': 'Link teilen',
       'share.viewHint': 'Diesen Link geben Deine Freunde weiter. Er zeigt die Liste, ändern lässt sich damit nichts.',
-      'share.editHint': 'Dieser Link ist Dein Zugang. Gib ihn niemandem und speichere ihn als Lesezeichen.',
       'share.viewLabel': 'Ansehen-Link für Freunde',
       'share.editLabel': 'Bearbeiten-Link, geheim',
       'share.copy': 'Kopieren',
@@ -603,7 +601,6 @@
       'nav.circle': 'Super list',
 
       'key.headline': 'Keep this link!',
-      'key.label': 'Edit link',
       'key.remember': 'Remembered on this device — next time you will find the list on the start page.',
       'key.done': 'I have saved the link',
 
@@ -614,7 +611,6 @@
 
       'share.headline': 'Share link',
       'share.viewHint': 'This is the link your friends get. It shows the list; nothing can be changed with it.',
-      'share.editHint': 'This link is your way in. Give it to nobody and bookmark it.',
       'share.viewLabel': 'View link for friends',
       'share.editLabel': 'Edit link, secret',
       'share.copy': 'Copy',
@@ -985,7 +981,7 @@
        Beschriftung aus dem Woerterbuch. applyStaticI18n setzt sie gerade auf
        "Zeigen" zurueck, auch wenn der Link offen daliegt; dann stuende dort
        das Gegenteil dessen, was ein Druck bewirkt. */
-    [['#btnRevealEdit', '#linkEdit'], ['#btnRevealCircle', '#circleLink']].forEach(function (paar) {
+    [['#btnRevealEdit', '#keyLink'], ['#btnRevealCircle', '#circleLink']].forEach(function (paar) {
       var knopf = $(paar[0]), feld = $(paar[1]);
       if (knopf && feld) { knopf.textContent = t(feld.type === 'password' ? 'share.reveal' : 'share.hide'); }
     });
@@ -1668,11 +1664,10 @@
     /* Nur in der Liste eines Freundes: Die eigene Liste in den eigenen Kreis
        zu legen ergibt nichts, sie steht schon im Kasten darunter. */
     $('#circleAddHereRow').hidden = isEdit;
-    if (!isEdit) { $('#keyBox').hidden = true; }
+    zugangListe.zeichnen(isEdit);
 
     if (isEdit) {
       $('#linkView').value = viewLink();
-      $('#linkEdit').value = editLink();
       if (document.activeElement !== $('#cfgName')) { $('#cfgName').value = state.doc.contact.name; }
       if (document.activeElement !== $('#cfgEmail')) { $('#cfgEmail').value = state.doc.contact.email; }
       if (document.activeElement !== $('#cfgPhone')) { $('#cfgPhone').value = state.doc.contact.phone; }
@@ -2835,6 +2830,101 @@
   };
 
   var abfolgeListe = new Abfolge('viewList', 'schritte', ['inventoryBox', 'contactBox', 'shareBox']);
+
+  /* -- Der Zugang --------------------------------------------------------- *
+   * Der geheime Link einer eigenen Liste steht im Bearbeitenmodus immer als
+   * Feld unter dem offenen Schritt, verdeckt, mit Zeigen und Kopieren. Gelb
+   * und mit der Bitte, ihn zu sichern, ist er nur fuer die Liste, die gerade
+   * angelegt oder deren Links gerade zurueckgezogen wurden, und nur bis zur
+   * Bestaetigung. frischFuer haelt fest, fuer welche Liste das gilt: Wer
+   * ohne neu zu laden zu einer anderen eigenen Liste wechselt, sieht dort
+   * deren Link, ruhig, und nicht die Bitte der vorigen. fuer merkt sich, fuer
+   * welche Liste das Feld zuletzt gezeichnet wurde; wechselt sie, wird ein
+   * aufgedeckter Link wieder verdeckt.
+   *
+   * Wie die Abfolge kennt ein Zugang nur Kennungen und fragt seine Ansicht,
+   * welche Liste offen ist und wie ihr Link lautet. So traegt eine zweite
+   * Ansicht dasselbe Feld, ohne dass der Code ein zweites Mal entsteht. */
+
+  /**
+   * @param {object} o
+   *   kasten, feld, zeigen, haken, merken: Kennungen der Knoten;
+   *   offen():   die Kennung der offenen Liste;
+   *   link():    ihr geheimer Link;
+   *   gemerkt(): ob sich dieses Geraet die Liste merkt
+   */
+  function Zugang(o) {
+    this.o = o;
+    this.frischFuer = null;
+    this.fuer = null;
+  }
+
+  /** Zeichnet das Feld oder verbirgt es. Laeuft bei jedem Zeichnen der
+      Ansicht und nimmt deshalb nie den Fokus. */
+  Zugang.prototype.zeichnen = function (an) {
+    var o = this.o;
+    var kasten = $('#' + o.kasten);
+    var offen = o.offen();
+    kasten.hidden = !an;
+    kasten.classList.toggle('keybox--frisch', an && this.frischFuer === offen);
+    if (!an) { return; }
+    var feld = $('#' + o.feld);
+    if (this.fuer !== offen) {
+      this.fuer = offen;
+      feld.type = 'password';
+      $('#' + o.zeigen).textContent = t('share.reveal');
+    }
+    feld.value = o.link();
+  };
+
+  /** Nach dem Anlegen und nach dem Zurueckziehen: Die Links sind neu, und
+      bis die Besitzerin bestaetigt, sie gesichert zu haben, bittet das Feld
+      darum. */
+  Zugang.prototype.frisch = function () {
+    var o = this.o;
+    this.frischFuer = o.offen();
+    $('#' + o.haken).checked = false;
+    $('#' + o.merken).hidden = !o.gemerkt();
+    this.zeichnen(true);
+  };
+
+  /**
+   * Zeigen und Verbergen, und der Haken. Nach dem Haken geht die Bitte, das
+   * Feld bleibt. Der Haken verschwindet mit ihr; damit die Tastatur nicht
+   * ins Leere faellt, geht der Fokus ins Feld.
+   *
+   * @param {function} [danach]  was die Ansicht nach dem Haken noch tut
+   */
+  Zugang.prototype.binden = function (danach) {
+    var self = this;
+    var o = this.o;
+    $('#' + o.zeigen).addEventListener('click', function () {
+      var feld = $('#' + o.feld);
+      var verdeckt = feld.type === 'password';
+      feld.type = verdeckt ? 'text' : 'password';
+      this.textContent = t(verdeckt ? 'share.hide' : 'share.reveal');
+    });
+    $('#' + o.haken).addEventListener('change', function () {
+      if (!this.checked) { return; }
+      self.frischFuer = null;
+      self.zeichnen(true);
+      $('#' + o.feld).focus({ preventScroll: true });
+      if (danach) { danach(); }
+    });
+    /* Ein Ankreuzfeld hoert auf die Leertaste, nicht auf die Eingabetaste.
+       Die Schaltflaeche davor konnte beides; das bleibt so. */
+    $('#' + o.haken).addEventListener('keydown', function (ev) {
+      if (ev.key !== 'Enter' || this.checked) { return; }
+      ev.preventDefault();
+      this.checked = true;
+      this.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  };
+
+  var zugangListe = new Zugang({
+    kasten: 'keyBox', feld: 'keyLink', zeigen: 'btnRevealEdit', haken: 'chkKeyDone', merken: 'keyRemember',
+    offen: function () { return state.id; }, link: editLink, gemerkt: mineWorks
+  });
 
   /* ===================================================================== *
    * 8a · Die Knete der Startseite
@@ -4100,13 +4190,11 @@
            angelegt" vor. */
         createButtons(false, t('start.create'));
 
-        /* Der Zugang, einmal und deutlich. Er steht ueber allem anderen, bis
-           er bestaetigt wurde: Wer diesen Link verliert, verliert die Liste,
-           und niemand kann ihn wiederherstellen. */
-        $('#keyLink').value = editLink();
-        $('#chkKeyDone').checked = false;
-        $('#keyBox').hidden = false;
-        $('#keyRemember').hidden = !mineWorks();
+        /* Der Zugang, einmal und deutlich: Bis er bestaetigt wurde, bittet
+           das Feld unter dem Schritt darum, ihn zu sichern. Wer diesen Link
+           verliert, verliert die Liste, und niemand kann ihn
+           wiederherstellen. */
+        zugangListe.frisch();
         if (danach) { danach(); }
       });
     }).catch(function (err) {
@@ -4393,10 +4481,7 @@
       render();
       /* Der Zugang, noch einmal und deutlich: Der Bearbeiten-Link ist ein
          anderer als der, den die Besitzerin aufbewahrt hat. */
-      $('#keyLink').value = editLink();
-      $('#chkKeyDone').checked = false;
-      $('#keyBox').hidden = false;
-      $('#keyRemember').hidden = !mineWorks();
+      zugangListe.frisch();
       $('#keyBox').scrollIntoView({ block: 'start', behavior: ruhig() ? 'auto' : 'smooth' });
       toast(t('revoke.done'));
       if (state.dirty) { scheduleSave(); }
@@ -5476,7 +5561,7 @@
 
   /**
    * Die Leihliste: anlegen, aktualisieren, eintragen, benennen, oeffnen, und
-   * der Zugangskasten am Ende des Anlegens. Dazu der Kontakt — ein eigener
+   * der Zugang unter den Schritten. Dazu der Kontakt — ein eigener
    * Schritt, aber er schreibt in dasselbe state.doc und steht und faellt
    * mit ihm — und die Abfolge der drei Schritte selbst (bindAbfolge).
    */
@@ -5504,24 +5589,11 @@
       if (hit.getAttribute('data-act') === 'ask') { openAskModal(id); return; }
       openItemModal(id);
     });
-    /* Der Zugang wird weggeräumt, wenn er ausdrücklich gesichert wurde. Das
-       ist der Abschluss des Anlegens und nicht das Anlegen selbst: Wer den
+    /* Gefeiert wird, wenn der Zugang ausdruecklich gesichert wurde. Das ist
+       der Abschluss des Anlegens und nicht das Anlegen selbst: Wer den
        Bearbeiten-Link nicht bestaetigt hat, hat die Liste noch nicht in der
        Hand — und ueber einer Warnung wird ohnehin nicht gefeiert. */
-    $('#chkKeyDone').addEventListener('change', function () {
-      if (!this.checked) { return; }
-      $('#keyBox').hidden = true;
-      feierZugang();
-    });
-
-    /* Ein Ankreuzfeld hoert auf die Leertaste, nicht auf die Eingabetaste.
-       Die Schaltflaeche davor konnte beides; das bleibt so. */
-    $('#chkKeyDone').addEventListener('keydown', function (ev) {
-      if (ev.key !== 'Enter' || this.checked) { return; }
-      ev.preventDefault();
-      this.checked = true;
-      this.dispatchEvent(new Event('change', { bubbles: true }));
-    });
+    zugangListe.binden(feierZugang);
     /* Sichern und Wiederherstellen. Das Dateifeld bleibt verborgen; der
        Verweis auf der Startseite oeffnet es. Zuruecksetzen nach dem Lesen,
        sonst loest dieselbe Datei beim zweiten Mal kein change mehr aus. */
@@ -5600,12 +5672,6 @@
           if (laut(vorher + 1) <= 1) { toast(t('share.copied')); }
         });
       });
-    });
-    $('#btnRevealEdit').addEventListener('click', function () {
-      var input = $('#linkEdit');
-      var hidden = input.type === 'password';
-      input.type = hidden ? 'text' : 'password';
-      this.textContent = t(hidden ? 'share.hide' : 'share.reveal');
     });
     $('#btnShareView').addEventListener('click', function () {
       nativeShare({

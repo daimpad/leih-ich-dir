@@ -29,7 +29,10 @@ ok('Kontakt erst im zweiten Schritt', await page.locator('#contactBox').isHidden
 ok('Einstellungen als eigene Seite', await page.locator('#lnkSettings').count() === 1);
 const editUrl = page.url();
 await page.check('#chkKeyDone');
-ok('Zugangskarte weggeräumt', await page.locator('#keyBox').isHidden());
+// Bis Oktober 2026 verschwand die Zugangskarte mit dem Haken. Seitdem
+// bleibt der Bearbeiten-Link als ruhiges Feld stehen; es geht nur die Bitte.
+ok('die Bitte ist weggeräumt, das Feld bleibt', await page.locator('#keyBox').isVisible() &&
+   await page.locator('#keyBox .keybox__title').isHidden() && await page.locator('#chkKeyDone').isHidden());
 
 for (const it of ['Bohrmaschine', 'Lastenrad', 'Beamer']) {
   await page.fill('#addName', it);

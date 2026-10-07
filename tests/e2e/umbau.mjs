@@ -50,16 +50,16 @@ await heroBtn.click();
 await page.waitForSelector('#viewList:not([hidden])', { timeout: 15000 });
 ok('der Aufruf im Hero legt eine Liste an', await page.locator('#keyBox').isVisible());
 
-// Bis Oktober 2026 stand der Zugang unter dem Inventar, direkt ueber Link
-// teilen. Seit die Liste in drei Reitern steht, steht er ueber ihnen: Er
-// soll zu sehen sein, gleich welcher Schritt offen ist.
-console.log('\n· Zugangskasten über den Reitern');
+// Zuerst stand der Zugang unter dem Inventar, direkt ueber Link teilen, mit
+// den drei Reitern dann kurz ueber ihnen. Seit Oktober 2026 ist er ein festes
+// Feld unter dem offenen Schritt: zu sehen, gleich welcher Schritt offen ist.
+console.log('\n· Zugang unter dem offenen Schritt');
 const pos = await page.evaluate(() => {
   const p = sel => { const n = document.querySelector(sel); return n && !n.hidden ? n.getBoundingClientRect().top + window.scrollY : -1; };
   return { key: p('#keyBox'), reiter: p('#schritte'), inv: p('#inventoryBox') };
 });
-ok('Zugang steht über den Reitern', pos.key >= 0 && pos.key < pos.reiter, JSON.stringify(pos));
-ok('und die Reiter über dem Inventar', pos.reiter < pos.inv, JSON.stringify(pos));
+ok('die Reiter stehen über dem Inventar', pos.reiter >= 0 && pos.reiter < pos.inv, JSON.stringify(pos));
+ok('und der Zugang darunter', pos.key > pos.inv, JSON.stringify(pos));
 
 console.log('\n· Gemerkte Listen erscheinen am Ende');
 await page.goto(URL, { waitUntil: 'networkidle' });

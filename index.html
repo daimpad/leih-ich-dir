@@ -660,29 +660,6 @@
       </p>
     </div>
 
-    <!-- Der Zugang. Erscheint einmal, direkt nach dem Anlegen, und bleibt
-         stehen, bis er ausdrücklich bestätigt wurde. Er steht über den
-         Reitern und in keinem von ihnen: Wer ihn verliert, verliert die
-         Liste, und er soll zu sehen sein, gleich welcher Schritt offen ist. -->
-    <section class="keybox" id="keyBox" hidden>
-      <h2 class="keybox__title" data-i18n="key.headline">Bewahre diesen Link auf!</h2>
-      <div class="spaced-lg linkrow">
-        <label class="sr-only" for="keyLink" data-i18n="key.label">Bearbeiten-Link</label>
-        <input type="text" id="keyLink" class="input mono" readonly>
-        <button type="button" class="btn btn--primary" data-copy="keyLink" data-i18n="share.copy">Kopieren</button>
-      </div>
-      <p class="hint keybox__remember" id="keyRemember" data-i18n="key.remember">
-        Auf diesem Gerät gemerkt — beim nächsten Besuch findest Du die Liste auf der Startseite wieder.
-      </p>
-      <p class="spaced-lg">
-        <label class="check keybox__check">
-          <input type="checkbox" id="chkKeyDone">
-          <span class="check__box" aria-hidden="true"></span>
-          <span data-i18n="key.done">Ich habe den Link gesichert</span>
-        </label>
-      </p>
-    </section>
-
     <!-- Die Abfolge, nur im Bearbeitenmodus: drei Reiter in der Reihenfolge,
          in der eine Liste entsteht — erst eintragen, dann den Kontakt, dann
          den Link weitergeben. Zu sehen ist immer ein Schritt; am Ende des
@@ -847,9 +824,10 @@
     </section>
 
     <!-- 4 · Link teilen: der dritte Schritt. Vorn steht der Ansehen-Link, um
-         den es hier geht; der geheime Bearbeiten-Link und das Sichern liegen
-         zugeklappt darunter. Bis Oktober 2026 trugen die beiden Links eigene
-         Reiter — Reiter in einem Reiter waeren eine Ebene zu viel. -->
+         den es hier geht, darunter zugeklappt das Sichern. Der geheime
+         Bearbeiten-Link steht nicht hier, sondern im Zugang unter jedem
+         Schritt. Bis Oktober 2026 trugen die beiden Links eigene Reiter —
+         Reiter in einem Reiter waeren eine Ebene zu viel. -->
     <section class="card schritt" id="shareBox" hidden>
       <div class="card__head">
         <h2 class="card__title schritt__titel" data-i18n="share.headline">Link teilen</h2>
@@ -889,24 +867,6 @@
         <small class="hint hint--abruf" data-i18n="revoke.hint"></small>
       </div>
 
-      <!-- Der Bearbeiten-Link ist der eigene Zugang und wird nicht geteilt;
-           er liegt zugeklappt hier, damit er auffindbar bleibt. -->
-      <details class="klapp" id="editFold">
-        <summary>
-          <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-chev"/></svg>
-          <span data-i18n="share.editLabel">Bearbeiten-Link, geheim</span>
-        </summary>
-        <p class="hint" data-i18n="share.editHint">
-          Dieser Link ist Dein Zugang. Gib ihn niemandem und speichere ihn als Lesezeichen.
-        </p>
-        <div class="spaced linkrow">
-          <label class="sr-only" for="linkEdit" data-i18n="share.editLabel">Bearbeiten-Link, geheim</label>
-          <input type="password" id="linkEdit" class="input mono" readonly>
-          <button type="button" class="btn" id="btnRevealEdit" data-i18n="share.reveal">Zeigen</button>
-          <button type="button" class="btn btn--primary" data-copy="linkEdit" data-i18n="share.copy">Kopieren</button>
-        </div>
-      </details>
-
       <!-- Sichern: eine Datei im Klartext, ohne Link. Zugeklappt, weil das
            Sichern selten ist und das Weitergeben der Alltag. Die Begruendung
            steht bei sichereListe() in app.js. -->
@@ -920,6 +880,35 @@
           <button type="button" id="btnBackup" class="btn" data-i18n="backup.download">Als Datei sichern</button>
         </div>
       </details>
+    </section>
+
+    <!-- Der Zugang. Im Bearbeitenmodus steht er immer unter dem offenen
+         Schritt, gleich welcher es ist, und immer an derselben Stelle: Wer
+         diesen Link verliert, verliert die Liste. Verdeckt wie ein Passwort,
+         mit Zeigen und Kopieren. Direkt nach dem Anlegen und nach dem
+         Zurueckziehen ist er Butter und bittet darum, ihn zu sichern, bis das
+         bestaetigt ist; danach bleibt er als ruhiges Feld stehen (app.js,
+         zugangZeichnen). Bis Oktober 2026 erschien er nur nach dem Anlegen,
+         ueber den Reitern, und verschwand nach der Bestaetigung; der
+         Bearbeiten-Link lag dann zugeklappt in Link teilen. -->
+    <section class="keybox" id="keyBox" hidden>
+      <h2 class="keybox__title" data-i18n="key.headline">Bewahre diesen Link auf!</h2>
+      <label class="field__label" for="keyLink" data-i18n="share.editLabel">Bearbeiten-Link, geheim</label>
+      <div class="linkrow">
+        <input type="password" id="keyLink" class="input mono" readonly>
+        <button type="button" class="btn" id="btnRevealEdit" data-i18n="share.reveal">Zeigen</button>
+        <button type="button" class="btn btn--primary" data-copy="keyLink" data-i18n="share.copy">Kopieren</button>
+      </div>
+      <p class="hint keybox__remember" id="keyRemember" data-i18n="key.remember">
+        Auf diesem Gerät gemerkt — beim nächsten Besuch findest Du die Liste auf der Startseite wieder.
+      </p>
+      <p class="spaced-lg keybox__done">
+        <label class="check keybox__check">
+          <input type="checkbox" id="chkKeyDone">
+          <span class="check__box" aria-hidden="true"></span>
+          <span data-i18n="key.done">Ich habe den Link gesichert</span>
+        </label>
+      </p>
     </section>
 
   </section>
@@ -1034,7 +1023,7 @@
 
     <!-- Der Zugang zum Kreis. Erscheint einmal nach dem Anlegen und bleibt
          stehen, bis er ausdrücklich bestätigt wurde. -->
-    <section class="keybox" id="circleKeyBox" hidden>
+    <section class="keybox keybox--frisch" id="circleKeyBox" hidden>
       <h2 class="keybox__title" data-i18n="circle.keyHeadline">Bewahre diesen Link auf</h2>
       <div class="spaced-lg linkrow">
         <label class="sr-only" for="circleKeyLink" data-i18n="circle.keyLabel">Zugangs-Link der Superliste</label>

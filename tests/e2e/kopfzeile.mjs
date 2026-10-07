@@ -18,11 +18,15 @@ await page.locator('#btnCreateHero').click();
 await page.waitForSelector('#keyBox:not([hidden])', { timeout: 15000 });
 const box = page.locator('#chkKeyDone');
 ok('es ist ein Ankreuzfeld', await box.getAttribute('type') === 'checkbox');
-ok('keine Schaltfläche mehr im Kasten', await page.locator('#keyBox button:not([data-copy])').count() === 0);
+// Seit Oktober 2026 liegt der Link verdeckt im Kasten, daneben steht
+// "Zeigen". Ein Knopf zum Wegräumen ist weiterhin keiner da.
+ok('keine Schaltfläche zum Wegräumen im Kasten',
+   await page.locator('#keyBox button:not([data-copy]):not(#btnRevealEdit)').count() === 0);
 ok('anfangs nicht angekreuzt', !(await box.isChecked()));
 await box.check();
 await page.waitForTimeout(250);
-ok('der Kasten verschwindet', await page.locator('#keyBox').isHidden());
+ok('die Bitte verschwindet, das Feld bleibt', await page.locator('#keyBox').isVisible() &&
+   !(await page.locator('#keyBox').evaluate(n => n.classList.contains('keybox--frisch'))));
 ok('und der Zugang wird gefeiert', await page.evaluate(() => !!document.getElementById('konfetti')));
 ok('der Zähler steht auf 1', await page.evaluate(() => JSON.parse(localStorage.getItem('lid.spiel')).listen) === 1);
 await page.waitForTimeout(2000);
@@ -75,8 +79,8 @@ console.log('\n· Aus der Durchsicht');
   await p2.locator('#chkKeyDone').focus();
   await p2.keyboard.press('Enter');
   await p2.waitForTimeout(250);
-  ok('die Eingabetaste kreuzt an und schließt den Kasten',
-     await p2.locator('#keyBox').isHidden());
+  ok('die Eingabetaste kreuzt an und nimmt die Bitte zurück',
+     !(await p2.locator('#keyBox').evaluate(n => n.classList.contains('keybox--frisch'))));
   ok('und zählt den Zugang',
      await p2.evaluate(() => JSON.parse(localStorage.getItem('lid.spiel')).listen) === 1);
   await p2.close();

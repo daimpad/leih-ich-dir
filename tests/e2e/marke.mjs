@@ -67,10 +67,15 @@ await page.waitForSelector('#viewList:not([hidden])', { timeout: 15000 });
 await page.waitForTimeout(400);
 const yNach = await page.evaluate(() => window.scrollY);
 ok('Liste beginnt am Seitenanfang', yNach === 0, 'y=' + yNach);
-const obenSichtbar = await page.locator('#keyBox').isVisible();
-ok('der Zugangshinweis steht im Blick', obenSichtbar);
-const boxY = await page.locator('#keyBox').boundingBox();
-ok('Zugangshinweis liegt im ersten Bildschirm', boxY && boxY.y < 800, boxY ? 'y=' + Math.round(boxY.y) : 'fehlt');
+ok('der Zugangshinweis ist da', await page.locator('#keyBox').isVisible());
+/* Bis Oktober 2026 lag der Zugangshinweis im ersten Bildschirm, zuerst unter
+   dem Inventar, dann ueber den Reitern. Seitdem ist er ein festes Feld unter
+   dem offenen Schritt, so entschieden gegen den Platz ganz oben. Unter dem
+   leeren Inventar liegt er knapp unter dem ersten Bildschirm; im Blick ist
+   er spaetestens im zweiten Schritt, dessen Inhalt kurz ist (siehe unten). */
+const abstand = await page.evaluate(() => Math.round(document.getElementById('keyBox').getBoundingClientRect().top -
+  document.getElementById('inventoryBox').getBoundingClientRect().bottom));
+ok('er steht direkt unter dem ersten Schritt', abstand >= 0 && abstand <= 48, abstand + 'px');
 
 console.log('\n· Hinweis auf das gemerkte Geraet');
 const rem = page.locator('#keyRemember');
@@ -86,6 +91,13 @@ if (await rem.isVisible()) {
 } else {
   ok('Hinweis sichtbar', false, 'ausgeblendet');
 }
+
+console.log('\n· Spaetestens im zweiten Schritt im Blick');
+await page.locator('#inventoryBox [data-weiter="2"]').click();
+await page.waitForTimeout(700);
+const imBlick = await page.evaluate(() => ({ titel: Math.round(document.querySelector('#keyBox .keybox__title').getBoundingClientRect().bottom),
+  hoehe: innerHeight }));
+ok('mit dem Weiter zum Kontakt steht die Bitte im ersten Bildschirm', imBlick.titel <= imBlick.hoehe, JSON.stringify(imBlick));
 
 console.log('\n· Restliche Seiten');
 for (const p of ['ueber.html', 'impressum.html', 'datenschutz.html', 'einstellungen.html', 'check.html']) {

@@ -86,7 +86,8 @@ ok('es entsteht eine neue Liste mit eigenem Zugang',
    /^#e=/.test(hash) && !hash.includes(anna.id) && !hash.includes(anna.keyStr), hash.slice(0, 24));
 const namen = await p.evaluate(() => Array.from(document.querySelectorAll('#itemList .item-name')).map(n => n.textContent));
 ok('mit denselben Gegenstaenden', namen.join('|') === 'Bohrmaschine|Rasenmäher', namen.join('|'));
-ok('der Zugangskasten steht offen, denn die Links sind neu', !(await p.locator('#keyBox').isHidden()));
+ok('der Zugang bittet darum, ihn zu sichern, denn die Links sind neu',
+   await p.locator('#keyBox').evaluate(n => !n.hidden && n.classList.contains('keybox--frisch')));
 ok('die Meldung sagt es', (await p.locator('#toastText').textContent()).includes('neue Liste'),
    await p.locator('#toastText').textContent());
 const neuTeile = hash.slice(3).split('.');

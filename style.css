@@ -223,7 +223,7 @@
  * und, wo noetig, --mass.
  * ===================================================================== */
 
-.card, .fold, .modal, .klappe, .toast, .mine a, .itemrow, .keybox, .note {
+.card, .fold, .modal, .klappe, .toast, .mine a, .itemrow, .keybox--frisch, .note {
   --farbe: var(--surface);
   --tief:  var(--flaeche-tief);
   --glanz: var(--licht-flaeche);
@@ -239,7 +239,7 @@
   color: var(--tinte);
 }
 
-.card, .fold, .modal, .klappe, .toast, .mine a, .itemrow, .keybox, .note,
+.card, .fold, .modal, .klappe, .toast, .mine a, .itemrow, .keybox--frisch, .note,
 .btn, .ctl-square, .modal__x, .fab__btn, .fab__item, .skiplink, .trust li,
 .chip--level, .chip--ok, .item-badge, .einstieg__mark, .mine .kind,
 .tab[aria-selected="true"], .seg button[aria-pressed="true"],
@@ -902,25 +902,34 @@ header.site { padding-block: var(--s-4); }
   .mine .when { display: none; }
 }
 
-/* Der Zugang. Eigene Farbe, weil er kein Bericht ist, sondern eine
-   Aufforderung: Wer diesen Link verliert, verliert die Liste. Butter im
-   Hellen, dunkler Bernstein im Dunkeln. */
-.keybox {
+/* Der Zugang. Ruhig ist er ein Feld unter dem offenen Schritt, ohne eigene
+   Flaeche. Frisch — nach dem Anlegen und nach dem Zurueckziehen, bis zur
+   Bestaetigung — ist er eine eigene Farbe, weil er dann kein Bericht ist,
+   sondern eine Aufforderung: Wer diesen Link verliert, verliert die Liste.
+   Butter im Hellen, dunkler Bernstein im Dunkeln. */
+.keybox { margin-bottom: var(--s-4); }
+.schritt ~ .keybox { margin-top: var(--s-5); }
+.keybox--frisch {
   --farbe: var(--warn-flaeche); --tief: var(--warn-tief);
-  border: 0; border-radius: var(--r-card); padding: var(--s-5); margin-bottom: var(--s-4);
+  border: 0; border-radius: var(--r-card); padding: var(--s-5);
 }
-.keybox__title { font-size: 1.6rem; color: var(--warn-ink); }
+.keybox__title { font-size: 1.6rem; color: var(--warn-ink); margin-bottom: var(--s-3); }
+/* Titel, Nebenbemerkung und Haken gehoeren zur Bitte und gehen mit ihr. */
+.keybox:not(.keybox--frisch) .keybox__title,
+.keybox:not(.keybox--frisch) .keybox__remember,
+.keybox:not(.keybox--frisch) .keybox__done { display: none; }
 /* Ohne Deckkraft: Leiser wird der Hinweis ueber die Groesse, nicht ueber die
    Deckkraft — Deckkraft kostet Kontrast, Groesse nicht. */
-.keybox .hint { color: var(--warn-ink); margin-top: var(--s-2); }
+.keybox--frisch .hint { color: var(--warn-ink); margin-top: var(--s-2); }
+.keybox--frisch .field__label { color: var(--warn-ink); }
 /* Nebenbemerkung, kein zweiter Hinweis: klein und in einer Zeile, damit sie
    dem Link daneben nicht das Gewicht nimmt. */
 .keybox .keybox__remember { font-size: .74rem; margin-top: var(--s-1); }
 /* Der Haken im Zugangskasten traegt Butter, nicht die Minze der Anwendung:
    Hier wird eine Warnung bestaetigt, nichts Erfreuliches. */
 .keybox__check input:checked + .check__box { --farbe: var(--butter); --tief: var(--butter-tief); }
-.keybox .check { color: var(--warn-ink); font-weight: 700; }
-.keybox .input { background: var(--surface); }
+.keybox--frisch .check { color: var(--warn-ink); font-weight: 700; }
+.keybox--frisch .input { background: var(--surface); }
 
 /* == 8 · Liste ========================================================= */
 
@@ -1429,6 +1438,10 @@ header.site { padding-block: var(--s-4); }
   .site-footer { padding-bottom: calc(var(--s-7) + 3.6rem); }
   .toast-region { bottom: calc(var(--s-5) + 3.6rem); }
   .klappe { bottom: calc(var(--s-5) + 9.8rem); }
+  /* Der Zugang steht unter jedem Schritt und kommt deshalb oft genau dort zu
+     liegen, wo die Schaltflaeche schwebt. Seine Knoepfe stehen hier unter
+     dem Feld und links, wo die Schaltflaeche sie nicht verdeckt. */
+  .schritt ~ .keybox .linkrow .input { flex-basis: 100%; }
 }
 
 @media (max-width: 34rem) {
@@ -1444,7 +1457,7 @@ header.site { padding-block: var(--s-4); }
   /* Schmal steht der Zusatz unter den Verweisen statt neben ihnen. */
   .footer-row { flex-direction: column; align-items: flex-start; }
   .footer-claim { white-space: normal; flex-wrap: wrap; }
-  .keybox { padding: var(--s-4); }
+  .keybox--frisch { padding: var(--s-4); }
   .card, .fold__body { padding: var(--s-4); }
   .fold > summary { padding: var(--s-4); }
   .hero h1 { font-size: 2.4rem; }
