@@ -2799,8 +2799,9 @@
    * federt, haengt an einem Takt (requestAnimationFrame); er schlaeft, sobald
    * nichts mehr schwingt, und haelt an, solange der Reiter verborgen ist.
    *
-   * Gefeiert wird hier nichts, kein Konfetti und kein Ton: Die Startseite
-   * traegt das Vertrauensversprechen und bleibt ruhig. Wer Bewegung
+   * Gefeiert wird hier nichts, kein Konfetti: Die Startseite traegt das
+   * Vertrauensversprechen und bleibt ruhig. Einen Ton gibt es nur bei der
+   * Trommel, und nur fuer den, der Toene eingeschaltet hat. Wer Bewegung
    * abbestellt hat (ruhig()), bekommt keine, und die Daueranimationen haelt
    * das Stylesheet an. Das gilt auch fuer den Auftritt am Ende des
    * Abschnitts: Dinge, Wortmarke und Satz erscheinen beim ersten Zeigen
@@ -2864,8 +2865,8 @@
    * zusaetzlich auf den Klick und sprang nach einem langen Druck zweimal;
    * hier gibt es keinen Klick, denn die Dinge sind keine Schaltflaechen. */
 
-  var SPRUNG = { bohr: 1, leiter: 1.5, zelt: 0.85, wuerfel: 1.1, waffel: 0.9, schalter: 1 };
-  var DREHUNG = { bohr: 2.4, leiter: 0.8, zelt: 1, wuerfel: 3, waffel: 1.2, schalter: 0.6 };
+  var SPRUNG = { bohr: 1, leiter: 1.5, zelt: 0.85, wuerfel: 1.1, waffel: 0.9, trommel: 1.2 };
+  var DREHUNG = { bohr: 2.4, leiter: 0.8, zelt: 1, wuerfel: 3, waffel: 1.2, trommel: 0.8 };
 
   function Ding(node) {
     this.node = node;
@@ -2889,7 +2890,10 @@
   Ding.prototype.los = function (springen) {
     if (!this.gedrueckt) { return; }
     this.gedrueckt = false;
-    if (springen && this.art === 'schalter') { this.node.classList.toggle('ist-aus'); }
+    /* Die Trommel klingt, wenn Toene eingeschaltet sind; ton() fragt das
+       selbst. Unabhaengig von der Bewegung: Wer sie abbestellt hat, hoert
+       den Schlag trotzdem, nur springt nichts. */
+    if (springen && this.art === 'trommel') { ton('trommel'); }
     if (springen && !ruhig()) {
       this.s.v += 4.2;
       this.vy = -330 * (SPRUNG[this.art] || 1);
@@ -3531,7 +3535,11 @@
     plopp: [{ f: 660, bis: 880, ms: 90,  ab: 0 }],
     weg:   [{ f: 392, ms: 120, ab: 0 }],
     heim:  [{ f: 587, ms: 90,  ab: 0 }, { f: 880, ms: 90, ab: 110 }],
-    tada:  [{ f: 523, ms: 80,  ab: 0 }, { f: 659, ms: 80, ab: 80 }, { f: 784, ms: 110, ab: 160 }]
+    tada:  [{ f: 523, ms: 80,  ab: 0 }, { f: 659, ms: 80, ab: 80 }, { f: 784, ms: 110, ab: 160 }],
+    /* Ein Schlag auf die Trommel der Startseite: ein kurzer heller Anschlag
+       und darunter ein tiefer Ton, der faellt. Der helle Teil ist da, weil
+       Telefonlautsprecher den tiefen allein kaum wiedergeben. */
+    trommel: [{ f: 420, bis: 300, ms: 40, ab: 0 }, { f: 170, bis: 70, ms: 170, ab: 0 }]
   };
 
   function tonAn() {

@@ -766,7 +766,7 @@ header.site { padding-block: var(--s-4); }
 .dinge li:nth-child(3) { left: 64%; top: 15%; width: 36%; }   /* Zelt */
 .dinge li:nth-child(4) { left: 35%; top: 42%; width: 24%; }   /* Wuerfel */
 .dinge li:nth-child(5) { left: 3%;  top: 59%; width: 34%; }   /* Waffeleisen */
-.dinge li:nth-child(6) { left: 53%; top: 64%; width: 32%; }   /* Schalter */
+.dinge li:nth-child(6) { left: 53%; top: 64%; width: 32%; }   /* Trommel */
 .ding {
   display: block; width: 100%; aspect-ratio: 1;
   cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
@@ -823,12 +823,8 @@ header.site { padding-block: var(--s-4); }
 .gesicht__mund, .gesicht--schlaf path { fill: none; stroke: var(--tinte); stroke-width: 3; stroke-linecap: round; }
 .zelt__tuer { fill: var(--minze-satt); stroke: var(--minze-satt); }
 .waffel__gitter path { fill: none; stroke: var(--waffel-gitter); stroke-width: 4; opacity: .5; }
-.ding__spur { fill: url(#v-minze); }
-.ding__knauf { transition: transform .6s var(--feder); }
-.ding__haken { fill: none; stroke: var(--tinte); stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; transition: opacity .2s ease; }
-.ding--schalter.ist-aus .ding__spur { fill: url(#v-pfirsich); }
-.ding--schalter.ist-aus .ding__knauf { transform: translateX(-46px); }
-.ding--schalter.ist-aus .ding__haken { opacity: 0; }
+/* Die Schnuerung der Trommel: helle Knete auf dem Korpus, auch im Dunkeln. */
+.trommel__schnur { fill: none; stroke: var(--milch); stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round; }
 
 /* Vier Zusagen mit Haken, als Plaketten aus Knete auf dem Grund. Der Haken
    steht in einer Minzkugel, weil er dasselbe sagt wie in der Liste: hier

@@ -42,13 +42,13 @@
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Die Wortmarke Leih ich Dir. aus Knete, daneben schweben sechs Dinge zum Verleihen: Bohrmaschine, Leiter, Zelt, Würfel, Waffeleisen und ein Schalter.">
+<meta property="og:image:alt" content="Die Wortmarke Leih ich Dir. aus Knete, daneben schweben sechs Dinge zum Verleihen: Bohrmaschine, Leiter, Zelt, Würfel, Waffeleisen und eine kleine Trommel.">
 <!-- Ohne diese Angabe zeigen Slack, Discord und X ein Randbildchen statt der grossen Karte. -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="LeihIchDir · Dinge an Freunde verleihen, ohne Konto">
 <meta name="twitter:description" content="Trage ein, was Du verleihst, und schick Deinen Freund:innen einen Link. Verschlüsselt im Browser, ohne Konto.">
 <meta name="twitter:image" content="https://leihichdir.de/assets/pics/og.png">
-<meta name="twitter:image:alt" content="Die Wortmarke Leih ich Dir. aus Knete, daneben schweben sechs Dinge zum Verleihen: Bohrmaschine, Leiter, Zelt, Würfel, Waffeleisen und ein Schalter.">
+<meta name="twitter:image:alt" content="Die Wortmarke Leih ich Dir. aus Knete, daneben schweben sechs Dinge zum Verleihen: Bohrmaschine, Leiter, Zelt, Würfel, Waffeleisen und eine kleine Trommel.">
 <!-- Strukturierte Angaben zur Anwendung.
 
      Warum das unter dieser CSP geht: Nicht weil script-src es erlaubte,
@@ -444,7 +444,8 @@
            Kissen und ohne Rahmen. Es traegt keine Aussage, die nicht schon
            im Satz stuende, und ist deshalb fuer Vorleseprogramme verborgen
            und nicht anwaehlbar. Wer ein Ding anfasst, bringt es zum
-           Springen (app.js, 8a); mehr geschieht nicht. Das Bild steht im
+           Springen (app.js, 8a); die Trommel klingt dazu leise, wenn Toene
+           eingeschaltet sind, mehr geschieht nicht. Das Bild steht im
            Dokument und nicht in einem <img>: Nur so erreichen es die Farben
            aus style.css und der Wechsel zwischen hell und dunkel. Das alte
            Bild, die Pfote, liegt in archiv/alter-stil/pics/. -->
@@ -536,15 +537,21 @@
             </span>
           </li>
           <li>
-            <span class="ding ding--schalter" data-ding="schalter">
+            <!-- Eine kleine Trommel. Sie springt wie die anderen; wer Toene
+                 eingeschaltet hat, hoert dazu einen leisen Schlag (app.js, 8a). -->
+            <span class="ding" data-ding="trommel">
               <svg viewBox="0 0 120 120" focusable="false">
                 <g class="ding__feder">
                   <g filter="url(#knete)">
-                    <rect class="ding__spur" x="12" y="42" width="96" height="50" rx="25"/>
-                    <g class="ding__knauf">
-                      <circle cx="83" cy="67" r="20" fill="url(#v-milch)"/>
-                      <path class="ding__haken" d="M75 67l5.5 5.5L91 61"/>
-                    </g>
+                    <rect x="16" y="92" width="88" height="13" rx="6.5" fill="url(#v-butter)"/>
+                    <rect x="21" y="52" width="78" height="46" rx="8" fill="url(#v-pfirsich)"/>
+                    <path class="trommel__schnur" d="M30 62L42 90L54 62L66 90L78 62L90 90"/>
+                    <rect x="16" y="44" width="88" height="13" rx="6.5" fill="url(#v-butter)"/>
+                    <ellipse cx="60" cy="45" rx="40" ry="9" fill="url(#v-milch)"/>
+                    <rect x="57" y="4" width="6" height="48" rx="3" fill="url(#v-waffel)" transform="rotate(-30 60 28)"/>
+                    <rect x="57" y="4" width="6" height="48" rx="3" fill="url(#v-waffel)" transform="rotate(30 60 28)"/>
+                    <circle cx="48" cy="7" r="6.5" fill="url(#v-kaugummi)"/>
+                    <circle cx="72" cy="7" r="6.5" fill="url(#v-kaugummi)"/>
                   </g>
                 </g>
               </svg>
