@@ -934,16 +934,40 @@ header.site { padding-block: var(--s-4); }
 .titleblock h1 { font-size: 2.3rem; }
 /* Titel und Speicherzustand in einer Zeile. Der Zustand steht rechts und
    klein: Er gehoert zum Titel, draengt sich aber nicht neben ihn. */
-.titlerow { display: flex; align-items: baseline; gap: var(--s-3); }
+.titlerow { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s-1) var(--s-3); }
+/* Reicht die Zeile nicht fuer Name, Stift und Zustand, rueckt der Zustand
+   darunter, rechts: Der Name geht vor, und schmal schnitte ihn sonst der
+   Zustand an. */
+.titlerow > .chip { margin-left: auto; }
 .titlerow h1, .titlerow .title-edit { flex: 1 1 auto; min-width: 0; }
 .chip--sm { font-size: .74rem; padding: .15rem .6rem; }
 /* Der Titel als Feld: Er sieht aus wie Schrift, bis man ihn anfasst — dann
-   wird er zur Mulde. */
-.title-input {
-  font-size: 2.3rem;
-  padding: .3rem .6rem; margin-left: -.6rem; background: none; box-shadow: none; border-color: transparent;
+   wird er zur Mulde. Er ist so breit wie sein Wort, damit der Stift direkt
+   dahinter steht. Ein Feld kann sich nach seinem Inhalt nicht richten; die
+   Breite gibt deshalb ein unsichtbarer Zwilling vor, der denselben Text in
+   derselben Schrift traegt (data-wert, app.js titelBreite). Zu lang fuer
+   die Zeile, darf der Zwilling schrumpfen, und das Feld rollt wie jedes. */
+.title-edit { display: flex; align-items: center; gap: var(--s-2); cursor: text; }
+.title-edit__feld {
+  display: grid; grid-template-columns: minmax(0, 1fr); flex: 0 1 auto; min-width: 0;
+  margin-left: -.6rem;
 }
-.title-input:hover { background: var(--surface-alt); }
+.title-input, .title-edit__feld::after {
+  grid-area: 1 / 1;
+  font-size: 2.3rem;
+  padding: .3rem .6rem; border: 1px solid transparent;
+}
+.title-input { width: 100%; min-width: 0; background: none; box-shadow: none; }
+.title-edit__feld::after {
+  content: attr(data-wert) ' ';
+  visibility: hidden; white-space: pre; overflow: hidden;
+  font-family: var(--display); font-weight: 900; letter-spacing: -.015em;
+}
+.title-input:hover, .title-edit:hover .title-input { background: var(--surface-alt); }
+/* Der Stift ist ein Hinweis, kein eigener Knopf: leise, bis man den Namen
+   anfasst. Er steht im Label, ein Tipp darauf setzt den Cursor ins Feld. */
+.title-edit__stift { flex: none; width: 1.6rem; height: 1.6rem; color: var(--tinte-leise); }
+.title-edit:hover .title-edit__stift, .title-edit:focus-within .title-edit__stift { color: var(--tinte); }
 .titlemeta { display: flex; align-items: center; flex-wrap: wrap; gap: var(--s-2); margin-top: var(--s-2); color: var(--faint); font-size: .92rem; }
 
 .items-head { display: flex; align-items: center; gap: var(--s-3); margin-bottom: var(--s-4); }
@@ -1471,7 +1495,7 @@ header.site { padding-block: var(--s-4); }
   .card, .fold__body { padding: var(--s-4); }
   .fold > summary { padding: var(--s-4); }
   .hero h1 { font-size: 2.4rem; }
-  .titleblock h1, .title-input { font-size: 1.9rem; }
+  .titleblock h1, .title-input, .title-edit__feld::after { font-size: 1.9rem; }
 
   /* Der Aufklapper-Zusatz rutscht unter den Namen statt ihn zu drängen. */
   .fold > summary { flex-wrap: wrap; }
