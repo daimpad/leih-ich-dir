@@ -162,6 +162,7 @@ foreach ([
     ['/app.js', 'javascript'],
     ['/theme.js', 'javascript'],
     ['/einstellungen.html', 'text/html'],
+    ['/so-gehts.html', 'text/html'],
     ['/ueber.html', 'text/html'],
     ['/impressum.html', 'text/html'],
     ['/datenschutz.html', 'text/html'],

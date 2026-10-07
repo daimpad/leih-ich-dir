@@ -8,7 +8,7 @@ p.on('console', m => { if (m.type()==='error') fehler.push(m.text()); });
 p.on('response', r => { if (r.status() >= 400) schlecht.push(r.status()+' '+r.url()); });
 
 console.log('· Der Zeichensatz steht in allen sechs Seiten');
-for (const s of ['/', '/ueber.html', '/impressum.html', '/datenschutz.html', '/einstellungen.html', '/check.html']) {
+for (const s of ['/', '/so-gehts.html', '/ueber.html', '/impressum.html', '/datenschutz.html', '/einstellungen.html', '/check.html']) {
   await p.goto(BASE + ''+s, { waitUntil: 'networkidle' });
   const m = await p.evaluate(() => {
     const l = sel => { const e = document.querySelector(sel); return e && e.getAttribute('href'); };

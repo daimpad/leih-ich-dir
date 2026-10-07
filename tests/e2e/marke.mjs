@@ -100,7 +100,7 @@ const imBlick = await page.evaluate(() => ({ titel: Math.round(document.querySel
 ok('mit dem Weiter zum Kontakt steht die Bitte im ersten Bildschirm', imBlick.titel <= imBlick.hoehe, JSON.stringify(imBlick));
 
 console.log('\n· Restliche Seiten');
-for (const p of ['ueber.html', 'impressum.html', 'datenschutz.html', 'einstellungen.html', 'check.html']) {
+for (const p of ['so-gehts.html', 'ueber.html', 'impressum.html', 'datenschutz.html', 'einstellungen.html', 'check.html']) {
   await page.goto(URL + p, { waitUntil: 'networkidle' });
   const imgs = await page.locator('header img.brand-mark').count();
   const hasIch = await page.locator('.brand-ich').count();

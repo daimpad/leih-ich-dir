@@ -198,7 +198,7 @@ for (const breite of [320, 390]) {
   await pruefe(p, 'Fehler', breite, sprache);
 
   console.log('· Rechtstexte');
-  for (const seite of ['ueber.html','datenschutz.html','impressum.html']) {
+  for (const seite of ['so-gehts.html','ueber.html','datenschutz.html','impressum.html']) {
     await p.goto(BASE + '/'+seite, { waitUntil:'networkidle' });
     await pruefe(p, seite, breite, sprache);
   }
