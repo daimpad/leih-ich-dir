@@ -14,12 +14,14 @@
  * Klingen darf allein die Trommel, leise und nur, wenn Toene eingeschaltet
  * sind. Wer Bewegung abbestellt hat, bekommt keine.
  *
- * Seit der Hero ohne Rahmen steht, gilt ausserdem: Er ist die eine
- * Ausnahme vom Geruest und reicht ueber die Breite des Fensters, bis 1440
- * Punkte. Breit schweben die Dinge rechts neben der Wortmarke, schmal
- * stehen sie darueber. Beim ersten Zeigen treten Dinge, Wortmarke und Satz
- * in dieser Reihenfolge auf, einmal je Laden und nie fuer jemanden, der
- * Bewegung abbestellt hat. Das Kissen der ersten Knete-Fassung ist fort.
+ * Seit der Hero ohne Rahmen steht, gilt ausserdem: Er steht im Geruest,
+ * so breit wie die Seite und buendig mit ihr. Fuer zwei Tage im Oktober
+ * 2026 reichte er als Ausnahme ueber die Breite des Fensters, zuletzt bis
+ * 1440 Punkte. Ist das Fenster breiter als die Seite, schweben die Dinge
+ * rechts neben der Wortmarke, sonst stehen sie darueber. Beim ersten
+ * Zeigen treten Dinge, Wortmarke und Satz in dieser Reihenfolge auf,
+ * einmal je Laden und nie fuer jemanden, der Bewegung abbestellt hat. Das
+ * Kissen der ersten Knete-Fassung ist fort.
  */
 import { starteBrowser, BASE, pruefer } from './hilfe.mjs';
 
@@ -220,30 +222,59 @@ for (const [name, optionen, thema, grund, satz] of [
 }
 
 console.log('· Über die Breiten');
-/* Breit ist der Hero so breit wie das Fenster ohne den Rand von 24 Punkten
-   je Seite, hoechstens 1440 (bis Oktober 2026 1600); schmal (bis 46rem, 736 Punkte) so breit wie
-   das Geruest, an dem die Zusagen darunter stehen. */
-for (const w of [1920, 1800, 1440, 1400, 1100, 760, 700, 600, 430, 390, 360, 320]) {
+/* Der Hero ist auf jeder Breite so breit wie das Geruest, an dem die
+   Zusagen darunter stehen, und steht buendig mit ihm: links wie rechts
+   dieselbe Kante. Zuvor war er breit so breit wie das Fenster ohne den
+   Rand von 24 Punkten je Seite, hoechstens 1440. Nebeneinander steht er,
+   sobald das Fenster breiter ist als die Seite (660 Punkte). */
+for (const w of [1920, 1800, 1440, 1400, 1100, 760, 700, 661, 660, 600, 430, 390, 360, 320]) {
   const { ctx, p } = await oeffne({ viewport: { width: w, height: 900 } });
-  const r = await p.evaluate(() => ({
-    sichtbar: document.querySelector('.hero-bild').getBoundingClientRect().height > 0,
-    ueberlauf: document.documentElement.scrollWidth > window.innerWidth + 1,
-    hero: document.querySelector('.hero').getBoundingClientRect(),
-    geruest: document.querySelector('.trust').getBoundingClientRect(),
-    marke: document.getElementById('wortmarke').getBoundingClientRect(),
-    bild: document.querySelector('.hero-bild').getBoundingClientRect()
-  }));
-  const breit = w > 736;
-  const soll = breit ? Math.min(w - 48, 1440) : r.geruest.width;
-  ok(w + 'px: der Hero ist ' + (breit ? 'breiter als das Geruest' : 'so breit wie das Geruest'),
-     Math.abs(r.hero.width - soll) <= 1 && (!breit || r.hero.width > r.geruest.width),
-     Math.round(r.hero.width) + ' / ' + Math.round(soll));
+  const r = await p.evaluate(() => {
+    const satz = document.querySelector('.hero .lead');
+    return {
+      sichtbar: document.querySelector('.hero-bild').getBoundingClientRect().height > 0,
+      ueberlauf: document.documentElement.scrollWidth > window.innerWidth + 1,
+      hero: document.querySelector('.hero').getBoundingClientRect(),
+      geruest: document.querySelector('.trust').getBoundingClientRect(),
+      marke: document.getElementById('wortmarke').getBoundingClientRect(),
+      bild: document.querySelector('.hero-bild').getBoundingClientRect(),
+      zeilen: Math.round(satz.getBoundingClientRect().height / parseFloat(getComputedStyle(satz).lineHeight))
+    };
+  });
+  const breit = w > 660;
+  ok(w + 'px: der Hero ist so breit wie das Geruest und buendig mit ihm',
+     Math.abs(r.hero.width - r.geruest.width) <= 1 && Math.abs(r.hero.left - r.geruest.left) <= 1,
+     Math.round(r.hero.left) + '+' + Math.round(r.hero.width) + ' / ' + Math.round(r.geruest.left) + '+' + Math.round(r.geruest.width));
+  /* Die Spalte neben den Dingen ist breit ueberall dieselbe; die Schrift
+     des Satzes waechst deshalb nicht weiter, und er bleibt bei zwei
+     Zeilen. */
+  if (breit) {
+    ok(w + 'px: der Satz in zwei Zeilen', r.zeilen === 2, String(r.zeilen));
+  }
   ok(w + 'px: die Dinge sichtbar, ' + (breit ? 'rechts neben der Wortmarke' : 'ueber der Wortmarke'),
      r.sichtbar && (breit ? r.bild.x >= r.marke.x + r.marke.width : r.bild.y + r.bild.height <= r.marke.y + 1),
      JSON.stringify([Math.round(r.bild.x), Math.round(r.bild.y), Math.round(r.marke.x + r.marke.width), Math.round(r.marke.y)]));
   ok(w + 'px: die Wortmarke bleibt im Fenster', r.marke.x >= 0 && r.marke.x + r.marke.width <= w && r.marke.width > 200,
      Math.round(r.marke.x) + ' bis ' + Math.round(r.marke.x + r.marke.width));
   ok(w + 'px: kein Überlauf', !r.ueberlauf);
+  await ctx.close();
+}
+
+console.log('· Ohne Wortmarke');
+/* Kann app.js die Wortmarke nicht messen, steht der Titel selbst da. Er
+   bleibt gross, passt aber auf Deutsch in eine Zeile seiner Spalte; mit
+   der Groesse aus der Zeit des breiten Heros brach er dort um. Nachgestellt
+   wird das, indem die Klasse fortfaellt, die app.js nur bei Erfolg setzt. */
+for (const w of [1280, 700, 390, 320]) {
+  const { ctx, p } = await oeffne({ viewport: { width: w, height: 900 } });
+  const t = await p.evaluate(() => {
+    document.documentElement.classList.remove('wortmarke-da');
+    const h = document.querySelector('.hero h1');
+    const b = h.getBoundingClientRect();
+    return { zeilen: Math.round(b.height / parseFloat(getComputedStyle(h).lineHeight)), sichtbar: b.width > 1,
+             ueberlauf: document.documentElement.scrollWidth > window.innerWidth + 1 };
+  });
+  ok(w + 'px: der Titel steht sichtbar in einer Zeile', t.sichtbar && t.zeilen === 1 && !t.ueberlauf, JSON.stringify(t));
   await ctx.close();
 }
 

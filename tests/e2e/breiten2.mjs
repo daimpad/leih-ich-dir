@@ -32,8 +32,8 @@ for (const w of [1440, 1280, 900, 740, 600, 430, 360]) {
         const r = marke.getBoundingClientRect();
         return r.width > 200 && r.height * 3 < r.width ? 1 : 2;
       })(),
-      /* Der Hero ist die eine Ausnahme vom Geruest; seine Breite steht
-         nur im Protokoll, zugesichert wird sie in heroknete.mjs. */
+      /* Der Hero steht im Geruest wie alles andere; seine Breite steht
+         hier nur im Protokoll, zugesichert wird sie in heroknete.mjs. */
       hero: Math.round(document.querySelector('.hero').getBoundingClientRect().width),
       ueberlauf: document.documentElement.scrollWidth > window.innerWidth + 1
     };
