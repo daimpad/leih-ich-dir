@@ -27,7 +27,7 @@ ok('kein Block in der Kopfleiste', await page.locator('#barMine').isHidden());
 ok('keine schwebende Schaltflaeche', !(await page.locator('.fab__btn').isVisible()));
 
 // Je eine Liste beider Arten anlegen, damit beide Wege erscheinen.
-await page.locator('#btnCreateHero').click();
+await page.locator('#btnCreate').click();
 await page.waitForSelector('#viewList:not([hidden])', { timeout: 15000 });
 await page.waitForTimeout(900);
 await page.goto(URL, { waitUntil: 'networkidle' });
@@ -247,10 +247,10 @@ console.log('\n· Zurueck zu den gemerkten Listen, ohne neu zu laden');
   await p.goto(URL, { waitUntil: 'networkidle' });
   await p.evaluate(() => { localStorage.clear(); localStorage.setItem('lid.lang', 'de'); });
   await p.reload({ waitUntil: 'networkidle' });
-  await p.locator('#btnCreateHero').click();
+  await p.locator('#btnCreate').click();
   await p.waitForSelector('#viewList:not([hidden])', { timeout: 15000 });
   await p.goto(URL, { waitUntil: 'networkidle' });
-  await p.locator('#btnCreateHero').click();
+  await p.locator('#btnCreate').click();
   await p.waitForSelector('#viewList:not([hidden])', { timeout: 15000 });
   await p.waitForTimeout(500);
   ok('mit zwei Listen fuehrt der Weg zu den gemerkten', await p.locator('#lnkMine').getAttribute('href') === './#meine',
@@ -262,8 +262,10 @@ console.log('\n· Zurueck zu den gemerkten Listen, ohne neu zu laden');
      location.hash === '#meine'));
   const knoepfe = await p.evaluate(() => [...document.querySelectorAll('[data-create]')]
     .map(b => (b.disabled ? 'gesperrt: ' : '') + b.textContent.trim()));
-  ok('beide Knoepfe zum Anlegen sind wieder frei und heissen wieder so',
-     knoepfe.length === 2 && knoepfe.every(k => k === 'Leihliste anlegen'), knoepfe.join(' | '));
+  /* Seit Oktober 2026 gibt es nur noch einen Knopf zum Anlegen; der im
+     Hero ist fort. */
+  ok('der Knopf zum Anlegen ist wieder frei und heisst wieder so',
+     knoepfe.length === 1 && knoepfe[0] === 'Leihliste anlegen', knoepfe.join(' | '));
   await ctx2.close();
 }
 

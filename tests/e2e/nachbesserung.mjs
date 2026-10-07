@@ -56,7 +56,7 @@ console.log('· Details ergaenzen steht in der Zeile');
   await p.goto(BASE + '/');
   await p.evaluate(() => { localStorage.clear(); localStorage.setItem('lid.lang','de'); });
   await p.reload({ waitUntil: 'networkidle' });
-  await p.locator('#btnCreateHero').click();
+  await p.locator('#btnCreate').click();
   await p.waitForSelector('#viewList:not([hidden])', { timeout: 15000 });
   await p.waitForTimeout(700);
   await p.locator('#addName').fill('Bohrmaschine');

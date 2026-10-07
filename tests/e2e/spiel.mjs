@@ -20,7 +20,7 @@ await page.evaluate(() => localStorage.clear());
 await page.reload({ waitUntil: 'networkidle' });
 
 console.log('\n· Liste anlegen und Zugang bestätigen');
-await page.locator('#btnCreateHero').first().click();
+await page.locator('#btnCreate').first().click();
 await page.waitForSelector('#keyBox:not([hidden])', { timeout: 15000 });
 ok('beim Anlegen selbst bleibt es sachlich', !(await konfettiDa()), 'Konfetti über der Warnung wäre falsch');
 await page.locator('#chkKeyDone').check();

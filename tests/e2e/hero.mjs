@@ -11,7 +11,7 @@ page.on('pageerror', e => errs.push('PAGEERROR: ' + e.message));
 page.on('console', m => { if (m.type() === 'error') errs.push('CONSOLE: ' + m.text()); });
 
 await page.goto(BASE + '/', { waitUntil: 'networkidle' });
-// Gemessen wird nach dem Auftritt; solange er laeuft, ist der Aufruf verschoben.
+// Gemessen wird nach dem Auftritt; solange er laeuft, ist der Satz verschoben.
 await page.waitForFunction(() => !document.querySelector('.hero--auftritt'), null, { timeout: 8000 }).catch(() => {});
 await page.waitForTimeout(300);
 
@@ -34,12 +34,23 @@ ok('Auszeichnungen in einer Reihe', await page.evaluate(() => {
   const ys = [...document.querySelectorAll('.trust li')].map(n => Math.round(n.getBoundingClientRect().y));
   return new Set(ys).size === 1;
 }));
+// Bis Oktober 2026 waren die Auszeichnungen Knete und sahen aus wie Knoepfe.
+// Seitdem sind sie flacher Text mit einem Haekchen davor.
+{
+  const flach = await page.evaluate(() => [...document.querySelectorAll('.trust li')].map(n => {
+    const s = getComputedStyle(n);
+    return { schatten: s.boxShadow, bild: s.backgroundImage, farbe: s.backgroundColor, haken: !!n.querySelector('use[href="#i-check"]') };
+  }));
+  ok('die Auszeichnungen sind keine Knoepfe: ohne Flaeche und ohne Schatten, mit Haekchen',
+     flach.length === 4 && flach.every(f => f.schatten === 'none' && f.bild === 'none' &&
+       f.farbe === 'rgba(0, 0, 0, 0)' && f.haken), JSON.stringify(flach[0]));
+}
 // Der Rahmen stand flach — keine Verlaeufe, kein Punktraster, kein Schatten —,
 // bis die Anwendung in Knete umgestellt wurde (Oktober 2026, auf ausdruecklichen
 // Wunsch; der alte Stil liegt in archiv/alter-stil/). Danach war er Knete, bis
 // der Hero breit wurde (ebenfalls Oktober 2026, ebenfalls auf ausdruecklichen
 // Wunsch): Seitdem steht er ohne Rahmen auf dem Grund der Seite, und die Knete
-// tragen Wortmarke, Dinge und Aufruf. Das Punktraster bleibt fort.
+// tragen Wortmarke und Dinge. Das Punktraster bleibt fort.
 const panel = await page.locator('.hero').evaluate(n => {
   const s = getComputedStyle(n);
   return { bild: s.backgroundImage, farbe: s.backgroundColor, schatten: s.boxShadow,
@@ -73,42 +84,40 @@ ok('je ein eigenes Zeichen',
   kaesten[0].zeichen === '#i-leihliste' && kaesten[1].zeichen === '#i-kreis', JSON.stringify(kaesten.map(k => k.zeichen)));
 ok('beide aus Knete', kaesten.every(k => k.knete));
 
-// Ein Aufruf, und der steht im Hero
+// Ein Aufruf, im ersten Einstieg. Bis Oktober 2026 stand ein zweiter im
+// Hero; seitdem steht er nur noch gleich darunter, und der erste Bildschirm
+// zeigt ihn trotzdem.
 {
-  const oben = await page.locator('#btnCreateHero').boundingBox();
-  const steps = await page.locator('.einstieg').first().boundingBox();
-  ok('Aufruf steht vor den Einstiegen', oben.y < steps.y, [Math.round(oben.y), Math.round(steps.y)]);
-  ok('Aufruf ueber der Falz', oben.y + oben.height <= 900, Math.round(oben.y + oben.height));
-  // Die sichtbare Hoehe ist auf ausdrueckliche Anweisung flach. Treffbar
-  // bleibt der Knopf trotzdem: Auf groben Zeigern waechst die Flaeche, nicht
-  // das Bild — geprueft wird deshalb beides getrennt.
-  ok('Aufruf flach gehalten', oben.height >= 36 && oben.height <= 48, Math.round(oben.height));
+  const knopf = await page.locator('#btnCreate').boundingBox();
+  ok('Aufruf ueber der Falz', knopf.y + knopf.height <= 900, Math.round(knopf.y + knopf.height));
+  ok('im Hero steht keiner mehr', await page.locator('.hero button').count() === 0);
   const tipp = await browser.newContext({ viewport: { width: 1280, height: 900 }, hasTouch: true, isMobile: true });
   const tp = await tipp.newPage();
   await tp.goto(BASE + '/', { waitUntil: 'networkidle' });
   await tp.waitForTimeout(300);
-  const flaeche = await tp.locator('#btnCreateHero').evaluate(n => getComputedStyle(n, '::after').height);
-  ok('auf grobem Zeiger 44 Punkte Trefferflaeche', parseFloat(flaeche) >= 44, flaeche);
+  /* Der Knopf im Einstieg ist schon hoch genug und braucht keine
+     vergroesserte Flaeche; gemessen wird, was der Finger trifft. */
+  const treffer = await tp.locator('#btnCreate').evaluate(n => Math.max(n.getBoundingClientRect().height,
+    parseFloat(getComputedStyle(n, '::after').height) || 0));
+  ok('auf grobem Zeiger mindestens 44 Punkte Trefferflaeche', treffer >= 44, String(treffer));
   await tipp.close();
 }
-// Zwei Aufrufe fuer die Leihliste, einer im Hero und einer im Einstieg.
 // Der Knopf der Superliste traegt ausdruecklich KEIN data-create:
 // createButtons() beschriftet jedes solche Element und schriebe sonst
 // "Leihliste wird angelegt …" auf den falschen Knopf.
 {
   const create = await page.evaluate(() => [...document.querySelectorAll('[data-create]')]
     .map(n => ({ id: n.id, text: n.textContent.trim(), kasten: !!n.closest('.einstieg') })));
-  ok('zwei Aufrufe zur Leihliste', create.length === 2, JSON.stringify(create));
-  ok('einer davon im Hero', create.some(c => c.id === 'btnCreateHero'), JSON.stringify(create.map(c => c.id)));
-  ok('einer im Einstieg', create.some(c => c.kasten && !c.id), JSON.stringify(create));
-  ok('beide nennen die Art', create.every(c => /Leihliste anlegen/.test(c.text)), JSON.stringify(create.map(c => c.text)));
+  ok('ein Aufruf zur Leihliste, im Einstieg', create.length === 1 && create[0].kasten && create[0].id === 'btnCreate',
+     JSON.stringify(create));
+  ok('er nennt die Art', /Leihliste anlegen/.test(create[0].text), create[0].text);
   ok('der Superlisten-Knopf traegt kein data-create',
     await page.evaluate(() => !document.querySelector('#btnStartCircle').hasAttribute('data-create')));
 }
 
 // Kopfzeilen-Knopf
 ok('Ohne Listen kein Knopf', await page.locator('#lnkMine').isHidden());
-await page.click('#btnCreateHero');
+await page.click('#btnCreate');
 await page.waitForSelector('#viewList:not([hidden])');
 await page.waitForTimeout(800);
 ok('Mit Liste erscheint der Knopf', await page.locator('#lnkMine').isVisible());
@@ -163,3 +172,6 @@ await c3.close();
 console.log(`\n${pass} bestanden, ${fail} offen`);
 console.log(errs.length ? 'FEHLER:\n' + errs.join('\n') : 'Keine Konsolenfehler.');
 await browser.close();
+/* Ohne diesen Ausgang meldete die Suite offene Punkte nur in ihrer Zeile;
+   lauf.mjs zaehlt aber nach dem Ausgangscode. */
+process.exit(fail ? 1 : 0);

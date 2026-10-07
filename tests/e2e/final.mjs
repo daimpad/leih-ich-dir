@@ -14,9 +14,9 @@ page.on('pageerror', e => errs.push('PAGEERROR: ' + e.message));
 page.on('console', m => { if (m.type() === 'error') errs.push('CONSOLE: ' + m.text()); });
 
 await page.goto(BASE + '/', { waitUntil: 'networkidle' });
-{ const b = await page.locator('#btnCreateHero').boundingBox(); ok('Aufforderung über der Falz', b.y + b.height <= 900, Math.round(b.y + b.height)); }
+{ const b = await page.locator('#btnCreate').boundingBox(); ok('Aufforderung über der Falz', b.y + b.height <= 900, Math.round(b.y + b.height)); }
 ok('Abzeichen Speicherort verborgen', await page.locator('#storageBadge').isHidden());
-await page.click('#btnCreateHero');
+await page.click('#btnCreate');
 await page.waitForSelector('#viewList:not([hidden])');
 await page.waitForTimeout(700);
 ok('Zugangskarte sichtbar', await page.isVisible('#keyBox'));
@@ -155,3 +155,6 @@ await c4.close();
 console.log(`\n${pass} bestanden, ${fail} offen`);
 console.log(errs.length ? 'FEHLER:\n' + errs.join('\n') : 'Keine Konsolenfehler.');
 await browser.close();
+/* Ohne diesen Ausgang meldete die Suite offene Punkte nur in ihrer Zeile;
+   lauf.mjs zaehlt aber nach dem Ausgangscode. */
+process.exit(fail ? 1 : 0);

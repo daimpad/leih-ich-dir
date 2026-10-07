@@ -13,7 +13,7 @@ await page.goto(URL, { waitUntil: 'networkidle' });
 await page.evaluate(() => { localStorage.clear(); localStorage.setItem('lid.lang', 'de'); });
 await page.reload({ waitUntil: 'networkidle' });
 
-await page.locator('#btnCreateHero').click();
+await page.locator('#btnCreate').click();
 await page.waitForSelector('#viewList:not([hidden])', { timeout: 15000 });
 await page.waitForTimeout(2200);
 

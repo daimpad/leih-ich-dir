@@ -275,9 +275,12 @@ unterbindet das ohnehin.
 ### Wortmarke und Bild im Hero
 
 Der Hero ist die eine Ausnahme vom Gerüst von 660 Punkten: Er steht ohne
-Rahmen und reicht über die ganze Breite des Fensters, bis 1600 Punkte. Links
-steht die Wortmarke, sehr groß, darunter Satz und Aufruf; rechts schweben
-die Dinge. Schmal steht alles untereinander, die Dinge zuerst.
+Rahmen und reicht über die ganze Breite des Fensters, bis 1440 Punkte. Links
+steht die Wortmarke, sehr groß, darunter der Satz; rechts schweben die Dinge.
+Schmal steht alles untereinander, die Dinge zuerst. Einen eigenen Knopf trägt
+der Hero nicht: Der Aufruf zum Anlegen steht gleich darunter im ersten
+Einstieg. Dazwischen stehen die Eigenschaften der Anwendung als ruhige Zeile
+mit Häkchen, flach, denn sie sind Aussagen und keine Knöpfe.
 
 Die Wortmarke ist aus Knete: Jeder Buchstabe dreifach geschichtet, ein
 dunkler Sockel, ein Rand für die Pausbacken, die Fläche mit Lichtfleck.
@@ -294,8 +297,8 @@ bringt es zum Springen. Die Trommel klingt dazu leise, wenn Töne eingeschaltet
 sind. Mehr geschieht nicht, kein Konfetti, denn die Startseite bleibt ruhig.
 
 Beim ersten Zeigen der Startseite treten die drei nacheinander auf: erst die
-Dinge, dann Wort für Wort die Marke, dann Satz und Aufruf, zusammen gut
-anderthalb Sekunden. Das geschieht einmal je Laden; wer von einer Liste
+Dinge, dann Wort für Wort die Marke, dann der Satz, zusammen gut anderthalb
+Sekunden. Das geschieht einmal je Laden; wer von einer Liste
 zurückkehrt, sieht die Seite gleich ganz. Wer weniger Bewegung eingestellt
 hat, ebenfalls.
 
