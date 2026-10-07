@@ -36,7 +36,7 @@ await page.locator('#btnBulk').click();
 await page.locator('#addName').fill('Bohrmaschine');
 await page.locator('#addForm button[type=submit]').click();
 await page.waitForTimeout(2200);
-await page.locator('#contactBox summary').click();
+await page.locator('#schrittTab2').click();
 await page.waitForTimeout(150);
 ok('Feld ist da', await page.locator('#cfgPhone').isVisible());
 ok('als Telefonfeld ausgezeichnet', await page.locator('#cfgPhone').getAttribute('type') === 'tel');
@@ -48,7 +48,7 @@ console.log('\n· Die Nummer reist mitverschlüsselt');
 const gespeichert = await page.evaluate(() => window.__doc ? null : null);
 await page.reload({ waitUntil: 'networkidle' });
 await page.waitForSelector('#viewList:not([hidden])', { timeout: 15000 });
-await page.locator('#contactBox summary').click();
+await page.locator('#schrittTab2').click();
 await page.waitForTimeout(200);
 ok('nach dem Neuladen noch da', (await page.locator('#cfgPhone').inputValue()) === '0228 / 123 45-67',
    await page.locator('#cfgPhone').inputValue());

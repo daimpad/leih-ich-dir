@@ -65,11 +65,14 @@ ok('und sagt der Vorlesestimme warum',
    /Pflichtfeld/.test(await page.locator('label[for="addName"] .sr-only').innerText()));
 ok('das Feld ist als Pflicht ausgezeichnet',
    await page.locator('#addName').getAttribute('aria-required') === 'true');
-await page.locator('#contactBox summary').click();
+await page.locator('#schrittTab2').click();
 await page.waitForTimeout(150);
 for (const [sel, wort] of [['label[for="cfgName"]', 'freiwillig'], ['label[for="cfgEmail"]', 'freiwillig'], ['label[for="cfgPhone"]', 'freiwillig']]) {
   ok(sel + ' sagt freiwillig', new RegExp(wort).test(await page.locator(sel).innerText()), await page.locator(sel).innerText());
 }
+// Zurueck zum Inventar: Seit Oktober 2026 stehen Kontakt und Eintragen in
+// verschiedenen Reitern.
+await page.locator('#schrittTab1').click();
 
 console.log('\n· Warnung bei leerem Pflichtfeld');
 await page.locator('#addName').fill('');

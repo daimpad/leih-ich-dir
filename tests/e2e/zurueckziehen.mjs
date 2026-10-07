@@ -53,6 +53,7 @@ console.log('· Zurueckziehen');
 await p.goto(BASE + '/' + altEdit, { waitUntil: 'networkidle' });
 await p.waitForSelector('#viewList:not([hidden])');
 await p.waitForTimeout(500);
+await p.locator('#schrittTab3').click();
 ok('beim Ansehen-Link steht der Knopf', await p.locator('#btnRevoke').isVisible());
 const revVorher = (await liesListe(p, anna.id + '.' + anna.keyStr)).rev;
 await p.locator('#btnRevoke').click();

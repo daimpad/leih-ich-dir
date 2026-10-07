@@ -603,14 +603,22 @@ header.site { padding-block: var(--s-4); }
 .card__title { font-size: 1.6rem; }
 .card__head { display: flex; align-items: center; gap: var(--s-2); }
 
-/* Auskunft auf Zuruf: das Zeichen trägt den Satz im Titel, sichtbar beim
-   Zeigen und beim Tasten. */
+/* Auskunft auf Zuruf: ein Knopf mit dem Zeichen i. Er blendet die
+   Erklaerungen seiner Karte an ihrer Stelle ein und wieder aus (app.js,
+   bindAbfolge). Zu sehen ist sonst nur, was es zum Ausfuellen braucht. Ein
+   Knopf und kein Titel am Zeichen: Den Titel zeigt kein Telefon. */
 .info {
-  display: inline-grid; place-items: center; cursor: help;
-  width: 1.6rem; height: 1.6rem; border-radius: 999px; color: var(--faint);
+  display: inline-grid; place-items: center; cursor: pointer;
+  width: 2rem; height: 2rem; padding: 0; border: 0; border-radius: 999px;
+  background: none; color: var(--faint); font: inherit;
 }
-.info:hover, .info:focus-visible { color: var(--tinte); background: var(--minze); }
-.info .ico { width: 1rem; height: 1rem; }
+.info:hover, .info:focus-visible, .info[aria-expanded="true"] { color: var(--tinte); background: var(--minze); }
+.info .ico { width: 1.15rem; height: 1.15rem; }
+.hint--abruf { display: none; }
+.zeigt-hinweise .hint--abruf { display: block; }
+/* Der Satz zur ganzen Karte steht oben, neben dem Zeichen: rechts Platz
+   fuer das Zeichen, unten Abstand zum ersten Feld. */
+.card__head + .hint--abruf { margin-bottom: var(--s-4); padding-right: 2.5rem; }
 .card__title + .hint { margin-top: var(--s-1); }
 
 /* Aufklapper: zugeklappt eine Zeile, aufgeklappt eine Karte. */
@@ -1038,6 +1046,45 @@ header.site { padding-block: var(--s-4); }
 }
 .tab[aria-selected="true"] { --farbe: var(--immergruen); --tief: var(--immergruen-tief); --mass: .45; font-weight: 900; }
 
+/* Die Abfolge der Leihliste: drei gleich breite Reiter ueber die ganze
+   Breite, jeder mit seiner Nummer. Die Nummer sagt die Reihenfolge, das
+   Wort den Inhalt. */
+.schritte { display: flex; width: 100%; }
+.schritte .tab {
+  flex: 1 1 0; min-width: 0;
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
+  padding-inline: .5rem; white-space: nowrap;
+}
+.schritt__nr { font-weight: 900; }
+/* Die Reiter nennen den Schritt schon; die Ueberschrift der Karte darunter
+   bleibt fuer Vorleseprogramme und Ueberschriftenspruenge im Dokument. */
+.ist-abfolge .schritt__titel {
+  position: absolute; width: 1px; height: 1px; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+.ist-abfolge .items-head { justify-content: flex-end; }
+/* Das Zeichen fuer die Erklaerungen sitzt oben rechts in der Karte und
+   nimmt keine eigene Zeile. */
+.schritt { position: relative; }
+.ist-abfolge .schritt .card__head .info { position: absolute; top: var(--s-3); right: var(--s-3); }
+/* Weiter zum naechsten Schritt: unten rechts, nur in der Abfolge. */
+.weiter { display: none; }
+.ist-abfolge .weiter { display: flex; justify-content: flex-end; margin-top: var(--s-5); }
+.weiter .btn .ico { width: 1.1rem; height: 1.1rem; }
+
+/* Kleine Aufklapper in einer Karte: eine Zeile mit Winkel, aufgeklappt
+   darunter der Inhalt. Keine eigene Knete — eine Karte in der Karte waere
+   eine Ebene zu viel. */
+.klapp { margin-top: var(--s-5); padding-top: var(--s-4); border-top: 1px solid var(--line); }
+.klapp > summary {
+  display: inline-flex; align-items: center; gap: var(--s-2); cursor: pointer;
+  list-style: none; font-weight: 800; color: var(--link);
+}
+.klapp > summary::-webkit-details-marker { display: none; }
+.klapp > summary .ico { width: 1rem; height: 1rem; transition: rotate var(--takt-kurz) ease; }
+.klapp[open] > summary .ico { rotate: 90deg; }
+.klapp > summary + * { margin-top: var(--s-3); }
+
 /* == 10 · Fenster und Meldungen ======================================== */
 
 .modal {
@@ -1364,6 +1411,14 @@ header.site { padding-block: var(--s-4); }
   .dinge li:nth-child(6) { left: 51%; top: 52%; width: 26%; }
 }
 
+/* Drei Reiter nebeneinander: "3 Link teilen" braucht in der ueblichen
+   Groesse 90 Punkte, bei 360 Punkten Fensterbreite hat ein Reiter innen
+   88. Eine Stufe kleiner und enger gesetzt passt es bis 320, auch auf
+   Englisch. Gemessen, nicht geschaetzt. */
+@media (max-width: 23rem) {
+  .schritte .tab { font-size: .84rem; gap: .3rem; padding-inline: .25rem; }
+}
+
 /* Die schwebende Schaltflaeche loest die Kopfleiste ab, sobald deren beide
    Wege nicht mehr neben Marke und Schaltern in eine Zeile passen. Gemessen
    wurde, wo die Zeile umbricht: Deutsch braucht 634 Punkte, Englisch 653
@@ -1454,9 +1509,10 @@ header.site { padding-block: var(--s-4); }
      "Mehrere auf einmal" 132 mal 22, "Superliste anlegen" 171 mal 25 und
      ein Reiter im Teilen-Kasten 94 mal 39 gross. Alle drei sind eigene
      Bedienelemente und keine Verweise im Fliesstext, fuer die die Ausnahme
-     der Richtlinie gilt. */
+     der Richtlinie gilt. Spaeter die Zeilen der kleinen Aufklapper im
+     Schritt Link teilen, eine Textzeile hoch. */
   .ctl-square, .modal__x, .info, .btn--sm, .btn--lg, .chip--level,
-  .linkbtn, .tab { position: relative; }
+  .linkbtn, .tab, .klapp > summary { position: relative; }
   .ctl-square::after,
   .modal__x::after,
   .info::after,
@@ -1464,7 +1520,8 @@ header.site { padding-block: var(--s-4); }
   .btn--lg::after,
   .chip--level::after,
   .linkbtn::after,
-  .tab::after {
+  .tab::after,
+  .klapp > summary::after {
     content: ""; position: absolute;
     top: 50%; left: 50%; transform: translate(-50%, -50%);
     width: max(100%, 44px); height: max(100%, 44px);

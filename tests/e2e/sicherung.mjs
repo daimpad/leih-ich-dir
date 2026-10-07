@@ -52,7 +52,9 @@ ok('beim Ansehen gibt es nichts zu sichern', await p.locator('#backupBox').isHid
 await p.goto(BASE + '/#e=' + anna.id + '.' + anna.keyStr + '.' + anna.token, { waitUntil: 'networkidle' });
 await p.waitForSelector('#viewList:not([hidden])');
 await p.waitForTimeout(500);
-ok('beim Bearbeiten steht der Aufklapper', !(await p.locator('#backupBox').isHidden()));
+// Seit Oktober 2026 liegt das Sichern im dritten Schritt, Link teilen.
+await p.locator('#schrittTab3').click();
+ok('beim Bearbeiten steht der Aufklapper, im Schritt Link teilen', !(await p.locator('#backupBox').isHidden()));
 await p.evaluate(() => { document.querySelector('#backupBox').open = true; });
 const [download] = await Promise.all([
   p.waitForEvent('download'),

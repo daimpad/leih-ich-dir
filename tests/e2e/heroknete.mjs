@@ -293,9 +293,12 @@ console.log('· Zeichen bei Kontakt');
   await p.waitForSelector('#viewList:not([hidden])', { timeout: 15000 });
   await p.locator('#chkKeyDone').check();
   await p.waitForTimeout(2300);
-  ok('kein Zeichen mehr in der Überschrift', await p.locator('#contactBox summary .ico').count() === 0);
-  ok('die Überschrift steht weiterhin', /Kontakt/.test(await p.locator('#contactBox summary').innerText()));
-  ok('der Zusatz ebenfalls', /Telefon/.test(await p.locator('#contactBox summary').innerText()));
+  /* Seit Oktober 2026 ist der Kontakt der zweite Reiter und kein
+     Aufklapper mehr; seinen Zusatz traegt das Feld selbst. */
+  await p.locator('#schrittTab2').click();
+  ok('kein Zeichen mehr in der Überschrift', await p.locator('#contactBox .card__title .ico').count() === 0);
+  ok('die Überschrift steht weiterhin', /Kontakt/.test(await p.locator('#contactBox .card__title').textContent()));
+  ok('das Telefon ebenfalls', await p.locator('#cfgPhone').isVisible());
   ok('das ungenutzte Zeichen ist aus dem Satz', await p.locator('#i-user').count() === 0);
   const kartenMitZeichen = await p.evaluate(() =>
     Array.from(document.querySelectorAll('.card__title, .fold > summary'))
