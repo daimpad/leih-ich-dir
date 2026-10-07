@@ -4094,6 +4094,11 @@
         rememberList();
         render();
         stopRefresh();
+        /* Die Knoepfe stehen weiter auf der verborgenen Startseite. Wer ohne
+           neu zu laden dorthin zurueckkehrt, etwa ueber die Kopfleiste zu
+           den gemerkten Listen, faende sie sonst gesperrt und mit "wird
+           angelegt" vor. */
+        createButtons(false, t('start.create'));
 
         /* Der Zugang, einmal und deutlich. Er steht ueber allem anderen, bis
            er bestaetigt wurde: Wer diesen Link verliert, verliert die Liste,
