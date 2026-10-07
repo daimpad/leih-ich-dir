@@ -682,9 +682,8 @@
 
     <!-- 2 · Inventar, mit dem Hinzufügen darin: der erste Schritt -->
     <section class="card schritt" id="inventoryBox">
-      <div class="items-head">
+      <div class="items-head items-head--inventar">
         <h2 class="card__title schritt__titel" data-i18n="items.headline">Inventar</h2>
-        <span id="listUpdated" class="checked" hidden></span>
         <span id="checkedAt" class="checked"></span>
         <button type="button" id="btnRefresh" class="btn btn--ghost btn--icon" hidden>
           <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-refresh"/></svg>
@@ -877,15 +876,12 @@
       </details>
     </section>
 
-    <!-- Der Zugang. Im Bearbeitenmodus steht er immer unter dem offenen
-         Schritt, gleich welcher es ist, und immer an derselben Stelle: Wer
-         diesen Link verliert, verliert die Liste. Verdeckt wie ein Passwort,
-         mit Zeigen und Kopieren. Direkt nach dem Anlegen und nach dem
-         Zurueckziehen ist er Butter und bittet darum, ihn zu sichern, bis das
-         bestaetigt ist; danach bleibt er als ruhiges Feld stehen (app.js,
-         zugangZeichnen). Bis Oktober 2026 erschien er nur nach dem Anlegen,
-         ueber den Reitern, und verschwand nach der Bestaetigung; der
-         Bearbeiten-Link lag dann zugeklappt in Link teilen. -->
+    <!-- Der Zugang. Im Bearbeitenmodus steht er als ruhiges Feld unter dem
+         dritten Schritt, Link teilen: verdeckt wie ein Passwort, mit Zeigen
+         und Kopieren. Direkt nach dem Anlegen und nach dem Zurueckziehen ist
+         er Butter und bittet darum, ihn zu sichern, und steht so lange unter
+         jedem Schritt, bis das bestaetigt ist; wer diesen Link verliert,
+         verliert die Liste (app.js, Zugang). -->
     <section class="keybox" id="keyBox" hidden>
       <h2 class="keybox__title" data-i18n="key.headline">Bewahre diesen Link auf!</h2>
       <label class="field__label" for="keyLink" data-i18n="share.editLabel">Bearbeiten-Link, geheim</label>
@@ -1070,11 +1066,10 @@
       </details>
     </section>
 
-    <!-- Der Zugang zur Superliste, wie bei der Leihliste: immer unter dem
-         offenen Schritt, verdeckt, mit Zeigen und Kopieren. Direkt nach dem
-         Anlegen ist er Butter und bittet darum, ihn zu sichern, bis das
-         bestaetigt ist (app.js, Zugang). Bis Oktober 2026 erschien er nur
-         nach dem Anlegen und verschwand nach der Bestaetigung. -->
+    <!-- Der Zugang zur Superliste, wie bei der Leihliste: ruhig unter dem
+         dritten Schritt, Weitergeben, verdeckt, mit Zeigen und Kopieren.
+         Direkt nach dem Anlegen ist er Butter, bittet darum, ihn zu sichern,
+         und steht bis zur Bestaetigung unter jedem Schritt (app.js, Zugang). -->
     <section class="keybox" id="circleKeyBox" hidden>
       <h2 class="keybox__title" data-i18n="circle.keyHeadline">Bewahre diesen Link auf</h2>
       <label class="field__label" for="circleKeyLink" data-i18n="circle.keyLabel">Zugangs-Link der Superliste</label>

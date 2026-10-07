@@ -4,10 +4,11 @@
  * Seit Oktober 2026 steht auch die Superliste in drei Reitern: Listen
  * sammeln, Was es gibt, Weitergeben. Eine neue beginnt beim ersten; stehen
  * schon Leihlisten darin, oeffnet sie beim zweiten, denn dann ist das Suchen
- * der Alltag. Darunter steht ihr Zugangs-Link als festes Feld, wie bei der
- * Leihliste: verdeckt, nach dem Anlegen gelb mit der Bitte, ihn zu sichern,
- * und nur fuer die Superliste, die er meint. Der dritte Schritt traegt die
- * Warnung und das Sichern, den Link selbst nicht noch einmal.
+ * der Alltag. Ihr Zugangs-Link steht wie bei der Leihliste als Feld unter
+ * dem dritten Schritt, verdeckt; nach dem Anlegen gelb mit der Bitte, ihn zu
+ * sichern, und so lange unter jedem Schritt, nur fuer die Superliste, die
+ * er meint. Der dritte Schritt traegt die Warnung und das Sichern, den Link
+ * selbst nicht noch einmal.
  */
 import { starteBrowser, BASE, pruefer, macheListe, L } from './hilfe.mjs';
 
@@ -70,6 +71,12 @@ const kreisA = await p.evaluate(() => location.hash);
     zugang: Math.round(document.getElementById('circleKeyBox').getBoundingClientRect().top)
   }));
   ok('und zwar unter dem offenen Schritt', lage.zugang > lage.schritt, JSON.stringify(lage));
+  const ueberall = [];
+  for (const n of [2, 3, 1]) {
+    await p.locator('#kreisTab' + n).click();
+    ueberall.push((await zugang()).frisch && (await zugang()).da);
+  }
+  ok('bis zum Haken steht die Bitte unter jedem Schritt', ueberall.every(Boolean), JSON.stringify(ueberall));
 }
 
 console.log('· Leer: "Was es gibt" fuehrt zum Sammeln');
@@ -97,7 +104,7 @@ await p.locator('#chkCircleKeyDone').check();
 await p.waitForTimeout(200);
 {
   const g = await zugang();
-  ok('nach dem Haken geht die Bitte, das Feld bleibt', g.da && !g.frisch && !g.titel && !g.haken, kurz(g));
+  ok('im dritten Schritt geht mit dem Haken die Bitte, das Feld bleibt', g.da && !g.frisch && !g.titel && !g.haken, kurz(g));
   ok('und der Fokus steht im Feld', await p.evaluate(() => document.activeElement.id) === 'circleKeyLink');
 }
 await p.locator('#btnRevealCircle').click();
@@ -119,7 +126,10 @@ await p.waitForTimeout(1200);
   ok('neu geladen steht "Was es gibt" offen', z.gewaehlt.join() === 'kreisTab2' && z.zu.join() === 'circleBox', JSON.stringify(z));
   ok('mit Annas zwei Sachen', await p.locator('#circleItems > li').count() === 2);
   const g = await zugang();
-  ok('und darunter dem Zugang, ruhig und verdeckt', g.da && !g.frisch && g.verdeckt && g.link.endsWith(kreisA), kurz(g));
+  ok('ohne das Feld: ruhig steht es nur unter dem dritten Schritt', !g.da && !g.frisch, kurz(g));
+  await p.locator('#kreisTab3').click();
+  const h = await zugang();
+  ok('dort ruhig und verdeckt, mit ihrem Link', h.da && !h.frisch && h.verdeckt && h.link.endsWith(kreisA), kurz(h));
 }
 
 console.log('· Eine zweite Superliste, ohne neu zu laden');
@@ -138,10 +148,11 @@ await p.evaluate((h) => { location.hash = h; }, kreisA);
 await p.waitForFunction((h) => location.hash === h, kreisA);
 await p.waitForTimeout(1200);
 {
-  const g = await zugang();
-  ok('zurueck bei der ersten: ihr Link, ruhig und nicht die Bitte der zweiten',
-     g.da && !g.frisch && g.link.endsWith(kreisA), kurz(g));
+  ok('zurueck bei der ersten: nicht die Bitte der zweiten', !(await zugang()).frisch);
   ok('und, weil sie Leihlisten hat, "Was es gibt"', (await zustand()).gewaehlt.join() === 'kreisTab2');
+  await p.locator('#kreisTab3').click();
+  const g = await zugang();
+  ok('im dritten Schritt ihr eigener Link, ruhig', g.da && !g.frisch && g.link.endsWith(kreisA), kurz(g));
 }
 ok('keine Ausnahme und keine Fehlermeldung in der Konsole', probleme.length === 0, probleme.join(' | '));
 await ctx.close();
