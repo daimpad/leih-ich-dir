@@ -10,8 +10,9 @@
  * geformt, in Nunito und in der gewaehlten Sprache, und der Titel bleibt
  * fuer Vorleseprogramme stehen. Die Dinge stehen im Dokument, sind fuer
  * Vorleseprogramme verborgen und nicht anwaehlbar, springen beim Anfassen
- * und kommen zur Ruhe — ohne Konfetti und ohne Ton, denn die Startseite
- * bleibt ruhig. Wer Bewegung abbestellt hat, bekommt keine.
+ * und kommen zur Ruhe — ohne Konfetti, denn die Startseite bleibt ruhig.
+ * Klingen darf allein die Trommel, leise und nur, wenn Toene eingeschaltet
+ * sind. Wer Bewegung abbestellt hat, bekommt keine.
  *
  * Seit der Hero ohne Rahmen steht, gilt ausserdem: Er ist die eine
  * Ausnahme vom Geruest und reicht ueber die Breite des Fensters, bis 1600
@@ -158,10 +159,28 @@ console.log('· Die Dinge');
   await p.waitForTimeout(2600);
   ok('und kommt zur Ruhe', await ruht(p, 'leiter'));
 
-  const schalter = await p.locator('[data-ding="schalter"]').boundingBox();
-  await p.mouse.click(schalter.x + schalter.width / 2, schalter.y + schalter.height / 2);
-  ok('der Schalter unter den Dingen legt sich um', await p.locator('.ding--schalter.ist-aus').count() === 1);
+  /* Bis Oktober 2026 stand hier ein Schalter, der sich beim Antippen
+     umlegte. Seitdem steht an seiner Stelle eine kleine Trommel: Sie
+     springt wie die anderen und ist die eine, die klingt. */
+  ok('statt des Schalters eine Trommel', await p.locator('[data-ding="schalter"]').count() === 0 &&
+     await p.locator('[data-ding="trommel"] svg').count() === 1);
+  const trommel = await p.locator('[data-ding="trommel"]').boundingBox();
+  await p.mouse.click(trommel.x + trommel.width / 2, trommel.y + trommel.height / 2);
+  await p.waitForTimeout(120);
+  ok('die Trommel springt', !(await ruht(p, 'trommel')));
+  ok('und klingt, weil Toene eingeschaltet sind', await p.evaluate(() => window.__audio) === 1,
+     String(await p.evaluate(() => window.__audio)));
   ok('die Daueranimationen laufen', await laufend(p) > 6, String(await laufend(p)));
+  await ctx.close();
+}
+
+{
+  const { ctx, p } = await oeffne();
+  const trommel = await p.locator('[data-ding="trommel"]').boundingBox();
+  await p.mouse.click(trommel.x + trommel.width / 2, trommel.y + trommel.height / 2);
+  await p.waitForTimeout(150);
+  ok('ohne eingeschaltete Toene bleibt auch die Trommel still', await p.evaluate(() => window.__audio) === 0,
+     String(await p.evaluate(() => window.__audio)));
   await ctx.close();
 }
 

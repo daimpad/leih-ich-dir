@@ -287,11 +287,11 @@ heißt sie „Borrow it from me.“. Der Titel bleibt für Vorleseprogramme im
 Dokument.
 
 Neben ihr schweben sechs Dinge, ein loser Haufen: Bohrmaschine, Leiter,
-Zelt, Würfel, Waffeleisen, ein Schalter. Sie sagen, wofür die Liste da ist, und
-tragen keine Aussage, die nicht schon im Satz stünde; sie sind deshalb für
-Vorleseprogramme verborgen und nicht anwählbar. Wer eines anfasst, bringt es
-zum Springen. Mehr geschieht nicht — kein Konfetti, kein Ton —, denn die
-Startseite bleibt ruhig.
+Zelt, Würfel, Waffeleisen, eine kleine Trommel. Sie sagen, wofür die Liste da
+ist, und tragen keine Aussage, die nicht schon im Satz stünde; sie sind
+deshalb für Vorleseprogramme verborgen und nicht anwählbar. Wer eines anfasst,
+bringt es zum Springen. Die Trommel klingt dazu leise, wenn Töne eingeschaltet
+sind. Mehr geschieht nicht, kein Konfetti, denn die Startseite bleibt ruhig.
 
 Beim ersten Zeigen der Startseite treten die drei nacheinander auf: erst die
 Dinge, dann Wort für Wort die Marke, dann Satz und Aufruf, zusammen gut
@@ -350,10 +350,13 @@ fünfzig Gegenständen nicht lauter wird, sondern nützlicher — und es überle
 
 **Töne** entstehen über die Web Audio API, ohne eine einzige Datei: Der
 Richtlinie fehlt `media-src`, es greift `default-src 'self'`, und `data:` ist
-allein für Bilder freigegeben. Vier Klänge unter einer Viertelsekunde,
-standardmäßig aus, Schalter in den Einstellungen.
+allein für Bilder freigegeben. Fünf Klänge unter einer Viertelsekunde,
+standardmäßig aus, Schalter in den Einstellungen. Vier davon gehören zum
+Spielerischen der eigenen Liste, der fünfte ist der Schlag der Trommel auf der
+Startseite.
 
-**Ruhig bleibt es** auf der Startseite, die das Vertrauensversprechen trägt,
+**Ruhig bleibt es** auf der Startseite, die das Vertrauensversprechen trägt
+(bis auf die Trommel, wer Töne eingeschaltet hat und sie anfasst),
 beim Freund im Ansehen-Modus, in den neun Sekunden nach einem Löschen, die dem
 Rückweg gehören, und in jeder Fehlermeldung.
 
