@@ -14,7 +14,7 @@ await page.evaluate(() => { localStorage.clear(); localStorage.setItem('lid.lang
 await page.reload({ waitUntil: 'networkidle' });
 
 console.log('\n· Der Zugang wird angekreuzt');
-await page.locator('#btnCreateHero').click();
+await page.locator('#btnCreate').click();
 await page.waitForSelector('#keyBox:not([hidden])', { timeout: 15000 });
 const box = page.locator('#chkKeyDone');
 ok('es ist ein Ankreuzfeld', await box.getAttribute('type') === 'checkbox');
@@ -74,7 +74,7 @@ console.log('\n· Aus der Durchsicht');
   await p2.goto(URL, { waitUntil: 'networkidle' });
   await p2.evaluate(() => localStorage.clear());
   await p2.reload({ waitUntil: 'networkidle' });
-  await p2.locator('#btnCreateHero').click();
+  await p2.locator('#btnCreate').click();
   await p2.waitForSelector('#keyBox:not([hidden])', { timeout: 15000 });
   await p2.locator('#chkKeyDone').focus();
   await p2.keyboard.press('Enter');

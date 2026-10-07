@@ -15,7 +15,7 @@
  * sind. Wer Bewegung abbestellt hat, bekommt keine.
  *
  * Seit der Hero ohne Rahmen steht, gilt ausserdem: Er ist die eine
- * Ausnahme vom Geruest und reicht ueber die Breite des Fensters, bis 1600
+ * Ausnahme vom Geruest und reicht ueber die Breite des Fensters, bis 1440
  * Punkte. Breit schweben die Dinge rechts neben der Wortmarke, schmal
  * stehen sie darueber. Beim ersten Zeigen treten Dinge, Wortmarke und Satz
  * in dieser Reihenfolge auf, einmal je Laden und nie fuer jemanden, der
@@ -221,9 +221,9 @@ for (const [name, optionen, thema, grund, satz] of [
 
 console.log('· Über die Breiten');
 /* Breit ist der Hero so breit wie das Fenster ohne den Rand von 24 Punkten
-   je Seite, hoechstens 1600; schmal (bis 46rem, 736 Punkte) so breit wie
+   je Seite, hoechstens 1440 (bis Oktober 2026 1600); schmal (bis 46rem, 736 Punkte) so breit wie
    das Geruest, an dem die Zusagen darunter stehen. */
-for (const w of [1800, 1400, 1100, 760, 700, 600, 430, 390, 360, 320]) {
+for (const w of [1920, 1800, 1440, 1400, 1100, 760, 700, 600, 430, 390, 360, 320]) {
   const { ctx, p } = await oeffne({ viewport: { width: w, height: 900 } });
   const r = await p.evaluate(() => ({
     sichtbar: document.querySelector('.hero-bild').getBoundingClientRect().height > 0,
@@ -234,7 +234,7 @@ for (const w of [1800, 1400, 1100, 760, 700, 600, 430, 390, 360, 320]) {
     bild: document.querySelector('.hero-bild').getBoundingClientRect()
   }));
   const breit = w > 736;
-  const soll = breit ? Math.min(w - 48, 1600) : r.geruest.width;
+  const soll = breit ? Math.min(w - 48, 1440) : r.geruest.width;
   ok(w + 'px: der Hero ist ' + (breit ? 'breiter als das Geruest' : 'so breit wie das Geruest'),
      Math.abs(r.hero.width - soll) <= 1 && (!breit || r.hero.width > r.geruest.width),
      Math.round(r.hero.width) + ' / ' + Math.round(soll));
@@ -261,7 +261,7 @@ console.log('· Der Auftritt');
   const z = await p.evaluate(() => {
     const ms = (n) => parseFloat(getComputedStyle(n).animationDelay) * 1000;
     const dinge = Array.from(document.querySelectorAll('.dinge li')).map(ms);
-    return { dinge, satz: ms(document.querySelector('.hero .lead')), aufruf: ms(document.querySelector('.hero-act')),
+    return { dinge, satz: ms(document.querySelector('.hero .lead')),
              titel: ms(document.querySelector('.hero h1')),
              satzSichtbar: getComputedStyle(document.querySelector('.hero .lead')).opacity };
   });
@@ -278,8 +278,7 @@ console.log('· Der Auftritt');
   ok('dann die Wortmarke, Wort fuer Wort', w.klasse === 'da' && w.worte[0] > letztesDing &&
      w.worte.every((d, i) => i === 0 || d > w.worte[i - 1]), w.klasse + ' ' + w.worte.join(','));
   ok('der Titel tritt mit dem ersten Wort auf', z.titel > letztesDing, String(z.titel));
-  ok('dann Satz und Aufruf', z.satz > Math.max(z.titel, w.worte[3]) && z.aufruf > z.satz,
-     z.satz + ' / ' + z.aufruf);
+  ok('dann der Satz', z.satz > Math.max(z.titel, w.worte[3]), String(z.satz));
   ok('der Satz wartet so lange unsichtbar', z.satzSichtbar === '0', z.satzSichtbar);
   ok('danach geht die Klasse wieder ab', await p.waitForFunction(() => !document.querySelector('.hero--auftritt'), null, { timeout: 5000 })
     .then(() => true, () => false));
@@ -308,7 +307,7 @@ console.log('· Der Auftritt');
 console.log('· Zeichen bei Kontakt');
 {
   const { ctx, p } = await oeffne();
-  await p.locator('#btnCreateHero').click();
+  await p.locator('#btnCreate').click();
   await p.waitForSelector('#viewList:not([hidden])', { timeout: 15000 });
   await p.locator('#chkKeyDone').check();
   await p.waitForTimeout(2300);

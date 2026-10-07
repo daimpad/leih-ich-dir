@@ -15,7 +15,7 @@ await page.reload({ waitUntil: 'networkidle' });
 
 console.log('\n· Meine Listen im Kopf der Startseite');
 ok('ohne Listen kein Verweis', await page.locator('#lnkMine').isHidden());
-await page.locator('#btnCreateHero').click();
+await page.locator('#btnCreate').click();
 await page.waitForSelector('#viewList:not([hidden])', { timeout: 15000 });
 await page.locator('#chkKeyDone').check();
 await page.waitForTimeout(2300);

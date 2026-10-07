@@ -18,7 +18,7 @@ await p.goto(BASE + '/', { waitUntil: 'networkidle' });
 console.log('· Entschluesselter Inhalt wird nicht uebersetzt');
 await p.evaluate(() => { localStorage.clear(); localStorage.setItem('lid.lang','de'); });
 await p.reload({ waitUntil: 'networkidle' });
-await p.locator('#btnCreateHero').click();
+await p.locator('#btnCreate').click();
 await p.waitForSelector('#viewList:not([hidden])', { timeout: 15000 });
 await p.waitForTimeout(700);
 await p.locator('#addName').fill('Bohrmaschine');

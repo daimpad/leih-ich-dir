@@ -419,11 +419,12 @@
   <section id="viewStart" class="view" hidden>
 
     <!-- Der Hero ist die eine Ausnahme vom Geruest: ohne Rahmen und ueber
-         die ganze Breite des Fensters, bis 1600 Punkte. Links steht die
-         Wortmarke, darunter Satz und Aufruf, rechts schweben die Dinge;
-         schmal stehen die Dinge oben. Beim ersten Zeigen treten die drei
+         die ganze Breite des Fensters, bis 1440 Punkte. Links steht die
+         Wortmarke, darunter der Satz, rechts schweben die Dinge; schmal
+         stehen die Dinge oben. Beim ersten Zeigen treten die drei
          nacheinander auf, erst die Dinge, dann die Wortmarke, dann der Satz
-         (app.js, 8a). -->
+         (app.js, 8a). Einen eigenen Aufruf traegt er nicht mehr: Der steht
+         gleich darunter im ersten Einstieg. -->
     <div class="hero">
       <div class="hero-sagt">
         <h1><span data-i18n="hero.a">Leih</span> <mark data-i18n="hero.b">ich</mark> <span data-i18n="hero.c">Dir.</span></h1>
@@ -432,12 +433,6 @@
              der Titel bleibt dann nur fuer Vorleseprogramme stehen. -->
         <svg class="wortmarke" id="wortmarke" aria-hidden="true" focusable="false"></svg>
         <p class="lead" data-i18n="hero.lead">Zeig Deinen Freund:innen, was sie bei Dir ausleihen können!</p>
-        <!-- Der Aufruf steht in der Textspalte, nicht unter der ganzen
-             Reihe: Sonst bliebe neben dem Bild eine leere Flaeche. -->
-        <p class="hero-act">
-          <button type="button" id="btnCreateHero" class="btn btn--primary btn--lg" data-create
-                  data-i18n="start.create">Leihliste anlegen</button>
-        </p>
       </div>
       <!-- Das Bild sagt, wofuer die Liste da ist: Dinge, die man
            verleiht, aus Knete. Sie schweben frei neben der Schrift, ohne
@@ -583,7 +578,7 @@
         <h2 data-i18n="start.listHead">Leihliste erstellen</h2>
       </div>
       <p class="einstieg__act">
-        <button type="button" class="btn btn--primary" data-create
+        <button type="button" id="btnCreate" class="btn btn--primary" data-create
                 data-i18n="start.create">Leihliste anlegen</button>
       </p>
       <!-- Wer schon eine hatte: Der Weg zurueck steht neben dem Anlegen, weil

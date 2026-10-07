@@ -54,7 +54,7 @@ console.log('\n· Listenansicht bei 1280');
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
   await page.evaluate(() => localStorage.clear());
   await page.reload({ waitUntil: 'networkidle' });
-  await page.locator('#btnCreateHero').click();
+  await page.locator('#btnCreate').click();
   await page.waitForSelector('#viewList:not([hidden])', { timeout: 15000 });
   const b = await page.evaluate(() => Math.round(document.querySelector('#main').getBoundingClientRect().width));
   ok('Liste ebenfalls 660', b === 660, String(b));

@@ -130,7 +130,7 @@
   --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 64px;
 
   --shell: 41.25rem;   /* 660px — dieselbe Breite auf jeder Seite */
-  --hero:  100rem;     /* 1600px — die eine Ausnahme: der Hero der Startseite */
+  --hero:  90rem;      /* 1440px — die eine Ausnahme: der Hero der Startseite */
 
   /* Bewegungsmerkmale. Ein gemeinsames Vokabular statt fuenfzehn einzeln
      gewaehlter Kurven: Was federt, federt ueberall gleich. */
@@ -229,7 +229,7 @@
   --glanz: var(--licht-flaeche);
 }
 
-.btn, .ctl-square, .modal__x, .fab__btn, .fab__item, .skiplink, .trust li,
+.btn, .ctl-square, .modal__x, .fab__btn, .fab__item, .skiplink,
 .chip--level, .chip--ok, .item-badge, .einstieg__mark, .mine .kind,
 .tab[aria-selected="true"], .seg button[aria-pressed="true"],
 .check input:checked + .check__box {
@@ -240,7 +240,7 @@
 }
 
 .card, .fold, .modal, .klappe, .toast, .mine a, .itemrow, .keybox--frisch, .note,
-.btn, .ctl-square, .modal__x, .fab__btn, .fab__item, .skiplink, .trust li,
+.btn, .ctl-square, .modal__x, .fab__btn, .fab__item, .skiplink,
 .chip--level, .chip--ok, .item-badge, .einstieg__mark, .mine .kind,
 .tab[aria-selected="true"], .seg button[aria-pressed="true"],
 .check input:checked + .check__box {
@@ -692,9 +692,8 @@ header.site { padding-block: var(--s-4); }
   column-gap: clamp(var(--s-5), 4vw, var(--s-8));
 }
 
-/* Links die Marke, darunter Satz und Aufruf. */
+/* Links die Marke, darunter der Satz. */
 .hero-sagt { min-width: 0; }
-.hero-act { margin-top: var(--s-5); }
 /* Die Ueberschrift bleibt gross — sie ist die Marke. Steht die Wortmarke
    aus Knete, bleibt der Titel nur fuer Vorleseprogramme im Dokument. */
 .hero h1 { font-size: clamp(2.6rem, 7vw, 6rem); line-height: 1.04; }
@@ -804,7 +803,6 @@ header.site { padding-block: var(--s-4); }
 .hero--auftritt .buchstabe.w-immergruen { animation: lid-auftauchen .5s var(--feder) 750ms both; }
 .hero--auftritt .buchstabe.w-pfirsich   { animation: lid-auftauchen .5s var(--feder) 900ms both; }
 .hero--auftritt .lead     { animation: lid-einblenden .45s ease-out 1050ms both; }
-.hero--auftritt .hero-act { animation: lid-einblenden .45s ease-out 1150ms both; }
 @keyframes lid-hereinschweben {
   from { opacity: 0; translate: 0 3rem; scale: .5; }
   to   { opacity: 1; translate: 0 0;    scale: 1; }
@@ -831,17 +829,16 @@ header.site { padding-block: var(--s-4); }
    ist etwas in Ordnung. */
 .trust {
   list-style: none; padding: 0; margin-top: var(--s-6);
-  display: flex; flex-wrap: wrap; gap: var(--s-3);
+  display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-5);
 }
+/* Die Eigenschaften sind Aussagen, keine Bedienelemente: flacher Text mit
+   einem Haekchen davor, ohne Flaeche und ohne Schatten. Als Knete sahen
+   sie aus wie Knoepfe, die man druecken kann. */
 .trust li {
   display: flex; align-items: center; gap: var(--s-2);
-  padding: .32rem .85rem .32rem .4rem; border-radius: 999px; --mass: .45;
-  color: var(--tinte-leise); font-size: .86rem; font-weight: 800; white-space: nowrap;
+  color: var(--tinte-leise); font-size: .92rem; font-weight: 700; white-space: nowrap;
 }
-.trust .ico {
-  width: 1.45rem; height: 1.45rem; padding: .22rem; border-radius: 999px;
-  background: var(--minze); color: var(--tinte);
-}
+.trust .ico { width: 1.1rem; height: 1.1rem; }
 
 /* Zwei Einstiege, je eine Karte: das Zeichen der Art, die Ueberschrift,
    der Aufruf. Breit stehen sie in einer Zeile, schmal rutscht der Aufruf
@@ -1458,7 +1455,7 @@ header.site { padding-block: var(--s-4); }
   .trust li { font-size: .88rem; }
   /* Schmal nimmt der Aufruf die ganze Zeile: Daneben steht ohnehin nichts.
      In den Einstiegen rutscht er dafuer unter Zeichen und Ueberschrift. */
-  .hero-act .btn, .einstieg__act .btn { width: 100%; }
+  .einstieg__act .btn { width: 100%; }
   .einstieg { grid-template-columns: auto minmax(0, 1fr); }
   .einstieg__act, .einstieg__nach { grid-column: 1 / -1; }
   .einstieg__mark { width: 2.6rem; height: 2.6rem; }

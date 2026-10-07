@@ -28,10 +28,12 @@ console.log('\n· Hero');
 const lead = await page.locator('.hero .lead').innerText();
 ok('neuer Satz im Hero', /Zeig Deinen Freund:innen, was sie bei Dir ausleihen können/.test(lead), lead);
 ok('Dein und Dir großgeschrieben', /Deinen/.test(lead) && /bei Dir/.test(lead), lead);
-const heroBtn = page.locator('#btnCreateHero');
-ok('Aufruf im Hero vorhanden', await heroBtn.isVisible());
-ok('und im Hero', await page.evaluate(() =>
-  document.querySelector('.hero').contains(document.getElementById('btnCreateHero'))));
+// Bis Oktober 2026 stand ein eigener Aufruf im Hero. Seitdem steht er nur
+// noch im ersten Einstieg, gleich darunter.
+ok('im Hero steht kein Aufruf mehr', await page.locator('.hero button, .hero [data-create]').count() === 0);
+const heroBtn = page.locator('#btnCreate');
+ok('der Aufruf steht im ersten Einstieg', await page.evaluate(() =>
+  document.querySelector('.einstieg').contains(document.getElementById('btnCreate'))));
 // Seit es zwei Arten von Liste gibt, nennt der Aufruf die Art.
 ok('Beschriftung stimmt', /Leihliste anlegen/.test(await heroBtn.innerText()), await heroBtn.innerText());
 
@@ -48,7 +50,7 @@ ok('Deine Listen sind ohne Liste gar nicht da', await page.evaluate(() => docume
 console.log('\n· Der Aufruf legt an');
 await heroBtn.click();
 await page.waitForSelector('#viewList:not([hidden])', { timeout: 15000 });
-ok('der Aufruf im Hero legt eine Liste an', await page.locator('#keyBox').isVisible());
+ok('der Aufruf legt eine Liste an', await page.locator('#keyBox').isVisible());
 
 // Zuerst stand der Zugang unter dem Inventar, direkt ueber Link teilen, mit
 // den drei Reitern dann kurz ueber ihnen. Seit Oktober 2026 ist er ein festes

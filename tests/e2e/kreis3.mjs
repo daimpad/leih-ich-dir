@@ -76,7 +76,7 @@ console.log('· In der eigenen Liste steht der Knopf nicht');
   await q.goto(BASE + '/', { waitUntil: 'networkidle' });
   await q.evaluate(() => { localStorage.clear(); localStorage.setItem('lid.lang','de'); });
   await q.reload({ waitUntil: 'networkidle' });
-  await q.locator('#btnCreateHero').click();
+  await q.locator('#btnCreate').click();
   await q.waitForSelector('#viewList:not([hidden])', { timeout: 10000 });
   await q.waitForTimeout(600);
   ok('im Bearbeiten-Modus verborgen', await q.locator('#circleAddHereRow').isHidden());

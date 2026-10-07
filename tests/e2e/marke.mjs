@@ -62,7 +62,7 @@ await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
 const roll = await page.evaluate(() => ({ y: window.scrollY,
   moeglich: document.documentElement.scrollHeight - window.innerHeight }));
 ok('Seite war heruntergerollt', roll.y > 0 && roll.y >= roll.moeglich - 1, JSON.stringify(roll));
-await page.locator('#btnCreateHero').last().click();
+await page.locator('#btnCreate').last().click();
 await page.waitForSelector('#viewList:not([hidden])', { timeout: 15000 });
 await page.waitForTimeout(400);
 const yNach = await page.evaluate(() => window.scrollY);

@@ -28,7 +28,7 @@ async function neueListe(sprache, breite) {
   await p.goto(BASE + '/', { waitUntil: 'networkidle' });
   await p.evaluate((l) => { localStorage.clear(); localStorage.setItem('lid.lang', l); }, sprache || 'de');
   await p.reload({ waitUntil: 'networkidle' });
-  await p.locator('#btnCreateHero').click();
+  await p.locator('#btnCreate').click();
   await p.waitForSelector('#viewList:not([hidden])', { timeout: 15000 });
   await p.waitForTimeout(600);
   return { ctx, p };
@@ -196,7 +196,7 @@ console.log('· Eine andere Liste, ohne neu zu laden');
   await p.locator('#schrittTab3').click();
   await p.evaluate(() => { location.hash = ''; });
   await p.waitForSelector('#viewStart:not([hidden])');
-  await p.locator('#btnCreateHero').click();
+  await p.locator('#btnCreate').click();
   await p.waitForSelector('#viewList:not([hidden])', { timeout: 15000 });
   await p.waitForTimeout(500);
   const z = await zustand(p);

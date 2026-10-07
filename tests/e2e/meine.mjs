@@ -11,7 +11,7 @@ page.on('pageerror', e => problems.push('pageerror: ' + e.message));
 
 const neueListe = async (titel) => {
   await page.goto(URL, { waitUntil: 'networkidle' });
-  await page.locator('#btnCreateHero').click();
+  await page.locator('#btnCreate').click();
   await page.waitForSelector('#viewList:not([hidden])', { timeout: 15000 });
   await page.locator('#chkKeyDone').check();
   await page.waitForTimeout(2300);
