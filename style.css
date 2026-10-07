@@ -130,7 +130,6 @@
   --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 64px;
 
   --shell: 41.25rem;   /* 660px — dieselbe Breite auf jeder Seite */
-  --hero:  90rem;      /* 1440px — die eine Ausnahme: der Hero der Startseite */
 
   /* Bewegungsmerkmale. Ein gemeinsames Vokabular statt fuenfzehn einzeln
      gewaehlter Kurven: Was federt, federt ueberall gleich. */
@@ -677,36 +676,36 @@ header.site { padding-block: var(--s-4); }
 /* == 7 · Startseite ==================================================== */
 
 .hero {
-  /* Der Hero ist die eine Ausnahme vom Geruest: Er reicht ueber die ganze
-     Breite des Fensters, bis --hero, ohne Rahmen. Die Rechnung zieht ihn
-     aus der Mitte des Geruests nach beiden Seiten auf; der Rand von --s-5
-     haelt ihn auch dort vom Fensterrand fern, wo eine Bildlaufleiste in
-     100vw mitzaehlt. Schmal ist er so breit wie alles andere (Abschnitt 12). */
-  --hero-breite: min(100vw - 2 * var(--s-5), var(--hero));
-  width: var(--hero-breite);
-  margin-inline: calc(50% - var(--hero-breite) / 2);
+  /* Der Hero steht im Geruest wie alles andere, ohne Rahmen: so breit wie
+     die Seite und buendig mit der Marke im Kopf und den Einstiegen
+     darunter. Fuer zwei Tage im Oktober 2026 war er die eine Ausnahme und
+     reichte ueber die Breite des Fensters, zuletzt bis 1440 Punkte; seitdem
+     gilt auch fuer ihn die eine Breite der Seite. Breit ist seine Spalte
+     immer gleich breit, deshalb steht der Abstand fest. */
   padding-block: clamp(var(--s-4), 3vw, var(--s-7)) clamp(var(--s-4), 3vw, var(--s-6));
   display: grid;
   grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
   align-items: center;
-  column-gap: clamp(var(--s-5), 4vw, var(--s-8));
+  column-gap: var(--s-6);
 }
 
 /* Links die Marke, darunter der Satz. */
 .hero-sagt { min-width: 0; }
-/* Die Ueberschrift bleibt gross — sie ist die Marke. Steht die Wortmarke
-   aus Knete, bleibt der Titel nur fuer Vorleseprogramme im Dokument. */
-.hero h1 { font-size: clamp(2.6rem, 7vw, 6rem); line-height: 1.04; }
+/* Ohne Wortmarke ist die Ueberschrift die Marke: gross, aber auf Deutsch
+   in einer Zeile ihrer Spalte. Steht die Wortmarke aus Knete, bleibt der
+   Titel nur fuer Vorleseprogramme im Dokument. */
+.hero h1 { font-size: clamp(2.6rem, 7vw, 3.3rem); line-height: 1.04; }
 .hero h1 mark { background: none; color: var(--brand-ich); }
 .wortmarke-da .hero h1 {
   position: absolute; width: 1px; height: 1px; margin: -1px;
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
 }
 /* Die Erklaerung zur Marke: kraeftiger als der Fliesstext und groesser,
-   aber leiser als die Marke selbst. */
+   aber leiser als die Marke selbst. Ihre Spalte waechst nicht ueber die
+   Seite hinaus, die Schrift auch nicht: So bleibt es bei zwei Zeilen. */
 .hero .lead {
   margin-top: var(--s-4); max-width: 30ch;
-  font-size: clamp(1.15rem, .9rem + .9vw, 1.6rem); font-weight: 800; line-height: 1.35;
+  font-size: clamp(1.15rem, .9rem + .9vw, 1.3rem); font-weight: 800; line-height: 1.35;
 }
 
 /* Die Wortmarke: jeder Buchstabe dreifach — Sockel, Rand fuer die
@@ -754,7 +753,7 @@ header.site { padding-block: var(--s-4); }
    Vorleseprogramme verborgen. Gefeiert wird hier nichts — kein Konfetti,
    kein Ton: Die Startseite traegt das Vertrauensversprechen und bleibt
    ruhig. */
-.hero-bild { position: relative; min-width: 0; width: 100%; max-width: 34rem; justify-self: end; }
+.hero-bild { position: relative; min-width: 0; width: 100%; justify-self: end; }
 .dinge {
   position: relative; aspect-ratio: 20 / 19;
   margin: 0; padding: 0; list-style: none;
@@ -824,19 +823,19 @@ header.site { padding-block: var(--s-4); }
 /* Die Schnuerung der Trommel: helle Knete auf dem Korpus, auch im Dunkeln. */
 .trommel__schnur { fill: none; stroke: var(--milch); stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round; }
 
-/* Vier Zusagen mit Haken, als Plaketten aus Knete auf dem Grund. Der Haken
-   steht in einer Minzkugel, weil er dasselbe sagt wie in der Liste: hier
-   ist etwas in Ordnung. */
+/* Vier Zusagen mit Haken, als ruhige Zeile unter dem Hero. */
 .trust {
   list-style: none; padding: 0; margin-top: var(--s-6);
   display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-5);
 }
 /* Die Eigenschaften sind Aussagen, keine Bedienelemente: flacher Text mit
    einem Haekchen davor, ohne Flaeche und ohne Schatten. Als Knete sahen
-   sie aus wie Knoepfe, die man druecken kann. */
+   sie aus wie Knoepfe, die man druecken kann. Sie stehen in der Farbe der
+   Schrift, hell dunkel und dunkel hell; --tinte-leise gibt es nur fuer
+   den hellen Grund, im Dunkeln verschwanden sie darin. */
 .trust li {
   display: flex; align-items: center; gap: var(--s-2);
-  color: var(--tinte-leise); font-size: .92rem; font-weight: 700; white-space: nowrap;
+  color: var(--ink); font-size: .92rem; font-weight: 700; white-space: nowrap;
 }
 .trust .ico { width: 1.1rem; height: 1.1rem; }
 
@@ -1432,13 +1431,17 @@ header.site { padding-block: var(--s-4); }
 
 /* == 12 · Telefon ====================================================== */
 
-@media (max-width: 46rem) {
-  /* Schmal steht der Hero im Geruest wie alles andere, und untereinander:
-     die Dinge zuerst, so wie sie auch zuerst auftreten. Das Bild ist
-     verborgen und nicht anwaehlbar, die Reihenfolge fuer Tastatur und
-     Vorleseprogramme bleibt die des Dokuments. */
-  .hero { width: auto; margin-inline: 0; grid-template-columns: minmax(0, 1fr); row-gap: var(--s-4); }
-  .hero-bild { order: -1; max-width: none; }
+/* Nebeneinander steht der Hero nur, wenn das Fenster breiter ist als die
+   Seite (--shell, 660 Punkte): Dann ist seine Spalte ueberall dieselbe.
+   Ist es schmaler, wird es auch die Spalte, und neben der Marke wuerden
+   die Dinge zu klein. */
+@media (max-width: 41.25rem) {
+  /* Schmal steht der Hero untereinander: die Dinge zuerst, so wie sie
+     auch zuerst auftreten. Das Bild ist verborgen und nicht anwaehlbar,
+     die Reihenfolge fuer Tastatur und Vorleseprogramme bleibt die des
+     Dokuments. */
+  .hero { grid-template-columns: minmax(0, 1fr); row-gap: var(--s-4); }
+  .hero-bild { order: -1; }
   /* Der Haufen wird flacher und breiter: zwei lose Reihen statt eines
      Turms, damit Marke und Aufruf noch auf den ersten Blick passen. */
   .dinge { aspect-ratio: 20 / 11; }

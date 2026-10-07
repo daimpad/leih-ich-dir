@@ -5,6 +5,29 @@ const errs = [];
 let pass = 0, fail = 0;
 const ok = (n, c, x) => { if (c) pass++; else { fail++; console.log('  FEHLT:', n, x === undefined ? '' : x); } };
 
+/* Wie gut sich die Zusagen vom Grund abheben, als Kontrastverhaeltnis nach
+   WCAG: Schrift und Haekchen gegen den Grund der Seite. Bis Oktober 2026
+   standen sie in --tinte-leise, das es nur fuer den hellen Grund gibt; im
+   Dunkeln verschwanden sie darin (2,6 zu 1). Seitdem in der Farbe der
+   Schrift, hell dunkel und dunkel hell. */
+const kontrast = (p) => p.evaluate(() => {
+  const rgb = (s) => s.match(/[\d.]+/g).slice(0, 3).map(Number);
+  const lum = (c) => {
+    const [r, g, b] = c.map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const k = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  const grund = lum(rgb(getComputedStyle(document.body).backgroundColor));
+  const werte = [...document.querySelectorAll('.trust li')].map(n => ({
+    schrift: k(lum(rgb(getComputedStyle(n).color)), grund),
+    haken: k(lum(rgb(getComputedStyle(n.querySelector('.ico')).color)), grund)
+  }));
+  return { schrift: Math.min(...werte.map(w => w.schrift)), haken: Math.min(...werte.map(w => w.haken)), zahl: werte.length };
+});
+/* Text in der Groesse der Zusagen braucht 4,5 zu 1, ein Zeichen 3 zu 1. */
+const lesbar = (n, kt) => ok('die Auszeichnungen heben sich ab (' + n + ')',
+  kt.zahl === 4 && kt.schrift >= 4.5 && kt.haken >= 3, JSON.stringify(kt));
+
 const ctx = await browser.newContext({ viewport: { width: 1100, height: 900 }, locale: 'de-DE' });
 const page = await ctx.newPage();
 page.on('pageerror', e => errs.push('PAGEERROR: ' + e.message));
@@ -45,6 +68,7 @@ ok('Auszeichnungen in einer Reihe', await page.evaluate(() => {
      flach.length === 4 && flach.every(f => f.schatten === 'none' && f.bild === 'none' &&
        f.farbe === 'rgba(0, 0, 0, 0)' && f.haken), JSON.stringify(flach[0]));
 }
+lesbar('hell', await kontrast(page));
 // Der Rahmen stand flach — keine Verlaeufe, kein Punktraster, kein Schatten —,
 // bis die Anwendung in Knete umgestellt wurde (Oktober 2026, auf ausdruecklichen
 // Wunsch; der alte Stil liegt in archiv/alter-stil/). Danach war er Knete, bis
@@ -166,8 +190,19 @@ const c3 = await browser.newContext({ viewport: { width: 1100, height: 900 }, co
 const p3 = await c3.newPage();
 await p3.goto(BASE + '/', { waitUntil: 'networkidle' });
 await p3.waitForTimeout(600);
+lesbar('dunkel', await kontrast(p3));
 await p3.screenshot({ path: OUT + '/S-dunkel.png', fullPage: true });
 await c3.close();
+// Dunkel gewaehlt auf hellem System: dieselben Farben ueber den zweiten Weg.
+const c4 = await browser.newContext({ viewport: { width: 1100, height: 900 }, colorScheme: 'light', locale: 'de-DE' });
+await c4.addInitScript(() => { localStorage.setItem('lid.theme', 'dark'); });
+const p4 = await c4.newPage();
+await p4.goto(BASE + '/', { waitUntil: 'networkidle' });
+await p4.waitForTimeout(600);
+ok('dunkel gewaehlt, der Grund ist dunkel',
+   await p4.evaluate(() => getComputedStyle(document.body).backgroundColor) === 'rgb(9, 31, 22)');
+lesbar('dunkel gewaehlt', await kontrast(p4));
+await c4.close();
 
 console.log(`\n${pass} bestanden, ${fail} offen`);
 console.log(errs.length ? 'FEHLER:\n' + errs.join('\n') : 'Keine Konsolenfehler.');

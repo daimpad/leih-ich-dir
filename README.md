@@ -274,13 +274,15 @@ unterbindet das ohnehin.
 
 ### Wortmarke und Bild im Hero
 
-Der Hero ist die eine Ausnahme vom Gerüst von 660 Punkten: Er steht ohne
-Rahmen und reicht über die ganze Breite des Fensters, bis 1440 Punkte. Links
-steht die Wortmarke, sehr groß, darunter der Satz; rechts schweben die Dinge.
-Schmal steht alles untereinander, die Dinge zuerst. Einen eigenen Knopf trägt
-der Hero nicht: Der Aufruf zum Anlegen steht gleich darunter im ersten
-Einstieg. Dazwischen stehen die Eigenschaften der Anwendung als ruhige Zeile
-mit Häkchen, flach, denn sie sind Aussagen und keine Knöpfe.
+Der Hero steht ohne Rahmen im Gerüst von 660 Punkten, so breit wie die Seite
+und bündig mit der Marke im Kopf und den Einstiegen darunter. Links steht die
+Wortmarke, darunter der Satz; rechts schweben die Dinge. Ist das Fenster
+nicht breiter als die Seite, steht alles untereinander, die Dinge zuerst.
+Einen eigenen Knopf trägt der Hero nicht: Der Aufruf zum Anlegen steht gleich
+darunter im ersten Einstieg. Dazwischen stehen die Eigenschaften der
+Anwendung als ruhige Zeile mit Häkchen, flach, denn sie sind Aussagen und
+keine Knöpfe, und in der Farbe der Schrift, damit sie hell wie dunkel zu
+lesen sind.
 
 Die Wortmarke ist aus Knete: Jeder Buchstabe dreifach geschichtet, ein
 dunkler Sockel, ein Rand für die Pausbacken, die Fläche mit Lichtfleck.
