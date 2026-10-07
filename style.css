@@ -1065,6 +1065,10 @@ header.site { padding-block: var(--s-4); }
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
 }
 .ist-abfolge .items-head { justify-content: flex-end; }
+/* Im eigenen Inventar steht im Kopf nichts Sichtbares mehr: Den Schritt
+   nennt der Reiter, und die Uhrzeit ist fort. Die Zeile bleibt fuer die
+   Ueberschrift im Dokument, ohne Abstand darunter. */
+.ist-abfolge .items-head--inventar { margin-bottom: 0; }
 /* Das Zeichen fuer die Erklaerungen sitzt oben rechts in der Karte und
    nimmt keine eigene Zeile. */
 .schritt { position: relative; }

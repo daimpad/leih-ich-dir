@@ -457,7 +457,6 @@
 
       /* -- Das Spielerische ------------------------------------------- */
 
-      'items.updatedLabel': 'Zuletzt gespeichert: {date}',
       'items.emptyHead': 'Noch nichts drin',
       'items.emptyEg': 'z. B.',
       'item.longOut': '{name} ist seit {n} Tagen unterwegs. Ein kurzer Anruf wäre kein Drama.',
@@ -832,7 +831,6 @@
 
       /* -- The playful part ------------------------------------------- */
 
-      'items.updatedLabel': 'Last saved: {date}',
       'items.emptyHead': 'Nothing here yet',
       'items.emptyEg': 'e.g.',
       'item.longOut': '{name} has been out for {n} days. A short call would not hurt.',
@@ -1030,15 +1028,6 @@
     if (window.LeihTheme) { window.LeihTheme.setLang(lang); }
     /* Der Titel traegt jetzt die Woerter der neuen Sprache. */
     wortmarkeZeigen();
-  }
-
-  function formatDate(tsSeconds) {
-    if (!tsSeconds) { return ''; }
-    try {
-      return new Intl.DateTimeFormat(lang, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(tsSeconds * 1000));
-    } catch (e) {
-      return new Date(tsSeconds * 1000).toLocaleString();
-    }
   }
 
   function formatDay(iso) {
@@ -1714,23 +1703,6 @@
       parts.push(frei === 1 ? t('list.free_1') : t('list.free', { n: frei }));
     }
     $('#listMeta').textContent = parts.join(' · ');
-
-    /* Im Bearbeiten-Modus steht ueber der Liste kein Satz mehr. Wann zuletzt
-       geschrieben wurde, gehoert klein neben die Ueberschrift des Inventars:
-       Es ist eine Angabe zur Liste, keine Ueberschrift der Seite. */
-    var stamp = $('#listUpdated');
-    if (stamp) {
-      var zeigen = state.mode === 'edit' && !!state.updated;
-      stamp.hidden = !zeigen;
-      var wann = zeigen ? formatDate(state.updated) : '';
-      stamp.textContent = wann;
-      /* Sichtbar steht dort nur Datum und Uhrzeit. Vorgelesen waere das eine
-         Zahl ohne Zusammenhang, zumal die gleich aussehende Angabe daneben
-         etwas anderes bedeutet — deshalb traegt der Knoten die Beschriftung,
-         die der Text nicht zeigt. */
-      if (wann) { stamp.setAttribute('aria-label', t('items.updatedLabel', { date: wann })); }
-      else { stamp.removeAttribute('aria-label'); }
-    }
   }
 
   /** „zuletzt geprüft vor …" — macht die Schaltfläche daneben entbehrlich. */
@@ -2734,11 +2706,14 @@
    * @param {string} ansicht  Kennung der Ansicht, etwa viewList
    * @param {string} leiste   Kennung der Reiterleiste
    * @param {string[]} felder Kennungen der Kaesten, in der Reihenfolge der Reiter
+   * @param {function} [nachWahl]  laeuft nach jeder Wahl eines Schritts, fuer
+   *   das, was ausserhalb der Kaesten vom offenen Schritt abhaengt
    */
-  function Abfolge(ansicht, leiste, felder) {
+  function Abfolge(ansicht, leiste, felder, nachWahl) {
     this.ansicht = ansicht;
     this.leiste = leiste;
     this.felder = felder;
+    this.nachWahl = nachWahl || null;
     this.schritt = 1;
     this.fuer = null;
   }
@@ -2794,6 +2769,7 @@
       tab.setAttribute('tabindex', an ? '0' : '-1');
       document.getElementById(this.felder[i - 1]).hidden = !an;
     }
+    if (this.nachWahl) { this.nachWahl(n); }
     if (fokus) {
       this.reiter(n).focus({ preventScroll: true });
       $('#' + this.leiste).scrollIntoView({ block: 'nearest', behavior: ruhig() ? 'auto' : 'smooth' });
@@ -2827,18 +2803,28 @@
     });
   };
 
-  var abfolgeListe = new Abfolge('viewList', 'schritte', ['inventoryBox', 'contactBox', 'shareBox']);
-  var abfolgeKreis = new Abfolge('viewCircle', 'kreisSchritte', ['circleManage', 'circleBox', 'circleShareBox']);
+  /* Nach jeder Wahl wird der Zugang neu gezeichnet: Ruhig steht er nur im
+     dritten Schritt (Zugang, unten). */
+  var abfolgeListe = new Abfolge('viewList', 'schritte', ['inventoryBox', 'contactBox', 'shareBox'],
+    function () { zugangListe.zeichnen(state.mode === 'edit'); });
+  var abfolgeKreis = new Abfolge('viewCircle', 'kreisSchritte', ['circleManage', 'circleBox', 'circleShareBox'],
+    function () { zugangKreis.zeichnen(!!kreis.token); });
 
   /* -- Der Zugang --------------------------------------------------------- *
-   * Der geheime Link einer eigenen Liste steht im Bearbeitenmodus immer als
-   * Feld unter dem offenen Schritt, verdeckt, mit Zeigen und Kopieren. Gelb
-   * und mit der Bitte, ihn zu sichern, ist er nur fuer die Liste, die gerade
+   * Der geheime Link einer eigenen Liste steht im Bearbeitenmodus als Feld
+   * unter dem dritten Schritt, verdeckt, mit Zeigen und Kopieren. Gelb und
+   * mit der Bitte, ihn zu sichern, ist er nur fuer die Liste, die gerade
    * angelegt oder deren Links gerade zurueckgezogen wurden, und nur bis zur
-   * Bestaetigung. frischFuer haelt fest, fuer welche Liste das gilt: Wer
-   * ohne neu zu laden zu einer anderen eigenen Liste wechselt, sieht dort
-   * deren Link, ruhig, und nicht die Bitte der vorigen. fuer merkt sich, fuer
-   * welche Liste das Feld zuletzt gezeichnet wurde; wechselt sie, wird ein
+   * Bestaetigung; so lange steht er unter jedem Schritt. Wer eine Liste
+   * anlegt, nur eintraegt und das Fenster schliesst, soll die Bitte gesehen
+   * haben: Ein privates Fenster vergisst die Liste beim Schliessen, und es
+   * laesst sich nicht erkennen. Nach dem Haken steht nur noch das ruhige
+   * Feld, und nur im dritten Schritt, damit so wenig wie moeglich dasteht.
+   *
+   * frischFuer haelt fest, fuer welche Liste die Bitte gilt: Wer ohne neu zu
+   * laden zu einer anderen eigenen Liste wechselt, sieht dort deren Link,
+   * ruhig, und nicht die Bitte der vorigen. fuer merkt sich, fuer welche
+   * Liste das Feld zuletzt gezeichnet wurde; wechselt sie, wird ein
    * aufgedeckter Link wieder verdeckt.
    *
    * Wie die Abfolge kennt ein Zugang nur Kennungen und fragt seine Ansicht,
@@ -2850,7 +2836,9 @@
    *   kasten, feld, zeigen, haken, merken: Kennungen der Knoten;
    *   offen():   die Kennung der offenen Liste;
    *   link():    ihr geheimer Link;
-   *   gemerkt(): ob sich dieses Geraet die Liste merkt
+   *   gemerkt(): ob sich dieses Geraet die Liste merkt;
+   *   abfolge, schritt: die Abfolge der Ansicht und der Schritt, unter dem
+   *   das ruhige Feld steht
    */
   function Zugang(o) {
     this.o = o;
@@ -2864,8 +2852,9 @@
     var o = this.o;
     var kasten = $('#' + o.kasten);
     var offen = o.offen();
-    kasten.hidden = !an;
-    kasten.classList.toggle('keybox--frisch', an && this.frischFuer === offen);
+    var frisch = an && this.frischFuer === offen;
+    kasten.hidden = !(frisch || (an && o.abfolge.schritt === o.schritt));
+    kasten.classList.toggle('keybox--frisch', frisch);
     if (!an) { return; }
     var feld = $('#' + o.feld);
     if (this.fuer !== offen) {
@@ -2888,9 +2877,10 @@
   };
 
   /**
-   * Zeigen und Verbergen, und der Haken. Nach dem Haken geht die Bitte, das
-   * Feld bleibt. Der Haken verschwindet mit ihr; damit die Tastatur nicht
-   * ins Leere faellt, geht der Fokus ins Feld.
+   * Zeigen und Verbergen, und der Haken. Nach dem Haken geht die Bitte, und
+   * ausser im dritten Schritt mit ihr das Feld. Damit die Tastatur nicht ins
+   * Leere faellt, geht der Fokus ins Feld, oder, wo es fort ist, auf den
+   * Reiter des offenen Schritts.
    *
    * @param {function} [danach]  was die Ansicht nach dem Haken noch tut
    */
@@ -2907,7 +2897,8 @@
       if (!this.checked) { return; }
       self.frischFuer = null;
       self.zeichnen(true);
-      $('#' + o.feld).focus({ preventScroll: true });
+      var ziel = $('#' + o.kasten).hidden ? o.abfolge.reiter(o.abfolge.schritt) : $('#' + o.feld);
+      ziel.focus({ preventScroll: true });
       if (danach) { danach(); }
     });
     /* Ein Ankreuzfeld hoert auf die Leertaste, nicht auf die Eingabetaste.
@@ -2922,11 +2913,13 @@
 
   var zugangListe = new Zugang({
     kasten: 'keyBox', feld: 'keyLink', zeigen: 'btnRevealEdit', haken: 'chkKeyDone', merken: 'keyRemember',
-    offen: function () { return state.id; }, link: editLink, gemerkt: mineWorks
+    offen: function () { return state.id; }, link: editLink, gemerkt: mineWorks,
+    abfolge: abfolgeListe, schritt: 3
   });
   var zugangKreis = new Zugang({
     kasten: 'circleKeyBox', feld: 'circleKeyLink', zeigen: 'btnRevealCircle', haken: 'chkCircleKeyDone',
-    merken: 'circleKeyRemember', offen: function () { return kreis.id; }, link: circleLink, gemerkt: kreisGemerkt
+    merken: 'circleKeyRemember', offen: function () { return kreis.id; }, link: circleLink, gemerkt: kreisGemerkt,
+    abfolge: abfolgeKreis, schritt: 3
   });
 
   /* ===================================================================== *

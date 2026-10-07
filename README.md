@@ -18,7 +18,7 @@ oder Kontaktdaten.
 | **Kein Konto** | Zugang ausschließlich über Links, keine Registrierung, keine Cookies, keine Sitzungen |
 | **Ende-zu-Ende-verschlüsselt** | AES-GCM-256 über die Web Crypto API, Schlüssel nur im URL-Fragment |
 | **Zwei Linkarten** | ein geheimer Bearbeiten-Link, ein konstanter Ansehen-Link für Freunde |
-| **Drei Schritte** | die eigene Liste in drei Reitern, in der Reihenfolge ihrer Entstehung: Inventar, Kontakt, Link teilen; Erklärungen erscheinen erst auf Zuruf. Darunter steht immer der Bearbeiten-Link, verdeckt; nach dem Anlegen bittet er gelb darum, gesichert zu werden |
+| **Drei Schritte** | die eigene Liste in drei Reitern, in der Reihenfolge ihrer Entstehung: Inventar, Kontakt, Link teilen; Erklärungen erscheinen erst auf Zuruf. Im dritten Schritt steht darunter der Bearbeiten-Link, verdeckt; nach dem Anlegen bittet er gelb und unter jedem Schritt darum, gesichert zu werden, bis das bestätigt ist |
 | **Live-Daten** | der Ansehen-Link lädt den aktuellen Stand und aktualisiert sich selbsttätig |
 | **Zweisprachig** | Deutsch als Standard, Englisch über den Schalter in der Kopfleiste; die Wahl bleibt im Browser |
 | **Hell und dunkel** | folgt dem System, lässt sich in der Kopfleiste und auf der Einstellungsseite übersteuern |
@@ -30,7 +30,7 @@ oder Kontaktdaten.
 | **Sichern und Wiederherstellen** | die Liste als Klartextdatei auf dem eigenen Gerät, ohne Link; daraus entsteht auf der Startseite eine neue Liste mit neuen Links. Auch die Superliste, dann mit den gesammelten Ansehen-Links darin — fremder Zugang, und die Warnung daneben sagt es |
 | **Gemerkte Listen** | eigene Leihlisten und Superlisten stehen auf der Startseite dieses Browsers, rein lokal und ohne Konto |
 | **Zwei Wege dorthin** | breit als zwei Verweise in der Kopfleiste, je mit Zeichen und Wort; schmal als eine schwebende Schaltfläche unten rechts |
-| **Superliste** | eine Liste der Leihlisten: mehrere Ansehen-Links zu einer Übersicht bündeln, alle Gegenstände in einer Liste, mit Suche über Gegenstand, Person und Notiz. Wie die Leihliste in drei Reitern: Listen sammeln, Was es gibt, Weitergeben; darunter ihr Zugangs-Link, verdeckt |
+| **Superliste** | eine Liste der Leihlisten: mehrere Ansehen-Links zu einer Übersicht bündeln, alle Gegenstände in einer Liste, mit Suche über Gegenstand, Person und Notiz. Wie die Leihliste in drei Reitern: Listen sammeln, Was es gibt, Weitergeben; unter dem dritten ihr Zugangs-Link, verdeckt |
 | **Spracheingabe** | Gegenstände unterwegs einsprechen, Zerlegung im Browser oder wahlweise per Gemini |
 | **Erscheinungsbild** | eigenständig in `style.css`, Schriften mitgeliefert, keine fremden Server |
 | **Auffindbar** | Titel, Beschreibungen, Open Graph, `robots.txt` und `sitemap.xml`; strukturierte Angaben als JSON-LD |

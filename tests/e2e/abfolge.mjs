@@ -86,6 +86,17 @@ const { ctx, p } = await neueListe('de');
      await sichtbar(p, '#keyBox .keybox__title') && await sichtbar(p, '#chkKeyDone'), JSON.stringify(frisch));
   ok('die Ueberschrift der Karte nur fuer Vorleseprogramme',
      await p.locator('#inventoryBox .card__title').evaluate(n => n.getBoundingClientRect().width <= 1));
+  /* Bis zum Haken steht die Bitte unter jedem Schritt: Wer nur eintraegt und
+     das Fenster schliesst, soll sie gesehen haben. */
+  const ueberall = [];
+  for (const n of [2, 3, 1]) {
+    await p.locator('#schrittTab' + n).click();
+    ueberall.push(await p.locator('#keyBox').evaluate(b => !b.hidden && b.classList.contains('keybox--frisch')));
+  }
+  ok('bis zum Haken steht die Bitte unter jedem Schritt', ueberall.every(Boolean), JSON.stringify(ueberall));
+  ok('und keine Uhrzeit im Kopf des Inventars', await p.locator('#listUpdated').count() === 0 &&
+     await p.evaluate(() => [...document.querySelectorAll('#inventoryBox .items-head > :not(.schritt__titel)')]
+       .every(n => n.hidden || !n.textContent.trim())));
 }
 
 console.log('· Weiter');
@@ -154,8 +165,9 @@ console.log('· Link teilen');
 
 console.log('· Der Zugang');
 {
-  /* Nach dem Anlegen weiter oben bestaetigt: Jetzt steht er ruhig unter
-     jedem Schritt, an derselben Stelle. */
+  /* Nach dem Anlegen weiter oben bestaetigt. Bis Oktober 2026 stand er dann
+     ruhig unter jedem Schritt; seitdem nur unter dem dritten, Link teilen,
+     damit so wenig wie moeglich dasteht. */
   const lagen = [];
   for (const n of [1, 2, 3]) {
     await p.locator('#schrittTab' + n).click();
@@ -166,7 +178,8 @@ console.log('· Der Zugang');
                ruhig: !zugang.classList.contains('keybox--frisch') };
     }, ['inventoryBox', 'contactBox', 'shareBox'][n - 1]));
   }
-  ok('unter jedem der drei Schritte', lagen.every(l => l.da && l.unter), JSON.stringify(lagen));
+  ok('ruhig steht er nur unter dem dritten Schritt', !lagen[0].da && !lagen[1].da && lagen[2].da && lagen[2].unter,
+     JSON.stringify(lagen));
   ok('nach der Bestaetigung ruhig: ohne Bitte und ohne Haken', lagen.every(l => l.ruhig) &&
      !(await sichtbar(p, '#keyBox .keybox__title')) && !(await sichtbar(p, '#chkKeyDone')));
   const link = await p.locator('#keyLink').inputValue();
@@ -211,13 +224,16 @@ console.log('· Eine andere Liste, ohne neu zu laden');
   await p.waitForFunction((h) => location.hash === h, ersteListe);
   await p.waitForSelector('#viewList:not([hidden])');
   await p.waitForTimeout(800);
+  ok('zurueck bei der ersten: keine Bitte, und im Inventar kein Feld',
+     await p.locator('#keyBox').evaluate(n => n.hidden && !n.classList.contains('keybox--frisch')));
+  await p.locator('#schrittTab3').click();
   const zurueck = await p.evaluate(() => ({
     frisch: document.getElementById('keyBox').classList.contains('keybox--frisch'),
     da: !document.getElementById('keyBox').hidden,
     link: document.getElementById('keyLink').value,
     verdeckt: document.getElementById('keyLink').type === 'password'
   }));
-  ok('zurueck bei der ersten: ihr Zugang, ruhig und verdeckt', zurueck.da && !zurueck.frisch && zurueck.verdeckt &&
+  ok('im dritten Schritt ihr Zugang, ruhig und verdeckt', zurueck.da && !zurueck.frisch && zurueck.verdeckt &&
      zurueck.link.endsWith(ersteListe), JSON.stringify(Object.assign({}, zurueck, { link: zurueck.link.slice(-12) })));
 }
 
