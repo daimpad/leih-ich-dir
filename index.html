@@ -159,6 +159,13 @@
   <symbol id="i-check" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
     <path d="M12 34 L26 48 L52 16"/>
   </symbol>
+  <!-- Der Stift hinter dem Namen einer Liste: Der Name laesst sich aendern.
+       Schraeg wie in der Hand, Spitze unten links, oben ein Ring. -->
+  <symbol id="i-stift" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M12 52 L15 41 L46 10 L54 18 L23 49 Z"/>
+    <path d="M15 41 L23 49"/>
+    <path d="M40 16 L48 24"/>
+  </symbol>
   <symbol id="i-share" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
     <path d="M10 22 L10 50 L40 50 L40 32"/>
     <path d="M28 32 L45 15"/>
@@ -642,10 +649,18 @@
            Titel, nicht zu den Angaben darunter. -->
       <div class="titlerow">
         <h1 id="listTitleRead" hidden></h1>
+        <!-- Der Name als Feld, so breit wie sein Wort, und dahinter ein Stift:
+             Man sieht, dass er sich aendern laesst. Der Stift steht im Label,
+             ein Tipp darauf setzt den Cursor in den Namen. size="1" nimmt dem
+             Feld die Eigenbreite von zwanzig Zeichen; die Breite gibt der
+             Zwilling vor (style.css, .title-edit__feld). -->
         <label class="title-edit" hidden id="listTitleEditWrap">
           <span class="sr-only" data-i18n="list.titleLabel">Titel der Liste, freiwillig</span>
-          <input type="text" id="listTitleInput" class="input title-input" maxlength="80"
-                 data-i18n-placeholder="list.titlePlaceholder" placeholder="Titel der Liste">
+          <span class="title-edit__feld">
+            <input type="text" id="listTitleInput" class="input title-input" maxlength="80" size="1"
+                   data-i18n-placeholder="list.titlePlaceholder" placeholder="Titel der Liste">
+          </span>
+          <svg class="ico title-edit__stift" aria-hidden="true" focusable="false"><use href="#i-stift"/></svg>
         </label>
         <span id="saveState" class="chip chip--ok chip--sm" role="status" aria-live="polite" hidden></span>
       </div>
@@ -919,8 +934,11 @@
         <h1 id="circleTitleRead" hidden></h1>
         <label class="title-edit" hidden id="circleTitleWrap">
           <span class="sr-only" data-i18n="circle.titleLabel">Name der Superliste, freiwillig</span>
-          <input type="text" id="circleTitleInput" class="input title-input" maxlength="80"
-                 data-i18n-placeholder="circle.titlePlaceholder" placeholder="Superliste">
+          <span class="title-edit__feld">
+            <input type="text" id="circleTitleInput" class="input title-input" maxlength="80" size="1"
+                   data-i18n-placeholder="circle.titlePlaceholder" placeholder="Superliste">
+          </span>
+          <svg class="ico title-edit__stift" aria-hidden="true" focusable="false"><use href="#i-stift"/></svg>
         </label>
       </div>
       <p class="titlemeta"><span id="circleMeta"></span></p>

@@ -995,6 +995,18 @@
     render();
   }
 
+  /**
+   * Gibt dem Namen einer Liste seine Breite: Der Zwilling neben dem Feld
+   * traegt denselben Text, oder den Platzhalter, solange keiner da ist
+   * (style.css, .title-edit__feld). So steht der Stift direkt hinter dem
+   * Namen. Ein Attribut und keine Breitenangabe am Knoten, weil die CSP
+   * eingebettete Stile verwirft.
+   */
+  function titelBreite(feld) {
+    if (!feld || !feld.parentNode) { return; }
+    feld.parentNode.setAttribute('data-wert', feld.value || feld.placeholder || '');
+  }
+
   /** Überträgt die Wörterbücher auf alle statisch ausgezeichneten Knoten. */
   function applyStaticI18n() {
     $$('[data-i18n]').forEach(function (node) { node.textContent = t(node.getAttribute('data-i18n')); });
@@ -1637,6 +1649,7 @@
     titleRead.classList.toggle('sr-only', isEdit);
     titleRead.textContent = state.doc.title || t('list.untitled');
     if (isEdit && document.activeElement !== titleInput) { titleInput.value = state.doc.title; }
+    titelBreite(titleInput);
     /* Kein entschluesselter Titel hier. <title> steht im <head> und damit
        ausserhalb jedes translate="no"; ausserdem nimmt der Browser den
        Seitentitel in den Verlauf auf und traegt ihn bei eingeschalteter
@@ -2344,6 +2357,7 @@
     if (istZugang && document.activeElement !== $('#circleTitleInput')) {
       $('#circleTitleInput').value = (kreis.doc && kreis.doc.title) || '';
     }
+    titelBreite($('#circleTitleInput'));
     /* Der Seitentitel bleibt fest: <title> steht im <head> und damit
        ausserhalb jedes translate="no". Ein Kreisname dort waere eine Aussage
        ueber Dritte an einer Stelle, die die Anwendung nicht abschirmen kann. */
@@ -5574,6 +5588,7 @@
     });
     $('#listTitleInput').addEventListener('input', function () {
       state.doc.title = this.value;
+      titelBreite(this);
       touch();
     });
     /* Delegation für die Inventarliste */
@@ -5727,6 +5742,7 @@
        Zeichen — sonst waere jeder Tastendruck ein Schreibvorgang. */
     $('#circleTitleInput').addEventListener('input', function () {
       if (kreis.doc) { kreis.doc.title = this.value; }
+      titelBreite(this);
     });
     $('#circleTitleInput').addEventListener('change', function () {
       if (!kreis.doc) { return; }
