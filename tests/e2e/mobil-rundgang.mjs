@@ -174,11 +174,18 @@ for (const breite of [320, 390]) {
   await p.waitForSelector('#viewCircle:not([hidden])');
   await p.waitForTimeout(600);
   const kh = await p.evaluate(() => location.hash);
-  await p.evaluate(() => { document.querySelector('#circleManage').open = true; });
+  await p.locator('#kreisTab1').click();
   await p.locator('#circleAddLink').fill('#v='+anna.id+'.'+anna.keyStr);
   await p.locator('#btnCircleAdd').click();
   await p.waitForTimeout(900);
+  /* Seit Oktober 2026 steht die Superliste in drei Reitern; gemessen wird
+     jeder Schritt, das Weitergeben mit offener Sicherung. */
   await pruefe(p, 'Superliste', breite, sprache);
+  await p.locator('#kreisTab2').click();
+  await pruefe(p, 'Superliste: Was es gibt', breite, sprache);
+  await p.locator('#kreisTab3').click();
+  await p.locator('#circleBackupBox summary').click();
+  await pruefe(p, 'Superliste: Weitergeben', breite, sprache);
 
   console.log('· Einstellungen');
   await p.goto(BASE + '/einstellungen.html'+kh, { waitUntil:'networkidle' });

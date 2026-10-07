@@ -399,6 +399,9 @@
       'circle.honest': 'Die Personen, deren Leihlisten hier stehen, erfahren davon nichts. Eine Benachrichtigung setzte voraus, dass festgehalten wird, wer welche Liste liest. Diese Superliste hält das nicht fest.',
       'circle.previewNote': 'Im Vorschaumodus liegen Listen nur in diesem Browser. Die Superliste findet deshalb nur Leihlisten, die Du hier selbst angelegt hast; die Listen Deiner Freunde liegen in deren Browsern.',
       'circle.itemsHeadline': 'Was es gibt',
+      'circle.stepCollect': 'Listen sammeln',
+      'circle.stepShare': 'Weitergeben',
+      'circle.toItems': 'Weiter: Was es gibt',
       'circle.meta': '{n} Leihlisten gesammelt',
       'circle.meta_1': '1 Leihliste gesammelt',
       'circle.searchLabel': 'Unter allen Sachen suchen',
@@ -419,7 +422,6 @@
       'circle.emptyNoneText': 'Füge den Ansehen-Link einer Leihliste ein. Die Superliste holt sie bei jedem Öffnen frisch und zeigt alles daraus in einer Liste.',
       'circle.emptyAllHead': 'Nichts eingetragen',
       'circle.emptyAllText': 'Die gesammelten Leihlisten sind erreichbar, aber noch leer.',
-      'circle.manageHeadline': 'Leihliste eines Freundes hinzufügen',
       'circle.addLabel': 'Ansehen-Link der Leihliste',
       'circle.addPlaceholder': 'Link einfügen',
       'circle.add': 'Aufnehmen',
@@ -446,7 +448,6 @@
       'circle.keyRemember': 'Auf diesem Gerät gemerkt, beim nächsten Besuch findest Du die Superliste auf der Startseite wieder.',
       'circle.shareHeadline': 'Superliste weitergeben',
       'circle.shareWarn': 'Wer diesen Link bekommt, sieht alle Leihlisten Deiner Superliste. Einen Link nur zum Ansehen gibt es hier nicht.',
-      'circle.shareLabel': 'Link zur Superliste',
       'circle.copied': 'Gut verwahrt.',
       'circle.deleteConfirm': 'Die gesamte Superliste wird unwiderruflich vom Server gelöscht. Die Leihlisten Deiner Freunde bleiben unberührt. Fortfahren?',
       'circle.dangerHeadline': 'Superliste löschen',
@@ -773,6 +774,9 @@
       'circle.honest': 'The people whose lending lists are kept here are not told about it. A notice would require a record of who reads which list. This super list keeps no such record.',
       'circle.previewNote': 'In preview mode lists live in this browser only. The super list therefore finds just the lending lists you created here; your friends\u2019 lists live in their own browsers.',
       'circle.itemsHeadline': 'What there is',
+      'circle.stepCollect': 'Collect lists',
+      'circle.stepShare': 'Pass on',
+      'circle.toItems': 'Next: what there is',
       'circle.meta': '{n} lending lists collected',
       'circle.meta_1': '1 lending list collected',
       'circle.searchLabel': 'Search across all things',
@@ -793,7 +797,6 @@
       'circle.emptyNoneText': 'Paste the view link of a lending list. The super list fetches it fresh every time you open it and shows everything from it in one list.',
       'circle.emptyAllHead': 'Nothing listed',
       'circle.emptyAllText': 'The collected lending lists can be reached, but they are still empty.',
-      'circle.manageHeadline': 'Add a friend\u2019s lending list',
       'circle.addLabel': 'View link of the lending list',
       'circle.addPlaceholder': 'Paste link',
       'circle.add': 'Add',
@@ -820,7 +823,6 @@
       'circle.keyRemember': 'Remembered on this device, you will find the super list on the start page next time.',
       'circle.shareHeadline': 'Pass on the super list',
       'circle.shareWarn': 'Anyone who gets this link sees every lending list in your super list. There is no view-only link for it.',
-      'circle.shareLabel': 'Link to the super list',
       'circle.copied': 'Kept safe.',
       'circle.deleteConfirm': 'The entire super list will be irreversibly deleted from the server. Your friends\u2019 lending lists stay untouched. Continue?',
       'circle.dangerHeadline': 'Delete the super list',
@@ -981,7 +983,7 @@
        Beschriftung aus dem Woerterbuch. applyStaticI18n setzt sie gerade auf
        "Zeigen" zurueck, auch wenn der Link offen daliegt; dann stuende dort
        das Gegenteil dessen, was ein Druck bewirkt. */
-    [['#btnRevealEdit', '#keyLink'], ['#btnRevealCircle', '#circleLink']].forEach(function (paar) {
+    [['#btnRevealEdit', '#keyLink'], ['#btnRevealCircle', '#circleKeyLink']].forEach(function (paar) {
       var knopf = $(paar[0]), feld = $(paar[1]);
       if (knopf && feld) { knopf.textContent = t(feld.type === 'password' ? 'share.reveal' : 'share.hide'); }
     });
@@ -2342,39 +2344,21 @@
   }
 
   /**
-   * Der Aufklapper zum Aufnehmen kennt zwei Lagen, und welche gilt, entscheidet
-   * allein die Zahl der gesammelten Leihlisten.
-   *
-   * Steht noch keine drin, gibt es nichts zu durchsuchen: "Was es gibt" tritt
-   * ganz ab, der Aufklapper rueckt damit an den Kopf der Ansicht, steht offen
-   * und heisst nach dem, was jetzt ansteht — die Leihlisten der Freunde
-   * ergaenzen. Steht schon eine drin, ist die Uebersicht der Zweck und das
-   * Aufnehmen der Anlass: Dann heisst der Aufklapper nach seiner Handlung und
-   * bleibt zu.
-   *
-   * Die Ueberschrift wird nicht nur geschrieben, sondern auch umgeschluesselt:
-   * Ohne das gesetzte data-i18n schriebe der naechste Sprachwechsel die alte
-   * Zeile zurueck, denn applyStaticI18n() liest das Attribut, nicht den Zustand.
+   * Die leere Superliste. Ob sie leer ist, entscheidet allein die Zahl der
+   * gesammelten Leihlisten. Steht noch keine drin, sagt der Vorspann im
+   * ersten Schritt, wie es geht, und im zweiten tritt die Suche ab: Es gibt
+   * nichts zu durchsuchen, an ihrer Stelle fuehrt ein Knopf zum Sammeln.
+   * Steht schon eine drin, traegt der erste Schritt nur noch das Aufnehmen.
    */
   function renderKreisManage() {
     var istZugang = !!kreis.token;
-    var box = $('#circleBox');
-    var titel = $('#circleManageTitle');
-    var lead = $('#circleManageLead');
-    if (!box || !titel || !lead) { return; }
     var leer = istZugang && !!(kreis.doc && kreis.doc.friends.length === 0);
-    box.hidden = leer;
-    var schluessel = leer ? 'circle.emptyNoneHead' : 'circle.manageHeadline';
-    titel.setAttribute('data-i18n', schluessel);
-    titel.textContent = t(schluessel);
-    lead.hidden = !leer;
+    sichtbar($('#circleManageLead'), leer);
+    sichtbar($('#circleSearch'), !leer);
+    sichtbar($('#circleEmptyNone'), leer);
     /* Die Ehrlichkeitszeile spricht von den Personen, deren Leihlisten hier
        stehen. Steht noch keine drin, spricht sie von niemandem. */
     sichtbar($('#circleTruth'), !leer);
-    /* Nur aufklappen, nie zuklappen: Zugeklappt zeigte die leere Superliste
-       ueberhaupt nichts mehr. Wer schon etwas gesammelt hat, behaelt dagegen
-       seinen Stand, auch ueber ein erneutes Zeichnen hinweg. */
-    if (leer) { $('#circleManage').open = true; }
   }
 
   /** Zeichnet die Uebersicht vollstaendig. Holt nichts. */
@@ -2391,17 +2375,19 @@
     /* Der Seitentitel bleibt fest: <title> steht im <head> und damit
        ausserhalb jedes translate="no". Ein Kreisname dort waere eine Aussage
        ueber Dritte an einer Stelle, die die Anwendung nicht abschirmen kann. */
-    $('#circleManage').hidden = !istZugang;
-    $('#circleShareBox').hidden = !istZugang;
-    /* Sichern nur mit Zugang, wie bei der Leihliste: Wer eine fremde
-       Superliste geoeffnet haette, duerfte sie nicht als Datei mitnehmen. */
-    $('#circleBackupBox').hidden = !istZugang;
+    /* Die Reiter nur mit Zugang, wie bei der Leihliste. Ohne Zugang stuende
+       allein "Was es gibt" da; Sammeln, Weitergeben und Sichern brauchen ihn,
+       und eine fremde Superliste duerfte niemand als Datei mitnehmen. Ein
+       Link mit #k= traegt allerdings immer ein Token, parseFragment lehnt
+       ihn sonst ab. */
+    var gesammelt = !!(kreis.doc && kreis.doc.friends.length);
+    abfolgeKreis.zeigen(istZugang, kreis.id, gesammelt || !istZugang ? 2 : 1);
+    /* Der Zugang steht immer da, mit dem Link der offenen Superliste. Die
+       Bitte darin bleibt, bis sie bestaetigt ist, auch ueber ein erneutes
+       Zeichnen hinweg — etwa beim Sprachwechsel oder sobald der erste Freund
+       aufgenommen wird. */
+    zugangKreis.zeichnen(istZugang);
     $('#circlePreview').hidden = !(Store && Store.kind === 'local');
-    if (istZugang) { $('#circleLink').value = circleLink(); }
-    /* #circleKeyBox wird hier ausdruecklich NICHT verborgen: Er bleibt
-       stehen, bis #chkCircleKeyDone bestaetigt ist. Unbedingtes Verbergen
-       raeumte ihn beim naechstbesten Zeichnen weg — etwa beim Sprachwechsel
-       oder sobald der erste Freund aufgenommen wird. */
     renderKreisListe();
     renderKreisChecked();
     /* Ohne diese beiden Zeilen zeigten der Einstellungen-Verweis und die Wege
@@ -2734,6 +2720,10 @@
    * Freund gibt es keine Reiter: Er sieht das Inventar, und die Kaesten, die
    * nur fuer die eigene Liste gelten, bleiben verborgen.
    *
+   * Die Superliste steht ebenso in drei Reitern: Listen sammeln, Was es gibt,
+   * Weitergeben. Sie beginnt nicht immer beim ersten: Stehen schon
+   * Leihlisten darin, ist das Suchen der Alltag und das Sammeln der Anlass.
+   *
    * Eine Abfolge kennt ihre Ansicht, ihre Reiterleiste und ihre Kaesten in
    * der Reihenfolge der Reiter. Die Reiter selbst findet sie an
    * data-schritt, die Knoepfe zum naechsten Schritt an data-weiter in ihrer
@@ -2757,11 +2747,19 @@
     return $('#' + this.leiste + ' [data-schritt="' + n + '"]');
   };
 
-  /** Stellt die Abfolge an oder ab, fuer die Liste mit der Kennung fuer.
-      renderList ruft das bei jedem Zeichnen, deshalb nimmt es nie den Fokus. */
-  Abfolge.prototype.zeigen = function (an, fuer) {
+  /**
+   * Stellt die Abfolge an oder ab, fuer die Liste mit der Kennung fuer. Laeuft
+   * bei jedem Zeichnen und nimmt deshalb nie den Fokus.
+   *
+   * @param {boolean} an
+   * @param {string} fuer
+   * @param {number} [start]  wo sie fuer eine neu geoeffnete Liste beginnt,
+   *   ohne Angabe beim ersten Schritt; ohne Reiter steht allein dieser da
+   */
+  Abfolge.prototype.zeigen = function (an, fuer, start) {
     var self = this;
-    if (this.fuer !== fuer) { this.fuer = fuer; this.schritt = 1; }
+    var erster = start || 1;
+    if (this.fuer !== fuer) { this.fuer = fuer; this.schritt = erster; }
     $('#' + this.ansicht).classList.toggle('ist-abfolge', an);
     $('#' + this.leiste).hidden = !an;
     this.felder.forEach(function (id, i) {
@@ -2774,7 +2772,7 @@
         feld.removeAttribute('aria-labelledby');
       }
     });
-    this.waehlen(an ? this.schritt : 1, false);
+    this.waehlen(an ? this.schritt : erster, false);
   };
 
   /**
@@ -2830,6 +2828,7 @@
   };
 
   var abfolgeListe = new Abfolge('viewList', 'schritte', ['inventoryBox', 'contactBox', 'shareBox']);
+  var abfolgeKreis = new Abfolge('viewCircle', 'kreisSchritte', ['circleManage', 'circleBox', 'circleShareBox']);
 
   /* -- Der Zugang --------------------------------------------------------- *
    * Der geheime Link einer eigenen Liste steht im Bearbeitenmodus immer als
@@ -2924,6 +2923,10 @@
   var zugangListe = new Zugang({
     kasten: 'keyBox', feld: 'keyLink', zeigen: 'btnRevealEdit', haken: 'chkKeyDone', merken: 'keyRemember',
     offen: function () { return state.id; }, link: editLink, gemerkt: mineWorks
+  });
+  var zugangKreis = new Zugang({
+    kasten: 'circleKeyBox', feld: 'circleKeyLink', zeigen: 'btnRevealCircle', haken: 'chkCircleKeyDone',
+    merken: 'circleKeyRemember', offen: function () { return kreis.id; }, link: circleLink, gemerkt: kreisGemerkt
   });
 
   /* ===================================================================== *
@@ -4924,10 +4927,9 @@
         rememberList();
         if (danach) { danach(); }
         renderKreis();
-        $('#circleKeyLink').value = circleLink();
-        $('#chkCircleKeyDone').checked = false;
-        $('#circleKeyBox').hidden = false;
-        $('#circleKeyRemember').hidden = !kreisGemerkt();
+        /* Der Zugang, einmal und deutlich: Bis er bestaetigt wurde, bittet
+           das Feld unter dem Schritt darum, ihn zu sichern. */
+        zugangKreis.frisch();
       });
     }).catch(function (err) {
       toast(t('error.' + (err && err.code ? err.code : 'network')));
@@ -5664,7 +5666,7 @@
              gefeiert gehoert. */
           /* Der Kreis hat nur einen Link, und er ist geheim; "Bearbeiten-Link
              kopiert" waere dort das falsche Wort. */
-          if (ziel === 'circleKeyLink' || ziel === 'circleLink') { toast(t('circle.copied')); return; }
+          if (ziel === 'circleKeyLink') { toast(t('circle.copied')); return; }
           if (ziel !== 'linkView') { toast(t('share.copiedEdit')); return; }
           if (state.mode !== 'edit') { toast(t('share.copied')); return; }
           var vorher = spielRead().weiter;
@@ -5706,25 +5708,10 @@
   function bindKreis() {
     $('#btnCircleBackup').addEventListener('click', sichereKreis);
 
-    $('#btnRevealCircle').addEventListener('click', function () {
-      var input = $('#circleLink');
-      var hidden = input.type === 'password';
-      input.type = hidden ? 'text' : 'password';
-      this.textContent = t(hidden ? 'share.hide' : 'share.reveal');
-    });
-
-    /* Spiegelbildlich zu #chkKeyDone, aber ohne feierZugang(): Ein
+    abfolgeKreis.binden();
+    /* Wie der Zugang der Leihliste, aber ohne feierZugang(): Eine
        Superliste ist keine angelegte Liste. */
-    $('#chkCircleKeyDone').addEventListener('change', function () {
-      if (!this.checked) { return; }
-      $('#circleKeyBox').hidden = true;
-    });
-    $('#chkCircleKeyDone').addEventListener('keydown', function (ev) {
-      if (ev.key !== 'Enter' || this.checked) { return; }
-      ev.preventDefault();
-      this.checked = true;
-      this.dispatchEvent(new Event('change', { bubbles: true }));
-    });
+    zugangKreis.binden();
 
     /* Der eigene Knopf, weil #btnRefresh in #viewList liegt und refresh()
        bei state.mode !== 'view' ohnehin sofort zurueckkehrt. */

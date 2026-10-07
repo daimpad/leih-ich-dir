@@ -101,7 +101,7 @@ console.log('· Vorschaumodus');
   await q.waitForTimeout(500);
   ok('eine Superliste laesst sich auch hier anlegen', /^#k=/.test(await q.evaluate(() => location.hash)));
   ok('der Hinweis zum Vorschaumodus steht da', !(await q.locator('#circlePreview').isHidden()));
-  await q.evaluate(() => { document.querySelector('#circleManage').open = true; });
+  await q.locator('#kreisTab1').click();
   await q.locator('#circleAddLink').fill('#v=' + anna.id + '.' + anna.keyStr);
   await q.locator('#btnCircleAdd').click();
   await q.waitForTimeout(900);

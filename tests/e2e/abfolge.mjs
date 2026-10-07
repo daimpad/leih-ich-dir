@@ -92,16 +92,16 @@ console.log('· Weiter');
 await p.locator('#chkKeyDone').check();
 await p.waitForTimeout(300);
 {
-  ok('im Inventar fuehrt ein Knopf zum Kontakt', /Weiter: Kontakt/.test(await p.locator('[data-weiter="2"]').innerText()));
+  ok('im Inventar fuehrt ein Knopf zum Kontakt', /Weiter: Kontakt/.test(await p.locator('#viewList [data-weiter="2"]').innerText()));
   ok('er traegt nicht die Farbe der Handlung',
-     !(await p.locator('[data-weiter="2"]').getAttribute('class')).includes('btn--primary'));
-  await p.locator('[data-weiter="2"]').click();
+     !(await p.locator('#viewList [data-weiter="2"]').getAttribute('class')).includes('btn--primary'));
+  await p.locator('#viewList [data-weiter="2"]').click();
   await p.waitForTimeout(300);
   let z = await zustand(p);
   ok('danach ist der Kontakt offen und nur er', z.gewaehlt.join() === 'schrittTab2' && z.zu.join() === 'contactBox', JSON.stringify(z));
   ok('und sein Reiter hat den Fokus', z.fokus === 'schrittTab2', z.fokus);
-  ok('im Kontakt fuehrt ein Knopf zum Teilen', /Weiter: Link teilen/.test(await p.locator('[data-weiter="3"]').innerText()));
-  await p.locator('[data-weiter="3"]').click();
+  ok('im Kontakt fuehrt ein Knopf zum Teilen', /Weiter: Link teilen/.test(await p.locator('#viewList [data-weiter="3"]').innerText()));
+  await p.locator('#viewList [data-weiter="3"]').click();
   await p.waitForTimeout(300);
   z = await zustand(p);
   ok('danach ist Link teilen offen', z.gewaehlt.join() === 'schrittTab3' && z.zu.join() === 'shareBox', JSON.stringify(z));
@@ -236,7 +236,7 @@ console.log('· Beim Freund');
     inventar: !document.getElementById('inventoryBox').hidden,
     rolle: document.getElementById('inventoryBox').getAttribute('role'),
     zugang: document.getElementById('keyBox').hidden,
-    weiter: document.querySelector('[data-weiter="2"]').getClientRects().length,
+    weiter: document.querySelector('#viewList [data-weiter="2"]').getClientRects().length,
     titel: document.querySelector('#inventoryBox .card__title').getBoundingClientRect().width
   }));
   ok('keine Reiter', r.leiste, JSON.stringify(r));
@@ -267,8 +267,8 @@ for (const [sprache, breite, namen, weiter] of [
   ok(wo + 'die Reiter heissen richtig', r.namen === namen, r.namen);
   ok(wo + 'jeder passt in seinen Platz', r.passt);
   ok(wo + 'kein Ueberlauf', !r.ueberlauf);
-  ok(wo + 'der Knopf heisst ' + weiter, (await s.locator('[data-weiter="2"]').innerText()).trim() === weiter,
-     await s.locator('[data-weiter="2"]').innerText());
+  ok(wo + 'der Knopf heisst ' + weiter, (await s.locator('#viewList [data-weiter="2"]').innerText()).trim() === weiter,
+     await s.locator('#viewList [data-weiter="2"]').innerText());
   await c.close();
 }
 

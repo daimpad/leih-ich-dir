@@ -47,7 +47,7 @@ await p.locator('#btnStartCircle').click();
 await p.waitForSelector('#viewCircle:not([hidden])');
 await p.waitForTimeout(400);
 const kreisHash = await p.evaluate(() => location.hash);
-await p.evaluate(() => { document.querySelector('#circleManage').open = true; });
+await p.locator('#kreisTab1').click();
 for (const l of zehn) {
   await p.locator('#circleAddLink').fill('#v=' + l.id + '.' + l.keyStr);
   await p.locator('#btnCircleAdd').click();
@@ -55,6 +55,8 @@ for (const l of zehn) {
 }
 await p.waitForTimeout(600);
 offen = 0; hoechst = 0;
+// Aktualisieren steht in "Was es gibt", dem zweiten Reiter.
+await p.locator('#kreisTab2').click();
 await p.locator('#btnCircleRefresh').click();
 await p.waitForTimeout(2500);
 ok('nie mehr als vier Leseanfragen gleichzeitig', hoechst <= 4, 'hoechstens ' + hoechst);
@@ -63,6 +65,8 @@ ok('alle zehn Sachen stehen da', n === 10, String(n));
 
 console.log('· Entfernen mit Ruecknahme');
 {
+  // Entfernt wird beim Sammeln, im ersten Reiter.
+  await p.locator('#kreisTab1').click();
   const erste = await p.evaluate(() => document.querySelector('#circleFriends [data-kreis-act="remove"]').getAttribute('data-kreis-id'));
   await p.locator('#circleFriends [data-kreis-act="remove"]').first().click();
   await p.waitForTimeout(300);
@@ -159,7 +163,7 @@ console.log('· Nebenlaeufig aufnehmen (zwei Reiter)');
   await q.goto(BASE + '/' + kreisHash, { waitUntil: 'networkidle' });
   await p.waitForTimeout(1800); await q.waitForTimeout(1800);
   for (const [seite, l] of [[p, a], [q, b]]) {
-    await seite.evaluate(() => { document.querySelector('#circleManage').open = true; });
+    await seite.locator('#kreisTab1').click();
     await seite.locator('#circleAddLink').fill('#v=' + l.id + '.' + l.keyStr);
   }
   await Promise.all([p.locator('#btnCircleAdd').click(), q.locator('#btnCircleAdd').click()]);

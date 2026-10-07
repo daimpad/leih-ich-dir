@@ -38,7 +38,7 @@ console.log('· Fund 2: Entfernen, dann Aktualisieren innerhalb der Frist');
 await p.locator('#btnStartCircle').click();
 await p.waitForSelector('#viewCircle:not([hidden])'); await p.waitForTimeout(500);
 const kh = await p.evaluate(()=>location.hash);
-await p.evaluate(()=>{document.querySelector('#circleManage').open=true;});
+await p.locator('#kreisTab1').click();
 for (const l of [a,b]) {
   await p.locator('#circleAddLink').fill('#v='+l.id+'.'+l.keyStr);
   await p.locator('#btnCircleAdd').click(); await p.waitForTimeout(700);
@@ -46,6 +46,8 @@ for (const l of [a,b]) {
 await p.waitForTimeout(500);
 await p.locator('#circleFriends [data-kreis-act="remove"]').first().click();
 await p.waitForTimeout(200);
+// Aktualisieren steht in "Was es gibt", dem zweiten Reiter.
+await p.locator('#kreisTab2').click();
 await p.locator('#btnCircleRefresh').click();
 await p.waitForTimeout(2500);
 {
@@ -122,7 +124,7 @@ console.log('· Fund 5 und 6: die Aufnehmen-Zeile bei 320 Punkten');
   const q = await c2.newPage();
   await q.goto(BASE + '/'+kh,{waitUntil:'networkidle'});
   await q.waitForSelector('#viewCircle:not([hidden])'); await q.waitForTimeout(1500);
-  await q.evaluate(()=>{document.querySelector('#circleManage').open=true;});
+  await q.locator('#kreisTab1').click();
   await q.waitForTimeout(300);
   const m = await q.evaluate(()=>{
     const k=document.querySelector('#btnCircleAdd'), f=document.querySelector('#circleAddLink');
