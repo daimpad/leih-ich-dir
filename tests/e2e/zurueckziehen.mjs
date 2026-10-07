@@ -64,8 +64,9 @@ const neuTeile = neuHash.slice(3).split('.');
 ok('das Fragment traegt neuen Schluessel und neues Token bei gleicher Kennung',
    /^#e=/.test(neuHash) && neuTeile[0] === anna.id && neuTeile[1] !== anna.keyStr && neuTeile[2] !== anna.token,
    neuHash.slice(0, 30));
-ok('der Zugangskasten steht offen, mit dem neuen Bearbeiten-Link',
-   !(await p.locator('#keyBox').isHidden()) && (await p.locator('#keyLink').inputValue()).includes(neuTeile[1]));
+ok('der Zugang bittet darum, den neuen Bearbeiten-Link zu sichern',
+   await p.locator('#keyBox').evaluate(n => !n.hidden && n.classList.contains('keybox--frisch')) &&
+   (await p.locator('#keyLink').inputValue()).includes(neuTeile[1]));
 ok('der Ansehen-Link im Kasten ist der neue',
    (await p.locator('#linkView').inputValue()).includes('#v=' + anna.id + '.' + neuTeile[1]));
 ok('die Meldung sagt es', (await p.locator('#toastText').textContent()).includes('Zurückgezogen'),

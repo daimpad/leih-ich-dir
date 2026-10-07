@@ -147,8 +147,9 @@ for (const breite of [320, 390]) {
   await p.waitForTimeout(250);
 
   /* Seit Oktober 2026 sind Kontakt und Teilen eigene Schritte; gemessen
-     wird jeder fuer sich, das Teilen mit beiden Aufklappern offen und mit
-     den Erklaerungen. */
+     wird jeder fuer sich, das Teilen mit offener Sicherung und mit den
+     Erklaerungen. Der Bearbeiten-Link hat keinen eigenen Aufklapper mehr,
+     er steht als Feld unter jedem Schritt und wird mit ihm gemessen. */
   console.log('· Kontakt und Teilen');
   /* Gut eine Sekunde nach dem Oeffnen erinnert eine Meldung an lange
      Verliehenes (hinweisLangeDraussen) und liegt dann 3,6 Sekunden ueber
@@ -162,7 +163,6 @@ for (const breite of [320, 390]) {
   await p.locator('#schrittTab2').click();
   await pruefe(p, 'Kontakt', breite, sprache);
   await p.locator('#schrittTab3').click();
-  await p.locator('#editFold summary').click();
   await p.locator('#backupBox summary').click();
   await p.locator('#shareBox [data-hinweise]').click();
   await pruefe(p, 'Teilen', breite, sprache);
