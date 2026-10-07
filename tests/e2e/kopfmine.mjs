@@ -220,7 +220,7 @@ await page.waitForTimeout(200);
 
 console.log('\n· Seiten ohne die Wege bleiben einzeilig');
 await page.setViewportSize({ width: 390, height: 780 });
-for (const datei of ['ueber.html', 'impressum.html', 'datenschutz.html']) {
+for (const datei of ['so-gehts.html', 'ueber.html', 'impressum.html', 'datenschutz.html']) {
   await page.goto(URL + datei, { waitUntil: 'networkidle' });
   await page.waitForTimeout(200);
   const m = await page.evaluate(() => ({

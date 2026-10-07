@@ -968,6 +968,15 @@ header.site { padding-block: var(--s-4); }
    anfasst. Er steht im Label, ein Tipp darauf setzt den Cursor ins Feld. */
 .title-edit__stift { flex: none; width: 1.6rem; height: 1.6rem; color: var(--tinte-leise); }
 .title-edit:hover .title-edit__stift, .title-edit:focus-within .title-edit__stift { color: var(--tinte); }
+/* Die Seite So geht's ist zum Lesen da: Absaetze und Ueberschriften der
+   Karten bekommen Luft. Die Schritte sind nummeriert wie die Reiter, die
+   Nummer zum Sehen, die Liste fuer die Reihenfolge im Dokument. */
+.anleitung .card__title { margin-bottom: var(--s-2); }
+.anleitung .card p + p { margin-top: var(--s-3); }
+.folge { list-style: none; padding: 0; margin-top: var(--s-4); display: grid; gap: var(--s-4); }
+.folge h3 { display: flex; align-items: baseline; gap: var(--s-2); font-size: 1.15rem; }
+.folge__nr { color: var(--tinte-leise); }
+.folge p { margin-top: var(--s-1); }
 .titlemeta { display: flex; align-items: center; flex-wrap: wrap; gap: var(--s-2); margin-top: var(--s-2); color: var(--faint); font-size: .92rem; }
 
 .items-head { display: flex; align-items: center; gap: var(--s-3); margin-bottom: var(--s-4); }

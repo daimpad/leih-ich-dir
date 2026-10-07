@@ -557,6 +557,7 @@
       'settings.motionHint': 'Konfetti, aufpoppende Gesichter und das Aufklappen entfallen dann; alles erscheint sofort. Der Schalter gilt nur für diesen Browser.',
       'settings.motionSystem': 'Dein System verlangt bereits wenig Bewegung. Die Anwendung folgt dem, unabhängig von diesem Schalter.',
 
+      'footer.howto': 'So geht\u2019s',
       'footer.imprint': 'Impressum',
       'footer.privacy': 'Datenschutz',
       'footer.about': 'Über'
@@ -931,6 +932,7 @@
       'settings.motionHint': 'Confetti, popping faces and the unfolding are dropped; everything appears at once. The switch applies to this browser only.',
       'settings.motionSystem': 'Your system already asks for reduced motion. The application follows that, regardless of this switch.',
 
+      'footer.howto': 'How it works',
       'footer.imprint': 'Imprint',
       'footer.privacy': 'Privacy',
       'footer.about': 'About'

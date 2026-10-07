@@ -6,9 +6,9 @@
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy"
       content="default-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
-<title>Impressum · LeihIchDir</title>
-<meta name="description" content="Anbieterkennzeichnung nach § 5 TMG für leihichdir.de.">
-<link rel="canonical" href="https://leihichdir.de/impressum.html">
+<title>So geht’s · LeihIchDir</title>
+<meta name="description" content="Wie Du eine Leihliste und eine Superliste anlegst, in je drei Schritten, und was es mit den Links auf sich hat.">
+<link rel="canonical" href="https://leihichdir.de/so-gehts.html">
 <!-- Das Zeichen der Anwendung, aus assets/favicon/. Die favicon.ico liegt
      zusaetzlich im Wurzelverzeichnis, weil Browser und fremde Abholer sie
      dort blind anfordern, ohne auf diesen Verweis zu sehen. Das Manifest
@@ -32,9 +32,9 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="LeihIchDir">
 <meta property="og:locale" content="de_DE">
-<meta property="og:url" content="https://leihichdir.de/impressum.html">
-<meta property="og:title" content="Impressum · LeihIchDir">
-<meta property="og:description" content="Anbieterkennzeichnung nach § 5 TMG für leihichdir.de.">
+<meta property="og:url" content="https://leihichdir.de/so-gehts.html">
+<meta property="og:title" content="So geht’s · LeihIchDir">
+<meta property="og:description" content="Leihliste und Superliste in je drei Schritten.">
 <meta property="og:image" content="https://leihichdir.de/assets/pics/og.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
@@ -42,8 +42,8 @@
 <meta property="og:image:alt" content="Die Wortmarke Leih ich Dir. aus Knete, daneben schweben sechs Dinge zum Verleihen: Bohrmaschine, Leiter, Zelt, Würfel, Waffeleisen und eine kleine Trommel.">
 <!-- Ohne diese Angabe zeigen Slack, Discord und X ein Randbildchen statt der grossen Karte. -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Impressum · LeihIchDir">
-<meta name="twitter:description" content="Anbieterkennzeichnung nach § 5 TMG für leihichdir.de.">
+<meta name="twitter:title" content="So geht’s · LeihIchDir">
+<meta name="twitter:description" content="Leihliste und Superliste in je drei Schritten.">
 <meta name="twitter:image" content="https://leihichdir.de/assets/pics/og.png">
 <meta name="twitter:image:alt" content="Die Wortmarke Leih ich Dir. aus Knete, daneben schweben sechs Dinge zum Verleihen: Bohrmaschine, Leiter, Zelt, Würfel, Waffeleisen und eine kleine Trommel.">
 <!-- Die Schrift, die sofort zu sehen ist, wird vorab geholt; eine Datei traegt alle Staerken. -->
@@ -86,107 +86,124 @@
   </div>
 </header>
 
-<main id="main" class="shell page">
+<main id="main" class="shell page anleitung">
 
+  <!-- Wie es geht, fuer beide Arten von Liste, je in den drei Schritten, in
+       denen die Anwendung sie zeigt. Die Texte stammen zum Teil aus den
+       Kaesten, die bis Oktober 2026 auf der Startseite standen. -->
   <div class="titleblock">
-    <h1>Impressum</h1>
-    <p class="lead">Anbieterkennzeichnung nach § 5 TMG.</p>
+    <h1>So geht’s</h1>
+    <p class="lead">LeihIchDir kennt zwei Arten von Liste: die Leihliste mit den Dingen, die Du verleihst, und die Superliste, die die Leihlisten Deiner Freund:innen zusammenführt. Beide entstehen in drei Schritten.</p>
   </div>
 
   <section class="card">
-    <h2 class="card__title">Angaben gemäß § 5 TMG</h2>
+    <h2 class="card__title">Eine Leihliste anlegen</h2>
     <p>
-      NOZILLA – Damian Paderta<br>
-      Kaiser-Karl-Ring 26<br>
-      53111 Bonn
+      Eine Leihliste ist eine Liste der Dinge, die Du verleihst. Sie liegt
+      verschlüsselt auf dem Server, und sehen kann sie, wer den Link von Dir
+      bekommt. Angelegt ist sie auf der Startseite mit „Leihliste anlegen“.
     </p>
-
-    <h3 class="settings-sub">Kontakt</h3>
-    <p>E-Mail: <a href="mailto:contact@nozilla.de">contact@nozilla.de</a></p>
+    <ol class="folge">
+      <li>
+        <h3><span class="folge__nr" aria-hidden="true">1</span> Inventar</h3>
+        <p>
+          Trag ein, was Du verleihen magst: tippend, eingesprochen oder mehrere
+          auf einmal. Erst nur der Name; eine Notiz und ob etwas gerade
+          verliehen ist, stehen hinter dem Eintrag. Den Namen der Liste änderst
+          Du oben beim Stift.
+        </p>
+      </li>
+      <li>
+        <h3><span class="folge__nr" aria-hidden="true">2</span> Kontakt</h3>
+        <p>
+          Name, E-Mail und Telefon, alles freiwillig. So erreichen Dich Deine
+          Freund:innen, wenn sie etwas ausleihen möchten, und alles wird mit der
+          Liste verschlüsselt. Hier legst Du auch fest, ob die Namen derer, die
+          gerade etwas ausgeliehen haben, im Ansehen-Link zu sehen sind.
+        </p>
+      </li>
+      <li>
+        <h3><span class="folge__nr" aria-hidden="true">3</span> Link teilen</h3>
+        <p>
+          Den Ansehen-Link gibst Du weiter. Wer ihn hat, sieht Deine Liste und
+          was gerade frei ist, und fragt mit einem Klick an; ändern lässt sich
+          damit nichts. Ziehst Du ihn zurück, gelten alle bisherigen Links nicht
+          mehr, auch Dein eigener Bearbeiten-Link, und Du bekommst neue. Hier
+          sicherst Du die Liste auch als Datei.
+        </p>
+      </li>
+    </ol>
   </section>
 
   <section class="card">
-    <h2 class="card__title">Streitschlichtung</h2>
+    <h2 class="card__title">Eine Superliste anlegen</h2>
     <p>
-      Ich bin nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor
-      einer Verbraucherschlichtungsstelle teilzunehmen.
+      Eine Superliste ist eine Liste der Leihlisten. Sie führt zusammen, was
+      Dir Freund:innen geteilt haben, und macht es an einer Stelle
+      durchsuchbar. Angelegt ist sie auf der Startseite mit „Superliste
+      anlegen“.
     </p>
+    <ol class="folge">
+      <li>
+        <h3><span class="folge__nr" aria-hidden="true">1</span> Listen sammeln</h3>
+        <p>
+          Füge die Ansehen-Links ein, die Dir Deine Freund:innen geschickt
+          haben, und gib jeder Liste einen Namen, wenn Du magst. Aus einer
+          geteilten Leihliste heraus geht es auch mit „Zur Superliste
+          hinzufügen“.
+          Gespeichert werden Kennung und Schlüssel, keine Gegenstände.
+        </p>
+      </li>
+      <li>
+        <h3><span class="folge__nr" aria-hidden="true">2</span> Was es gibt</h3>
+        <p>
+          Alle Sachen aus allen gesammelten Leihlisten stehen in einer Liste,
+          durchsuchbar nach Gegenstand, Person und Notiz, mit frei oder
+          verliehen daneben; auf Wunsch nur, was gerade frei ist. Die Superliste
+          holt die Listen bei jedem Öffnen frisch. Stehen schon Leihlisten
+          darin, öffnet sie gleich bei diesem Schritt.
+        </p>
+      </li>
+      <li>
+        <h3><span class="folge__nr" aria-hidden="true">3</span> Weitergeben</h3>
+        <p>
+          Wer den Link zur Superliste bekommt, sieht alle Leihlisten darin.
+          Einen Link nur zum Ansehen gibt es hier nicht; gib ihn also nur
+          weiter, wo das gewollt ist. Die Personen, deren Leihlisten darin
+          stehen, erfahren davon nichts. Hier sicherst Du die Superliste auch
+          als Datei.
+        </p>
+      </li>
+    </ol>
   </section>
 
   <section class="card">
-    <h2 class="card__title">Haftung für Inhalte</h2>
+    <h2 class="card__title">Die Links</h2>
     <p>
-      Als Diensteanbieter sind wir gemäß § 7 Abs. 1 TMG für eigene Inhalte auf
-      diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis
-      10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte
-      oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu
-      forschen, die auf eine rechtswidrige Tätigkeit hinweisen.
+      <strong>Bearbeiten-Link.</strong> Dein Zugang zur Leihliste: Wer ihn hat,
+      kann sie ändern. Bewahre ihn auf und gib ihn niemandem; geht er verloren,
+      lässt er sich nicht wiederherstellen. Du findest ihn im dritten Schritt.
+      Auf diesem Gerät merkt sich der Browser Deine Listen, Du findest sie auf
+      der Startseite wieder; auf anderen Geräten und nach dem Löschen der
+      Browserdaten hilft nur der Link.
     </p>
     <p>
-      Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen
-      nach den allgemeinen Gesetzen bleiben hiervon unberührt. Eine diesbezügliche
-      Haftung ist jedoch erst ab dem Zeitpunkt der Kenntnis einer konkreten
-      Rechtsverletzung möglich. Bei Bekanntwerden von entsprechenden
-      Rechtsverletzungen werden wir diese Inhalte umgehend entfernen.
+      <strong>Ansehen-Link.</strong> Für Deine Freund:innen. Er zeigt die
+      Liste, ändern lässt sich damit nichts.
     </p>
     <p>
-      Die Inhalte der Listen stammen von den Nutzerinnen und Nutzern selbst und
-      werden Ende-zu-Ende verschlüsselt abgelegt. Der Betrieb kann sie technisch
-      nicht einsehen und daher auch nicht prüfen. Bei Kenntnis einer
-      Rechtsverletzung wird der betroffene Datensatz entfernt.
+      <strong>Zugangs-Link der Superliste.</strong> Zugang und Weitergabe in
+      einem: Wer ihn hat, sieht alle Leihlisten darin. Er steht im dritten
+      Schritt der Superliste.
+    </p>
+    <p>
+      Alle drei tragen den Schlüssel im Teil hinter dem #, den der Browser nie
+      an den Server schickt. Wie die Verschlüsselung arbeitet, steht unter
+      <a href="ueber.html">Über</a>.
     </p>
   </section>
 
-  <section class="card">
-    <h2 class="card__title">Haftung für Links</h2>
-    <p>
-      Unser Angebot enthält Links zu externen Websites Dritter, auf deren Inhalte
-      wir keinen Einfluss haben. Deshalb können wir für diese fremden Inhalte auch
-      keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der
-      jeweilige Anbieter oder Betreiber der Seiten verantwortlich. Die verlinkten
-      Seiten wurden zum Zeitpunkt der Verlinkung auf mögliche Rechtsverstöße
-      überprüft. Rechtswidrige Inhalte waren zum Zeitpunkt der Verlinkung nicht
-      erkennbar.
-    </p>
-    <p>
-      Eine permanente inhaltliche Kontrolle der verlinkten Seiten ist jedoch ohne
-      konkrete Anhaltspunkte einer Rechtsverletzung nicht zumutbar. Bei
-      Bekanntwerden von Rechtsverletzungen werden wir derartige Links umgehend
-      entfernen.
-    </p>
-  </section>
-
-  <section class="card">
-    <h2 class="card__title">Urheberrecht</h2>
-    <p>
-      Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten
-      unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung,
-      Verbreitung und jede Art der Verwertung außerhalb der Grenzen des
-      Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors
-      bzw. Erstellers. Downloads und Kopien dieser Seite sind nur für den privaten,
-      nicht kommerziellen Gebrauch gestattet.
-    </p>
-    <p>
-      Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden,
-      werden die Urheberrechte Dritter beachtet. Insbesondere werden Inhalte
-      Dritter als solche gekennzeichnet. Sollten Sie trotzdem auf eine
-      Urheberrechtsverletzung aufmerksam werden, bitten wir um einen entsprechenden
-      Hinweis. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige
-      Inhalte umgehend entfernen.
-    </p>
-    <p>
-      Die Inhalte dieser Website stehen, wenn nicht anders vermerkt, unter der
-      Lizenz CC BY-SA. Diese Lizenz erlaubt es Dir, meine Inhalte zu verbreiten,
-      zu remixen, zu verbessern und darauf aufzubauen, auch kommerziell, solange
-      ich als Urheber des Originals genannt werde und die auf Deinem Inhalt
-      basierenden neuen Werke unter denselben Bedingungen veröffentlicht werden.
-    </p>
-    <p class="hint">
-      Der Quelltext der Anwendung selbst steht davon unabhängig unter der
-      MIT-Lizenz; sie liegt im
-      <a href="https://github.com/daimpad/leih-ich-dir" rel="noopener">Repository</a>.
-    </p>
-  </section>
+  <p class="actions"><a class="btn" href="./">Zur Startseite</a></p>
 
 </main>
 

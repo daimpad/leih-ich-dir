@@ -377,6 +377,7 @@ weniger Bewegung, nicht weniger Anerkennung.
 ├── theme.js                      Wahl zwischen hell, dunkel und der Systemeinstellung
 ├── impressum.html                Anbieterkennzeichnung nach § 5 TMG
 ├── datenschutz.html              beschreibt den technischen Stand, juristisch prüfen lassen
+├── so-gehts.html                 Leihliste und Superliste in je drei Schritten, und die Links
 ├── ueber.html                    Beschreibung des Projekts
 ├── app.js                        Verschlüsselung · i18n · Rendering · Sprache · Speicher · Superliste
 ├── style.css                     das gesamte Erscheinungsbild
