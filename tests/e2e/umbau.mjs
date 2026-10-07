@@ -16,31 +16,33 @@ await page.reload({ waitUntil: 'networkidle' });
 console.log('\n· Wortmarke');
 // Die Marke als Ganzes, nicht nur das Wort: Seit der Bildmarke beginnt das
 // Wort um Pfote und Abstand weiter rechts, der Verweis aber weiterhin buendig.
+// Verglichen wird mit dem Geruest, an dem die Zusagen stehen: Der Hero ist
+// seit Oktober 2026 die eine Ausnahme und reicht breiter.
 const marke = await page.locator('.brand').boundingBox();
-const inhalt = await page.locator('.hero-panel').boundingBox();
+const inhalt = await page.locator('.trust').boundingBox();
 ok('Marke steht links vom Inhalt oder bündig', marke.x <= inhalt.x + 2,
    'Marke x=' + Math.round(marke.x) + ' Inhalt x=' + Math.round(inhalt.x));
 ok('und nicht am äußersten Rand geklebt', marke.x > 20, 'x=' + Math.round(marke.x));
 
 console.log('\n· Hero');
-const lead = await page.locator('.hero-panel .lead').innerText();
+const lead = await page.locator('.hero .lead').innerText();
 ok('neuer Satz im Hero', /Zeig Deinen Freund:innen, was sie bei Dir ausleihen können/.test(lead), lead);
 ok('Dein und Dir großgeschrieben', /Deinen/.test(lead) && /bei Dir/.test(lead), lead);
 const heroBtn = page.locator('#btnCreateHero');
 ok('Aufruf im Hero vorhanden', await heroBtn.isVisible());
-ok('und im Rahmen des Heros', await page.evaluate(() =>
-  document.querySelector('.hero-panel').contains(document.getElementById('btnCreateHero'))));
+ok('und im Hero', await page.evaluate(() =>
+  document.querySelector('.hero').contains(document.getElementById('btnCreateHero'))));
 // Seit es zwei Arten von Liste gibt, nennt der Aufruf die Art.
 ok('Beschriftung stimmt', /Leihliste anlegen/.test(await heroBtn.innerText()), await heroBtn.innerText());
 
 console.log('\n· Reihenfolge der Startseite');
 const folge = await page.evaluate(() => {
-  const ids = ['.hero', '.trust', '.howto', '#mineBox'];
+  const ids = ['.hero', '.trust', '.einstieg', '#mineBox'];
   return ids.map(sel => { const n = document.querySelector(sel); return { sel, y: n ? n.getBoundingClientRect().top + window.scrollY : -1 }; });
 });
 const y = Object.fromEntries(folge.map(f => [f.sel, f.y]));
-ok('Hero, Auszeichnungen, So gehts in dieser Reihenfolge',
-   y['.hero'] < y['.trust'] && y['.trust'] < y['.howto'], JSON.stringify(y));
+ok('Hero, Auszeichnungen, Einstiege in dieser Reihenfolge',
+   y['.hero'] < y['.trust'] && y['.trust'] < y['.einstieg'], JSON.stringify(y));
 ok('Deine Listen sind ohne Liste gar nicht da', await page.evaluate(() => document.querySelector('#mineBox').hidden));
 
 console.log('\n· Der Aufruf legt an');
@@ -61,10 +63,10 @@ await page.goto(URL, { waitUntil: 'networkidle' });
 await page.waitForTimeout(400);
 ok('Kasten ist da', await page.locator('#mineBox').isVisible());
 const y2 = await page.evaluate(() => ({
-  howto: document.querySelector('.howto').getBoundingClientRect().top + window.scrollY,
+  howto: Math.max(...[...document.querySelectorAll('.einstieg')].map(n => n.getBoundingClientRect().top + window.scrollY)),
   mine: document.querySelector('#mineBox').getBoundingClientRect().top + window.scrollY
 }));
-ok('und steht unter den Schritten', y2.mine > y2.howto, JSON.stringify(y2));
+ok('und steht unter den Einstiegen', y2.mine > y2.howto, JSON.stringify(y2));
 
 console.log('\n· Rechtsseiten');
 for (const [datei, pruef] of [['impressum.html', /Kaiser-Karl-Ring 26/], ['datenschutz.html', /Kaiser-Karl-Ring 26/]]) {

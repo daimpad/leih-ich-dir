@@ -41,16 +41,19 @@ ok('und zwar Kaugummi wie im Hero', cIch === 'rgb(194, 71, 122)', cIch + ' / Tok
 const ff = await word.evaluate(n => getComputedStyle(n).fontFamily);
 ok('Wortmarke in Nunito', ff.includes('Nunito'), ff);
 
-console.log('\n· Ueberschriften dritter Ordnung');
-const h3 = page.locator('.steps h3').first();
-ok('h3 vorhanden', await h3.count() > 0);
+// Bis Oktober 2026 standen hier die Ueberschriften der Schritte, eine
+// dritte Ordnung. Die Schritte sind fort; die Einstiege tragen eine zweite,
+// und fuer die gilt dasselbe.
+console.log('\n· Ueberschriften der Einstiege');
+const h3 = page.locator('.einstieg h2').first();
+ok('Ueberschrift vorhanden', await h3.count() > 0);
 const ff3 = await h3.evaluate(n => getComputedStyle(n).fontFamily);
-ok('h3 in Nunito', ff3.includes('Nunito'), ff3);
+ok('in Nunito', ff3.includes('Nunito'), ff3);
 // Ranchers hatte einen einzigen Schnitt und vertrug keine enge Laufweite;
 // beides galt nur ihr. Nunito kommt als variable Datei bis 1000, der
 // schwerste Schnitt ist also gezeichnet und nicht gerechnet.
 const w3 = await h3.evaluate(n => getComputedStyle(n).fontWeight);
-ok('h3 im schwersten Schnitt', w3 === '900', w3);
+ok('im schwersten Schnitt', w3 === '900', w3);
 const geladen = await page.evaluate(() => document.fonts.check('900 16px Nunito'));
 ok('und der ist geladen, nicht gerechnet', geladen);
 

@@ -16,8 +16,6 @@ for (const w of [1440, 1280, 900, 740, 600, 430, 360]) {
     const cs = getComputedStyle(h1);
     const main = document.querySelector('#main').getBoundingClientRect();
     const kopf = document.querySelector('header.site .shell').getBoundingClientRect();
-    const li = document.querySelectorAll('.steps li');
-    const spalten = new Set(Array.from(li).map(n => Math.round(n.getBoundingClientRect().top))).size === 1 ? 3 : 1;
     return {
       breite: Math.round(main.width),
       kopfBreite: Math.round(kopf.width),
@@ -34,13 +32,15 @@ for (const w of [1440, 1280, 900, 740, 600, 430, 360]) {
         const r = marke.getBoundingClientRect();
         return r.width > 200 && r.height * 3 < r.width ? 1 : 2;
       })(),
-      spalten,
+      /* Der Hero ist die eine Ausnahme vom Geruest; seine Breite steht
+         nur im Protokoll, zugesichert wird sie in heroknete.mjs. */
+      hero: Math.round(document.querySelector('.hero').getBoundingClientRect().width),
       ueberlauf: document.documentElement.scrollWidth > window.innerWidth + 1
     };
   });
   console.log(String(w).padStart(5) + 'px  Inhalt ' + String(m.breite).padStart(3) +
     '  Kopf ' + String(m.kopfBreite).padStart(3) + (m.bündig ? ' bündig' : ' VERSETZT') +
-    '  h1 ' + m.h1Zeilen + 'z  Schritte ' + m.spalten + (m.ueberlauf ? '  ÜBERLAUF' : ''));
+    '  h1 ' + m.h1Zeilen + 'z  Hero ' + m.hero + (m.ueberlauf ? '  ÜBERLAUF' : ''));
   ok(w + 'px: kein waagerechter Überlauf', !m.ueberlauf);
   ok(w + 'px: Kopf bündig mit dem Inhalt', m.bündig);
   ok(w + 'px: Inhalt höchstens 660', m.breite <= 660, String(m.breite));
