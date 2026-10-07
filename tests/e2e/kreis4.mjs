@@ -39,7 +39,7 @@ console.log('· Entfernen wird eingeloest, wenn man die Uebersicht verlaesst');
 await p.locator('#btnStartCircle').click();
 await p.waitForSelector('#viewCircle:not([hidden])'); await p.waitForTimeout(500);
 const kh = await p.evaluate(()=>location.hash);
-await p.evaluate(() => { document.querySelector('#circleManage').open = true; });
+await p.locator('#kreisTab1').click();
 for (const l of [a,b]) {
   await p.locator('#circleAddLink').fill('#v='+l.id+'.'+l.keyStr);
   await p.locator('#btnCircleAdd').click(); await p.waitForTimeout(700);
@@ -62,7 +62,7 @@ ok('keine Ausnahme', fehler.length===0, fehler.join(' | '));
 console.log('· Die Ruecknahme wirft nach einem Ortswechsel nicht');
 await p.evaluate((h)=>{location.hash=h;}, kh);
 await p.waitForSelector('#viewCircle:not([hidden])'); await p.waitForTimeout(1500);
-await p.evaluate(() => { document.querySelector('#circleManage').open = true; });
+await p.locator('#kreisTab1').click();
 await p.locator('#circleFriends [data-kreis-act="remove"]').first().click();
 await p.waitForTimeout(150);
 await p.evaluate((h)=>{location.hash=h;}, '#v='+a.id+'.'+a.keyStr);
@@ -89,7 +89,7 @@ console.log('· Aufnehmen waehrend des Ladens geht nicht verloren');
   await p.goto(BASE + '/'+kh, {waitUntil:'domcontentloaded'});
   await p.waitForSelector('#viewCircle:not([hidden])', {timeout:15000});
   await p.waitForTimeout(400);                       // mitten im Laden
-  await p.evaluate(() => { document.querySelector('#circleManage').open = true; });
+  await p.locator('#kreisTab1').click();
   await p.locator('#circleAddLink').fill('#v='+c.id+'.'+c.keyStr);
   await p.locator('#btnCircleAdd').click();
   await p.waitForTimeout(4000);

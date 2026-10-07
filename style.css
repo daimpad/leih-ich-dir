@@ -1424,6 +1424,15 @@ header.site { padding-block: var(--s-4); }
   .schritte .tab { font-size: .84rem; gap: .3rem; padding-inline: .25rem; }
 }
 
+/* Die Reiter der Superliste tragen laengere Namen: "1 Listen sammeln" braucht
+   127 Punkte, ein Drittel der Leiste ist bei 390 Punkten Fensterbreite 114
+   breit. Schmal wird deshalb jeder Reiter so breit wie sein Name, und ein
+   Name aus zwei Woertern darf umbrechen. So passen alle drei bis 320, auf
+   Deutsch und auf Englisch. */
+@media (max-width: 27rem) {
+  .schritte--kreis .tab { flex: 1 1 auto; min-width: auto; white-space: normal; text-align: center; line-height: 1.2; }
+}
+
 /* Die schwebende Schaltflaeche loest die Kopfleiste ab, sobald deren beide
    Wege nicht mehr neben Marke und Schaltern in eine Zeile passen. Gemessen
    wurde, wo die Zeile umbricht: Deutsch braucht 634 Punkte, Englisch 653

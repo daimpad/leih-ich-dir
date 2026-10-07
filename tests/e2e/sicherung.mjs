@@ -104,7 +104,7 @@ await p.locator('#btnStartCircle').click();
 await p.waitForSelector('#viewCircle:not([hidden])');
 await p.waitForTimeout(800);
 const kAlt = (await p.evaluate(() => location.hash)).slice(3).split('.');
-await p.evaluate(() => { document.querySelector('#circleManage').open = true; });
+await p.locator('#kreisTab1').click();
 await p.locator('#circleAddLink').fill('#v=' + anna.id + '.' + anna.keyStr);
 await p.locator('#circleAddName').fill('Anna');
 await p.locator('#btnCircleAdd').click();
@@ -112,6 +112,8 @@ await p.waitForTimeout(1500);
 ok('die Superliste zeigt Annas zwei Sachen',
    (await p.locator('#circleItems > li:not([hidden])').count()) === 2);
 
+// Seit Oktober 2026 steht das Sichern im dritten Reiter, Weitergeben.
+await p.locator('#kreisTab3').click();
 ok('der Aufklapper zum Sichern steht da', !(await p.locator('#circleBackupBox').isHidden()));
 await p.evaluate(() => { document.querySelector('#circleBackupBox').open = true; });
 const [kDownload] = await Promise.all([
@@ -149,11 +151,11 @@ ok('es entsteht eine neue Superliste mit eigenem Zugang',
    && kNeuTeile[2] !== kAlt[2], kNeu.slice(0, 24));
 ok('die Meldung sagt es', (await p.locator('#toastText').textContent()).includes('neue Superliste'),
    await p.locator('#toastText').textContent());
-ok('der Zugangskasten steht offen, denn der Link ist neu',
-   !(await p.locator('#circleKeyBox').isHidden()));
+ok('der Zugang bittet darum, ihn zu sichern, denn der Link ist neu',
+   await p.locator('#circleKeyBox').evaluate(n => !n.hidden && n.classList.contains('keybox--frisch')));
 ok('und Annas zwei Sachen stehen wieder da',
    (await p.locator('#circleItems > li:not([hidden])').count()) === 2);
-await p.evaluate(() => { document.querySelector('#circleManage').open = true; });
+await p.locator('#kreisTab1').click();
 ok('mit der Beschriftung aus der Datei',
    /Anna/.test(await p.locator('#circleFriends li').first().textContent()));
 

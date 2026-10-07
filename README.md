@@ -30,7 +30,7 @@ oder Kontaktdaten.
 | **Sichern und Wiederherstellen** | die Liste als Klartextdatei auf dem eigenen Gerät, ohne Link; daraus entsteht auf der Startseite eine neue Liste mit neuen Links. Auch die Superliste, dann mit den gesammelten Ansehen-Links darin — fremder Zugang, und die Warnung daneben sagt es |
 | **Gemerkte Listen** | eigene Leihlisten und Superlisten stehen auf der Startseite dieses Browsers, rein lokal und ohne Konto |
 | **Zwei Wege dorthin** | breit als zwei Verweise in der Kopfleiste, je mit Zeichen und Wort; schmal als eine schwebende Schaltfläche unten rechts |
-| **Superliste** | eine Liste der Leihlisten: mehrere Ansehen-Links zu einer Übersicht bündeln, alle Gegenstände in einer Liste, mit Suche über Gegenstand, Person und Notiz |
+| **Superliste** | eine Liste der Leihlisten: mehrere Ansehen-Links zu einer Übersicht bündeln, alle Gegenstände in einer Liste, mit Suche über Gegenstand, Person und Notiz. Wie die Leihliste in drei Reitern: Listen sammeln, Was es gibt, Weitergeben; darunter ihr Zugangs-Link, verdeckt |
 | **Spracheingabe** | Gegenstände unterwegs einsprechen, Zerlegung im Browser oder wahlweise per Gemini |
 | **Erscheinungsbild** | eigenständig in `style.css`, Schriften mitgeliefert, keine fremden Server |
 | **Auffindbar** | Titel, Beschreibungen, Open Graph, `robots.txt` und `sitemap.xml`; strukturierte Angaben als JSON-LD |

@@ -75,18 +75,18 @@ ok('die leere Superliste zeigt die Ehrlichkeitszeile noch nicht',
    await p.locator('#circleTruth').isHidden());
 ok('keine Ausnahme', fehler.length===0, fehler.join(' | '));
 
-console.log('· Die leere Superliste fordert zum Ergaenzen auf');
-ok('"Was es gibt" tritt ab', await p.locator('#circleBox').isHidden());
-ok('der Aufklapper steht offen', await p.evaluate(() => document.querySelector('#circleManage').open));
-ok('und heisst nach dem, was ansteht',
-   (await p.locator('#circleManageTitle').textContent()).trim() === 'Ergänze hier die Leihlisten Deiner Freunde',
-   await p.locator('#circleManageTitle').textContent());
-ok('der Vorspann steht darunter', !(await p.locator('#circleManageLead').isHidden()));
+console.log('· Die leere Superliste beginnt beim Sammeln');
+/* Bis Oktober 2026 trat "Was es gibt" in der leeren Superliste ganz ab, und
+   der Aufklapper zum Aufnehmen stand offen an seiner Stelle, ueberschrieben
+   mit "Ergänze hier die Leihlisten Deiner Freunde". Seitdem steht die
+   Superliste in drei Reitern, und eine neue beginnt beim ersten. */
+ok('der erste Reiter ist gewaehlt: Listen sammeln',
+   await p.locator('#kreisTab1').getAttribute('aria-selected') === 'true' &&
+   (await p.locator('#kreisTab1').textContent()).includes('Listen sammeln'));
+ok('"Was es gibt" ist zu', await p.locator('#circleBox').isHidden());
+ok('der Vorspann steht da', !(await p.locator('#circleManageLead').isHidden()));
 
 console.log('· Aufnehmen');
-/* Aufklappen und nicht umschalten: Bei leerer Superliste steht der
-   Aufklapper schon offen, ein Klick schloesse ihn. */
-await p.evaluate(() => { document.querySelector('#circleManage').open = true; });
 const auf = async (link, name) => {
   await p.locator('#circleAddLink').fill(link);
   await p.locator('#circleAddName').fill(name || '');
@@ -105,13 +105,13 @@ const zeilen = async () => p.evaluate(() => Array.from(document.querySelectorAll
                 zust: (li.querySelector('.item-state')||{}).textContent || '',
                 notiz:(li.querySelector('.item-note')||{}).textContent || '',
                 href: li.querySelector('a').getAttribute('href') })));
-ok('mit der ersten Leihliste steht "Was es gibt" wieder da', !(await p.locator('#circleBox').isHidden()));
-ok('der Aufklapper heisst jetzt nach seiner Handlung',
-   (await p.locator('#circleManageTitle').textContent()).trim() === 'Leihliste eines Freundes hinzufügen',
-   await p.locator('#circleManageTitle').textContent());
+ok('beim Sammeln bleibt es, bis es weitergeht', await p.locator('#kreisTab1').getAttribute('aria-selected') === 'true');
 ok('der Vorspann tritt ab', await p.locator('#circleManageLead').isHidden());
 ok('und die Ehrlichkeitszeile an',
    (await p.locator('#circleTruth p').textContent()).includes('erfahren davon nichts'));
+await p.locator('#circleManage [data-weiter="2"]').click();
+ok('Weiter fuehrt zu "Was es gibt"', !(await p.locator('#circleBox').isHidden()) &&
+   await p.locator('#kreisTab2').getAttribute('aria-selected') === 'true');
 
 let z = await zeilen();
 ok('sechs Sachen aus drei Listen', z.length === 6, JSON.stringify(z.map(x=>x.name)));
