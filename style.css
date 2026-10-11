@@ -620,17 +620,22 @@ header.site { padding-block: var(--s-4); }
 .card__head + .hint--abruf { margin-bottom: var(--s-4); padding-right: 2.5rem; }
 .card__title + .hint { margin-top: var(--s-1); }
 
-/* Aufklapper: zugeklappt eine Zeile, aufgeklappt eine Karte. */
+/* Aufklapper: zugeklappt eine Zeile, aufgeklappt eine Karte. So steht das
+   Sichern unter dem Zugang im dritten Schritt: ein eigener Kasten, weil es
+   ausserhalb der Karte des Schritts steht, aber zugeklappt nur eine Zeile
+   mit Winkel, weil es selten gebraucht wird. */
 .fold {
   border: 0; border-radius: var(--r-card);
   margin-bottom: var(--s-4);
 }
 .fold > summary {
-  display: flex; align-items: center; gap: var(--s-3); cursor: pointer;
+  display: flex; align-items: center; gap: var(--s-2); cursor: pointer;
   padding: var(--s-4) var(--s-5); list-style: none;
-  font-family: var(--display); font-weight: 900; font-size: 1.6rem;
+  font-weight: 800; color: var(--link);
 }
 .fold > summary::-webkit-details-marker { display: none; }
+.fold > summary .ico { width: 1rem; height: 1rem; transition: rotate var(--takt-kurz) ease; }
+.fold[open] > summary .ico { rotate: 90deg; }
 .fold > summary .fold-sub {
   margin-left: auto; color: var(--faint); text-align: right;
   font-family: var(--sans); font-weight: 600; font-size: .92rem;
@@ -921,6 +926,8 @@ header.site { padding-block: var(--s-4); }
 /* Nebenbemerkung, kein zweiter Hinweis: klein und in einer Zeile, damit sie
    dem Link daneben nicht das Gewicht nimmt. */
 .keybox .keybox__remember { font-size: .74rem; margin-top: var(--s-1); }
+/* Wie man den Link sichert, steht ruhig wie frisch unter dem Feld. */
+.keybox__lesezeichen { margin-top: var(--s-2); }
 /* Der Haken im Zugangskasten traegt Butter, nicht die Minze der Anwendung:
    Hier wird eine Warnung bestaetigt, nichts Erfreuliches. */
 .keybox__check input:checked + .check__box { --farbe: var(--butter); --tief: var(--butter-tief); }
@@ -1110,18 +1117,6 @@ header.site { padding-block: var(--s-4); }
 .ist-abfolge .weiter { display: flex; justify-content: flex-end; margin-top: var(--s-5); }
 .weiter .btn .ico { width: 1.1rem; height: 1.1rem; }
 
-/* Kleine Aufklapper in einer Karte: eine Zeile mit Winkel, aufgeklappt
-   darunter der Inhalt. Keine eigene Knete — eine Karte in der Karte waere
-   eine Ebene zu viel. */
-.klapp { margin-top: var(--s-5); padding-top: var(--s-4); border-top: 1px solid var(--line); }
-.klapp > summary {
-  display: inline-flex; align-items: center; gap: var(--s-2); cursor: pointer;
-  list-style: none; font-weight: 800; color: var(--link);
-}
-.klapp > summary::-webkit-details-marker { display: none; }
-.klapp > summary .ico { width: 1rem; height: 1rem; transition: rotate var(--takt-kurz) ease; }
-.klapp[open] > summary .ico { rotate: 90deg; }
-.klapp > summary + * { margin-top: var(--s-3); }
 
 /* == 10 · Fenster und Meldungen ======================================== */
 
@@ -1564,10 +1559,11 @@ header.site { padding-block: var(--s-4); }
      "Mehrere auf einmal" 132 mal 22, "Superliste anlegen" 171 mal 25 und
      ein Reiter im Teilen-Kasten 94 mal 39 gross. Alle drei sind eigene
      Bedienelemente und keine Verweise im Fliesstext, fuer die die Ausnahme
-     der Richtlinie gilt. Spaeter die Zeilen der kleinen Aufklapper im
-     Schritt Link teilen, eine Textzeile hoch. */
+     der Richtlinie gilt. Die kleinen Aufklapper im Schritt Link teilen,
+     eine Textzeile hoch, standen hier ebenfalls, bis das Sichern im
+     Oktober 2026 ein eigener Kasten mit Polster wurde. */
   .ctl-square, .modal__x, .info, .btn--sm, .btn--lg, .chip--level,
-  .linkbtn, .tab, .klapp > summary { position: relative; }
+  .linkbtn, .tab { position: relative; }
   .ctl-square::after,
   .modal__x::after,
   .info::after,
@@ -1575,8 +1571,7 @@ header.site { padding-block: var(--s-4); }
   .btn--lg::after,
   .chip--level::after,
   .linkbtn::after,
-  .tab::after,
-  .klapp > summary::after {
+  .tab::after {
     content: ""; position: absolute;
     top: 50%; left: 50%; transform: translate(-50%, -50%);
     width: max(100%, 44px); height: max(100%, 44px);

@@ -349,9 +349,13 @@ console.log('· Zeichen bei Kontakt');
   ok('die Überschrift steht weiterhin', /Kontakt/.test(await p.locator('#contactBox .card__title').textContent()));
   ok('das Telefon ebenfalls', await p.locator('#cfgPhone').isVisible());
   ok('das ungenutzte Zeichen ist aus dem Satz', await p.locator('#i-user').count() === 0);
+  /* Gemeint sind Zeichen als Schmuck, wie frueher die Person am Kontakt.
+     Der Winkel eines Aufklappers ist keiner, er zeigt, dass sich etwas
+     oeffnet: Seit Oktober 2026 traegt ihn das Sichern als .fold. */
   const kartenMitZeichen = await p.evaluate(() =>
     Array.from(document.querySelectorAll('.card__title, .fold > summary'))
-      .filter(n => n.querySelector('svg.ico')).length);
+      .filter(n => Array.from(n.querySelectorAll('svg.ico use'))
+        .some(u => u.getAttribute('href') !== '#i-chev')).length);
   ok('keine Überschrift trägt ein Zeichen', kartenMitZeichen === 0, String(kartenMitZeichen));
   await ctx.close();
 }
