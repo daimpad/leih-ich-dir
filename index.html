@@ -833,10 +833,10 @@
     </section>
 
     <!-- 4 · Link teilen: der dritte Schritt. Vorn steht der Ansehen-Link, um
-         den es hier geht, darunter zugeklappt das Sichern. Der geheime
-         Bearbeiten-Link steht nicht hier, sondern im Zugang unter jedem
-         Schritt. Bis Oktober 2026 trugen die beiden Links eigene Reiter —
-         Reiter in einem Reiter waeren eine Ebene zu viel. -->
+         den es hier geht. Der geheime Bearbeiten-Link steht nicht hier,
+         sondern im Zugang darunter, und nach ihm zugeklappt das Sichern.
+         Bis Oktober 2026 trugen die beiden Links eigene Reiter — Reiter in
+         einem Reiter waeren eine Ebene zu viel. -->
     <section class="card schritt" id="shareBox" hidden>
       <div class="card__head">
         <h2 class="card__title schritt__titel" data-i18n="share.headline">Link teilen</h2>
@@ -876,19 +876,6 @@
         <small class="hint hint--abruf" data-i18n="revoke.hint"></small>
       </div>
 
-      <!-- Sichern: eine Datei im Klartext, ohne Link. Zugeklappt, weil das
-           Sichern selten ist und das Weitergeben der Alltag. Die Begruendung
-           steht bei sichereListe() in app.js. -->
-      <details class="klapp" id="backupBox">
-        <summary>
-          <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-chev"/></svg>
-          <span data-i18n="backup.headline">Sichern</span>
-        </summary>
-        <p class="hint" data-i18n="backup.hint"></p>
-        <div class="spaced field">
-          <button type="button" id="btnBackup" class="btn" data-i18n="backup.download">Als Datei sichern</button>
-        </div>
-      </details>
     </section>
 
     <!-- Der Zugang. Im Bearbeitenmodus steht er als ruhiges Feld unter dem
@@ -896,7 +883,9 @@
          und Kopieren. Direkt nach dem Anlegen und nach dem Zurueckziehen ist
          er Butter und bittet darum, ihn zu sichern, und steht so lange unter
          jedem Schritt, bis das bestaetigt ist; wer diesen Link verliert,
-         verliert die Liste (app.js, Zugang). -->
+         verliert die Liste (app.js, Zugang). Der Satz unter dem Feld steht
+         in beiden Faellen: Er sagt, wie man den Link sichert — die Adresse
+         der Seite ist er selbst —, und dass er nicht der zum Teilen ist. -->
     <section class="keybox" id="keyBox" hidden>
       <h2 class="keybox__title" data-i18n="key.headline">Bewahre diesen Link auf!</h2>
       <label class="field__label" for="keyLink" data-i18n="share.editLabel">Bearbeiten-Link, geheim</label>
@@ -905,6 +894,9 @@
         <button type="button" class="btn" id="btnRevealEdit" data-i18n="share.reveal">Zeigen</button>
         <button type="button" class="btn btn--primary" data-copy="keyLink" data-i18n="share.copy">Kopieren</button>
       </div>
+      <p class="hint keybox__lesezeichen" data-i18n="key.bookmark">
+        Setz ein Lesezeichen auf diese Seite — ihre Adresse ist dieser Link, und ohne ihn kannst Du Dein Inventar nicht mehr bearbeiten. Zum Teilen gibt es einen anderen, den Ansehen-Link.
+      </p>
       <p class="hint keybox__remember" id="keyRemember" data-i18n="key.remember">
         Auf diesem Gerät gemerkt — beim nächsten Besuch findest Du die Liste auf der Startseite wieder.
       </p>
@@ -916,6 +908,25 @@
         </label>
       </p>
     </section>
+
+    <!-- Sichern: eine Datei im Klartext, ohne Link. Es steht nach dem
+         Zugang, weil erst der Link zaehlt und dann die Datei, und
+         zugeklappt, weil das Sichern selten ist und das Weitergeben der
+         Alltag. Wie der dritte Schritt steht es nur, wenn er offen ist
+         (app.js, abfolgeListe). Die Begruendung fuer die Datei steht bei
+         sichereListe() in app.js. -->
+    <details class="fold" id="backupBox" hidden>
+      <summary>
+        <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-chev"/></svg>
+        <span data-i18n="backup.headline">Sichern</span>
+      </summary>
+      <div class="fold__body">
+        <p class="hint" data-i18n="backup.hint"></p>
+        <div class="spaced field">
+          <button type="button" id="btnBackup" class="btn" data-i18n="backup.download">Als Datei sichern</button>
+        </div>
+      </div>
+    </details>
 
   </section>
 
@@ -1063,31 +1074,21 @@
       </p>
     </section>
 
-    <!-- 3 · Weitergeben: die Warnung und das Sichern. Den Link selbst traegt
-         das Feld darunter; Zugangs- und Weitergabe-Link sind bei der
-         Superliste derselbe. Bis Oktober 2026 stand er hier ein zweites Mal. -->
+    <!-- 3 · Weitergeben: die Warnung. Den Link selbst traegt das Feld
+         darunter, und nach ihm steht zugeklappt das Sichern; Zugangs- und
+         Weitergabe-Link sind bei der Superliste derselbe. Bis Oktober 2026
+         stand er hier ein zweites Mal. -->
     <section class="card schritt" id="circleShareBox">
       <h2 class="card__title schritt__titel" data-i18n="circle.shareHeadline">Superliste weitergeben</h2>
       <p class="hint" data-i18n="circle.shareWarn"></p>
-
-      <!-- Sichern. Die Datei traegt fremden Zugang; der Hinweis darin sagt
-           das als Erstes und nicht im Nebensatz. -->
-      <details class="klapp" id="circleBackupBox">
-        <summary>
-          <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-chev"/></svg>
-          <span data-i18n="backup.headline">Sichern</span>
-        </summary>
-        <p class="hint" data-i18n="backup.circleHint"></p>
-        <div class="spaced field">
-          <button type="button" id="btnCircleBackup" class="btn" data-i18n="backup.download">Als Datei sichern</button>
-        </div>
-      </details>
     </section>
 
     <!-- Der Zugang zur Superliste, wie bei der Leihliste: ruhig unter dem
          dritten Schritt, Weitergeben, verdeckt, mit Zeigen und Kopieren.
          Direkt nach dem Anlegen ist er Butter, bittet darum, ihn zu sichern,
-         und steht bis zur Bestaetigung unter jedem Schritt (app.js, Zugang). -->
+         und steht bis zur Bestaetigung unter jedem Schritt (app.js, Zugang).
+         Der Satz unter dem Feld steht in beiden Faellen; einen zweiten Link
+         zum Teilen gibt es hier nicht, also sagt er davon nichts. -->
     <section class="keybox" id="circleKeyBox" hidden>
       <h2 class="keybox__title" data-i18n="circle.keyHeadline">Bewahre diesen Link auf</h2>
       <label class="field__label" for="circleKeyLink" data-i18n="circle.keyLabel">Zugangs-Link der Superliste</label>
@@ -1096,6 +1097,9 @@
         <button type="button" class="btn" id="btnRevealCircle" data-i18n="share.reveal">Zeigen</button>
         <button type="button" class="btn btn--primary" data-copy="circleKeyLink" data-i18n="share.copy">Kopieren</button>
       </div>
+      <p class="hint keybox__lesezeichen" data-i18n="circle.keyBookmark">
+        Setz ein Lesezeichen auf diese Seite — ihre Adresse ist dieser Link, und ohne ihn kommst Du nicht mehr an Deine Superliste.
+      </p>
       <p class="hint keybox__remember" id="circleKeyRemember" data-i18n="circle.keyRemember"></p>
       <p class="spaced-lg keybox__done">
         <label class="check keybox__check">
@@ -1105,6 +1109,22 @@
         </label>
       </p>
     </section>
+
+    <!-- Sichern, wie bei der Leihliste nach dem Zugang und nur im dritten
+         Schritt (app.js, abfolgeKreis). Die Datei traegt fremden Zugang;
+         der Hinweis darin sagt das als Erstes und nicht im Nebensatz. -->
+    <details class="fold" id="circleBackupBox" hidden>
+      <summary>
+        <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-chev"/></svg>
+        <span data-i18n="backup.headline">Sichern</span>
+      </summary>
+      <div class="fold__body">
+        <p class="hint" data-i18n="backup.circleHint"></p>
+        <div class="spaced field">
+          <button type="button" id="btnCircleBackup" class="btn" data-i18n="backup.download">Als Datei sichern</button>
+        </div>
+      </div>
+    </details>
 
   </section>
 

@@ -18,7 +18,7 @@ oder Kontaktdaten.
 | **Kein Konto** | Zugang ausschließlich über Links, keine Registrierung, keine Cookies, keine Sitzungen |
 | **Ende-zu-Ende-verschlüsselt** | AES-GCM-256 über die Web Crypto API, Schlüssel nur im URL-Fragment |
 | **Zwei Linkarten** | ein geheimer Bearbeiten-Link, ein konstanter Ansehen-Link für Freunde |
-| **Drei Schritte** | die eigene Liste in drei Reitern, in der Reihenfolge ihrer Entstehung: Inventar, Kontakt, Link teilen; Erklärungen erscheinen erst auf Zuruf. Im dritten Schritt steht darunter der Bearbeiten-Link, verdeckt; nach dem Anlegen bittet er gelb und unter jedem Schritt darum, gesichert zu werden, bis das bestätigt ist |
+| **Drei Schritte** | die eigene Liste in drei Reitern, in der Reihenfolge ihrer Entstehung: Inventar, Kontakt, Link teilen; Erklärungen erscheinen erst auf Zuruf. Im dritten Schritt steht darunter der Bearbeiten-Link, verdeckt, mit dem Rat, ein Lesezeichen auf die Seite zu setzen — ihre Adresse ist der Link —, und dem Hinweis, dass der Ansehen-Link ein anderer ist; danach zugeklappt das Sichern. Nach dem Anlegen bittet der Bearbeiten-Link gelb und unter jedem Schritt darum, gesichert zu werden, bis das bestätigt ist |
 | **Live-Daten** | der Ansehen-Link lädt den aktuellen Stand und aktualisiert sich selbsttätig |
 | **Zweisprachig** | Deutsch als Standard, Englisch über den Schalter in der Kopfleiste; die Wahl bleibt im Browser |
 | **Hell und dunkel** | folgt dem System, lässt sich in der Kopfleiste und auf der Einstellungsseite übersteuern |

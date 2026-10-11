@@ -228,6 +228,7 @@
 
       'key.headline': 'Bewahre diesen Link auf!',
       'key.remember': 'Auf diesem Gerät gemerkt — beim nächsten Besuch findest Du die Liste auf der Startseite wieder.',
+      'key.bookmark': 'Setz ein Lesezeichen auf diese Seite — ihre Adresse ist dieser Link, und ohne ihn kannst Du Dein Inventar nicht mehr bearbeiten. Zum Teilen gibt es einen anderen, den Ansehen-Link.',
       'key.done': 'Ich habe den Link gesichert',
 
       'flow.label': 'Schritte',
@@ -446,6 +447,7 @@
       'circle.keyHeadline': 'Bewahre diesen Link auf',
       'circle.keyLabel': 'Zugangs-Link der Superliste',
       'circle.keyRemember': 'Auf diesem Gerät gemerkt, beim nächsten Besuch findest Du die Superliste auf der Startseite wieder.',
+      'circle.keyBookmark': 'Setz ein Lesezeichen auf diese Seite — ihre Adresse ist dieser Link, und ohne ihn kommst Du nicht mehr an Deine Superliste.',
       'circle.shareHeadline': 'Superliste weitergeben',
       'circle.shareWarn': 'Wer diesen Link bekommt, sieht alle Leihlisten Deiner Superliste. Einen Link nur zum Ansehen gibt es hier nicht.',
       'circle.copied': 'Gut verwahrt.',
@@ -603,6 +605,7 @@
 
       'key.headline': 'Keep this link!',
       'key.remember': 'Remembered on this device — next time you will find the list on the start page.',
+      'key.bookmark': 'Bookmark this page — its address is this link, and without it you can no longer edit your inventory. For sharing there is a different one, the view link.',
       'key.done': 'I have saved the link',
 
       'flow.label': 'Steps',
@@ -821,6 +824,7 @@
       'circle.keyHeadline': 'Keep this link safe',
       'circle.keyLabel': 'Access link of the super list',
       'circle.keyRemember': 'Remembered on this device, you will find the super list on the start page next time.',
+      'circle.keyBookmark': 'Bookmark this page — its address is this link, and without it you can no longer reach your super list.',
       'circle.shareHeadline': 'Pass on the super list',
       'circle.shareWarn': 'Anyone who gets this link sees every lending list in your super list. There is no view-only link for it.',
       'circle.copied': 'Kept safe.',
@@ -2820,11 +2824,22 @@
   };
 
   /* Nach jeder Wahl wird der Zugang neu gezeichnet: Ruhig steht er nur im
-     dritten Schritt (Zugang, unten). */
+     dritten Schritt (Zugang, unten). Nach ihm steht, ebenfalls nur im
+     dritten Schritt, das Sichern. Es gehoert zu diesem Schritt, steht aber
+     ausserhalb seines Kastens, weil zuerst der Link kommt, ohne den nichts
+     geht, und dann die Datei; und der Zugang steht unter jedem Schritt,
+     solange er frisch ist. Sichern gibt es nur mit Zugang, beim Freund
+     nicht. */
   var abfolgeListe = new Abfolge('viewList', 'schritte', ['inventoryBox', 'contactBox', 'shareBox'],
-    function () { zugangListe.zeichnen(state.mode === 'edit'); });
+    function (n) {
+      zugangListe.zeichnen(state.mode === 'edit');
+      $('#backupBox').hidden = !(state.mode === 'edit' && n === 3);
+    });
   var abfolgeKreis = new Abfolge('viewCircle', 'kreisSchritte', ['circleManage', 'circleBox', 'circleShareBox'],
-    function () { zugangKreis.zeichnen(!!kreis.token); });
+    function (n) {
+      zugangKreis.zeichnen(!!kreis.token);
+      $('#circleBackupBox').hidden = !(kreis.token && n === 3);
+    });
 
   /* -- Der Zugang --------------------------------------------------------- *
    * Der geheime Link einer eigenen Liste steht im Bearbeitenmodus als Feld
