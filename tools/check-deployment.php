@@ -68,9 +68,19 @@ function fetch(string $url, ?array $post = null): array
             $status = (int) $m[1];
             continue;
         }
+        /* Gleichnamige Kopfzeilen werden mit ", " zusammengefuegt, so wie
+           Headers.get() im Browser es tut; check.html und diese Abnahme
+           sollen dieselbe Antwort gleich lesen. Behielte fetch() nur die
+           letzte, gaelten zwei Zeilen Strict-Transport-Security, erst mit
+           includeSubDomains, dann ohne, hier als in Ordnung, waehrend
+           check.html den Verstoss meldet. Recht haette der Browser: Er
+           wertet nach RFC 6797, 8.1 nur die erste aus, includeSubDomains
+           gilt also. */
         $parts = explode(':', $line, 2);
         if (count($parts) === 2) {
-            $headers[strtolower(trim($parts[0]))] = trim($parts[1]);
+            $name = strtolower(trim($parts[0]));
+            $wert = trim($parts[1]);
+            $headers[$name] = isset($headers[$name]) ? $headers[$name] . ', ' . $wert : $wert;
         }
     }
     return ['status' => $status, 'headers' => $headers, 'body' => (string) $body];
@@ -167,8 +177,46 @@ if (preg_match('~<meta[^>]+http-equiv=["\']Content-Security-Policy["\'][^>]*>~i'
 line('SOLL', 'X-Content-Type-Options nosniff', ($h['x-content-type-options'] ?? '') === 'nosniff');
 line('SOLL', 'Referrer-Policy no-referrer', ($h['referrer-policy'] ?? '') === 'no-referrer');
 line('SOLL', 'X-Frame-Options DENY', strtoupper($h['x-frame-options'] ?? '') === 'DENY');
-line('SOLL', 'Strict-Transport-Security gesetzt', isset($h['strict-transport-security']),
-    'in .htaccess auskommentiert, erst nach dauerhaftem HTTPS einschalten');
+/* Erwartet wird die Kopfzeile ohne includeSubDomains und ohne preload, so
+   wie .htaccess sie setzt; steht eins von beiden darin, zaehlt das als
+   Verstoss. Warum ohne beides, steht in .htaccess. Direktiven sind Woerter
+   zwischen ";", gross oder klein geschrieben; "," trennt zwei Kopfzeilen,
+   die fetch() oben zusammengefuegt hat. Gezaehlt wird das Zuviel in jeder
+   davon, auch wenn der Browser nur die erste auswertet. */
+$hsts = $h['strict-transport-security'] ?? '';
+$teile = array_map('trim', preg_split('/[;,]/', strtolower($hsts)) ?: []);
+$zuviel = array_values(array_filter(['includeSubDomains', 'preload'],
+    static fn (string $w): bool => in_array(strtolower($w), $teile, true)));
+/* Und mit max-age von mindestens einem Jahr wie in .htaccess: max-age=0
+   hebt die Zusage im Browser auf (RFC 6797, 6.1.1), ohne max-age wertet er
+   die Zeile gar nicht aus. Gesucht wird nur in der ersten Zeile, vor dem
+   ersten ",": Nur sie wertet der Browser aus (8.1), ein max-age der zweiten
+   rettet eine erste ohne nicht. */
+$maxAge = null;
+foreach (array_map('trim', explode(';', explode(',', strtolower($hsts))[0])) as $teil) {
+    if (preg_match('/^max-age\s*=\s*"?(\d+)"?$/', $teil, $m)) {
+        $maxAge = (int) $m[1];
+        break;
+    }
+}
+$kurz = $maxAge === null || $maxAge < 31536000;
+/* Fehlt die Zeile, haengt die wahrscheinliche Ursache daran, ob die
+   uebrigen Kopfzeilen ankommen; die Content-Security-Policy steht fuer sie. */
+line('SOLL', 'Strict-Transport-Security', $hsts !== '' && $zuviel === [] && !$kurz,
+    $hsts === ''
+        ? ($kopfzeilenFehlen
+            ? 'fehlt; meist fehlt mod_headers (dann fehlen auch die übrigen Kopfzeilen), '
+              . 'oder ein vorgelagerter nginx liefert die Seite selbst aus und liest keine .htaccess'
+            : 'fehlt, obwohl die Content-Security-Policy als Kopfzeile ankommt; meist ist die '
+              . '.htaccess auf dem Server älter als diese Zeile, oder Apache sah die Anfrage nicht '
+              . 'als HTTPS, und nur dann setzt .htaccess sie')
+        : ($zuviel !== []
+            ? $hsts . ': enthält ' . implode(' und ', $zuviel)
+              . ', erwartet ist nur max-age wie in .htaccess (Begründung dort)'
+            : ($kurz
+                ? $hsts . ': ' . ($maxAge === null ? 'ohne max-age' : 'max-age unter einem Jahr')
+                  . ', erwartet ist mindestens max-age=31536000 wie in .htaccess'
+                : $hsts)));
 
 /* -- Dateien, die die Seite braucht ---------------------------------------- */
 

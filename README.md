@@ -479,6 +479,20 @@ git clone https://github.com/daimpad/leih-ich-dir.git
 HTTPS ist keine Kür. Die Web Crypto API steht nur in sicheren Kontexten zur
 Verfügung. Über `http://` bleibt die Anwendung funktionslos.
 
+`.htaccess` leitet `http://` mit 301 auf `https://` um und setzt auf jede
+Antwort über HTTPS `Strict-Transport-Security: max-age=31536000`. Ein Browser,
+der die Zeile einmal gesehen hat, fragt die Seite danach ein Jahr lang nur
+noch über HTTPS an, auch nach einem getippten `http://`. Damit entfällt die
+erste unverschlüsselte Anfrage vor der Umleitung, die sich unterwegs mit einer
+veränderten Seite beantworten ließe, und die läse `location.hash` und damit
+den Schlüssel. Bewusst ohne `includeSubDomains` und ohne `preload`: Beides
+bindet mehr als diese eine Adresse und lässt sich nicht schnell zurücknehmen;
+`check.html` und `tools/check-deployment.php` melden es, wenn eins davon in
+der Zeile steht, und ebenso ein `max-age` unter einem Jahr, denn `max-age=0`
+hebt die Zusage im Browser auf. Auch ohne `includeSubDomains` und `preload`
+gilt: Wer HTTPS je wieder abschaltet, sperrt diese Browser bis zu ein Jahr
+lang aus. Die Zeile braucht wie die übrigen Kopfzeilen `mod_headers`.
+
 **3. Schreibrechte setzen**
 
 ```bash
@@ -518,6 +532,7 @@ davon, ob `.htaccess` greift.
 Hinter nginx statt Apache übernimmt folgender Block die Aufgabe von `.htaccess`:
 
 ```nginx
+add_header Strict-Transport-Security "max-age=31536000" always;
 location ^~ /data/    { return 404; }
 location ^~ /tools/   { return 404; }
 location ^~ /tests/   { return 404; }
@@ -530,6 +545,16 @@ location ~ /\.        { return 404; }
 `tools/` und `tests/` standen hier bisher nicht: Die `.htaccess` sperrt sie über
 `RedirectMatch`, und nginx liest keine `.htaccess`. Warum `^~` und nicht `~`, steht
 unter *Vorgelagerter nginx* im Plesk-Kapitel.
+
+Aus demselben Grund steht `Strict-Transport-Security` im Block: Ohne
+`.htaccess` setzt sie sonst niemand, und die erste Anfrage über `http://`
+bliebe ungeschützt (Schritt 2). Der Wert ist derselbe wie dort, ohne
+`includeSubDomains` und `preload`. `always`, weil nginx die Zeile sonst nur
+an Antworten wie 200 und 301 hängt und nicht an 403 oder 404; `.htaccess`
+setzt sie mit `Header always` auf jede. Die Zeile mit `add_header` braucht es
+nur im `server` für Port 443: Über `http://` wertet der Browser sie ohnehin
+nicht aus. Eine `location` mit eigenem `add_header` erbt sie nicht und braucht
+sie dann selbst noch einmal.
 
 **5. Abnahme**
 

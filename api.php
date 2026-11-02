@@ -288,7 +288,8 @@ function same_origin_only(): void
  * hinaus, und die beantwortet api.php nicht; alles andere endet in
  * require_json(). Eine solche Seite liefert ausserdem nur, wer die
  * Verbindung unterwegs uebernimmt, denn .htaccess leitet http mit 301 auf
- * https um.
+ * https um; und ein Browser, der die HSTS-Zeile aus .htaccess einmal
+ * gesehen hat, fragt dort ein Jahr lang gar nicht mehr ueber http.
  */
 function own_origin(string $origin, string $host): bool
 {

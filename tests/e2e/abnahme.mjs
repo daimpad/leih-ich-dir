@@ -30,6 +30,19 @@
  * nur, weil es ihn ausdruecklich setzt; ohne ihn ginge dort das Anlegen durch,
  * und der Fehler fiele erst bei Nutzer:innen auf.
  *
+ * Und das Urteil ueber Strict-Transport-Security, wieder mit vorgegebenen
+ * Antworten: Die Startseite traegt die Zeile, so wie .htaccess sie setzt,
+ * gar nicht, oder mit includeSubDomains oder preload, die der Betrieb nicht
+ * will, oder mit einem max-age, das nichts zusagt. Nur die erste Welt ist in
+ * Ordnung; fehlt die Zeile, muss die Meldung die wahrscheinlichen Ursachen
+ * nennen, und die haengen daran, ob die uebrigen Kopfzeilen ankommen; steht
+ * zu viel darin, das Zuviel. Dazu zwei getrennte Zeilen, erst mit
+ * includeSubDomains, dann ohne: Der Browser wertet nur die erste aus
+ * (RFC 6797, 8.1), das Zuviel gilt also. check.js liest beide
+ * zusammengefuegt; behielte check-deployment.php nur die letzte, meldete es
+ * ok. Ebenso zwei Zeilen, nur die zweite mit max-age: Das der zweiten
+ * zaehlt nicht.
+ *
  * Wer die Suite einzeln startet, setzt vorher data/throttle zurueck; jeder
  * Lauf im Browser legt eine Liste an.
  */
@@ -87,14 +100,37 @@ const WELTEN = [
 const { ok, bilanz } = pruefer();
 const br = await starteBrowser();
 
+/** Ein Server, der nur antwortet, was die Welt vorgibt, sonst 404. Ein Feld
+    mit mehreren Werten geht als ebenso viele getrennte Kopfzeilen hinaus. */
+async function weltServer(welt) {
+  const server = http.createServer((req, res) => {
+    const path = req.url.split('?')[0];
+    const status = welt.pfade[path];
+    res.writeHead(status !== undefined ? status : 404, { 'Content-Type': 'text/plain', ...(welt.kopf || {})[path] });
+    res.end('');
+  });
+  await new Promise((fertig) => server.listen(0, '127.0.0.1', fertig));
+  return server;
+}
+
 /** Laesst check.html laufen, mit den vorgegebenen Antworten, und liest die Zeilen. */
 async function imBrowser(welt, basis = BASE) {
   const ctx = await br.newContext({ viewport: { width: 1000, height: 1200 } });
   const p = await ctx.newPage();
+  /* route.fulfill kennt je Feld nur einen Wert. Gibt die Welt zu einem Feld
+     mehrere vor, antwortet auf die vorgegebenen Pfade deren Server, mit
+     getrennten Zeilen, und der Browser fuegt sie selbst zusammen wie bei
+     einer echten Antwort. */
+  const getrennt = Object.values(welt.kopf || {}).some((k) => Object.values(k).some(Array.isArray));
+  const server = getrennt ? await weltServer(welt) : null;
   await p.route('**/*', (route) => {
-    const status = welt.pfade[new URL(route.request().url()).pathname];
+    const path = new URL(route.request().url()).pathname;
+    const status = welt.pfade[path];
+    if (status !== undefined && server) {
+      return route.continue({ url: 'http://127.0.0.1:' + server.address().port + path });
+    }
     if (status !== undefined) {
-      return route.fulfill({ status, contentType: 'text/plain', body: '' });
+      return route.fulfill({ status, contentType: 'text/plain', body: '', headers: (welt.kopf || {})[path] });
     }
     return route.continue();
   });
@@ -108,17 +144,13 @@ async function imBrowser(welt, basis = BASE) {
     state: li.querySelector('.check-state').textContent
   })));
   await ctx.close();
+  if (server) { server.close(); }
   return zeilen;
 }
 
 /** Laesst tools/check-deployment.php gegen einen Server laufen, der nur antwortet, was vorgegeben ist. */
 async function ueberKommandozeile(welt) {
-  const server = http.createServer((req, res) => {
-    const status = welt.pfade[req.url.split('?')[0]];
-    res.writeHead(status !== undefined ? status : 404, { 'Content-Type': 'text/plain' });
-    res.end('');
-  });
-  await new Promise((fertig) => server.listen(0, '127.0.0.1', fertig));
+  const server = await weltServer(welt);
   const aus = await abnahmeGegen('http://127.0.0.1:' + server.address().port);
   server.close();
   return aus;
@@ -202,6 +234,49 @@ for (const durch of [true, false]) {
      cli ? cli[1] + cli[2] : 'keine Zeile');
 
   server.close();
+}
+
+const HSTS_WELTEN = [
+  { name: 'wie .htaccess', wert: 'max-age=31536000', ok: true, detail: /^max-age=31536000$/ },
+  { name: 'fehlt', wert: null, ok: false, detail: /mod_headers.*nginx/ },
+  /* Kommt die Content-Security-Policy an, laeuft mod_headers; dann darf die
+     Meldung es nicht als Ursache nennen. */
+  { name: 'fehlt, die Content-Security-Policy kommt an', wert: null,
+    dazu: { 'Content-Security-Policy': "default-src 'self'" }, ok: false,
+    detail: /^(?!.*mod_headers)fehlt, obwohl die Content-Security-Policy .*\.htaccess .*HTTPS/ },
+  /* max-age=0 hebt HSTS im Browser auf (RFC 6797, 6.1.1), ohne max-age
+     gilt die Zeile nicht. */
+  { name: 'mit max-age=0', wert: 'max-age=0', ok: false, detail: /^max-age=0: max-age unter einem Jahr,/ },
+  { name: 'ohne max-age', wert: 'maxage=31536000', ok: false, detail: /^maxage=31536000: ohne max-age,/ },
+  { name: 'mit includeSubDomains', wert: 'max-age=31536000; includeSubDomains', ok: false, detail: /enth(?:ae|ä)lt includeSubDomains,/ },
+  { name: 'mit preload', wert: 'max-age=63072000;PRELOAD', ok: false, detail: /enth(?:ae|ä)lt preload,/ },
+  /* Zwei getrennte Zeilen. Der Text muss beide nennen, zusammengefuegt mit
+     ", " wie in Headers.get(): Sonst hat eine Umsetzung nur eine gelesen. */
+  { name: 'in zwei Zeilen, die erste mit includeSubDomains',
+    wert: ['max-age=31536000; includeSubDomains', 'max-age=31536000'], ok: false,
+    detail: /^max-age=31536000; includeSubDomains, max-age=31536000: enth(?:ae|ä)lt includeSubDomains,/ },
+  /* Und umgekehrt beim max-age: Der ersten Zeile fehlt es, die zweite hat
+     eins. Der Browser wertet nur die erste aus, HSTS gilt also nicht. */
+  { name: 'in zwei Zeilen, nur die zweite mit max-age',
+    wert: ['maxage=31536000', 'max-age=31536000'], ok: false,
+    detail: /^maxage=31536000, max-age=31536000: ohne max-age,/ }
+];
+for (const w of HSTS_WELTEN) {
+  console.log('· Strict-Transport-Security ' + w.name);
+  const welt = { pfade: { '/': 200 },
+    kopf: { '/': { ...(w.dazu || {}), ...(w.wert === null ? {} : { 'Strict-Transport-Security': w.wert }) } } };
+
+  const z = await imBrowser(welt);
+  const zeile = z.find((r) => r.name === 'Strict-Transport-Security');
+  ok('Browser: ' + (w.ok ? 'in Ordnung' : 'Verstoss mit klarem Text'),
+     !!zeile && zeile.state === (w.ok ? 'ok' : 'fehlt') && w.detail.test(zeile.detail),
+     zeile ? zeile.state + ' ' + zeile.detail : 'keine Zeile');
+
+  const t = await ueberKommandozeile(welt);
+  const cli = /SOLL\s+Strict-Transport-Security\s+(ok|FEHLT)\s*(?:\((.*)\))?/.exec(t);
+  ok('Kommandozeile: ' + (w.ok ? 'in Ordnung' : 'Verstoss mit klarem Text'),
+     !!cli && cli[1] === (w.ok ? 'ok' : 'FEHLT') && w.detail.test(cli[2] || ''),
+     cli ? cli[1] + ' ' + (cli[2] || '') : 'keine Zeile');
 }
 
 await br.close();
