@@ -303,9 +303,46 @@ check('KI-Anfrage als text/plain → 415', $code === 415, $code);
 [$code, $body] = http_json($base . '?a=read&id=' . $hId);
 check('die Liste steht danach unverändert', $code === 200 && ($body['rev'] ?? 0) === $rev, $code);
 
-/* Lesen bleibt, wie es war: Es liefert nur Chiffrat. */
-[$code] = http_json($base . '?a=read&id=' . $hId, null, [$json, 'Origin: https://boese.example', 'Sec-Fetch-Site: cross-site']);
-check('read von fremder Herkunft bleibt 200', $code === 200, $code);
+/* Lesen nur von der eigenen Herkunft (own_origin_read_only in api.php).
+   Anders als beim Schreiben ist auch same-site fremd: Bei einem Bild
+   schickt der Browser keinen Origin, der einen anderen Port fangen
+   koennte. */
+foreach ([
+    'mit Sec-Fetch-Site cross-site'       => [['Sec-Fetch-Site: cross-site'], 403],
+    'mit Sec-Fetch-Site same-site'        => [['Sec-Fetch-Site: same-site'], 403],
+    'mit fremdem Origin'                  => [['Origin: https://boese.example'], 403],
+    'mit Origin auf eigenem Rechner, fremdem Port' => [['Origin: http://' . HOST . ':9999'], 403],
+    'mit Sec-Fetch-Site same-origin'      => [['Sec-Fetch-Site: same-origin'], 200],
+    'mit Sec-Fetch-Site none'             => [['Sec-Fetch-Site: none'], 200],
+    'mit eigenem Origin'                  => [[$eigen, 'Sec-Fetch-Site: same-origin'], 200],
+    'ohne Origin und Sec-Fetch-Site'      => [[], 200],
+] as $name => [$kopf, $erwartet]) {
+    [$code, $body] = http_json($base . '?a=read&id=' . $hId, null, $kopf);
+    check("read $name → $erwartet", $code === $erwartet
+        && ($erwartet !== 403 || ($body['error'] ?? '') === 'cross_origin'), $code);
+}
+
+/* Und vor der Drosselung, aus demselben Grund wie beim Schreiben: Mehr
+   abgewiesene Abrufe, als READ_LIMIT zulaesst, und danach liest dieselbe
+   Adresse noch. Je Riegel eine eigene Reihe von eigener Adresse, damit
+   auch ein einzeln verschobener faellt. */
+preg_match('/const READ_LIMIT\s*=\s*(\d+)/', (string) file_get_contents($root . '/api.php'), $m);
+$leseGrenze = (int) ($m[1] ?? 0);
+foreach ([
+    'Sec-Fetch-Site same-site' => ['203.0.113.28', 'Sec-Fetch-Site: same-site'],
+    'fremder Origin'           => ['203.0.113.29', 'Origin: https://boese.example'],
+] as $riegel => [$adresse, $fremd]) {
+    $von = 'X-Forwarded-For: ' . $adresse;
+    $abgewiesen = [];
+    for ($n = 0; $n < $leseGrenze + 5; $n++) {
+        [$code] = http_json($base . '?a=read&id=' . $hId, null, [$fremd, $von]);
+        $abgewiesen[] = $code;
+    }
+    check("Lesen, $riegel: " . ($leseGrenze + 5) . ' Abrufe, je 403',
+        $leseGrenze > 0 && array_count_values($abgewiesen) === [403 => $leseGrenze + 5], array_count_values($abgewiesen));
+    [$code] = http_json($base . '?a=read&id=' . $hId, null, ['Sec-Fetch-Site: same-origin', $von]);
+    check("Lesen, $riegel: danach liest dieselbe Adresse noch, kein 429", $code === 200, $code);
+}
 http_json($base, ['a' => 'delete', 'id' => $hId, 'proof' => $proof]);
 
 /* Die Riegel stehen vor der Drosselung, und das ist eine eigene Zusage:
