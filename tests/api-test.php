@@ -55,12 +55,21 @@ function b64u(string $bin): string
     return rtrim(strtr(base64_encode($bin), '+/', '-_'), '=');
 }
 
-/** @return array{0: int, 1: array<string, mixed>|null} */
-function http_json(string $url, ?array $post = null): array
+/**
+ * Ohne $kopf geht jede Anfrage als application/json hinaus und, wie von
+ * curl, ohne Origin und ohne Sec-Fetch-Site. Wer $kopf angibt,
+ * ersetzt damit alle Kopfzeilen, den Inhaltstyp eingeschlossen.
+ * check-deployment.php fragt nicht so: Es schickt bei jedem POST den Origin
+ * der geprueften Adresse mit.
+ *
+ * @param list<string> $kopf
+ * @return array{0: int, 1: array<string, mixed>|null}
+ */
+function http_json(string $url, ?array $post = null, array $kopf = ['Content-Type: application/json']): array
 {
     $context = stream_context_create(['http' => [
         'method'        => $post === null ? 'GET' : 'POST',
-        'header'        => "Content-Type: application/json\r\n",
+        'header'        => implode("\r\n", $kopf) . "\r\n",
         'content'       => $post === null ? null : json_encode($post),
         'ignore_errors' => true,
         'timeout'       => 10,
@@ -224,6 +233,116 @@ $stored = (string) @file_get_contents($dataDir . '/lists/' . substr($plainId, 0,
 check('Ablage enthält keinen Klartext', $stored !== '' && !str_contains($stored, 'Bohrmaschine'));
 check('Ablage speichert nur den Hash des Nachweises', str_contains($stored, '"verifier"') && !str_contains($stored, $proof));
 http_json($base, ['a' => 'delete', 'id' => $plainId, 'proof' => $proof]);
+
+/* Schreiben nur von der eigenen Seite. Ohne Vorabanfrage kann eine fremde
+   Seite nur text/plain, application/x-www-form-urlencoded und
+   multipart/form-data schicken; mit mode 'no-cors' sieht sie die Antwort
+   nie, aber die Liste stuende auf dem Server. Deshalb wird nach jedem
+   abgewiesenen Anlegen nachgesehen, dass es die Liste nicht gibt.
+   Ohne eigene Kopfzeilen fragt http_json wie curl: ohne Origin und ohne
+   Sec-Fetch-Site. Dann gilt allein der Inhaltstyp. */
+$json  = 'Content-Type: application/json';
+$eigen = 'Origin: http://' . HOST . ':' . PORT;
+/** @return array{0: int, 1: string, 2: int} Status, Fehlercode, Status von read danach */
+$anlegenMit = static function (array $kopf) use ($base, $proof, $payload): array {
+    $neu = ['a' => 'create', 'id' => bin2hex(random_bytes(16)), 'proof' => $proof, 'payload' => $payload('fremd')];
+    [$code, $body] = http_json($base, $neu, $kopf);
+    [$danach] = http_json($base . '?a=read&id=' . $neu['id']);
+    return [$code, (string) ($body['error'] ?? ''), $danach];
+};
+
+foreach ([
+    'text/plain',
+    'text/plain; charset=UTF-8',
+    'application/x-www-form-urlencoded',
+    'multipart/form-data; boundary=x',
+    'text/plain; application/json',
+] as $typ) {
+    $r = $anlegenMit(['Content-Type: ' . $typ]);
+    check("POST als $typ → 415, nichts angelegt", $r === [415, 'unsupported_media_type', 404], $r);
+}
+
+foreach ([
+    'Sec-Fetch-Site cross-site'                => [$json, 'Sec-Fetch-Site: cross-site'],
+    'fremdem Origin'                           => [$json, 'Origin: https://boese.example'],
+    'Origin null'                              => [$json, 'Origin: null'],
+    'Origin auf eigenem Rechner, fremdem Port' => [$json, 'Origin: http://' . HOST . ':9999'],
+    'Origin, der mit dem eigenen beginnt'      => [$json, $eigen . '.boese.example'],
+] as $name => $kopf) {
+    $r = $anlegenMit($kopf);
+    check("POST mit $name → 403, nichts angelegt", $r === [403, 'cross_origin', 404], $r);
+}
+
+/* Was der eigene Browser schickt, kommt durch: JSON, eigener Origin,
+   same-origin. Einmal angelegt, danach nur geschrieben, damit das
+   Kontingent fuer die Drosselprobe unten kaum angetastet wird. */
+$hId = bin2hex(random_bytes(16));
+[$code] = http_json($base, ['a' => 'create', 'id' => $hId, 'proof' => $proof, 'payload' => $payload('eigen')],
+    [$json . '; charset=utf-8', $eigen, 'Sec-Fetch-Site: same-origin']);
+check('POST wie aus dem eigenen Browser → 200', $code === 200, $code);
+$rev = 1;
+foreach ([
+    'mit eigenem Origin'                  => [$json, $eigen],
+    'ohne Origin und Sec-Fetch-Site'      => [$json],
+    'als Application/JSON; charset=UTF-8' => ['Content-Type: Application/JSON; charset=UTF-8'],
+    'mit Sec-Fetch-Site same-site'        => [$json, 'Sec-Fetch-Site: same-site'],
+] as $name => $kopf) {
+    [$code, $body] = http_json($base, ['a' => 'write', 'id' => $hId, 'proof' => $proof, 'rev' => $rev, 'payload' => $payload('eigen')], $kopf);
+    check("write $name → 200", $code === 200 && ($body['rev'] ?? 0) === $rev + 1, $code);
+    $rev++;
+}
+
+/* Jede Aktion steht hinter denselben Riegeln, nicht nur das Anlegen. */
+[$code] = http_json($base, ['a' => 'write', 'id' => $hId, 'proof' => $proof, 'rev' => $rev, 'payload' => $payload('fremd')],
+    [$json, 'Origin: https://boese.example']);
+check('write mit gültigem Nachweis, fremdem Origin → 403', $code === 403, $code);
+[$code] = http_json($base, ['a' => 'delete', 'id' => $hId, 'proof' => $proof], ['Content-Type: text/plain']);
+check('delete als text/plain → 415', $code === 415, $code);
+[$code] = http_json($base, ['a' => 'ai', 'text' => 'Bohrmaschine'], ['Content-Type: text/plain']);
+check('KI-Anfrage als text/plain → 415', $code === 415, $code);
+[$code, $body] = http_json($base . '?a=read&id=' . $hId);
+check('die Liste steht danach unverändert', $code === 200 && ($body['rev'] ?? 0) === $rev, $code);
+
+/* Lesen bleibt, wie es war: Es liefert nur Chiffrat. */
+[$code] = http_json($base . '?a=read&id=' . $hId, null, [$json, 'Origin: https://boese.example', 'Sec-Fetch-Site: cross-site']);
+check('read von fremder Herkunft bleibt 200', $code === 200, $code);
+http_json($base, ['a' => 'delete', 'id' => $hId, 'proof' => $proof]);
+
+/* Die Riegel stehen vor der Drosselung, und das ist eine eigene Zusage:
+   Ein Schreibversuch von einer fremden Seite soll den Besucher:innen kein
+   Kontingent nehmen. Stuenden sie dahinter, genuegten zwanzig unsichtbare
+   Formulare, und sie koennten eine Stunde lang keine eigene Liste anlegen.
+   Deshalb je Riegel mehr abgewiesene Anlegeversuche, als CREATE_LIMIT
+   zulaesst, und danach ein gueltiges Anlegen von derselben Adresse.
+   Je Riegel eine eigene Reihe von einer eigenen Adresse: Eine gemeinsame
+   Reihe, abwechselnd abgewiesen vom einen und vom anderen, fiele erst, wenn
+   alle Riegel zugleich hinter der Drosselung stuenden, denn jeder allein
+   bekaeme nur einen Teil der Versuche ab und bliebe unter der Grenze. Die
+   Grenze wird aus api.php gelesen, damit die Probe bei einer anderen
+   Grenze nicht still zu kurz wird. Die Adresse steuert X-Forwarded-For
+   (client_ip), so behalten die Drosselproben unten ihr eigenes
+   Kontingent. */
+preg_match('/const CREATE_LIMIT\s*=\s*(\d+)/', (string) file_get_contents($root . '/api.php'), $m);
+$grenze = (int) ($m[1] ?? 0);
+$versuche = $grenze + 5;
+foreach ([
+    'Inhaltstyp'                => ['203.0.113.25', ['Content-Type: text/plain'], 415],
+    'Sec-Fetch-Site cross-site' => ['203.0.113.26', [$json, 'Sec-Fetch-Site: cross-site'], 403],
+    'fremder Origin'            => ['203.0.113.27', [$json, 'Origin: https://boese.example'], 403],
+] as $riegel => [$adresse, $kopf, $erwartet]) {
+    $von = 'X-Forwarded-For: ' . $adresse;
+    $abgewiesen = [];
+    for ($n = 0; $n < $versuche; $n++) {
+        [$code] = http_json($base, ['a' => 'create', 'id' => bin2hex(random_bytes(16)), 'proof' => $proof, 'payload' => $payload('fremd')],
+            [...$kopf, $von]);
+        $abgewiesen[] = $code;
+    }
+    check("$riegel: $versuche abgewiesene Anlegeversuche, je $erwartet",
+        $grenze > 0 && array_count_values($abgewiesen) === [$erwartet => $versuche], array_count_values($abgewiesen));
+    [$code] = http_json($base, ['a' => 'create', 'id' => bin2hex(random_bytes(16)), 'proof' => $proof, 'payload' => $payload('eigen')],
+        [$json, $eigen, $von]);
+    check("$riegel: danach legt dieselbe Adresse noch eine Liste an, kein 429", $code === 200, $code);
+}
 
 /* Lesen ist gedrosselt, aber großzügig: Die Grenze steht in api.php. Dieser
    Block steht vor dem Anlege-Spam, denn danach ließe sich keine Liste mehr

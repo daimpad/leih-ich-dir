@@ -22,6 +22,9 @@ declare(strict_types=1);
  *   POST {a:"write",  id, proof, rev, payload}
  *   POST {a:"delete", id, proof}
  *
+ * POST nur als application/json und nicht von fremder Herkunft, Begruendung
+ * bei same_origin_only().
+ *
  * @license MIT
  */
 
@@ -185,6 +188,132 @@ function install_salt(): string
 function verifier(string $proof): string
 {
     return hash('sha256', $proof);
+}
+
+/* == Herkunft ============================================================== */
+
+/**
+ * Schreibanfragen nimmt die Schnittstelle nur von der eigenen Seite an.
+ *
+ * Warum: Ein fetch(url, {method: 'POST', mode: 'no-cors'}) mit Content-Type
+ * text/plain gilt als einfache Anfrage und geht ohne Vorabanfrage hinaus,
+ * ebenso ein Formular mit enctype="text/plain", dessen Feldname und Wert
+ * zusammen ein JSON-Objekt ergeben. Die Antwort sieht die fremde Seite nie,
+ * aber sie braucht sie nicht: Im Browser ihrer Besucher:innen legt sie
+ * Listen an, verbraucht deren Kontingent und ruft, wo er eingeschaltet ist,
+ * den KI-Proxy auf das Kontingent des Betriebs. Bis hierher las
+ * request_body() php://input, ohne zu fragen, woher es kam. Nachgestellt
+ * mit einer zweiten Herkunft auf 127.0.0.1, tests/e2e/herkunft.mjs: Die
+ * Liste stand danach auf dem Server.
+ *
+ * Drei Riegel, nummeriert in der Reihenfolge, in der sie pruefen. Die
+ * ersten beiden stehen in dieser Funktion und sagen mit den Worten des
+ * Browsers vorab, was der dritte, require_json(), allein schon sicherstellt:
+ *
+ *  1. Sec-Fetch-Site: cross-site wird mit 403 abgewiesen. same-site
+ *     kommt durch, denn auch ein anderer Port oder eine Subdomain ist
+ *     same-site; die faengt der zweite Riegel.
+ *  2. Ein Origin, dessen Rechner und Port nicht die der Anfrage sind, wird
+ *     ebenfalls mit 403 abgewiesen, "null" eingeschlossen (Sandbox-Rahmen,
+ *     data:-Adressen). Die eigenen Seiten setzen Referrer-Policy
+ *     no-referrer, und dabei bleibt es: Ein fetch() im Modus cors, wie
+ *     apiPost ihn stellt, traegt laut Fetch-Standard trotzdem die echte
+ *     Herkunft; "null" setzt der Browser nur ausserhalb von cors, etwa beim
+ *     Formular. herkunft.mjs liest die Kopfzeile der eigenen Anfrage nach.
+ *  3. Content-Type application/json, sonst 415 (require_json). Diesen Typ
+ *     darf eine fremde Seite nur nach einer Vorabanfrage setzen, und die
+ *     beantwortet api.php nicht (OPTIONS endet in 405, ohne
+ *     Access-Control-Kopfzeilen). Alle eigenen Aufrufer schicken ihn
+ *     schon: apiPost in app.js, check.js, tools/check-deployment.php und
+ *     die Tests.
+ *
+ * Fehlen Origin und Sec-Fetch-Site — aeltere Browser, curl —, gilt allein
+ * der Inhaltstyp. Wer ohne Browser fragt, setzt jede Kopfzeile selbst; die
+ * Riegel schuetzen Besucher:innen davor, dass eine fremde Seite ihren
+ * Browser benutzt. Gegen Skripte steht die Drosselung.
+ * tools/check-deployment.php fragt zwar ohne Browser, schickt aber bei
+ * jedem POST den Origin der geprueften Adresse mit, wie ein Browser auf
+ * dieser Seite: So faellt ein Proxy, der Host umschreibt, in der Abnahme
+ * auf und nicht erst bei Nutzer:innen.
+ *
+ * Das gilt nur fuers Schreiben. Das Lesen ueber GET bleibt offen, von jeder
+ * Herkunft: Es liefert nur Chiffrat, und den Schluessel kennt die fremde
+ * Seite nicht. Gezaehlt wird es trotzdem (READ_LIMIT), und eine fremde
+ * Seite kann im Browser ihrer Besucher:innen GET-Anfragen ausloesen, etwa
+ * mit fetch im Modus no-cors oder einem Bild, und so deren Lesekontingent
+ * verbrauchen. Das bestand schon vor diesen Riegeln und ist hier nicht
+ * behoben.
+ *
+ * cross_origin und unsupported_media_type haben in app.js keinen eigenen
+ * Text, mapError macht aus beiden 'network'. Das ist Absicht: Der eigene
+ * Browser bekommt sie bei richtig eingerichtetem Proxy nie, denn apiPost
+ * fragt von derselben Herkunft und setzt den Typ immer. Reicht ein
+ * vorgelagerter Proxy Host nicht durch, ist das ein Fehler des Betriebs,
+ * und den meldet die Abnahme (README, Host durchreichen). Ein Text dafuer
+ * waere einer fuer die fremde Seite, und die liest die Antwort nicht.
+ */
+function same_origin_only(): void
+{
+    $site = strtolower(trim((string) ($_SERVER['HTTP_SEC_FETCH_SITE'] ?? '')));
+    if ($site === 'cross-site') {
+        fail(403, 'cross_origin');
+    }
+    if (isset($_SERVER['HTTP_ORIGIN'])
+        && !own_origin((string) $_SERVER['HTTP_ORIGIN'], (string) ($_SERVER['HTTP_HOST'] ?? ''))) {
+        fail(403, 'cross_origin');
+    }
+}
+
+/**
+ * Ob ein Origin auf den Rechner zeigt, an den die Anfrage ging.
+ *
+ * Verglichen wird mit der Host-Kopfzeile, nicht mit einem festen Namen:
+ * Dieselbe Installation antwortet unter leihichdir.de, unter 127.0.0.1 im
+ * Test und unter jedem weiteren Namen, den der Virtual Host kennt. Eine
+ * fremde Seite kann Host nicht verbiegen, der Browser setzt ihn nach dem
+ * Ziel. Fehlt der Port, gilt der des Schemas aus dem Origin; so passt
+ * https://leihichdir.de zu Host leihichdir.de. Was sich nicht zerlegen
+ * laesst, "null" eingeschlossen, ist fremd.
+ *
+ * Das Schema selbst wird nicht verglichen. Mit welchem die Anfrage ankam,
+ * weiss api.php nicht verlaesslich: Nimmt ein vorgelagerter Proxy TLS ab
+ * und reicht per http an Apache weiter, sieht PHP http, waehrend der
+ * Browser https://leihichdir.de schickt; ein Vergleich wiese dort die
+ * eigene Anwendung ab. Mehr durch kommt damit nur derselbe Rechner unter
+ * dem anderen Schema, fuer leihichdir.de also http://leihichdir.de, und
+ * unschaedlich ist das, weil eine Seite unter dieser Herkunft nichts
+ * schicken kann, was hier angenommen wird: Fuer den Browser ist sie eine
+ * fremde Herkunft, application/json ginge also nur nach einer Vorabanfrage
+ * hinaus, und die beantwortet api.php nicht; alles andere endet in
+ * require_json(). Eine solche Seite liefert ausserdem nur, wer die
+ * Verbindung unterwegs uebernimmt, denn .htaccess leitet http mit 301 auf
+ * https um.
+ */
+function own_origin(string $origin, string $host): bool
+{
+    $o = parse_url(trim($origin));
+    $h = parse_url('http://' . trim($host));
+    if (!is_array($o) || !is_array($h) || !isset($o['scheme'], $o['host'], $h['host'])) {
+        return false;
+    }
+    $standard = strtolower($o['scheme']) === 'https' ? 443 : 80;
+    return strtolower($o['host']) === strtolower($h['host'])
+        && ($o['port'] ?? $standard) === ($h['port'] ?? $standard);
+}
+
+/**
+ * Nur JSON. Parameter wie charset sind erlaubt, der Typ selbst ist nicht
+ * verhandelbar: text/plain, application/x-www-form-urlencoded und
+ * multipart/form-data sind, neben gar keinem, genau die Typen, die eine
+ * fremde Seite ohne Vorabanfrage schicken darf. Begruendung bei
+ * same_origin_only().
+ */
+function require_json(): void
+{
+    $typ = (string) ($_SERVER['CONTENT_TYPE'] ?? $_SERVER['HTTP_CONTENT_TYPE'] ?? '');
+    if (strtolower(trim(explode(';', $typ, 2)[0])) !== 'application/json') {
+        fail(415, 'unsupported_media_type');
+    }
 }
 
 /* == Eingabevalidierung ==================================================== */
@@ -702,6 +831,12 @@ if ($method === 'GET') {
 }
 
 if ($method === 'POST') {
+    /* Vor dem Lesen des Koerpers und vor jeder Drosselung: Ein
+       Schreibversuch von einer fremden Seite kostet niemanden ein
+       Kontingent. Fuers Lesen gilt das nicht, GET oben zaehlt von jeder
+       Herkunft (Begruendung bei same_origin_only()). */
+    same_origin_only();
+    require_json();
     $in = request_body();
     $action = is_string($in['a'] ?? null) ? $in['a'] : '';
     if ($action === 'create') {

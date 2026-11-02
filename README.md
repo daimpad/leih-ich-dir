@@ -81,6 +81,26 @@ wiederum nur den Hash ab und vergleicht ihn zeitkonstant (`hash_equals`). Weder
 in der Datenablage noch in Server-Protokollen steht damit ein Wert, der zum
 Wiederherstellen des Bearbeiten-Links genügt.
 
+**Schreiben nur von der eigenen Seite.** `api.php` nimmt POST nur als
+`application/json` an, sonst antwortet es mit 415. Diesen Typ darf eine fremde
+Seite nur nach einer Vorabanfrage setzen, und die beantwortet die
+Schnittstelle nicht. Ein `fetch(…, {mode: 'no-cors'})` mit `text/plain`
+braucht dagegen keine, ebenso wenig ein Formular mit `enctype="text/plain"`;
+solange die Schnittstelle beides annahm, konnte eine fremde Seite im Browser
+ihrer Besucher:innen Listen anlegen und, wo er eingeschaltet ist, den
+KI-Proxy rufen, ohne die Antwort je zu lesen. Zusätzlich weist die
+Schnittstelle mit 403 ab, was `Sec-Fetch-Site: cross-site` trägt oder einen
+`Origin`, dessen Rechner und Port nicht die der `Host`-Kopfzeile sind; hinter
+einem Proxy setzt das voraus, dass er `Host` durchreicht (*Vorgelagerter
+nginx*). Fehlen beide Kopfzeilen, etwa bei `curl` oder in älteren Browsern,
+gilt allein der Inhaltstyp. Abgewiesen wird vor der Ratenbegrenzung, ein
+abgewiesener Schreibversuch verbraucht also kein Kontingent. Für das Lesen gilt
+beides nicht: GET bleibt von jeder Herkunft offen, denn heraus kommt nur
+Chiffrat. Gezählt wird es trotzdem, und eine fremde Seite kann im Browser
+ihrer Besucher:innen Abrufe auslösen und so deren Lesekontingent (1200 je
+Stunde, *Grenzen*) aufbrauchen. Das bestand schon vorher und ist bislang nicht
+behoben.
+
 ### Grenzen (Bedrohungsmodell)
 
 Ehrliche Einordnung, denn Verschlüsselung ersetzt kein Rechtemanagement:
@@ -204,7 +224,9 @@ Zwei Dinge, die zum eingeschalteten Proxy gehören:
 * Die Übermittlung an Google gehört in die Datenschutzerklärung des Betriebs.
 * Das Kontingent läuft auf den hinterlegten Schlüssel. Bei einem öffentlichen
   Dienst ist die Ratenbegrenzung die einzige Schranke davor; wer sie enger
-  will, setzt `AI_LIMIT` herunter.
+  will, setzt `AI_LIMIT` herunter. Über die Browser ihrer Besucher:innen kann
+  eine fremde Seite den Proxy nicht rufen (*Schreiben nur von der eigenen
+  Seite*, oben).
 
 Wer das nicht will, setzt `AI_PROXY_ENABLED` zurück auf `false` oder entfernt
 schlicht `data/.ai-key`. Beides wirkt sofort; ausgeschaltet bleibt der Proxy
@@ -767,6 +789,30 @@ Repository. Sie sperren beide Verzeichnisse auch dann, wenn die Regel im
 Wurzelverzeichnis einmal umgeschrieben wird. Gegen einen nginx, der die
 Datei selbst ausliefert, helfen sie nicht: Er liest sie nicht.
 
+**Host durchreichen.** Eine Schreibanfrage aus dem Browser nimmt `api.php` nur
+an, wenn ihr `Origin` zu der `Host`-Kopfzeile passt, die bei `api.php`
+ankommt (*Schreiben nur von der eigenen Seite*). Ein vorgelagerter Proxy muss
+`Host` deshalb so durchreichen, wie der Browser ihn geschickt hat, samt Port:
+
+```nginx
+proxy_set_header Host $http_host;
+```
+
+Ohne diese Zeile setzt nginx bei `proxy_pass` Rechner und Port des Ziels ein;
+`$host` statt `$http_host` lässt den Port weg, was erst auffällt, wenn er
+nicht 80 oder 443 ist. Dann weist `api.php` jedes Schreiben aus dem Browser
+mit 403 `cross_origin` ab: Listen lassen sich ansehen, aber weder anlegen noch
+speichern. Die Abnahme legt eine Liste mit dem `Origin` der geprüften Adresse
+an, `check.html` über den Browser, `tools/check-deployment.php` von sich aus,
+und meldet genau das mit Verweis hierher.
+
+`X-Forwarded-Host` wertet `api.php` bewusst nicht aus. Ob diese Kopfzeile vom
+Proxy stammt oder vom Absender, hängt davon ab, ob der Proxy sie setzt oder
+nur weiterreicht, und von `api.php` aus ist das nicht zu sehen; bei
+`X-Forwarded-For` braucht es dafür schon eine eigene Regel (*Grenzen*, oben).
+Ein Proxy, der `Host` umschreibt, soll in der Abnahme auffallen, statt von
+einer zweiten Kopfzeile verdeckt zu werden.
+
 ## Vorschau über GitHub Pages
 
 Die Oberfläche lässt sich ohne Server betrachten. GitHub Pages liefert nur
@@ -800,9 +846,10 @@ php tests/api-test.php                               # Funktionstest des Backend
 ```
 
 Der Funktionstest startet einen eigenen PHP-Server mit einem eigenen
-Datenverzeichnis, prüft alle Endpunkte samt Fehlerfällen und Ratenbegrenzung
-und weist nach, dass in der Ablage kein Klartext landet. Vorhandene Listen
-bleiben unberührt. Alle drei Prüfungen laufen auch in der GitHub-Action `CI`.
+Datenverzeichnis, prüft alle Endpunkte samt Fehlerfällen, Herkunft und
+Inhaltstyp sowie die Ratenbegrenzung und weist nach, dass in der Ablage kein
+Klartext landet. Vorhandene Listen bleiben unberührt. Alle drei Prüfungen
+laufen auch in der GitHub-Action `CI`.
 
 ## Lizenz
 

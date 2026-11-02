@@ -30,13 +30,29 @@ if ($base === '') {
 $must = 0;
 $should = 0;
 
+/* Jede Schreibanfrage traegt den Origin, den ein Browser auf dieser Seite
+   schickte: Schema, Rechner und Port der Adresse, ohne Pfad. api.php
+   vergleicht ihn mit dem Host, der bei ihm ankommt. Ohne ihn gaelte wie bei
+   curl allein der Inhaltstyp, und ein vorgelagerter Proxy, der Host oder Port
+   umschreibt, fiele hier nicht auf, sondern erst bei Nutzer:innen: Deren
+   Browser schickt den Origin immer, und jedes Speichern endete in 403. */
+$teile = parse_url($base);
+$origin = is_array($teile) && isset($teile['scheme'], $teile['host'])
+    ? strtolower($teile['scheme']) . '://' . $teile['host'] . (isset($teile['port']) ? ':' . $teile['port'] : '')
+    : '';
+
 /** @return array{status: int, headers: array<string, string>, body: string} */
 function fetch(string $url, ?array $post = null): array
 {
+    global $origin;
+    $kopf = "Content-Type: application/json\r\nUser-Agent: leih-katalog-check\r\n";
+    if ($post !== null && $origin !== '') {
+        $kopf .= "Origin: {$origin}\r\n";
+    }
     $context = stream_context_create([
         'http' => [
             'method'          => $post === null ? 'GET' : 'POST',
-            'header'          => "Content-Type: application/json\r\nUser-Agent: leih-katalog-check\r\n",
+            'header'          => $kopf,
             'content'         => $post === null ? null : json_encode($post),
             'ignore_errors'   => true,
             'follow_location' => 0,
@@ -318,8 +334,13 @@ if ($alive) {
     $payload = ['iv' => $b64(random_bytes(12)), 'ct' => $b64('abnahme')];
 
     $create = fetch($base . '/api.php', ['a' => 'create', 'id' => $id, 'proof' => $proof, 'payload' => $payload]);
+    $fehler = json_decode($create['body'], true)['error'] ?? '';
     line('MUSS', 'Liste anlegen, data/ ist beschreibbar', $create['status'] === 200,
-        'Status ' . $create['status'] . ($create['status'] === 500 ? ', Rechte auf data/ prüfen' : ''));
+        'Status ' . $create['status'] . ($create['status'] === 500 ? ', Rechte auf data/ prüfen' : '')
+        . ($fehler === 'cross_origin'
+            ? ', api.php hält die eigene Herkunft für fremd: Ein vorgelagerter Proxy reicht Host '
+              . 'samt Port nicht durch (README, Vorgelagerter nginx)'
+            : ''));
 
     if ($create['status'] === 200) {
         $read = fetch($base . '/api.php?a=read&id=' . $id);
