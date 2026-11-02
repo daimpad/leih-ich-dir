@@ -1868,6 +1868,24 @@
       });
     });
 
+    /* Der Sprunglink zielt auf #main, aber er darf das Fragment nicht
+       anfassen: Dort steht in einer Liste der Schluessel, und die Adresse
+       der Seite ist der Link, auf den der Satz zum Lesezeichen baut. Mit
+       dem Verweis allein stand danach .../#main in der Adressleiste, und ein
+       Neuladen oder Lesezeichen fuehrte zur leeren Startseite
+       (tests/e2e/sprunglink.mjs). Er setzt deshalb nur die Fuehrung auf den
+       Inhalt; focus() rollt dorthin. main traegt dafuer tabindex="-1". Auf
+       der Einstellungsseite ebenso, darum hier und nicht in bindEvents(). */
+    var sprung = $('.skiplink');
+    if (sprung) {
+      sprung.addEventListener('click', function (ev) {
+        var ziel = $('#main');
+        if (!ziel) { return; }
+        ev.preventDefault();
+        ziel.focus();
+      });
+    }
+
     if (!$('#fab')) { return; }
     /* Ein <details> geht von sich aus nur ueber seine eigene Flaeche wieder
        zu. Beides hier nachgereicht, damit sich die Wahl wie ein Menue anfuehlt:
@@ -5843,9 +5861,10 @@
 
     if (!parsed) {
       /* Ein Fragment, das kein Zugangslink ist, ist ein Seitenanker und kein
-         Ortswechsel. Der Sprunglink (Ziel #main) hat keinen eigenen Zuhoerer;
-         ohne diese Zeile raeumte er die offene Ansicht weg — bei einer Liste
-         kostete das einen Abruf, bei der Superliste alle. MINE_HASH bleibt
+         Ortswechsel. Der Sprunglink schreibt seit November 2026 kein
+         Fragment mehr (bindNav), andere Anker koennen es; ohne diese Zeile
+         raeumten sie die offene Ansicht weg — bei einer Liste kostete das
+         einen Abruf, bei der Superliste alle. MINE_HASH bleibt
          ausgenommen, es lebt davon, dass parseHash hier null liefert. */
       if (location.hash && location.hash !== MINE_HASH && (state.doc || kreis.doc)) { return; }
       stopRefresh();
