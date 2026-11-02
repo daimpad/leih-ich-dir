@@ -27,8 +27,24 @@ DirectoryIndex index.html
     # sorgt schon frame-ancestors 'none'.
     Header always set Permissions-Policy "geolocation=(), camera=(), microphone=(self), payment=()"
     Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'self'; connect-src 'self' https://generativelanguage.googleapis.com; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
-    # HSTS erst aktivieren, wenn HTTPS dauerhaft eingerichtet ist:
-    # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    # HSTS: Ein Jahr lang fragt der Browser diese Seite nur noch ueber HTTPS
+    # an, auch wenn jemand http:// tippt oder einem alten Link folgt. Die
+    # Umleitung unten allein genuegt nicht: Vor ihr geht die erste Anfrage
+    # unverschluesselt hinaus, und wer sie unterwegs beantwortet, liefert eine
+    # Seite, die location.hash vorliest. Auskommentiert stand die Zeile, bis
+    # HTTPS dauerhaft eingerichtet ist; das ist es, http leitet mit 301 um.
+    # Ohne includeSubDomains und ohne preload, auf ausdruecklichen Wunsch des
+    # Betreibers: includeSubDomains bindet jede Subdomain an HTTPS, auch eine,
+    # die es noch nicht gibt, und preload laesst sich nur ueber Monate
+    # zuruecknehmen. Dazunehmen laesst sich beides spaeter, zuruecknehmen
+    # nicht so schnell.
+    # Nur auf Antworten ueber HTTPS: Ueber http wertet der Browser die Zeile
+    # ohnehin nicht aus (RFC 6797, 8.1), und die 301 soll nicht zusagen, was
+    # sie selbst nicht einhaelt. %{HTTPS} ist dieselbe Variable wie in der
+    # Umleitung unten. Die Bedingung expr= am Ende ist ein ap_expr-Ausdruck
+    # aus Apache 2.4; die Angabe "ab 2.4.10" im Handbuch gilt expr= als Wert,
+    # nicht als Bedingung.
+    Header always set Strict-Transport-Security "max-age=31536000" "expr=%{HTTPS} == 'on'"
 </IfModule>
 
 # Punktdateien (.git, .env, .htaccess …) nie ausliefern

@@ -183,9 +183,45 @@
         (h.get('referrer-policy') || '') === 'no-referrer');
       check(LEVEL_SHOULD, 'X-Frame-Options DENY',
         (h.get('x-frame-options') || '').toUpperCase() === 'DENY');
-      check(LEVEL_SHOULD, 'Strict-Transport-Security',
-        !!h.get('strict-transport-security'),
-        'in .htaccess auskommentiert, erst bei dauerhaftem HTTPS einschalten');
+      /* Erwartet wird die Kopfzeile ohne includeSubDomains und ohne preload,
+         so wie .htaccess sie setzt; steht eins von beiden darin, zaehlt das
+         als Verstoss. Warum ohne beides, steht in .htaccess. */
+      var hsts = h.get('strict-transport-security') || '';
+      /* Direktiven sind Woerter zwischen ";", gross oder klein geschrieben;
+         "," trennt zwei Kopfzeilen, die der Browser zusammengefuegt hat. */
+      var teile = hsts.toLowerCase().split(/[;,]/).map(function (t) { return t.replace(/^\s+|\s+$/g, ''); });
+      var zuviel = ['includeSubDomains', 'preload'].filter(function (w) {
+        return teile.indexOf(w.toLowerCase()) !== -1;
+      });
+      /* Und mit max-age von mindestens einem Jahr wie in .htaccess:
+         max-age=0 hebt die Zusage im Browser auf (RFC 6797, 6.1.1), ohne
+         max-age wertet er die Zeile gar nicht aus. Gesucht wird nur in der
+         ersten Zeile, vor dem ersten ",": Nur sie wertet der Browser aus
+         (8.1), ein max-age der zweiten rettet eine erste ohne nicht. */
+      var maxAge = null;
+      hsts.toLowerCase().split(',')[0].split(';').map(function (t) {
+        return t.replace(/^\s+|\s+$/g, '');
+      }).some(function (t) {
+        var m = /^max-age\s*=\s*"?(\d+)"?$/.exec(t);
+        if (m) { maxAge = parseInt(m[1], 10); }
+        return !!m;
+      });
+      var kurz = maxAge === null || maxAge < 31536000;
+      /* Fehlt die Zeile, haengt die wahrscheinliche Ursache daran, ob die
+         uebrigen Kopfzeilen ankommen; die Content-Security-Policy steht
+         fuer sie (kopfzeilenFehlen oben). */
+      check(LEVEL_SHOULD, 'Strict-Transport-Security', !!hsts && !zuviel.length && !kurz,
+        !hsts ? (kopfzeilenFehlen
+                  ? 'fehlt; meist fehlt mod_headers (dann fehlen auch die uebrigen Kopfzeilen), '
+                    + 'oder ein vorgelagerter nginx liefert die Seite selbst aus und liest keine .htaccess'
+                  : 'fehlt, obwohl die Content-Security-Policy als Kopfzeile ankommt; meist ist die '
+                    + '.htaccess auf dem Server aelter als diese Zeile, oder Apache sah die Anfrage nicht '
+                    + 'als HTTPS, und nur dann setzt .htaccess sie')
+          : zuviel.length ? hsts + ': enthaelt ' + zuviel.join(' und ')
+                + ', erwartet ist nur max-age wie in .htaccess (Begruendung dort)'
+          : kurz ? hsts + ': ' + (maxAge === null ? 'ohne max-age' : 'max-age unter einem Jahr')
+                + ', erwartet ist mindestens max-age=31536000 wie in .htaccess'
+          : hsts);
     }).then(function () {
       /* Fehlt mod_headers, ist die Meta-Fassung in index.html die einzige
          verbliebene Sperre. Sie gehoert also ebenso geprueft, und zwar auf
