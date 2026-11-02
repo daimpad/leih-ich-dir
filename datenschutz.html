@@ -158,15 +158,16 @@
 
     <h3 class="settings-sub">Zugriffsdaten</h3>
     <p>
-      Für das Anlegen neuer Listen und für Anfragen an die KI gilt eine
-      Mengenbegrenzung je Stunde. Dafür wird die IP-Adresse mit einem
-      installationsspezifischen Salz gehasht und nur dieser Hash zusammen mit
-      einem Zähler gespeichert. Die Adresse selbst wird nicht abgelegt. Die
-      Zähler verfallen nach Ablauf des Zeitfensters von einer Stunde und
-      werden ab dann nicht mehr mitgezählt. Die Datei dazu räumt ein
-      Aufräumschritt weg, der bei jeder fünfzigsten Anfrage zum Anlegen einer
-      Liste oder an die KI mitläuft und Dateien entfernt, die älter als zwei
-      Stunden sind; ohne solchen Verkehr bleibt sie liegen. Darüber hinaus gelten
+      Für das Anlegen neuer Listen und für das Lesen einer Liste gilt je eine
+      Mengenbegrenzung pro Stunde, beim Lesen großzügig (1200 Abrufe). Das
+      Lesen zählt auch dann, wenn Du nur einen Ansehen-Link öffnest. Dafür wird
+      die IP-Adresse mit einem installationsspezifischen Salz gehasht und nur
+      dieser Hash zusammen mit einem Zähler gespeichert. Die Adresse selbst
+      wird nicht abgelegt. Die Zähler verfallen nach Ablauf des Zeitfensters
+      von einer Stunde und werden ab dann nicht mehr mitgezählt. Die Datei
+      dazu räumt ein Aufräumschritt weg, der bei etwa jeder fünfzigsten
+      Anfrage mitläuft und Dateien entfernt, die älter als zwei Stunden sind;
+      ohne jeden Verkehr bleibt sie liegen. Darüber hinaus gelten
       die üblichen Protokolle des Webservers. Sie enthalten je Abruf Zeitpunkt,
       IP-Adresse, aufgerufene Adresse und Kennung der Liste, nicht aber deren
       Inhalt. Wie lange der Hoster sie aufbewahrt, steht in dessen Bedingungen;
@@ -201,9 +202,9 @@
     <h3 class="settings-sub">Superliste</h3>
     <p>
       Eine Superliste sammelt die Ansehen-Links mehrerer Leihlisten und zeigt
-      deren Gegenstände in einer gemeinsamen Übersicht. Er ist selbst eine
+      deren Gegenstände in einer gemeinsamen Übersicht. Sie ist selbst eine
       verschlüsselte Liste und liegt genauso auf dem Server wie jede andere.
-      Was er enthält, sind Kennung und Schlüssel der gesammelten Listen sowie
+      Was sie enthält, sind Kennung und Schlüssel der gesammelten Listen sowie
       die Namen, die Du ihnen gibst, und nichts davon kann der Betrieb lesen.
       Gegenstände, Titel und Kontaktangaben der gesammelten Listen werden bei
       jedem Öffnen frisch geholt und nirgends abgelegt.
@@ -215,8 +216,10 @@
       Verknüpfung zwischen zwei Listen entsteht dort nicht, und es ist auch
       niemand hinterlegt, der sich benachrichtigen ließe. Die Personen, deren
       Listen in einer Superliste stehen, erfahren davon deshalb nichts. Wer
-      seinen Ansehen-Link zurückziehen möchte, löscht die Liste über den
-      eigenen Bearbeiten-Link oder legt sie unter einem neuen Link an.
+      seinen Ansehen-Link zurückziehen möchte, tut das im dritten Schritt der
+      eigenen Liste: Danach zeigt keine Superliste, die den alten Link
+      gesammelt hat, die Liste noch. Was bis dahin gesehen wurde, holt das
+      nicht zurück.
     </p>
 
     <h3 class="settings-sub">Spracheingabe</h3>
@@ -271,8 +274,8 @@
     <p>
       Eine Liste lässt sich jederzeit über den Bearbeiten-Link selbst löschen,
       dann wird die Datei auf dem Server entfernt. Listen, die ein Jahr lang
-      nicht mehr geändert wurden, werden automatisch gelöscht; das erledigt ein
-      Wartungsskript, das täglich läuft. Maßgeblich ist der letzte
+      nicht mehr geändert wurden, werden gelöscht; das erledigt ein
+      Wartungsskript, das täglich auf dem Server läuft. Maßgeblich ist der letzte
       Schreibvorgang, nicht der letzte Aufruf. Damit eine Liste, die nur
       gelesen und nicht geändert wird, nicht unter diese Frist fällt, schreibt
       der Browser sie beim Öffnen mit dem Bearbeiten-Link unverändert noch
@@ -280,7 +283,8 @@
       zurückliegt; für die Superliste gilt dasselbe mit ihrem Zugangs-Link.
       Wer nur ansieht, schreibt nicht. Eine Liste, die ein Jahr lang niemand
       mit ihrem Zugang öffnet, wird gelöscht. Die Zähler der Mengenbegrenzung
-      werden nach einer Stunde entfernt.
+      verfallen nach einer Stunde, ihre Dateien entfernt der Aufräumschritt
+      aus dem Abschnitt Zugriffsdaten.
     </p>
     <p>
       Da der Betrieb die Inhalte nicht lesen kann, ist eine Auskunft über den

@@ -552,14 +552,18 @@ cd /var/www/leih-ich-dir && git pull --ff-only
 
 `data/` steht in `.gitignore` und bleibt dabei unberührt.
 
-**7. Optional: alte Listen abräumen**
+**7. Alte Listen abräumen**
 
 ```cron
 15 4 * * * /usr/bin/php /var/www/leih-ich-dir/tools/purge.php --days=365
 ```
 
-Entfernt Listen, die ein Jahr lang nicht geschrieben wurden. Mit `--dry-run`
-lässt sich der Lauf zunächst beobachten.
+Entfernt Listen, die ein Jahr lang nicht geschrieben wurden. Die
+Datenschutzerklärung sagt das zu; wer sie übernimmt, richtet den Lauf ein.
+Mit `--dry-run` lässt er sich zunächst beobachten. Den Datenordner findet das
+Skript wie `api.php`: `--data=…`, sonst `LEIH_DATA_DIR`, sonst `data/` neben
+der Anwendung. Fehlt der Ordner, endet es mit Status 1, damit der Lauf es
+meldet.
 
 **8. Sichern**
 
@@ -672,6 +676,23 @@ Auch hier ist `data/lists/` die ganze Datenbank; was dazu gehört und was
 nicht, steht oben unter *Deployment auf einem LAMP-Stack, Schritt 8*. In
 Plesk übernimmt das der Sicherungsmanager der Domain — oder ein geplanter
 Task mit demselben `rsync`.
+
+**7. Alte Listen abräumen**
+
+Die Datenschutzerklärung sagt zu, dass Listen nach einem Jahr ohne Änderung
+gelöscht werden; das erledigt `tools/purge.php`, und zwar nur, wenn es
+regelmäßig läuft. In Plesk unter *Websites & Domains → Geplante Aufgaben →
+Aufgabe hinzufügen*:
+
+* Art: *PHP-Skript ausführen*, Pfad `httpdocs/tools/purge.php`
+* Argumente: `--days=365 --data=/var/www/vhosts/leihichdir.de/private/leih-data`
+  (der Ordner aus Schritt 3; ohne Verlegung entfällt `--data`)
+* Ausführung: täglich, etwa 04:15, Benachrichtigung bei Fehlern
+
+Das Argument ist nötig, weil ein geplanter Task die `SetEnv`-Zeile des
+Virtual Host nicht erbt. Zuerst einmal mit `--dry-run` starten: Die Ausgabe
+nennt die Zahl der geprüften Listen. „Kein Datenverzeichnis gefunden“ heißt,
+der Pfad stimmt nicht.
 
 ### Vorgelagerter nginx
 
