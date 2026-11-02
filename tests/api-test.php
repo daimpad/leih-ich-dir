@@ -233,6 +233,13 @@ http_json($base, ['a' => 'delete', 'id' => $plainId, 'proof' => $proof]);
    Leihlisten, viele Male in der Stunde geöffnet. */
 $readId = bin2hex(random_bytes(16));
 http_json($base, ['a' => 'create', 'id' => $readId, 'proof' => $proof, 'payload' => $payload('Leiter')]);
+/* Eine Zaehlerdatei von vor drei Stunden, wie sie ein Ansehen hinterlaesst,
+   das nie etwas anlegt. Seit November 2026 raeumt auch das Lesen auf (etwa
+   jede fuenfzigste Anfrage); vorher blieb sie liegen. */
+@mkdir($dataDir . '/throttle', 0770, true);
+$altZaehler = $dataDir . '/throttle/' . str_repeat('a', 64) . '.json';
+file_put_contents($altZaehler, '{"w":0,"n":1}');
+touch($altZaehler, time() - 3 * 3600);
 $reads = 0;
 $readBlocked = false;
 for ($attempt = 0; $attempt < 1400; $attempt++) {
@@ -247,6 +254,7 @@ for ($attempt = 0; $attempt < 1400; $attempt++) {
 }
 check('Ratenbegrenzung greift beim Lesen', $readBlocked);
 check('Ratenbegrenzung lässt reichlich Lesen zu', $reads >= 1000, $reads);
+check('das Lesen räumt alte Zählerdateien weg', !is_file($altZaehler));
 [$code, $body] = http_json($base, ['a' => 'delete', 'id' => $readId, 'proof' => $proof]);
 check('Löschen bleibt trotz Lesedrossel möglich', $code === 200, (string) $code);
 
@@ -268,6 +276,39 @@ for ($attempt = 0; $attempt < 40; $attempt++) {
 }
 check('Ratenbegrenzung greift beim Anlegen', $blocked);
 check('Ratenbegrenzung lässt genug Listen zu', $created >= 10, $created);
+
+/* tools/purge.php findet denselben Datenordner wie api.php und meldet einen
+   falschen Pfad, statt still nichts zu tun. Bis November 2026 kannte es nur
+   data/ neben sich und endete bei verlegtem Ordner mit Status 0. */
+$purge = static function (string $args, ?string $env = null): array {
+    $cmd = ($env !== null ? 'LEIH_DATA_DIR=' . escapeshellarg($env) . ' ' : 'env -u LEIH_DATA_DIR ')
+         . escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(dirname(__DIR__) . '/tools/purge.php') . ' ' . $args . ' 2>&1';
+    exec($cmd, $out, $status);
+    /* is_file merkt sich, was es zuletzt gesehen hat; das Skript loescht in
+       einem anderen Prozess. */
+    clearstatcache();
+    return [$status, implode("\n", $out)];
+};
+$wartung = sys_get_temp_dir() . '/leih-purge-' . bin2hex(random_bytes(6));
+register_shutdown_function(static function () use ($wartung): void { rmtree($wartung); });
+$alt = str_repeat('a', 32);
+$neu = str_repeat('b', 32);
+@mkdir($wartung . '/lists/aa', 0770, true);
+@mkdir($wartung . '/lists/bb', 0770, true);
+file_put_contents($wartung . '/lists/aa/' . $alt . '.json', json_encode(['v' => 1, 'updated' => strtotime('2020-01-01')]));
+file_put_contents($wartung . '/lists/bb/' . $neu . '.json', json_encode(['v' => 1, 'updated' => time()]));
+
+[$status, $out] = $purge('--days=365 --dry-run --data=' . escapeshellarg($wartung));
+check('purge: Probelauf mit --data nennt die alte Liste', $status === 0 && str_contains($out, $alt) && is_file($wartung . '/lists/aa/' . $alt . '.json'), $out);
+[$status, $out] = $purge('--days=365', $wartung);
+check('purge: über LEIH_DATA_DIR löscht es die alte Liste und lässt die neue', $status === 0
+    && !is_file($wartung . '/lists/aa/' . $alt . '.json') && is_file($wartung . '/lists/bb/' . $neu . '.json'), $out);
+[$status, $out] = $purge('--days=365 --data=' . escapeshellarg($wartung . '/gibt-es-nicht'));
+check('purge: ein falscher Pfad endet mit Status 1', $status === 1 && str_contains($out, 'Kein Datenverzeichnis'), $out);
+$leer = $wartung . '/leer';
+@mkdir($leer, 0770, true);
+[$status] = $purge('--days=365 --data=' . escapeshellarg($leer));
+check('purge: ein Ordner ohne Listen ist kein Fehler', $status === 0);
 
 echo $failures === 0
     ? "\nAlle Prüfungen bestanden.\n"

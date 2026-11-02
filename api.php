@@ -359,6 +359,11 @@ function action_read(): never
        einzige Schranke, vier Abrufe zugleich, im Browser eines gutwilligen
        Nutzers, und jeder Lesevorgang belegt drueben einen PHP-Prozess. */
     throttle('read', READ_LIMIT, READ_WINDOW);
+    /* Seit das Lesen mitgezaehlt wird, legt es auch Zaehlerdateien an, oft als
+       einzige: Wer nur ansieht, legt nie etwas an. Aufgeraeumt wurde aber nur
+       beim Anlegen und bei der KI, eine solche Datei blieb also liegen, obwohl
+       die Datenschutzerklaerung ihr Verschwinden zusagt. */
+    throttle_gc();
     /* Mit geteilter Sperre lesen. action_write schreibt in dieselbe Datei
        (ftruncate, dann fwrite) und haelt dabei LOCK_EX; ein ungesperrtes
        file_get_contents traf das Fenster dazwischen und bekam eine leere
