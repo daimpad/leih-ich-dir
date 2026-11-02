@@ -94,12 +94,20 @@ Schnittstelle mit 403 ab, was `Sec-Fetch-Site: cross-site` trägt oder einen
 einem Proxy setzt das voraus, dass er `Host` durchreicht (*Vorgelagerter
 nginx*). Fehlen beide Kopfzeilen, etwa bei `curl` oder in älteren Browsern,
 gilt allein der Inhaltstyp. Abgewiesen wird vor der Ratenbegrenzung, ein
-abgewiesener Schreibversuch verbraucht also kein Kontingent. Für das Lesen gilt
-beides nicht: GET bleibt von jeder Herkunft offen, denn heraus kommt nur
-Chiffrat. Gezählt wird es trotzdem, und eine fremde Seite kann im Browser
-ihrer Besucher:innen Abrufe auslösen und so deren Lesekontingent (1200 je
-Stunde, *Grenzen*) aufbrauchen. Das bestand schon vorher und ist bislang nicht
-behoben.
+abgewiesener Schreibversuch verbraucht also kein Kontingent.
+
+**Lesen nur von der eigenen Seite.** Heraus kommt beim Lesen nur Chiffrat.
+Gezählt wird es trotzdem (1200 je Stunde, *Grenzen*), und eine fremde Seite
+könnte im Browser ihrer Besucher:innen Abrufe auslösen, mit einem Bild oder
+einem `fetch` im Modus `no-cors`, und so deren Lesekontingent aufbrauchen.
+Deshalb weist `api.php` auch beim Lesen mit 403 ab, vor der Ratenbegrenzung:
+was `Sec-Fetch-Site: cross-site` oder `same-site` trägt, und was einen
+fremden `Origin` trägt. Anders als beim Schreiben gilt hier auch `same-site`
+als fremd, denn bei einem Bild schickt der Browser keinen `Origin`, und ein
+anderer Port oder eine Subdomain käme sonst durch. Die Anwendung liest immer
+von derselben Herkunft. Fehlen beide Kopfzeilen, etwa bei `curl` oder in
+älteren Browsern, bleibt das Lesen offen; `?a=ping` bleibt es immer, denn es
+wird nicht gezählt.
 
 ### Grenzen (Bedrohungsmodell)
 

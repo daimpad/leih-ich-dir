@@ -24,7 +24,8 @@ declare(strict_types=1);
  *   POST {a:"delete", id, proof}
  *
  * POST nur als application/json und nicht von fremder Herkunft, Begruendung
- * bei same_origin_only().
+ * bei same_origin_only(). Gelesen wird nur von der eigenen Herkunft,
+ * Begruendung bei own_origin_read_only().
  *
  * @license MIT
  */
@@ -237,13 +238,7 @@ function verifier(string $proof): string
  * dieser Seite: So faellt ein Proxy, der Host umschreibt, in der Abnahme
  * auf und nicht erst bei Nutzer:innen.
  *
- * Das gilt nur fuers Schreiben. Das Lesen ueber GET bleibt offen, von jeder
- * Herkunft: Es liefert nur Chiffrat, und den Schluessel kennt die fremde
- * Seite nicht. Gezaehlt wird es trotzdem (READ_LIMIT), und eine fremde
- * Seite kann im Browser ihrer Besucher:innen GET-Anfragen ausloesen, etwa
- * mit fetch im Modus no-cors oder einem Bild, und so deren Lesekontingent
- * verbrauchen. Das bestand schon vor diesen Riegeln und ist hier nicht
- * behoben.
+ * Fuers Lesen gelten eigene, strengere Riegel, own_origin_read_only().
  *
  * cross_origin und unsupported_media_type haben in app.js keinen eigenen
  * Text, mapError macht aus beiden 'network'. Das ist Absicht: Der eigene
@@ -257,6 +252,47 @@ function same_origin_only(): void
 {
     $site = strtolower(trim((string) ($_SERVER['HTTP_SEC_FETCH_SITE'] ?? '')));
     if ($site === 'cross-site') {
+        fail(403, 'cross_origin');
+    }
+    if (isset($_SERVER['HTTP_ORIGIN'])
+        && !own_origin((string) $_SERVER['HTTP_ORIGIN'], (string) ($_SERVER['HTTP_HOST'] ?? ''))) {
+        fail(403, 'cross_origin');
+    }
+}
+
+/**
+ * Gelesen wird nur von der eigenen Herkunft.
+ *
+ * Warum: Das Lesen liefert nur Chiffrat, den Schluessel kennt eine fremde
+ * Seite nicht. Gezaehlt wird es aber (READ_LIMIT), und eine fremde Seite
+ * kann im Browser ihrer Besucher:innen GET-Anfragen ausloesen, mit fetch im
+ * Modus no-cors oder einem Bild, ohne die Antwort je zu sehen. So verbrauchte
+ * sie deren Lesekontingent, und eine Stunde lang oeffnete sich bei ihnen
+ * keine Liste mehr. Nachgestellt in tests/e2e/herkunft.mjs: Der Server
+ * antwortete 200 und zaehlte mit.
+ *
+ * Abgewiesen wird mit 403, vor der Drosselung, sodass ein abgewiesener
+ * Abruf nichts kostet:
+ *
+ *  1. Sec-Fetch-Site cross-site und, anders als beim Schreiben, auch
+ *     same-site. Ein Origin hilft beim Lesen nicht weiter, denn bei einem
+ *     GET im Modus no-cors und bei einem Bild schickt der Browser keinen;
+ *     ein anderer Port oder eine Subdomain kaeme sonst durch. Die
+ *     Anwendung liest immer von derselben Herkunft (API_URL in app.js ist
+ *     relativ), check.html ebenso. Durch kommen same-origin, none (die
+ *     Adressleiste) und Anfragen ganz ohne die Kopfzeile.
+ *  2. Ein Origin, der nicht der eigene ist (own_origin). Den schickt der
+ *     Browser bei einem GET im Modus cors von fremder Herkunft.
+ *
+ * Fehlen beide, etwa bei curl, tools/check-deployment.php oder in aelteren
+ * Browsern ohne Sec-Fetch-Site, bleibt das Lesen offen; gegen Skripte steht
+ * die Drosselung. ping bleibt von jeder Herkunft offen, es wird nicht
+ * gezaehlt.
+ */
+function own_origin_read_only(): void
+{
+    $site = strtolower(trim((string) ($_SERVER['HTTP_SEC_FETCH_SITE'] ?? '')));
+    if ($site === 'cross-site' || $site === 'same-site') {
         fail(403, 'cross_origin');
     }
     if (isset($_SERVER['HTTP_ORIGIN'])
@@ -518,7 +554,10 @@ function action_read(): never
        Auffrischung im Ansehen-Modus alle 45 Sekunden kostet 80. Gedrosselt
        wird nicht der Gebrauch, sondern das Haemmern: Bisher stand die
        einzige Schranke, vier Abrufe zugleich, im Browser eines gutwilligen
-       Nutzers, und jeder Lesevorgang belegt drueben einen PHP-Prozess. */
+       Nutzers, und jeder Lesevorgang belegt drueben einen PHP-Prozess.
+       Davor die Herkunft: Ein Abruf von einer fremden Seite zaehlt nicht
+       (own_origin_read_only). */
+    own_origin_read_only();
     throttle('read', READ_LIMIT, READ_WINDOW);
     /* Seit das Lesen mitgezaehlt wird, legt es auch Zaehlerdateien an, oft als
        einzige: Wer nur ansieht, legt nie etwas an. Aufgeraeumt wurde aber nur
@@ -865,8 +904,8 @@ if ($method === 'GET') {
 if ($method === 'POST') {
     /* Vor dem Lesen des Koerpers und vor jeder Drosselung: Ein
        Schreibversuch von einer fremden Seite kostet niemanden ein
-       Kontingent. Fuers Lesen gilt das nicht, GET oben zaehlt von jeder
-       Herkunft (Begruendung bei same_origin_only()). */
+       Kontingent. Fuers Lesen steht dasselbe in action_read()
+       (own_origin_read_only). */
     same_origin_only();
     require_json();
     $in = request_body();

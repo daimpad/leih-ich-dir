@@ -1,5 +1,6 @@
 /*
- * Herkunft: Die Schnittstelle schreibt nur fuer die eigene Seite.
+ * Herkunft: Die Schnittstelle schreibt nur fuer die eigene Seite, und sie
+ * liest nur fuer sie.
  *
  * Ein fetch mit mode 'no-cors' und Content-Type text/plain braucht keine
  * Vorabanfrage, ein Formular mit enctype="text/plain" auch nicht. Bis zur
@@ -26,6 +27,14 @@
  * davor griffe, weil der Browser etwa keinen Origin schickt. api-test.php
  * setzt die Kopfzeilen selbst; nur hier schickt sie Chromium, und nur hier
  * faellt eine falsche Annahme darueber auf, was es schickt.
+ *
+ * Beim Lesen dasselbe fuer ein Bild und fuer fetch, im Modus no-cors und
+ * cors (own_origin_read_only): Ein Abruf von fremder Seite verbraucht sonst
+ * das Lesekontingent ihrer Besucher:innen. Gelesen wird eine Liste, die es
+ * nicht gibt; 404 heisst also, der Abruf kam durch und wurde gezaehlt, 403,
+ * er wurde vorher abgewiesen. Hier ist auch der gleiche Rechner auf anderem
+ * Port fremd, obwohl same-site: Beim Bild schickt der Browser keinen
+ * Origin.
  *
  * Wer die Suite einzeln startet, setzt vorher data/throttle zurueck; sie
  * legt eine Liste an.
@@ -62,8 +71,8 @@ const port = fremd.address().port;
 const andererName = ZIEL.hostname === 'localhost' ? '127.0.0.1' : 'localhost';
 
 const HERKUENFTE = [
-  { name: 'gleicher Rechner, anderer Port', url: 'http://' + ZIEL.hostname + ':' + port + '/' },
-  { name: 'anderer Rechnername', url: 'http://' + andererName + ':' + port + '/' }
+  { name: 'gleicher Rechner, anderer Port', url: 'http://' + ZIEL.hostname + ':' + port + '/', site: 'same-site' },
+  { name: 'anderer Rechnername', url: 'http://' + andererName + ':' + port + '/', site: 'cross-site' }
 ];
 
 const br = await starteBrowser();
@@ -81,6 +90,45 @@ async function antwortAuf(p, ausloesen) {
   if (!r) { return '0'; }
   const body = await r.json().catch(() => ({ error: '?' }));
   return r.status() + ' ' + (body.error || '-');
+}
+
+/** Wie antwortAuf, fuer einen Abruf von ?a=read&id=<id> als Bild oder mit
+    fetch: Status und Sec-Fetch-Site, etwa "403 cross-site". Ein Bild mit
+    JSON darin verwirft Chromium (ORB), eine cors-Antwort ohne
+    Access-Control-Allow-Origin ebenso, und Playwright sieht dann keine
+    Antwort. Die Chrome-Schnittstelle sieht sie, mit dem Status, den der
+    Server schickte. Ohne eval, denn die eigene Seite verbietet es (CSP). */
+const sitzungen = new WeakMap();
+async function leseAntwort(p, id, wie) {
+  const url = API + '?a=read&id=' + id;
+  if (!sitzungen.has(p)) {
+    const cdp = await p.context().newCDPSession(p);
+    const s = { urls: {}, site: {}, status: {}, warten: [] };
+    cdp.on('Network.requestWillBeSent', (e) => { s.urls[e.requestId] = e.request.url; });
+    cdp.on('Network.requestWillBeSentExtraInfo', (e) => {
+      s.site[e.requestId] = e.headers['Sec-Fetch-Site'] || e.headers['sec-fetch-site'] || '-';
+    });
+    cdp.on('Network.responseReceivedExtraInfo', (e) => {
+      s.status[e.requestId] = e.statusCode;
+      s.warten.forEach((w) => w());
+    });
+    await cdp.send('Network.enable');
+    sitzungen.set(p, s);
+  }
+  const s = sitzungen.get(p);
+  const gefunden = () => Object.keys(s.status).find((rid) => s.urls[rid] === url);
+  const fertig = new Promise((ja) => {
+    const w = () => { if (gefunden()) { ja(); } };
+    s.warten.push(w);
+    setTimeout(ja, 8000);
+  });
+  await p.evaluate(({ url, wie }) => {
+    if (wie === 'ein Bild') { const b = new Image(); b.src = url; return; }
+    fetch(url, wie === 'fetch no-cors' ? { mode: 'no-cors' } : {}).catch(() => null);
+  }, { url, wie });
+  await fertig;
+  const rid = gefunden();
+  return rid ? s.status[rid] + ' ' + s.site[rid] : '0';
 }
 
 for (const h of HERKUENFTE) {
@@ -136,6 +184,12 @@ for (const h of HERKUENFTE) {
   const nachJson = await lesestatus(j.id);
   ok('und legt nichts an', nachJson === 404, 'read ' + nachJson);
 
+  /* 4 · Lesen, als Bild und mit fetch in beiden Modi */
+  for (const wie of ['ein Bild', 'fetch no-cors', 'fetch cors']) {
+    const status = await leseAntwort(p, randomBytes(16).toString('hex'), wie);
+    ok('Lesen über ' + wie + ' kommt beim Server an und endet in 403 (' + h.site + ')', status === '403 ' + h.site, status);
+  }
+
   await ctx.close();
 }
 
@@ -164,6 +218,12 @@ console.log('· eigene Seite (' + BASE + ')');
     body: JSON.stringify({ a: 'delete', id: arg.id, proof: arg.proof })
   }).then((r) => r.status), { id: e.id, proof: e.proof });
   ok('Loeschen von der eigenen Seite → 200', weg === 200, 'Status ' + weg);
+  /* Und das Lesen: als Bild und mit fetch, wie apiGet. Die Liste gibt es
+     nicht mehr, durch heisst also 404. */
+  for (const wie of ['ein Bild', 'fetch cors']) {
+    const status = await leseAntwort(p, e.id, wie);
+    ok('Lesen über ' + wie + ' von der eigenen Seite kommt durch', status === '404 same-origin', status);
+  }
   await ctx.close();
 }
 
