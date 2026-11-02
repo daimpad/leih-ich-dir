@@ -161,9 +161,10 @@
       Für das Anlegen neuer Listen und für das Lesen einer Liste gilt je eine
       Mengenbegrenzung pro Stunde, beim Lesen großzügig (1200 Abrufe). Das
       Lesen zählt auch dann, wenn Du nur einen Ansehen-Link öffnest. Dafür wird
-      die IP-Adresse mit einem installationsspezifischen Salz gehasht und nur
-      dieser Hash zusammen mit einem Zähler gespeichert. Die Adresse selbst
-      wird nicht abgelegt. Die Zähler verfallen nach Ablauf des Zeitfensters
+      die IP-Adresse mit einem installationsspezifischen Salz gehasht, bei IPv6
+      nicht Deine ganze Adresse, sondern nur ihr /64-Block, und nur dieser
+      Hash zusammen mit einem Zähler gespeichert. Die Adresse selbst wird
+      nicht abgelegt. Die Zähler verfallen nach Ablauf des Zeitfensters
       von einer Stunde und werden ab dann nicht mehr mitgezählt. Die Datei
       dazu räumt ein Aufräumschritt weg, der bei etwa jeder fünfzigsten
       Anfrage mitläuft und Dateien entfernt, die älter als zwei Stunden sind;
