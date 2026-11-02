@@ -110,7 +110,7 @@ Ehrliche Einordnung, denn Verschlüsselung ersetzt kein Rechtemanagement:
 - Die Superliste lässt sich ebenfalls sichern, und ihre Datei enthält die Ansehen-Links der gesammelten Leihlisten: fremden Zugang, im Klartext, auf einer Festplatte. Das ist ernst, aber es ist keine neue Preisgabe — der Zugangs-Link der Superliste (`#k=`) gewährt jedem, der ihn bekommt, genau dasselbe. Die Datei ist eine zweite Kopie davon. Wer sie für unzumutbar hält, müsste die Superliste selbst für unzumutbar halten. Der Unterschied liegt im Gefühl: Ein Link, den man verschickt, wirkt wie Zugang; eine Datei im Download-Ordner nicht. Deshalb steht die Warnung im Aufklapper und nicht im Kleingedruckten. Ein Token enthält die Datei nicht — weitergegeben wird, was der Eigentümer sehen darf, nicht, was er ändern darf.
 - Listen, die ein Jahr lang nicht geschrieben wurden, löscht `tools/purge.php`. Lesen zählt nicht, und der Server kann nicht zählen, was er nicht sieht. Deshalb schreibt der Browser eine Liste beim Öffnen mit Zugang unverändert neu, sobald der letzte Schreibvorgang mehr als dreißig Tage zurückliegt; die Superliste ebenso. Wer nur ansieht, hält nichts am Leben.
 - Der Server kennt zwar keine Inhalte, aber Metadaten: Größe des Chiffrats, Zeitpunkte, Revisionszähler.
-- Die Superliste erzeugt im Zugriffsprotokoll ein Muster, das einzelne Aufrufe nicht erzeugen: welche Listen zusammen und von welcher Adresse aus gelesen werden. Lesen ist gedrosselt, aber großzügig: 1200 Abrufe je Stunde und Adresse, das ist der Alltag einer vollen Superliste, viele Male geöffnet, und nicht das Hämmern. Die Schranke von vier gleichzeitigen Abrufen sitzt weiterhin im Browser. Hinter einem Proxy gilt die durchgereichte Adresse, aber nur, wenn die Anfrage von `localhost` kommt — von außen ließe sich die Kopfzeile erfinden.
+- Die Superliste erzeugt im Zugriffsprotokoll ein Muster, das einzelne Aufrufe nicht erzeugen: welche Listen zusammen und von welcher Adresse aus gelesen werden. Lesen ist gedrosselt, aber großzügig: 1200 Abrufe je Stunde und Adresse, das ist der Alltag einer vollen Superliste, viele Male geöffnet, und nicht das Hämmern. Die Schranke von vier gleichzeitigen Abrufen sitzt weiterhin im Browser. Hinter einem Proxy gilt die durchgereichte Adresse, aber nur, wenn die Anfrage von `localhost` kommt — von außen ließe sich die Kopfzeile erfinden. Gezählt wird je IPv4-Adresse, bei IPv6 aber je /64: Darin wählt jeder Anschluss seine Adresse selbst, und mit der vollen Adresse zählte jede neue von vorn. Wer ein ganzes /56 oder /48 hat, hat entsprechend mehr Kontingente; ein gröberer Schnitt träfe in Mobilfunknetzen, wo jedes Gerät ein /64 aus einem gemeinsamen Block bekommt, Fremde zusammen.
 - Der Link zu einer Superliste ist ein Bündel fremder Schlüssel. Es gibt für ihn bewusst keine Form nur zum Ansehen: Er wird als Ganzes weitergegeben oder gar nicht. Die gesammelten Personen erfahren nichts davon, denn eine Benachrichtigung setzte voraus, festzuhalten, wer welche Liste liest.
 - Ein kompromittierter Server könnte manipuliertes JavaScript ausliefern. Diesem Angriff ist jede Web-Anwendung mit Client-Verschlüsselung ausgesetzt; er lässt sich nur durch Prüfung des ausgelieferten Codes eingrenzen.
 - Gleichzeitige Änderungen an zwei Bearbeiten-Links: Der Server erkennt den Konflikt über den Revisionszähler, der Client schreibt danach seinen Stand fort (*last write wins*).
@@ -217,7 +217,7 @@ Der Schlüssel gehört nicht ins Repository; `data/` steht in `.gitignore`.
 
 Der Text wird weitergereicht und danach verworfen: kein Protokoll, keine
 Ablage, keine Zuordnung zu einer Liste. Die Ratenbegrenzung liegt bei 60
-Anfragen je Stunde und IP-Adresse.
+Anfragen je Stunde und IP-Adresse, bei IPv6 je /64.
 
 Zwei Dinge, die zum eingeschalteten Proxy gehören:
 
@@ -426,7 +426,7 @@ weniger Bewegung, nicht weniger Anerkennung.
 │   ├── .htaccess                 verbietet jeden HTTP-Zugriff
 │   ├── .ai-key                   optionaler Schlüssel für den KI-Proxy
 │   ├── lists/                    verschlüsselte Listen
-│   └── throttle/                 Ratenbegrenzung, gehashte IP-Adressen
+│   └── throttle/                 Ratenbegrenzung, gehashte IP-Adressen, IPv6 je /64
 ├── tools/
 │   ├── .htaccess                 sperrt das Verzeichnis, zweite Schicht
 │   ├── purge.php                 Wartungsskript für alte Listen
@@ -847,9 +847,9 @@ php tests/api-test.php                               # Funktionstest des Backend
 
 Der Funktionstest startet einen eigenen PHP-Server mit einem eigenen
 Datenverzeichnis, prüft alle Endpunkte samt Fehlerfällen, Herkunft und
-Inhaltstyp sowie die Ratenbegrenzung und weist nach, dass in der Ablage kein
-Klartext landet. Vorhandene Listen bleiben unberührt. Alle drei Prüfungen
-laufen auch in der GitHub-Action `CI`.
+Inhaltstyp sowie die Ratenbegrenzung, auch je IPv6-/64, und weist nach, dass
+in der Ablage kein Klartext landet. Vorhandene Listen bleiben unberührt. Alle
+drei Prüfungen laufen auch in der GitHub-Action `CI`.
 
 ## Lizenz
 

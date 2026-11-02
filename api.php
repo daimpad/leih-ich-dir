@@ -13,7 +13,8 @@ declare(strict_types=1);
  *
  * Der AES-Schlüssel steht im URL-Fragment und erreicht diesen Code nie.
  * Es gibt keine Datenbank, keine Sitzungen, keine Cookies, kein Logging von
- * Inhalten. IP-Adressen werden ausschließlich gesalzen gehasht (Ratenbegrenzung).
+ * Inhalten. IP-Adressen werden ausschließlich gesalzen gehasht (Ratenbegrenzung),
+ * IPv6-Adressen davor auf ihr /64 gekuerzt.
  *
  * API (JSON über POST, Lesen über GET):
  *   GET  ?a=ping
@@ -62,9 +63,9 @@ function ai_key_files(): array
 
 const MAX_REQUEST_SIZE = 1048576;  // 1 MiB Rohanfrage
 const MAX_CT_CHARS     = 524288;   // 512 KiB Chiffrat (base64url)
-const CREATE_LIMIT     = 20;       // neue Listen pro Fenster und IP
+const CREATE_LIMIT     = 20;       // neue Listen pro Fenster und IP (IPv6: je /64)
 const CREATE_WINDOW    = 3600;     // Sekunden
-const READ_LIMIT       = 1200;     // Lesezugriffe pro Fenster und IP; Begruendung bei action_read()
+const READ_LIMIT       = 1200;     // Lesezugriffe pro Fenster und IP (IPv6: je /64); Begruendung bei action_read()
 const READ_WINDOW      = 3600;
 const THROTTLE_GC_PROB = 50;       // 1 von n Anfragen räumt alte Zählerdateien auf
 
@@ -109,7 +110,7 @@ const AI_ENDPOINT      = 'https://generativelanguage.googleapis.com/v1beta/model
    Schlüssel über GET /v1beta/models prüfen, unangemeldet geht das nicht. */
 const AI_MODEL         = 'gemini-2.5-flash';
 const AI_MAX_TEXT      = 1500;     // Zeichen je Anfrage
-const AI_LIMIT         = 60;       // Anfragen pro Fenster und IP
+const AI_LIMIT         = 60;       // Anfragen pro Fenster und IP (IPv6: je /64)
 const AI_WINDOW        = 3600;
 
 /* == Antworten ============================================================= */
@@ -374,12 +375,6 @@ function valid_payload(mixed $payload): array
 /* == Ratenbegrenzung ======================================================= */
 
 /**
- * Begrenzt Anfragen pro IP und Zeitfenster.
- * Gespeichert wird nur ein gesalzener Hash der Adresse, nie die Adresse selbst.
- *
- * @param string $bucket Name des Zählers, trennt Anlegen und KI-Anfragen
- */
-/**
  * Die Adresse, nach der gedrosselt wird.
  *
  * Steht ein Proxy vor Apache — in Plesk der nginx —, ist REMOTE_ADDR dessen
@@ -414,9 +409,45 @@ function client_ip(): string
     return $ip;
 }
 
+/**
+ * Wofuer gezaehlt wird: eine IPv4-Adresse, aber ein ganzes IPv6-/64.
+ *
+ * Ein Anschluss bekommt bei IPv6 mindestens ein /64, und darin waehlt das
+ * Geraet seine Adresse selbst — mit Privacy Extensions wechselt sie von
+ * allein, und wer will, nimmt fuer jede Anfrage eine neue aus 2^64. Mit der
+ * vollen Adresse im Hash zaehlte jede davon neu, und CREATE_LIMIT,
+ * READ_LIMIT und AI_LIMIT galten fuer niemanden. Nicht weiter als /64:
+ * Mobilfunk und viele Anbieter geben jedem Kunden genau ein /64 aus einem
+ * gemeinsamen Block, ein /56 traefe dort Fremde zusammen. Wer selbst ein /56
+ * oder /48 hat, hat entsprechend mehr Kontingente; das bleibt.
+ *
+ * IPv4 und IPv4-gemappte Adressen (::ffff:a.b.c.d) bleiben, wie sie sind:
+ * Dort steht die Adresse fuer den Anschluss, und die ersten 64 Bit einer
+ * gemappten waeren fuer alle dieselben Nullen. Wie die Adresse ermittelt
+ * wird, steht bei client_ip() und aendert sich hiermit nicht.
+ */
+function address_block(string $ip): string
+{
+    $bin = str_contains($ip, ':') ? @inet_pton($ip) : false;
+    if (!is_string($bin) || strlen($bin) !== 16) {
+        return $ip;
+    }
+    if (str_starts_with($bin, str_repeat("\0", 10) . "\xff\xff")) {
+        return $ip;
+    }
+    return (string) inet_ntop(substr($bin, 0, 8) . str_repeat("\0", 8)) . '/64';
+}
+
+/**
+ * Begrenzt Anfragen je IPv4-Adresse bzw. IPv6-/64 (address_block) und
+ * Zeitfenster.
+ * Gespeichert wird nur ein gesalzener Hash der Adresse, nie die Adresse selbst.
+ *
+ * @param string $bucket Name des Zählers, trennt Anlegen und KI-Anfragen
+ */
 function throttle(string $bucket, int $limit, int $window): void
 {
-    $ip = client_ip();
+    $ip = address_block(client_ip());
     $file = throttle_dir() . '/' . hash('sha256', $bucket . '|' . $ip . '|' . install_salt()) . '.json';
 
     $fh = @fopen($file, 'c+');

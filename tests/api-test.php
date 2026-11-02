@@ -396,6 +396,40 @@ for ($attempt = 0; $attempt < 40; $attempt++) {
 check('Ratenbegrenzung greift beim Anlegen', $blocked);
 check('Ratenbegrenzung lässt genug Listen zu', $created >= 10, $created);
 
+/* Gezaehlt wird je IPv4-Adresse, aber je IPv6-/64 (address_block in
+   api.php): Im eigenen /64 waehlt jeder Anschluss seine Adresse selbst.
+   Die Adresse steuert der Test ueber X-Forwarded-For, denn er fragt von
+   127.0.0.1, und von dort gilt die letzte Adresse der Kette (client_ip).
+   Eine Adresse fuellt ihr Kontingent bis zum ersten 429; dann zeigt eine
+   zweite, ob sie auf dasselbe trifft. */
+$anlegenVon = static function (string $ip) use ($base, $proof, $payload): int {
+    [$code] = http_json($base, ['a' => 'create', 'id' => bin2hex(random_bytes(16)), 'proof' => $proof, 'payload' => $payload('x')],
+        ['Content-Type: application/json', 'X-Forwarded-For: ' . $ip]);
+    return $code;
+};
+$fuelle = static function (string $ip) use ($anlegenVon): bool {
+    for ($n = 0; $n < 40; $n++) {
+        if ($anlegenVon($ip) === 429) {
+            return $n >= 10;
+        }
+    }
+    return false;
+};
+
+check('IPv6: das Kontingent einer Adresse läuft voll', $fuelle('2001:db8:aaaa:1::1'));
+$code = $anlegenVon('2001:0DB8:AAAA:0001:1234:5678:9abc:def0');
+check('IPv6: eine andere Adresse im selben /64 teilt es', $code === 429, $code);
+$code = $anlegenVon('2001:db8:aaaa:2::1');
+check('IPv6: das Nachbar-/64 hat ein eigenes', $code === 200, $code);
+
+check('IPv4: das Kontingent einer Adresse läuft voll', $fuelle('198.51.100.1'));
+$code = $anlegenVon('198.51.100.2');
+check('IPv4: die Nachbaradresse hat ein eigenes', $code === 200, $code);
+
+check('IPv4-gemappt: das Kontingent läuft voll', $fuelle('::ffff:198.51.100.7'));
+$code = $anlegenVon('::ffff:198.51.100.8');
+check('IPv4-gemappt: die Nachbaradresse hat ein eigenes', $code === 200, $code);
+
 /* tools/purge.php findet denselben Datenordner wie api.php und meldet einen
    falschen Pfad, statt still nichts zu tun. Bis November 2026 kannte es nur
    data/ neben sich und endete bei verlegtem Ordner mit Status 0. */
