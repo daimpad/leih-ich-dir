@@ -95,7 +95,7 @@ Ehrliche Einordnung, denn Verschlüsselung ersetzt kein Rechtemanagement:
 - Ein kompromittierter Server könnte manipuliertes JavaScript ausliefern. Diesem Angriff ist jede Web-Anwendung mit Client-Verschlüsselung ausgesetzt; er lässt sich nur durch Prüfung des ausgelieferten Codes eingrenzen.
 - Gleichzeitige Änderungen an zwei Bearbeiten-Links: Der Server erkennt den Konflikt über den Revisionszähler, der Client schreibt danach seinen Stand fort (*last write wins*).
 - Die Übersetzungsfunktion des Browsers ist eine Übertragung an Dritte: Sie liest Textknoten aus und schickt sie an den Dienst des Browserherstellers. Die Bereiche mit entschlüsseltem Inhalt tragen deshalb `translate="no"`; Browser, die sich daran halten, lassen sie stehen. Erzwingen lässt es sich nicht.
-- Die Spracheingabe steht außerhalb dieser Zusage. Gesprochenes Audio und der erkannte Text verlassen das Gerät, sobald die Spracherkennung des Browsers oder die KI genutzt wird. Der Abschnitt zur Spracheingabe sagt genau, wann das passiert und wie es sich abstellen lässt.
+- Die Spracheingabe steht außerhalb dieser Zusage, ebenso das Feld „Mehrere auf einmal", das in dieselbe Box führt. Gesprochenes Audio und der Text in der Box — eingesprochen oder eingetippt — verlassen das Gerät, sobald die Spracherkennung des Browsers oder die KI genutzt wird. Nur was einzeln über das Eingabefeld eingetragen wird, bleibt in jedem Fall verschlüsselt. Der Abschnitt zur Spracheingabe sagt genau, wann das passiert und wie es sich abstellen lässt.
 
 ## Spracheingabe und KI-Strukturierung
 
@@ -103,7 +103,10 @@ Im Bearbeitenmodus steht eine Schaltfläche „Einsprechen". Sie nutzt die
 Spracherkennung des Browsers (`SpeechRecognition`, in Chrome und Safari als
 `webkitSpeechRecognition`). Der erkannte Freitext wird in einzelne Gegenstände
 zerlegt und in die Liste eingetragen. Ohne Spracherkennung im Browser, etwa in
-Firefox, bleibt das Textfeld nutzbar.
+Firefox, bleibt das Textfeld nutzbar. Dasselbe Feld öffnet „Mehrere auf
+einmal": Eingetippter Text geht dort denselben Weg wie gesprochener
+(`processVoiceText`), bis zur KI. Nur das einzelne Eintragen über das
+Eingabefeld (`addItem`) läuft an der Zerlegung vorbei.
 
 Für die Zerlegung gibt es drei Wege. Die Anwendung wählt den ersten, der
 verfügbar ist:
@@ -134,8 +137,9 @@ lädt; CORS schützt ihn nicht, weil die Gegenstelle jede Herkunft zurückspiege
 Deshalb ist es der Schlüssel der Nutzerin und nicht der des Betriebs.
 
 **Was das für die Zusage bedeutet.** Die Liste bleibt Ende-zu-Ende
-verschlüsselt. Der gesprochene Satz ist davon ausgenommen: Er ist der einzige
-Klartext, der das Gerät verlässt.
+verschlüsselt. Der Text in der Box ist davon ausgenommen, ob gesprochen oder
+unter „Mehrere auf einmal" eingetippt: Er ist der einzige Klartext, der das
+Gerät verlässt.
 
 Das geschieht an zwei Stellen, und die erste liegt nicht in unserer Hand. Wo
 die Spracherkennung läuft, entscheidet der Browser:
@@ -147,9 +151,9 @@ die Spracherkennung läuft, entscheidet der Browser:
   Google.
 
 Die Anwendung kann das weder erkennen noch beeinflussen. Die zweite Stelle ist
-die KI-Anfrage, und die überträgt den erkannten Text immer. Wer beides nicht
-will, hinterlegt keinen Schlüssel und lässt den Proxy aus. Dann bleibt die
-Zerlegung im Browser, und es wird nichts übertragen.
+die KI-Anfrage, und die überträgt den Text der Box immer, den erkannten wie den
+eingetippten. Wer beides nicht will, hinterlegt keinen Schlüssel und lässt den
+Proxy aus. Dann bleibt die Zerlegung im Browser, und es wird nichts übertragen.
 
 **Zu Modell und Kontingent.** `AI_MODEL` steht in `app.js` und `api.php` und
 ist auf `gemini-2.5-flash` gesetzt. Eine Modellkennung lässt sich unangemeldet
@@ -791,10 +795,11 @@ deployment section above; `data/` must be writable by the web server and
 unreachable over HTTP. GitHub Pages serves a design preview that falls back to
 `localStorage` because PHP is not executed there.
 
-Items can also be dictated: the browser's speech recognition produces free
-text, which is split into items either locally or, if you supply your own
-Gemini key, by the AI. That spoken text is the one piece of plaintext that
-leaves the device, and the German section above says exactly when.
+Items can also be dictated, or typed several at once into the same box: the
+text is split into items either locally or, once a Gemini key is set on the
+device or on the server, by the AI. That text, spoken or typed, is the one
+piece of plaintext that leaves the device; items added one by one stay
+encrypted. The German section above says exactly when.
 
 The visual identity is the nozilla corporate design, vendored verbatim under
 `style.css`, with self-hosted font subsets. Nothing is fetched from

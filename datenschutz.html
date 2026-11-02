@@ -215,38 +215,49 @@
       Verknüpfung zwischen zwei Listen entsteht dort nicht, und es ist auch
       niemand hinterlegt, der sich benachrichtigen ließe. Die Personen, deren
       Listen in einer Superliste stehen, erfahren davon deshalb nichts. Wer
-      seinen Ansehen-Link zurückziehen möchte, löscht die Liste über den
-      eigenen Bearbeiten-Link oder legt sie unter einem neuen Link an.
+      seinen Ansehen-Link zurückziehen möchte, tut das in der eigenen Liste im
+      dritten Schritt, <em>Link teilen</em>, mit <em>Ansehen-Link
+      zurückziehen</em>. Die Liste wird dabei unter einem neuen Schlüssel neu
+      verschlüsselt und bekommt einen neuen Nachweis-Hash. Alle bisherigen
+      Links werden ungültig, auch der eigene Bearbeiten-Link. Eine Superliste,
+      die noch den alten Link hält, zeigt die Liste danach nicht mehr. Was dort
+      bis dahin gesehen wurde, holt das Zurückziehen nicht zurück.
     </p>
 
-    <h3 class="settings-sub">Spracheingabe</h3>
+    <h3 class="settings-sub">Spracheingabe und Sammeleingabe</h3>
     <p>
-      Wer die Spracheingabe nutzt, verlässt den verschlüsselten Bereich. Zwei
-      Übertragungen können dabei stattfinden:
+      Wer Gegenstände einspricht oder unter <em>Mehrere auf einmal</em>
+      eintippt, verlässt den verschlüsselten Bereich. Beides führt in dasselbe
+      Textfeld, und der Text darin geht denselben Weg. Zwei Übertragungen
+      können dabei stattfinden:
     </p>
     <ul class="points">
       <li><span>
         Die <strong>Spracherkennung des Browsers</strong> wandelt Audio in Text.
-        Wo das geschieht, entscheidet der Browser. Auf dem Desktop nutzt Chrome
-        ein lokales Sprachpaket, wenn eines installiert ist, und weicht sonst auf
-        Server von Google aus. Auf Android gibt es die lokale Erkennung nicht,
-        dort wird das Audio immer an Google übertragen. Diese Anwendung kann das
-        weder erkennen noch beeinflussen.
+        Sie arbeitet nur beim Einsprechen. Wo das geschieht, entscheidet der
+        Browser. Auf dem Desktop nutzt Chrome ein lokales Sprachpaket, wenn
+        eines installiert ist, und weicht sonst auf Server von Google aus. Auf
+        Android gibt es die lokale Erkennung nicht, dort wird das Audio immer
+        an Google übertragen. Diese Anwendung kann das weder erkennen noch
+        beeinflussen.
       </span></li>
       <li><span>
-        Die <strong>Strukturierung des erkannten Textes</strong> läuft über
-        Google Gemini. Der erkannte Text wird dafür an Google übertragen, in den
-        USA verarbeitet und von dieser Anwendung weder protokolliert noch
-        gespeichert. Wer das nicht möchte, nutzt die Spracheingabe nicht; die
-        Liste lässt sich vollständig über die Tastatur pflegen.
+        Die <strong>Strukturierung des Textes</strong> läuft über Google
+        Gemini, beim eingesprochenen wie beim eingetippten. Der Text wird dafür
+        an Google übertragen, in den USA verarbeitet und von dieser Anwendung
+        weder protokolliert noch gespeichert. Wer das nicht möchte, trägt
+        Gegenstände einzeln über das Eingabefeld und <em>Hinzufügen</em> ein;
+        was so eingetragen wird, ist verschlüsselt, bevor es das Gerät
+        verlässt.
       </span></li>
     </ul>
     <p>
       Rechtsgrundlage ist die Einwilligung durch die bewusste Nutzung der
-      Schaltfläche zum Einsprechen, Artikel 6 Absatz 1 Buchstabe a DSGVO. Die
-      Einwilligung lässt sich jederzeit widerrufen, indem die Spracheingabe
-      nicht mehr benutzt wird; die Rechtmäßigkeit der bis dahin erfolgten
-      Verarbeitung bleibt davon unberührt.
+      Schaltfläche zum Einsprechen oder, beim Eintippen, der Schaltfläche
+      <em>Übernehmen</em>, Artikel 6 Absatz 1 Buchstabe a DSGVO. Die
+      Einwilligung lässt sich jederzeit widerrufen, indem beides nicht mehr
+      benutzt wird; die Rechtmäßigkeit der bis dahin erfolgten Verarbeitung
+      bleibt davon unberührt.
     </p>
     <p>
       In beiden Fällen werden Daten an Google (Google Ireland Limited,
@@ -256,8 +267,8 @@
       zertifiziert; ergänzend gelten die Standardvertragsklauseln der
       Europäischen Kommission. Ein dem europäischen Niveau gleichwertiger
       Schutz lässt sich damit nicht in jedem Fall zusichern. Wer das nicht
-      möchte, pflegt die Liste über die Tastatur — dann wird nichts
-      übertragen.
+      möchte, trägt Gegenstände einzeln über das Eingabefeld ein — dann
+      erreicht Google nichts davon.
     </p>
   </section>
 
@@ -292,9 +303,9 @@
       die sie anlegt, und dient der Erfüllung dieses Verhältnisses, Artikel 6
       Absatz 1 Buchstabe b DSGVO. Die Mengenbegrenzung mit gehashten Adressen
       dient dem Schutz des Dienstes vor Missbrauch und damit einem berechtigten
-      Interesse, Artikel 6 Absatz 1 Buchstabe f DSGVO. Für die Spracheingabe
-      gilt die Einwilligung nach Buchstabe a; sie ist im Abschnitt darüber
-      beschrieben.
+      Interesse, Artikel 6 Absatz 1 Buchstabe f DSGVO. Für Spracheingabe und
+      Sammeleingabe gilt die Einwilligung nach Buchstabe a; sie ist im
+      Abschnitt darüber beschrieben.
     </p>
   </section>
 
