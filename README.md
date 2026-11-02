@@ -31,7 +31,7 @@ oder Kontaktdaten.
 | **Gemerkte Listen** | eigene Leihlisten und Superlisten stehen auf der Startseite dieses Browsers, rein lokal und ohne Konto |
 | **Zwei Wege dorthin** | breit als zwei Verweise in der Kopfleiste, je mit Zeichen und Wort; schmal als eine schwebende Schaltfläche unten rechts |
 | **Superliste** | eine Liste der Leihlisten: mehrere Ansehen-Links zu einer Übersicht bündeln, alle Gegenstände in einer Liste, mit Suche über Gegenstand, Person und Notiz. Wie die Leihliste in drei Reitern: Listen sammeln, Was es gibt, Weitergeben; unter dem dritten ihr Zugangs-Link, verdeckt |
-| **Spracheingabe** | Gegenstände unterwegs einsprechen, Zerlegung im Browser oder wahlweise per Gemini |
+| **Spracheingabe** | Gegenstände unterwegs einsprechen, Zerlegung im Browser oder mit eigenem Schlüssel per Gemini |
 | **Erscheinungsbild** | eigenständig in `style.css`, Schriften mitgeliefert, keine fremden Server |
 | **Auffindbar** | Titel, Beschreibungen, Open Graph, `robots.txt` und `sitemap.xml`; strukturierte Angaben als JSON-LD |
 | **Ohne Abhängigkeiten** | pures PHP, HTML, CSS, Vanilla JS, kein Framework, kein Bauschritt, keine Datenbank |
@@ -111,7 +111,7 @@ verfügbar ist:
 | Weg | Voraussetzung | Wohin der Text geht |
 |---|---|---|
 | **Gemini, eigener Schlüssel** | Schlüssel auf der Einstellungsseite hinterlegt | vom Gerät direkt zu Google |
-| **Gemini über den Server** | Schlüssel in `data/.ai-key` hinterlegt | über diesen Server zu Google |
+| **Gemini über den Server** | `AI_PROXY_ENABLED` auf `true` und Schlüssel in `data/.ai-key`; für leihichdir.de ausgeschaltet | über diesen Server zu Google |
 | **Zerlegung im Browser** | immer | nirgendwohin |
 
 Die KI bekommt eine Systemanweisung, die ausschließlich ein JSON-Array
@@ -134,8 +134,10 @@ lädt; CORS schützt ihn nicht, weil die Gegenstelle jede Herkunft zurückspiege
 Deshalb ist es der Schlüssel der Nutzerin und nicht der des Betriebs.
 
 **Was das für die Zusage bedeutet.** Die Liste bleibt Ende-zu-Ende
-verschlüsselt. Der gesprochene Satz ist davon ausgenommen: Er ist der einzige
-Klartext, der das Gerät verlässt.
+verschlüsselt. Ausgenommen ist der Text, der zerlegt werden soll: der
+gesprochene Satz und, mit eigenem Schlüssel, auch das, was unter „Mehrere auf
+einmal“ getippt wird. Er ist der einzige Klartext, der das Gerät verlassen
+kann.
 
 Das geschieht an zwei Stellen, und die erste liegt nicht in unserer Hand. Wo
 die Spracherkennung läuft, entscheidet der Browser:
@@ -161,8 +163,17 @@ einander.
 
 ### Server-Proxy
 
-`AI_PROXY_ENABLED` steht in `api.php` auf `true`, damit auch Gäste ohne eigenen
-Schlüssel die KI-Strukturierung nutzen können.
+`AI_PROXY_ENABLED` steht in `api.php` auf `false`. Für leihichdir.de bleibt der
+Proxy seit November 2026 aus: Der Server soll keinen Klartext sehen, und die
+Datenschutzerklärung soll keinen Weg beschreiben, den eine abgelegte Datei
+jederzeit öffnen könnte. Wer Gemini will, hinterlegt einen eigenen Schlüssel
+in den Einstellungen.
+
+Eine eigene Installation kann ihn einschalten, damit auch Gäste ohne eigenen
+Schlüssel die KI-Strukturierung nutzen können. Dann gehören `settings.aiHint`
+in beiden Wörterbüchern und der Abschnitt *Spracheingabe* in
+`datenschutz.html` nachgezogen; beide beschreiben den Weg ohne Proxy. Was
+folgt, gilt für den eingeschalteten Proxy.
 
 **Der Schalter allein gibt nichts frei.** Ohne hinterlegten Schlüssel meldet
 `?a=ping` weiterhin `aiProxy: false`, die Aktion antwortet mit 404, und der
@@ -196,7 +207,8 @@ Zwei Dinge, die zum eingeschalteten Proxy gehören:
   will, setzt `AI_LIMIT` herunter.
 
 Wer das nicht will, setzt `AI_PROXY_ENABLED` zurück auf `false` oder entfernt
-schlicht `data/.ai-key`. Beides wirkt sofort.
+schlicht `data/.ai-key`. Beides wirkt sofort; ausgeschaltet bleibt der Proxy
+auch mit Schlüssel stumm.
 
 ## Erscheinungsbild
 
@@ -624,6 +636,9 @@ Proxy zurückgestellt.
 
 **4. KI-Schlüssel ablegen**
 
+Entfällt für leihichdir.de, solange `AI_PROXY_ENABLED` auf `false` steht
+(*Server-Proxy* oben). Für eine Installation mit eingeschaltetem Proxy:
+
 Die Listen in `data/` liegen verschlüsselt, der KI-Schlüssel nicht. Deshalb
 zuerst eine Probe, ob nginx den Datenordner an Apache vorbei ausliefert:
 Im Dateimanager in `httpdocs/data/` eine Datei `probe.txt` mit dem Inhalt `x`
@@ -793,8 +808,10 @@ unreachable over HTTP. GitHub Pages serves a design preview that falls back to
 
 Items can also be dictated: the browser's speech recognition produces free
 text, which is split into items either locally or, if you supply your own
-Gemini key, by the AI. That spoken text is the one piece of plaintext that
-leaves the device, and the German section above says exactly when.
+Gemini key, by the AI. That text — spoken, or typed under "Several at once"
+when you use your own key — is the one piece of plaintext that can leave the
+device, and the German section above says exactly when. The server-side AI
+proxy is switched off for leihichdir.de.
 
 The visual identity is the nozilla corporate design, vendored verbatim under
 `style.css`, with self-hosted font subsets. Nothing is fetched from

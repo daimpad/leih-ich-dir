@@ -66,7 +66,19 @@ const READ_WINDOW      = 3600;
 const THROTTLE_GC_PROB = 50;       // 1 von n Anfragen räumt alte Zählerdateien auf
 
 /* -- KI-Proxy ---------------------------------------------------------------
- * Für leihichdir.de eingeschaltet. Die Entscheidung ist bewusst gefallen.
+ * Für leihichdir.de seit November 2026 ausgeschaltet, auf ausdrücklichen
+ * Wunsch des Betreibers. Vorher war er eingeschaltet; scharf wird er erst mit
+ * einem Schlüssel, und im November 2026 lag keiner. Ausgeschaltet stimmt, was CLAUDE.md festhält — nichts
+ * bringt Klartext auf den Server —, und die Datenschutzerklärung muss keinen
+ * Weg beschreiben, der jederzeit durch eine abgelegte Datei aufginge. Wer
+ * Gemini will, hinterlegt in den Einstellungen einen eigenen Schlüssel; dann
+ * spricht der Browser direkt mit Google, und dieser Server sieht nichts.
+ *
+ * Wer den Schalter in einer eigenen Installation wieder umlegt, zieht
+ * settings.aiHint in beiden Wörterbüchern und den Abschnitt Spracheingabe
+ * in datenschutz.html nach: Beide beschreiben den Weg ohne Proxy.
+ *
+ * Was folgt, gilt für den eingeschalteten Proxy.
  *
  * Der Rest dieser Anwendung ist so gebaut, dass der Server keinen Klartext
  * sehen kann. Der Proxy durchbricht das für genau eine Angabe: den Satz, den
@@ -88,7 +100,7 @@ const THROTTLE_GC_PROB = 50;       // 1 von n Anfragen räumt alte Zählerdateie
  * Der Schlüssel gehört nicht ins Repository; data/ steht in .gitignore.
  * Der Text wird nicht protokolliert und nicht gespeichert.
  * -------------------------------------------------------------------------- */
-const AI_PROXY_ENABLED = true;
+const AI_PROXY_ENABLED = false;
 const AI_ENDPOINT      = 'https://generativelanguage.googleapis.com/v1beta/models/';
 /* Am besten belegte Kennung. Eine geänderte Kennung vorher mit einem gültigen
    Schlüssel über GET /v1beta/models prüfen, unangemeldet geht das nicht. */
