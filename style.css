@@ -362,6 +362,9 @@ button, input, textarea, select { font: inherit; color: inherit; }
   border-radius: var(--r-btn); padding: .6rem 1.1rem;
 }
 .skiplink:focus { top: var(--s-3); }
+/* Ziel des Sprungs: Es nimmt die Fuehrung, damit der naechste Tabulator im
+   Inhalt weitergeht, zeigt sie aber nicht als Rahmen um die ganze Seite. */
+main[tabindex="-1"]:focus { outline: none; }
 
 /* Abstand nach oben. Zwei Stufen genügen, und sie stehen hier statt im
    Markup: eingebettete Angaben verstoßen gegen die eigene Richtlinie
