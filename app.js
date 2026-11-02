@@ -1154,6 +1154,10 @@
    *     wissen, ob gerade PHP oder localStorage dahintersteht.
    * ===================================================================== */
 
+  /* Der Inhaltstyp ist Pflicht, nicht Hoeflichkeit: api.php nimmt POST nur
+     als application/json an, weil eine fremde Seite genau diesen Typ nicht
+     ohne Vorabanfrage schicken kann. Ohne die Zeile schickte fetch den
+     Koerper als text/plain, und jedes Speichern endete in 415. */
   function apiPost(payload) {
     return fetch(API_URL, {
       method: 'POST',

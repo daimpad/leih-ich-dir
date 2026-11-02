@@ -21,6 +21,15 @@
  * Umsetzungen, den Browser und die Kommandozeile, damit sie nicht
  * auseinanderlaufen: Sie sind zwei Faelle desselben Urteils.
  *
+ * Dazu ein zweiter Fall, in dem nicht vorgegeben, sondern die echte
+ * Anwendung gefragt wird: ein vorgelagerter Proxy, der Host durchreicht oder
+ * umschreibt. api.php vergleicht den Origin einer Schreibanfrage mit dem Host,
+ * der bei ihm ankommt; ein Proxy, der ihn umschreibt, sperrt also jedes
+ * Speichern aus dem Browser. Die Abnahme soll das mit 403 melden, beide
+ * Umsetzungen. Der Browser schickt den Origin ohnehin, check-deployment.php
+ * nur, weil es ihn ausdruecklich setzt; ohne ihn ginge dort das Anlegen durch,
+ * und der Fehler fiele erst bei Nutzer:innen auf.
+ *
  * Wer die Suite einzeln startet, setzt vorher data/throttle zurueck; jeder
  * Lauf im Browser legt eine Liste an.
  */
@@ -79,7 +88,7 @@ const { ok, bilanz } = pruefer();
 const br = await starteBrowser();
 
 /** Laesst check.html laufen, mit den vorgegebenen Antworten, und liest die Zeilen. */
-async function imBrowser(welt) {
+async function imBrowser(welt, basis = BASE) {
   const ctx = await br.newContext({ viewport: { width: 1000, height: 1200 } });
   const p = await ctx.newPage();
   await p.route('**/*', (route) => {
@@ -89,7 +98,7 @@ async function imBrowser(welt) {
     }
     return route.continue();
   });
-  await p.goto(BASE + '/check.html', { waitUntil: 'networkidle' });
+  await p.goto(basis + '/check.html', { waitUntil: 'networkidle' });
   await p.locator('#btnRun').click();
   await p.waitForFunction(() => document.querySelector('#btnRun').textContent === 'Erneut pruefen',
     null, { timeout: 40000 });
@@ -110,9 +119,15 @@ async function ueberKommandozeile(welt) {
     res.end('');
   });
   await new Promise((fertig) => server.listen(0, '127.0.0.1', fertig));
-  const port = server.address().port;
-  const aus = await new Promise((fertig) => {
-    const kind = spawn('php', [join(WURZEL, 'tools', 'check-deployment.php'), 'http://127.0.0.1:' + port],
+  const aus = await abnahmeGegen('http://127.0.0.1:' + server.address().port);
+  server.close();
+  return aus;
+}
+
+/** Laesst tools/check-deployment.php gegen eine Adresse laufen und gibt die Ausgabe zurueck. */
+function abnahmeGegen(url) {
+  return new Promise((fertig) => {
+    const kind = spawn('php', [join(WURZEL, 'tools', 'check-deployment.php'), url],
       { stdio: ['ignore', 'pipe', 'pipe'] });
     let text = '';
     kind.stdout.on('data', (d) => { text += d; });
@@ -120,8 +135,28 @@ async function ueberKommandozeile(welt) {
     const wache = setTimeout(() => kind.kill(), 60000);
     kind.on('close', () => { clearTimeout(wache); fertig(text); });
   });
-  server.close();
-  return aus;
+}
+
+/* Ein Proxy vor der laufenden Anwendung, wie nginx vor Apache. Reicht er Host
+   durch (proxy_set_header Host $http_host), sieht api.php den Rechner und
+   Port, die der Browser angefragt hat. Schreibt er ihn um, wie nginx es bei
+   proxy_pass ohne diese Zeile tut, sieht api.php Rechner und Port des Ziels. */
+const ZIEL = new URL(BASE);
+async function proxy(hostDurchreichen) {
+  const server = http.createServer((req, res) => {
+    const kopf = { ...req.headers };
+    if (!hostDurchreichen) { kopf.host = ZIEL.host; }
+    const weiter = http.request({
+      hostname: ZIEL.hostname, port: ZIEL.port || 80, path: req.url, method: req.method, headers: kopf
+    }, (antwort) => {
+      res.writeHead(antwort.statusCode, antwort.headers);
+      antwort.pipe(res);
+    });
+    weiter.on('error', () => { res.writeHead(502); res.end(); });
+    req.pipe(weiter);
+  });
+  await new Promise((fertig) => server.listen(0, '127.0.0.1', fertig));
+  return server;
 }
 
 for (const welt of WELTEN) {
@@ -145,6 +180,28 @@ for (const welt of WELTEN) {
   const cliKey = /nicht abrufbar: \/data\/ai-key\.txt\s+(ok|FEHLT)/.exec(t);
   ok('Kommandozeile: Der KI-Schluessel gilt als ' + (welt.key === 'ok' ? 'nicht abrufbar' : 'offen'),
      !!cliKey && cliKey[1] === (welt.key === 'ok' ? 'ok' : 'FEHLT'), cliKey ? cliKey[1] : 'keine Zeile');
+}
+
+const ANLEGEN = 'Liste anlegen, data/ ist beschreibbar';
+for (const durch of [true, false]) {
+  console.log('· Proxy, der Host ' + (durch ? 'durchreicht' : 'umschreibt'));
+  const server = await proxy(durch);
+  const basis = 'http://127.0.0.1:' + server.address().port;
+
+  const z = await imBrowser({ pfade: {} }, basis);
+  const zeile = z.find((r) => r.name === ANLEGEN);
+  ok('Browser: Anlegen ' + (durch ? 'gelingt' : 'faellt mit 403 auf'),
+     !!zeile && (durch ? zeile.state === 'ok'
+                       : zeile.state === 'fehlt' && /Status 403/.test(zeile.detail) && /Host/.test(zeile.detail)),
+     zeile ? zeile.state + ' ' + zeile.detail : 'keine Zeile');
+
+  const t = await abnahmeGegen(basis);
+  const cli = new RegExp(ANLEGEN + '\\s+(ok|FEHLT)(.*)').exec(t);
+  ok('Kommandozeile: Anlegen ' + (durch ? 'gelingt' : 'faellt mit 403 auf'),
+     !!cli && (durch ? cli[1] === 'ok' : cli[1] === 'FEHLT' && /Status 403/.test(cli[2]) && /Host/.test(cli[2])),
+     cli ? cli[1] + cli[2] : 'keine Zeile');
+
+  server.close();
 }
 
 await br.close();

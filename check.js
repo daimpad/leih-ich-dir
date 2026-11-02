@@ -70,6 +70,11 @@
     });
   }
 
+  /* Den Origin setzt der Browser bei jedem POST selbst, mit der Herkunft
+     dieser Seite; ein Skript kann ihn weder weglassen noch aendern. api.php
+     vergleicht ihn mit dem Host, der bei ihm ankommt. Schreibt ein
+     vorgelagerter Proxy Host oder Port um, endet das Anlegen deshalb hier
+     mit 403, genau wie in der Anwendung, und nicht erst bei Nutzer:innen. */
   function postJson(body) {
     return fetch('api.php', {
       method: 'POST',
@@ -350,9 +355,12 @@
 
       return postJson({ a: 'create', id: id, proof: proof, payload: payload }).then(function (res) {
         var wrote = res.status === 200;
+        var fremd = !!res.body && res.body.error === 'cross_origin';
         check(LEVEL_MUST, 'Liste anlegen, data/ ist beschreibbar', wrote,
           wrote ? 'Status 200'
-                : 'Status ' + res.status + (res.status === 500 ? ', Schreibrechte auf data/ pruefen' : ''));
+                : 'Status ' + res.status + (res.status === 500 ? ', Schreibrechte auf data/ pruefen' : '')
+                  + (fremd ? ', api.php haelt die eigene Herkunft fuer fremd: Ein vorgelagerter Proxy '
+                    + 'reicht Host samt Port nicht durch (README, Vorgelagerter nginx)' : ''));
         if (!wrote) { return; }
         return head('api.php?a=read&id=' + id).then(function (r) {
           check(LEVEL_MUST, 'Liste wieder lesbar', r.status === 200, 'Status ' + r.status);
