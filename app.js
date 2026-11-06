@@ -1667,6 +1667,26 @@
     setTimeout(function () { node.textContent = text; }, 60);
   }
 
+  /**
+   * Ein Ortswechsel setzt den Fokus an den Anfang der neuen Ansicht: auf
+   * deren sichtbare Ueberschrift, sonst auf main. Bis November 2026 blieb er
+   * beim Element der alten Ansicht, das nun verborgen war, also beim
+   * Koerper; der naechste Tabulator landete im Fuss auf "So geht's".
+   * Ueberschriften bekommen dafuer tabindex -1, wie main.
+   */
+  function ansichtFokus(name) {
+    var node = document.getElementById(name);
+    if (!node || !fokusVerloren() && node.contains(document.activeElement)) { return; }
+    var ziel = null;
+    Array.prototype.forEach.call(node.querySelectorAll('h1'), function (h) {
+      if (!ziel && !h.hidden && h.offsetParent !== null) { ziel = h; }
+    });
+    if (!ziel) { ziel = $('#main'); }
+    if (!ziel) { return; }
+    if (!ziel.hasAttribute('tabindex')) { ziel.setAttribute('tabindex', '-1'); }
+    ziel.focus({ preventScroll: true });
+  }
+
   function showView(name) {
     /* Verlassen wir die Uebersicht, verschwinden die entschluesselten
        Fremddaten aus DOM und Speicher. hidden allein genuegt nicht: Der
@@ -1680,9 +1700,11 @@
        Der Browser behaelt den Rollstand sonst bei, weil das Dokument
        dasselbe bleibt: Wer weit unten auf der Startseite einen Weg waehlt,
        landete mitten in der neuen Liste, beim Teilen statt beim Anfang. */
-    if (shownView !== null && shownView !== name) { window.scrollTo(0, 0); }
+    var gewechselt = shownView !== null && shownView !== name;
+    if (gewechselt) { window.scrollTo(0, 0); }
     shownView = name;
     seitenTitel();
+    if (gewechselt) { ansichtFokus(name); }
     /* Die Wortmarke laesst sich nur messen, wenn sie zu sehen ist. Der
        Auftritt kommt vorher: Die Buchstaben, die gleich entstehen, sollen
        ihn schon mitmachen. */
@@ -2876,7 +2898,7 @@
     free.addEventListener('click', function () {
       if (item.status === 'available') { return; }
       toggleItem(item.id);
-      refreshModal();
+      refreshModal('.seg button[aria-pressed="true"]');
     });
 
     var lent = el('button', 'is-lent');
@@ -2886,7 +2908,7 @@
     lent.addEventListener('click', function () {
       if (item.status === 'lent') { return; }
       toggleItem(item.id);
-      refreshModal();
+      refreshModal('#mdBorrower');
     });
 
     seg.appendChild(free);
@@ -2939,9 +2961,45 @@
     foot.appendChild(done);
   }
 
+  /* Wohin der Fokus geht, wenn das Fenster schliesst: die Zeile, die es
+     geoeffnet hat, und ihre Stelle, falls sie inzwischen fehlt. */
+  var fensterZeile = null;
+
+  function zeilenStelle(id) {
+    for (var i = 0; i < state.doc.items.length; i++) {
+      if (state.doc.items[i].id === id) { return i; }
+    }
+    return 0;
+  }
+
+  /**
+   * Gibt den Fokus an die Liste zurueck. Der Browser reicht ihn beim
+   * Schliessen an das Element, das das Fenster geoeffnet hat; das gibt es
+   * aber nicht mehr, sobald eine Aenderung die Zeilen neu gebaut hat. Bis
+   * November 2026 lag der Fokus dann auf dem Koerper der Seite, und der
+   * naechste Tabulator begann oben (WCAG 2.4.3). Fehlt die Zeile ganz, weil
+   * sie geloescht wurde, geht er an die Nachbarzeile, sonst ins Eingabefeld.
+   */
+  function zeileFokussieren(id, stelle, art) {
+    var zeilen = Array.prototype.slice.call(document.querySelectorAll('#itemList .item'));
+    var li = null;
+    zeilen.forEach(function (z) { if (z.getAttribute('data-id') === id) { li = z; } });
+    if (!li && zeilen.length) { li = zeilen[Math.min(stelle, zeilen.length - 1)]; }
+    var ziel = li ? li.querySelector(art === 'ask' ? '[data-act="ask"]' : '.itemrow') : null;
+    if (!ziel && li) { ziel = li.querySelector('button, a'); }
+    if (!ziel) { ziel = $('#addName'); }
+    if (ziel) { ziel.focus(); }
+  }
+
+  function fokusVerloren() {
+    var a = document.activeElement;
+    return !a || a === document.body || !document.body.contains(a);
+  }
+
   function openItemModal(id) {
     var item = findItem(id);
     if (!item || state.mode !== 'edit') { return; }
+    fensterZeile = { id: id, stelle: zeilenStelle(id), art: 'open' };
     modalItemId = id;
     buildModalHead(item);
     buildModalBody(item);
@@ -2957,6 +3015,7 @@
   function openAskModal(id) {
     var item = findItem(id);
     if (!item || item.status !== 'available') { return; }
+    fensterZeile = { id: id, stelle: zeilenStelle(id), art: 'ask' };
     modalItemId = id;
     buildModalHead(item);
 
@@ -2985,11 +3044,19 @@
     if (dialog.showModal) { dialog.showModal(); } else { dialog.setAttribute('open', 'open'); }
   }
 
-  function refreshModal() {
+  /**
+   * Baut den Inhalt des Fensters neu. Der Knopf, der das ausloeste, ist
+   * danach fort; ziel nennt, wohin der Fokus stattdessen geht. Bis November
+   * 2026 lag er auf dem Koerper, und der naechste Tabulator sprang hinter
+   * "Verliehen an" in die Notiz.
+   */
+  function refreshModal(ziel) {
     var item = findItem(modalItemId);
     if (!item) { closeItemModal(); return; }
     buildModalBody(item);
     buildModalFoot(item);
+    var node = ziel ? document.querySelector('#itemModal ' + ziel) : null;
+    if (node) { node.focus(); }
   }
 
   function closeItemModal() {
@@ -4061,6 +4128,8 @@
         touch();
         render();
         markRow(removed.id, 'lid-heim');
+        /* Der Knopf in der Meldung ist mit ihr fort. */
+        if (fokusVerloren()) { zeileFokussieren(removed.id, at, 'open'); }
       }
     }, 'face-schreck');
   }
@@ -5440,6 +5509,21 @@
     return kreisSave();
   }
 
+  /**
+   * Nach Entfernen und Rueckgaengig: Der Knopf, der das ausloeste, ist fort.
+   * Der Fokus geht an den Entfernen-Knopf derselben Zeile, der Stelle oder
+   * der davor, sonst ins Linkfeld. Bis November 2026 lag er auf dem Koerper.
+   */
+  function kreisFokus(pos, id) {
+    if (!fokusVerloren()) { return; }
+    var knoepfe = Array.prototype.slice.call(document.querySelectorAll('#circleFriends [data-kreis-act="remove"]'));
+    var ziel = null;
+    if (id) { knoepfe.forEach(function (k) { if (k.getAttribute('data-kreis-id') === id) { ziel = k; } }); }
+    if (!ziel && knoepfe.length) { ziel = knoepfe[Math.min(pos, knoepfe.length - 1)]; }
+    if (!ziel) { ziel = $('#circleAddLink'); }
+    if (ziel) { ziel.focus(); }
+  }
+
   function circleRemove(id) {
     if (!kreis.doc || !kreis.token) { return; }
     /* Steht noch eine Frist offen, wird sie zuerst eingeloest: Zwei
@@ -5458,6 +5542,7 @@
       if (kreis.eintraege[i] && kreis.eintraege[i].freund.id === id) { wegE = kreis.eintraege.splice(i, 1)[0]; break; }
     }
     renderKreisListe();
+    kreisFokus(pos, null);
     /* Geschrieben wird, wenn die Meldung geht, ohne dass jemand die
        Ruecknahme nimmt. Bis November 2026 hing das an einer eigenen Uhr von
        UNDO_MS; seit die Meldung unter Fokus und Zeiger steht, liefe die
@@ -5479,6 +5564,7 @@
         kreis.doc.friends.splice(pos, 0, weg);
         if (wegE) { kreis.eintraege.push(wegE); }
         renderKreisListe();
+        kreisFokus(pos, weg.id);
       }
     });
   }
@@ -6143,6 +6229,7 @@
           render();
           setVoiceOpen(true);
           $('#voiceText').value = input;
+          $('#voiceText').focus();
         }
       });
 
@@ -6343,6 +6430,12 @@
     $('#itemModal').addEventListener('close', function () {
       modalItemId = null;
       feierNachholen();
+      var zurueck = fensterZeile;
+      fensterZeile = null;
+      /* Nach dem Ereignis: Loeschen schliesst erst und entfernt dann. */
+      setTimeout(function () {
+        if (zurueck && fokusVerloren()) { zeileFokussieren(zurueck.id, zurueck.stelle, zurueck.art); }
+      }, 0);
     });
   }
 
