@@ -127,7 +127,10 @@ console.log('· Fund 5 und 6: die Aufnehmen-Zeile bei 320 Punkten');
   await q.locator('#kreisTab1').click();
   await q.waitForTimeout(300);
   const m = await q.evaluate(()=>{
-    const k=document.querySelector('#btnCircleAdd'), f=document.querySelector('#circleAddLink');
+    /* Seit November 2026 steht der Knopf neben dem Namen, nicht mehr neben
+       dem Link (tests/e2e/superliste.mjs): Geprueft wird das Feld, neben
+       dem er steht. */
+    const k=document.querySelector('#btnCircleAdd'), f=document.querySelector('#circleAddName');
     const rk=k.getBoundingClientRect(), rf=f.getBoundingClientRect();
     return { knopf:{b:Math.round(rk.width),h:Math.round(rk.height),x:Math.round(rk.left),r:Math.round(rk.right)},
              feld:{b:Math.round(rf.width),x:Math.round(rf.left),r:Math.round(rf.right)},
