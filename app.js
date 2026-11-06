@@ -63,11 +63,6 @@
     return svg;
   }
 
-  /** Statuspunkt: grün für verfügbar, orange für verliehen. */
-  function statusDot(status) {
-    return el('span', 'dot' + (status === 'lent' ? ' dot--warn' : ''));
-  }
-
   /** Fehler mit maschinenlesbarem Code (siehe I18N-Schlüssel error.*). */
   function AppError(code) { this.code = code; this.message = code; }
   AppError.prototype = Object.create(Error.prototype);
@@ -6092,15 +6087,11 @@
     btn.classList.toggle('is-listening', active);
     btn.setAttribute('aria-pressed', active ? 'true' : 'false');
     $('.micbtn-label', btn).textContent = t(active ? 'voice.stop' : 'voice.start');
-    if (active) {
-      var node = $('#voiceState');
-      node.className = 'tag voicestate';
-      node.textContent = '';
-      node.appendChild(statusDot('available'));
-      node.appendChild(el('span', null, t('voice.listening')));
-    } else {
-      setVoiceState('', false);
-    }
+    /* Bis November 2026 stand vor "Hoert zu" ein Punkt (statusDot), fuer
+       den style.css nie eine Regel hatte: ein leeres span, unsichtbar und
+       ohne Text. Dass zugehoert wird, zeigt der Knopf: gedrueckt, also
+       eingesunken und minzgruen (.btn[aria-pressed="true"]). */
+    setVoiceState(active ? t('voice.listening') : '', false);
   }
 
   /** Erzeugt die Erkennung einmalig und hängt die Ereignisse an. */
