@@ -6084,13 +6084,13 @@
     speechActive = active;
     var btn = $('#btnMic');
     if (!btn) { return; }
-    btn.classList.toggle('is-listening', active);
     btn.setAttribute('aria-pressed', active ? 'true' : 'false');
     $('.micbtn-label', btn).textContent = t(active ? 'voice.stop' : 'voice.start');
-    /* Bis November 2026 stand vor "Hoert zu" ein Punkt (statusDot), fuer
-       den style.css nie eine Regel hatte: ein leeres span, unsichtbar und
-       ohne Text. Dass zugehoert wird, zeigt der Knopf: gedrueckt, also
-       eingesunken und minzgruen (.btn[aria-pressed="true"]). */
+    /* Bis November 2026 stand vor "Hoert zu" ein Punkt (statusDot), und der
+       Knopf bekam die Klasse is-listening. Fuer beides hatte style.css nie
+       eine Regel. Dass zugehoert wird, zeigt der Knopf allein ueber
+       aria-pressed: gedrueckt, also eingesunken und minzgruen
+       (.btn[aria-pressed="true"]). */
     setVoiceState(active ? t('voice.listening') : '', false);
   }
 

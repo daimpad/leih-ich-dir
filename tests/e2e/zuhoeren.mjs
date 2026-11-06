@@ -6,6 +6,8 @@
  * Gestalt. Jetzt steht dort nur der Text, und den Zustand zeigt der Knopf.
  * Ebenso ohne Regel war voicestate-error: Ein Fehler stand gruen da wie
  * "Hört zu". Jetzt mahnt er in Butter (--warn-ink), hell und dunkel.
+ * Und ohne Regel war is-listening am Knopf; den Zustand zeigt er allein
+ * ueber aria-pressed, und das muss man sehen.
  *
  * Die Spracherkennung des Browsers wird nachgebaut: Chromium ohne Kopf hat
  * keine, und ein echtes Mikrofon gibt es hier nicht. Der Nachbau kann nur
@@ -50,10 +52,26 @@ const zeile = () => p.evaluate(() => {
   };
 });
 
+/* Wie der Knopf aussieht: Grund und Schatten, wie der Browser sie
+   berechnet. Die Maus geht vorher weg, sonst zaehlte :hover mit. */
+const aussehen = async () => {
+  await p.mouse.move(0, 0);
+  await p.waitForTimeout(250);
+  return p.evaluate(() => {
+    const v = getComputedStyle(document.querySelector('#btnMic'));
+    return v.backgroundImage + ' | ' + v.backgroundColor + ' | ' + v.boxShadow;
+  });
+};
+
 console.log('· Zuhoeren');
 ok('der Mikrofonknopf ist zu sehen', await p.locator('#btnMic').isVisible());
+const ruhig = await aussehen();
 await p.locator('#btnMic').click();
 await p.waitForTimeout(200);
+const gedrueckt = await aussehen();
+ok('gedrueckt sieht der Knopf anders aus', gedrueckt !== ruhig, gedrueckt);
+ok('ohne eine Klasse, die keine Regel hat', !(await p.locator('#btnMic').getAttribute('class')).includes('is-listening'),
+   await p.locator('#btnMic').getAttribute('class'));
 let z = await zeile();
 ok('die Erkennung laeuft', await p.evaluate(() => !!(window.__erkennung && window.__erkennung.laeuft)));
 ok('"Hört zu …" steht in der Zeile', z.text === 'Hört zu …', JSON.stringify(z));
@@ -68,6 +86,7 @@ await p.waitForTimeout(200);
 z = await zeile();
 ok('die Zeile ist leer', z.text === '' && z.kinder === 0, JSON.stringify(z));
 ok('der Knopf ist nicht mehr gedrueckt', z.gedrueckt === 'false', JSON.stringify(z));
+ok('und sieht wieder aus wie vorher', (await aussehen()) === ruhig);
 
 console.log('· Englisch');
 await p.locator('#btnLang').click();
