@@ -128,6 +128,10 @@
      und nicht ein Skript selbst. */
   var dynamischGesperrt = 0, dynamischOffen = 0;
   var statischGesperrt = 0, statischOffen = 0;
+  /* Cache-Control der Startseite, und die Dateien mit Endung, denen fehlt,
+     was die Startseite traegt (checkDelivery, Befund in checkDiagnose). */
+  var ccStart = '';
+  var ohneKopf = [];
 
   /* Eine Richtlinie in ihre Direktiven zerlegen. Auf Teilzeichenketten zu
      pruefen waere keine Verbesserung: indexOf("script-src 'self'") findet das
@@ -183,6 +187,11 @@
         (h.get('referrer-policy') || '') === 'no-referrer');
       check(LEVEL_SHOULD, 'X-Frame-Options DENY',
         (h.get('x-frame-options') || '').toUpperCase() === 'DENY');
+      /* .htaccess setzt fuer .html, .js und .css "no-cache, must-revalidate":
+         Nach einem Update fragt der Browser nach, statt alte Dateien zu
+         nehmen. Die Startseite ist index.html und faellt darunter. */
+      ccStart = (h.get('cache-control') || '').toLowerCase();
+      check(LEVEL_SHOULD, 'Cache-Control no-cache', ccStart.indexOf('no-cache') !== -1, ccStart || 'fehlt');
       /* Erwartet wird die Kopfzeile ohne includeSubDomains und ohne preload,
          so wie .htaccess sie setzt; steht eins von beiden darin, zaehlt das
          als Verstoss. Warum ohne beides, steht in .htaccess. */
@@ -245,8 +254,32 @@
     });
   }
 
+  /* Bis November 2026 sah die Abnahme Kopfzeilen nur an der Startseite. Die
+     kommt aber als "./" stets ueber Apache; alles mit Endung liefert ein
+     vorgelagerter nginx unter Umstaenden selbst aus, ohne die .htaccess zu
+     lesen, und dann ohne Cache-Control und ohne Schutzkopfzeilen. Auf
+     leihichdir.de war es so: einstellungen.html liess sich in einen fremden
+     Rahmen laden, app.js und style.css galten nach Last-Modified als frisch.
+     Deshalb jetzt an jeder solchen Datei: Cache-Control, und an jeder Seite
+     X-Frame-Options und die Content-Security-Policy als Kopfzeile (eine
+     meta-Fassung kennt frame-ancestors nicht). */
+  function pruefeKopf(pfad, h) {
+    var cc = (h.get('cache-control') || '').toLowerCase();
+    check(LEVEL_SHOULD, '  Cache-Control no-cache', cc.indexOf('no-cache') !== -1, cc || 'fehlt');
+    var fehlt = ccStart.indexOf('no-cache') !== -1 && cc.indexOf('no-cache') === -1;
+    if (/\.html$/.test(pfad)) {
+      var xfo = h.get('x-frame-options');
+      check(LEVEL_SHOULD, '  X-Frame-Options DENY', (xfo || '').toUpperCase() === 'DENY', xfo || 'fehlt');
+      var csp = h.get('content-security-policy');
+      check(LEVEL_SHOULD, '  Content-Security-Policy als Kopfzeile', !!csp, csp ? '' : 'fehlt');
+      fehlt = fehlt || (!kopfzeilenFehlen && !csp);
+    }
+    if (fehlt) { ohneKopf.push(pfad); }
+  }
+
   function checkDelivery() {
     group('Auslieferung');
+    ohneKopf = [];
     var files = [
       ['style.css', 'text/css'],
       ['app.js', 'javascript'],
@@ -278,6 +311,7 @@
           if (r.status === 200) {
             check(LEVEL_SHOULD, '  Typ ' + entry[1],
               r.type.indexOf(entry[1]) !== -1, r.type || 'kein Typ');
+            if (/\.(html|js|css)$/.test(entry[0])) { pruefeKopf(entry[0], r.res.headers); }
           }
         });
       });
@@ -429,8 +463,23 @@
        Verzeichnis kann kein einzelner Server erzeugen. Dieselbe Regel traefe
        beide. Also beantwortet sie nicht derselbe Server. */
     var gespalten = dynamischGesperrt > 0 && statischOffen > 0;
-    if (!kopfzeilenFehlen && !gespalten) { return Promise.resolve(); }
+    if (!kopfzeilenFehlen && !gespalten && !ohneKopf.length) { return Promise.resolve(); }
     group('Befund');
+
+    /* Die Startseite traegt, was .htaccess setzt, Dateien mit Endung nicht.
+       Also liest die .htaccess, wer "./" beantwortet, und nicht, wer die
+       Dateien beantwortet. Eine Empfehlung, kein Muss: Die Kennungen ?v=
+       in den Seiten halten Skripte und Stile auch so frisch; offen bleiben
+       die Seiten selbst und ihre Schutzkopfzeilen. */
+    if (ohneKopf.length) {
+      check(LEVEL_SHOULD, 'Ursache der fehlenden Kopfzeilen an Dateien', false,
+        'Die Startseite traegt Cache-Control und Schutzkopfzeilen aus der .htaccess, '
+        + ohneKopf.length + ' Datei(en) mit Endung nicht (' + ohneKopf.slice(0, 4).join(', ')
+        + (ohneKopf.length > 4 ? ', ...' : '') + '). Ein vorgelagerter nginx liefert sie selbst aus '
+        + 'und liest dabei keine .htaccess. In Plesk unter Hosting-Einstellungen, Apache & nginx, '
+        + '"Smart static files processing" abschalten; dann geht alles durch Apache. '
+        + 'Der Wortlaut steht im README unter "Vorgelagerter nginx".');
+    }
 
     if (gespalten) {
       check(LEVEL_MUST, 'Ursache der offenen statischen Dateien', false,

@@ -43,6 +43,15 @@
  * ok. Ebenso zwei Zeilen, nur die zweite mit max-age: Das der zweiten
  * zaehlt nicht.
  *
+ * Und die Kopfzeilen an Dateien mit Endung. Bis November 2026 sah die
+ * Abnahme sie nur an der Startseite, die stets ueber Apache kommt. Auf
+ * leihichdir.de lieferte nginx aber einstellungen.html, app.js und
+ * style.css selbst aus, ohne Cache-Control und ohne Schutzkopfzeilen, und
+ * keine der beiden Umsetzungen sagte etwas. Drei Welten: alles durch
+ * Apache, nginx vor den Dateien mit Endung, und mod_headers fehlt ganz. Nur
+ * die zweite verlangt den neuen Befund; in der dritten erklaert ihn schon
+ * der alte, er waere doppelt.
+ *
  * Wer die Suite einzeln startet, setzt vorher data/throttle zurueck; jeder
  * Lauf im Browser legt eine Liste an.
  */
@@ -277,6 +286,58 @@ for (const w of HSTS_WELTEN) {
   ok('Kommandozeile: ' + (w.ok ? 'in Ordnung' : 'Verstoss mit klarem Text'),
      !!cli && cli[1] === (w.ok ? 'ok' : 'FEHLT') && w.detail.test(cli[2] || ''),
      cli ? cli[1] + ' ' + (cli[2] || '') : 'keine Zeile');
+}
+
+/* -- Kopfzeilen an Dateien mit Endung ------------------------------------- */
+const MIT_ENDUNG = ['/style.css', '/app.js', '/theme.js', '/einstellungen.html', '/so-gehts.html',
+  '/ueber.html', '/impressum.html', '/datenschutz.html', '/assets/fonts/fonts.css'];
+const SCHUTZ = { 'Content-Security-Policy': "default-src 'self'", 'X-Frame-Options': 'DENY' };
+const FRISCH = { 'Cache-Control': 'no-cache, must-revalidate' };
+const DATEI_BEFUND = 'Ursache der fehlenden Kopfzeilen an Dateien';
+const DATEI_WELTEN = [
+  { name: 'alles durch Apache', start: { ...SCHUTZ, ...FRISCH },
+    datei: (p) => (p.endsWith('.html') ? { ...SCHUTZ, ...FRISCH } : FRISCH),
+    befund: false, einstellungen: 'ok', appjs: 'ok' },
+  { name: 'nginx liefert Dateien mit Endung selbst aus (leihichdir.de, November 2026)',
+    start: { ...SCHUTZ, ...FRISCH }, datei: () => ({}),
+    befund: true, einstellungen: 'fehlt', appjs: 'fehlt' },
+  { name: 'mod_headers fehlt, auch die Startseite ohne Kopfzeilen', start: {}, datei: () => ({}),
+    befund: false, einstellungen: 'fehlt', appjs: 'fehlt' }
+];
+for (const w of DATEI_WELTEN) {
+  console.log('· Dateien mit Endung: ' + w.name);
+  const welt = { pfade: { '/': 200 }, kopf: { '/': w.start } };
+  for (const p of MIT_ENDUNG) { welt.pfade[p] = 200; welt.kopf[p] = w.datei(p); }
+
+  const z = await imBrowser(welt);
+  /* Die Zeilen unter einer Datei heissen bei jeder Datei gleich; die erste
+     nach dem Namen der Datei ist die gesuchte. */
+  const unter = (datei, name) => {
+    const i = z.findIndex((r) => r.name === datei);
+    return i < 0 ? null : z.slice(i + 1).find((r) => r.name.trim() === name) || null;
+  };
+  const xfo = unter('einstellungen.html', 'X-Frame-Options DENY');
+  ok('Browser: einstellungen.html X-Frame-Options ' + w.einstellungen, !!xfo && xfo.state === w.einstellungen,
+     xfo ? xfo.state + ' ' + xfo.detail : 'keine Zeile');
+  const cc = unter('app.js', 'Cache-Control no-cache');
+  ok('Browser: app.js Cache-Control ' + w.appjs, !!cc && cc.state === w.appjs, cc ? cc.state + ' ' + cc.detail : 'keine Zeile');
+  const bf = z.find((r) => r.name === DATEI_BEFUND);
+  ok('Browser: Der Befund ' + (w.befund ? 'erscheint, mit nginx und Plesk' : 'bleibt aus'),
+     w.befund ? !!bf && bf.state === 'fehlt' && /9 Datei/.test(bf.detail) && /Smart static files processing/.test(bf.detail) : !bf,
+     bf ? bf.state + ' ' + bf.detail.slice(0, 120) : 'keine Zeile');
+
+  const t = await ueberKommandozeile(welt);
+  const block = (datei) => { const i = t.indexOf('  ' + datei + ' '); return i < 0 ? '' : t.slice(i, i + 900); };
+  const cliXfo = /X-Frame-Options DENY\s+(ok|FEHLT)/.exec(block('einstellungen.html'));
+  ok('Kommandozeile: einstellungen.html X-Frame-Options ' + w.einstellungen,
+     !!cliXfo && cliXfo[1] === (w.einstellungen === 'ok' ? 'ok' : 'FEHLT'), cliXfo ? cliXfo[1] : 'keine Zeile');
+  const cliCc = /Cache-Control no-cache\s+(ok|FEHLT)/.exec(block('app.js'));
+  ok('Kommandozeile: app.js Cache-Control ' + w.appjs,
+     !!cliCc && cliCc[1] === (w.appjs === 'ok' ? 'ok' : 'FEHLT'), cliCc ? cliCc[1] : 'keine Zeile');
+  const cliBf = new RegExp(DATEI_BEFUND + '\\s+FEHLT\\s+\\((.*)\\)').exec(t);
+  ok('Kommandozeile: Der Befund ' + (w.befund ? 'erscheint, mit nginx und Plesk' : 'bleibt aus'),
+     w.befund ? !!cliBf && /9 Datei/.test(cliBf[1]) && /Smart static files processing/.test(cliBf[1]) : !cliBf,
+     cliBf ? cliBf[1].slice(0, 120) : 'kein Befund');
 }
 
 await br.close();
