@@ -109,7 +109,17 @@ $server = proc_open(
 if (!is_resource($server)) {
     exit("Der eingebaute PHP-Server ließ sich nicht starten.\n");
 }
+/* Mit PHP_CLI_SERVER_WORKERS (unten bei den gleichzeitigen Schreibern)
+   startet der Server eigene Arbeitsprozesse. proc_terminate beendet nur den
+   Hauptprozess; in der CI blieben die vier Arbeiter danach stehen, und auf
+   einem anderen Rechner hielten sie den Port besetzt: Der naechste Lauf
+   fragte dann sie, mit dem Datenordner des vorigen. Deshalb zuerst die
+   Kinder. */
 register_shutdown_function(static function () use ($server): void {
+    $pid = (int) (proc_get_status($server)['pid'] ?? 0);
+    if ($pid > 0) {
+        exec('pkill -TERM -P ' . $pid . ' 2>/dev/null');
+    }
     proc_terminate($server);
     proc_close($server);
 });
