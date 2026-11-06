@@ -263,6 +263,7 @@
 
       'revoke.hint': 'Wer diesen Link hat, sieht die Liste — auch, wer ihn weitergereicht bekam. Zurückziehen macht alle bisherigen Links dieser Liste ungültig, den Ansehen-Link wie den Bearbeiten-Link, und gibt Dir neue.',
       'revoke.button': 'Ansehen-Link zurückziehen',
+      'revoke.short': 'Zurückziehen macht alle bisherigen Links dieser Liste ungültig und gibt Dir neue.',
       'revoke.confirm': 'Alle bisherigen Links dieser Liste werden ungültig, auch Dein Bearbeiten-Link. Du bekommst neue und musst den Ansehen-Link neu weitergeben. Fortfahren?',
       'revoke.done': 'Zurückgezogen. Die alten Links gelten nicht mehr, hier sind die neuen.',
       'revoke.unsure': 'Der Server hat nicht geantwortet. Ob der Wechsel angekommen ist, lässt sich von hier nicht sagen — lade die Seite neu und sieh nach, welcher Link die Liste öffnet.',
@@ -645,6 +646,7 @@
 
       'revoke.hint': 'Anyone who has this link can see the list, including anyone it was passed on to. Revoking makes every existing link of this list invalid, the view link and the edit link alike, and gives you new ones.',
       'revoke.button': 'Revoke the view link',
+      'revoke.short': 'Revoking makes every previous link to this list invalid and gives you new ones.',
       'revoke.confirm': 'Every existing link of this list becomes invalid, your edit link too. You get new ones and have to pass the view link on again. Continue?',
       'revoke.done': 'Revoked. The old links no longer work; here are the new ones.',
       'revoke.unsure': 'The server did not answer. Whether the change went through cannot be told from here — reload the page and see which link opens the list.',

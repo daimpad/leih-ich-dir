@@ -895,9 +895,13 @@
            einzufangen: Er tauscht den Schluessel, nicht die Liste. Kein
            btn--danger — Rot ist dem Zerstoerenden vorbehalten, und hier
            geht nichts verloren ausser dem alten Zugang. Begruendung bei
-           schluesselWechseln() in app.js. -->
-      <div class="field">
-        <button type="button" id="btnRevoke" class="btn" data-i18n="revoke.button">Ansehen-Link zurückziehen</button>
+           schluesselWechseln() in app.js. Leise und unter einer Linie, mit
+           einem Satz dazu, was er tut: Bis November 2026 stand er als
+           gleich schwerer Knopf neben Kopieren, obwohl man ihn selten und
+           mit Bedacht braucht. -->
+      <div class="field revoke">
+        <button type="button" id="btnRevoke" class="btn btn--ghost" data-i18n="revoke.button">Ansehen-Link zurückziehen</button>
+        <small class="hint revoke__kurz" data-i18n="revoke.short">Zurückziehen macht alle bisherigen Links dieser Liste ungültig und gibt Dir neue.</small>
         <small class="hint hint--abruf" data-i18n="revoke.hint"></small>
       </div>
 

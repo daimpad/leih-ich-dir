@@ -622,6 +622,14 @@ header.site { padding-block: var(--s-4); }
 .zeigt-hinweise .hint--abruf { display: block; }
 /* Der Satz zur ganzen Karte steht oben, neben dem Zeichen: rechts Platz
    fuer das Zeichen, unten Abstand zum ersten Feld. */
+/* Zurueckziehen steht unter einer Linie, abgesetzt vom Teilen: leise
+   (btn--ghost), mit einem Satz dazu. Sind die Erklaerungen der Karte offen,
+   sagt der laengere Satz dasselbe und mehr, und der kurze tritt zurueck. */
+.revoke { border-top: 1px solid var(--line); padding-top: var(--s-4); margin-top: var(--s-4); }
+.revoke .btn--ghost { padding-inline: 0; }
+.revoke .btn--ghost:hover { background: none; color: var(--ink); text-decoration: underline; }
+.revoke__kurz { display: block; margin-top: var(--s-1); }
+.zeigt-hinweise .revoke__kurz { display: none; }
 .card__head + .hint--abruf { margin-bottom: var(--s-4); padding-right: 2.5rem; }
 .card__title + .hint { margin-top: var(--s-1); }
 

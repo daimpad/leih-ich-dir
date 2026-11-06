@@ -55,6 +55,23 @@ await p.waitForSelector('#viewList:not([hidden])');
 await p.waitForTimeout(500);
 await p.locator('#schrittTab3').click();
 ok('beim Ansehen-Link steht der Knopf', await p.locator('#btnRevoke').isVisible());
+/* Seit November 2026 leise und abgesetzt: kein Knopf so schwer wie
+   Kopieren, sondern ein schlichter unter einer Linie, mit einem Satz dazu. */
+{
+  const m = await p.evaluate(() => {
+    const k = document.getElementById('btnRevoke'), kopie = document.querySelector('#shareBox [data-copy="linkView"]');
+    const feld = k.closest('.field'), kurz = feld.querySelector('.revoke__kurz');
+    return { schatten: getComputedStyle(k).boxShadow, kopieSchatten: getComputedStyle(kopie).boxShadow,
+             linie: getComputedStyle(feld).borderTopWidth, kurz: kurz && kurz.offsetParent !== null ? kurz.textContent.trim() : '' };
+  });
+  ok('der Knopf ist leise, Kopieren nicht', m.schatten === 'none' && m.kopieSchatten !== 'none', m.schatten + ' / ' + m.kopieSchatten);
+  ok('abgesetzt durch eine Linie', m.linie === '1px', m.linie);
+  ok('mit einem Satz dazu', m.kurz === 'Zurückziehen macht alle bisherigen Links dieser Liste ungültig und gibt Dir neue.', m.kurz);
+  await p.locator('#shareBox [data-hinweise]').click();
+  ok('sind die Erklaerungen offen, tritt der kurze Satz zurueck',
+     await p.locator('#shareBox .revoke__kurz').isHidden() && await p.locator('#shareBox [data-i18n="revoke.hint"]').isVisible());
+  await p.locator('#shareBox [data-hinweise]').click();
+}
 const revVorher = (await liesListe(p, anna.id + '.' + anna.keyStr)).rev;
 await p.locator('#btnRevoke').click();
 await p.waitForTimeout(1500);
