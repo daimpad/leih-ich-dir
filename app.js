@@ -1225,9 +1225,12 @@
       fetch(url, opts).then(readJson).then(function (res) {
         clearTimeout(uhr);
         ja(res);
-      }, function () {
+      }, function (err) {
         clearTimeout(uhr);
-        nein(new AppError('network'));
+        /* readJson gibt den Status mit, wenn eine Antwort kam, aber kein
+           JSON war; detectStore() braucht ihn. Fuer alle anderen bleibt es
+           ein Netzfehler. */
+        nein(err instanceof AppError ? err : new AppError('network'));
       });
     });
   }
@@ -1235,7 +1238,11 @@
   function readJson(res) {
     return res.text().then(function (txt) {
       var body = null;
-      try { body = JSON.parse(txt); } catch (e) { throw new AppError('network'); }
+      try { body = JSON.parse(txt); } catch (e) {
+        var fehler = new AppError('network');
+        fehler.status = res.status;
+        throw fehler;
+      }
       return { status: res.status, body: body };
     });
   }
@@ -1302,18 +1309,34 @@
 
   /**
    * Wählt den Speicher: Antwortet api.php mit der erwarteten Kennung, läuft
-   * die App im Produktivmodus, sonst im lokalen Vorschaumodus. GitHub Pages
-   * liefert PHP-Dateien als Text aus – die JSON-Prüfung fängt das ab.
+   * die App im Produktivmodus. Den lokalen Vorschaumodus gibt es nur, wo
+   * kein PHP laufen kann (file://, GitHub Pages) oder wo die Antwort das
+   * eindeutig sagt: 200, aber ohne Kennung, etwa api.php als Quelltext.
    */
+  /* Bis November 2026 genuegte ein einziger gescheiterter Ping, und
+     leihichdir.de schaltete in den Vorschaumodus. Nachgestellt mit einem
+     abgebrochenen Ping: Der Streifen erschien, und eine neue Liste lag nur
+     im localStorage dieses Browsers. Ihre Links fuehrten bei Freund:innen
+     ins Leere, und der Server wusste nichts von ihr. Ein Netzfehler, eine
+     abgelaufene Frist, 404, 429 oder 5xx sagen aber nichts darueber, ob
+     hier PHP laeuft. Dann gilt der Server; Laden und Speichern melden einen
+     Ausfall selbst und versuchen es weiter. Wiederholt wird der Ping nicht:
+     Er entschiede danach fast immer gleich und verzoegerte nur den Start.
+     serverInfo bleibt dann leer, und damit nur die Anzeige eines KI-Proxys,
+     der ohnehin abgeschaltet ist (AI_PROXY_ENABLED in api.php). */
   function detectStore() {
     if (location.protocol === 'file:' || /(^|\.)github\.io$/.test(location.hostname)) {
       return Promise.resolve(LocalStore);
     }
     return apiGet('?a=ping').then(function (res) {
-      var ok = res.status === 200 && res.body && res.body.service === 'leih-katalog';
-      if (ok) { serverInfo = res.body; }
-      return ok ? RemoteStore : LocalStore;
-    }, function () { return LocalStore; });
+      if (res.status === 200 && res.body && res.body.service === 'leih-katalog') {
+        serverInfo = res.body;
+        return RemoteStore;
+      }
+      return res.status === 200 ? LocalStore : RemoteStore;
+    }, function (err) {
+      return (err && err.status === 200) ? LocalStore : RemoteStore;
+    });
   }
 
   /* ===================================================================== *

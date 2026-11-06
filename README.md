@@ -857,12 +857,20 @@ einer zweiten Kopfzeile verdeckt zu werden.
 
 Die Oberfläche lässt sich ohne Server betrachten. GitHub Pages liefert nur
 statische Dateien aus; `api.php` wird dort nicht ausgeführt. Die Anwendung
-erkennt das beim Start (die Kennungsabfrage `?a=ping` liefert kein gültiges
-JSON) und schaltet in den **Vorschaumodus**:
+erkennt das beim Start an der Adresse (`file://` oder `github.io`) oder an
+der Kennungsabfrage `?a=ping`, wenn sie mit 200, aber ohne die Kennung des
+Dienstes antwortet, etwa mit `api.php` als Quelltext. Dann schaltet sie in
+den **Vorschaumodus**:
 
 - Listen werden im `localStorage` des Browsers abgelegt,
 - Links funktionieren nur im selben Browser,
 - ein Hinweisbanner macht das sichtbar.
+
+Ein gescheiterter Ping genügt dafür nicht. Netzfehler, eine abgelaufene
+Frist, 404, 429 oder 5xx sagen nichts darüber, ob PHP läuft; dann gilt der
+Server, und Laden und Speichern melden einen Ausfall selbst. Bis November
+2026 schaltete schon ein einziger gescheiterter Abruf auf leihichdir.de in
+den Vorschaumodus, und neue Listen lagen nur im Browser.
 
 Für Gestaltungs- und Barrierefreiheitsfragen genügt das; alles Serverseitige
 gehört auf den LAMP-Stack. Da GitHub Pages PHP nicht interpretiert, ist

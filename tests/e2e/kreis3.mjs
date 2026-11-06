@@ -88,8 +88,10 @@ console.log('· Vorschaumodus');
   const q = await ctx.newPage();
   const fq = [];
   q.on('pageerror', e => fq.push('pageerror: ' + e.message));
-  /* Die Schnittstelle unerreichbar machen: dann greift LocalStore. */
-  await q.route('**/api.php*', r => r.abort());
+  /* Ein Server ohne PHP: api.php kommt als Quelltext, mit 200. Dann greift
+     LocalStore. Bis November 2026 genuegte dafuer ein abgebrochener Abruf;
+     seitdem gilt dann der Server (tests/e2e/ping.mjs). */
+  await q.route('**/api.php*', r => r.fulfill({ status: 200, contentType: 'text/plain', body: '<?php\n' }));
   await q.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
   await q.evaluate(() => { localStorage.clear(); localStorage.setItem('lid.lang','de'); });
   await q.reload({ waitUntil: 'domcontentloaded' });
