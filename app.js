@@ -392,6 +392,11 @@
       'error.toolarge': 'Die Liste ist zu groß für den Server.',
       'error.ratelimit': 'Zu viele neue Listen in kurzer Zeit. Bitte später erneut versuchen.',
       'error.exists': 'Diese Listen-Kennung ist bereits vergeben. Bitte erneut versuchen.',
+      'error.corrupt': 'Diese Liste ist auf dem Server beschädigt und lässt sich nicht öffnen. Wem sie gehört, kann sie aus einer Sicherung wiederherstellen.',
+      'error.full': 'Auf dem Server ist gerade kein Platz. Bitte später erneut versuchen.',
+      'error.readlimit': 'Zu viele Abrufe in kurzer Zeit. Bitte später erneut versuchen.',
+      'error.forget': 'Von diesem Gerät entfernen',
+      'error.forgotten': 'Die Liste steht nicht mehr auf diesem Gerät.',
       'error.kindmix': 'Dieser Link gehört zu einer anderen Art von Liste.',
 
       /* -- Superliste ------------------------------------------------- */
@@ -775,6 +780,11 @@
       'error.toolarge': 'The list is too large for the server.',
       'error.ratelimit': 'Too many new lists in a short time. Please try again later.',
       'error.exists': 'This list id is already taken. Please try again.',
+      'error.corrupt': 'This list is damaged on the server and cannot be opened. Whoever it belongs to can restore it from a backup.',
+      'error.full': 'The server has no space left right now. Please try again later.',
+      'error.readlimit': 'Too many requests in a short time. Please try again later.',
+      'error.forget': 'Remove from this device',
+      'error.forgotten': 'The list is no longer stored on this device.',
       'error.kindmix': 'This link belongs to a different kind of list.',
 
       /* -- Super list ------------------------------------------------- */
@@ -1652,10 +1662,59 @@
     kreis.proof = null;
   }
 
+  /* Welche gemerkte Liste die Fehlerseite vom Geraet nehmen darf. */
+  var fehlerId = null;
+  /* Fehler, nach denen eine Liste nicht wiederkommt: geloescht, mit einem
+     zurueckgezogenen Link, beschaedigt. Nach einem Netzfehler oder der
+     Drosselung bleibt sie, denn sie lebt noch. */
+  var FEHLER_TOT = { notfound: 1, decrypt: 1, corrupt: 1 };
+
+  /**
+   * Zeigt die Fehlerseite. Steht die Liste unter "Auf diesem Geraet
+   * gemerkt" und ist sie tot, bietet die Seite an, sie dort zu entfernen.
+   * Bis November 2026 gab es nur "Zur Startseite", und dort stand sie
+   * wieder; der einzige Ausweg war, alle lokalen Daten zu loeschen.
+   */
   function showError(code) {
     state.mode = 'error';
     $('#errorText').textContent = t('error.' + code) || t('error.network');
+    var ziel = null;
+    try { ziel = parseHash(); } catch (e) { ziel = null; }
+    var gemerkt = !!ziel && readMine().some(function (it) { return it.id === ziel.id; });
+    fehlerId = (gemerkt && FEHLER_TOT[code]) ? ziel.id : null;
+    var knopf = $('#btnForget');
+    if (knopf) { knopf.hidden = !fehlerId; }
     showView('viewError');
+  }
+
+  /**
+   * Nimmt die tote Liste der Fehlerseite vom Geraet und kehrt zur
+   * Startseite zurueck. Rueckgaengig stellt den Eintrag an seine Stelle,
+   * denn ein Irrtum, etwa ein Server, der eben neu aufgesetzt wird, soll
+   * keinen Zugang kosten.
+   */
+  function totVergessen() {
+    var id = fehlerId;
+    if (!id) { return; }
+    var vorher = readMine();
+    var pos = -1;
+    vorher.forEach(function (it, i) { if (it.id === id) { pos = i; } });
+    if (pos < 0) { return; }
+    var eintrag = vorher[pos];
+    forgetList(id);
+    fehlerId = null;
+    history.replaceState(null, '', location.pathname + location.search);
+    route();
+    toast(t('error.forgotten'), {
+      label: t('item.undo'),
+      run: function () {
+        var jetzt = readMine();
+        if (jetzt.some(function (it) { return it.id === id; })) { return; }
+        jetzt.splice(Math.min(pos, jetzt.length), 0, eintrag);
+        writeMine(jetzt);
+        renderMine();
+      }
+    });
   }
 
   var toastTimer = null;
@@ -3613,10 +3672,27 @@
     saveTimer = setTimeout(save, warte);
   }
 
-  function mapError(res) {
-    var known = { notfound: 1, forbidden: 1, toolarge: 1, ratelimit: 1, exists: 1, conflict: 1 };
+  /**
+   * Uebersetzt die Antwort in einen Fehlercode fuer t('error.' + code).
+   *
+   * Bis November 2026 kannte es nur sechs Codes, alles andere hiess
+   * 'network', "Der Server ist gerade nicht erreichbar.": auch eine Liste,
+   * die auf dem Server beschaedigt ist (500 corrupt), und ein voller Server
+   * (507 full). Wer das las, wartete auf etwas, das Warten nicht behebt.
+   * conflict bleibt 'network', busy (503) ebenso, denn beides geht vorueber.
+   *
+   * Die Drosselung meldet api.php beim Anlegen und beim Lesen mit demselben
+   * Code. Der Satz dazu sprach nur vom Anlegen ("Zu viele neue Listen"),
+   * auch bei jemandem, der nur einen Ansehen-Link oeffnete. Was gerade
+   * geschah, weiss der Aufrufer; lesen = true macht daraus 'readlimit'.
+   *
+   * @param {{status: number, body: Object}} res
+   * @param {boolean=} lesen ob die Anfrage gelesen hat
+   */
+  function mapError(res, lesen) {
+    var known = { notfound: 1, forbidden: 1, toolarge: 1, ratelimit: 1, exists: 1, corrupt: 1, full: 1 };
     var code = res && res.body && res.body.error;
-    if (code === 'conflict') { return 'network'; }
+    if (code === 'ratelimit' && lesen) { return 'readlimit'; }
     return (code && known[code]) ? code : 'network';
   }
 
@@ -4781,7 +4857,7 @@
       return Store.read(state.id, 0);
     }).then(function (res) {
       if (res.status === 404) { throw new AppError('notfound'); }
-      if (res.status !== 200) { throw new AppError(mapError(res)); }
+      if (res.status !== 200) { throw new AppError(mapError(res, true)); }
       state.rev = res.body.rev;
       state.updated = res.body.updated;
       return Crypt.decrypt(state.key, res.body.payload, state.id);
@@ -4847,7 +4923,7 @@
     }).then(function (res) {
       if (gen !== kreisGen) { return null; }
       if (res.status === 404) { throw new AppError('notfound'); }
-      if (res.status !== 200) { throw new AppError(mapError(res)); }
+      if (res.status !== 200) { throw new AppError(mapError(res, true)); }
       kreis.rev = res.body.rev;
       kreis.updated = res.body.updated;
       return Crypt.decrypt(kreis.key, res.body.payload, kreis.id);
@@ -4941,7 +5017,7 @@
         return Store.read(e.freund.id, 0).then(function (res) {
           e.status = res.status;
           if (res.status === 404) { throw new AppError('notfound'); }
-          if (res.status !== 200) { throw new AppError(mapError(res)); }
+          if (res.status !== 200) { throw new AppError(mapError(res, true)); }
           return Crypt.decrypt(key, res.body.payload, e.freund.id);
         });
       }).then(function (raw) {
@@ -4969,10 +5045,12 @@
     return Promise.all(laeufer).then(function () { return eintraege; });
   }
 
-  /* mapError wirft corrupt, busy, malformed und conflict alle auf 'network'.
-     Fuer die Frage "nochmal versuchen?" ist das zu grob: Ein 500 corrupt
-     aendert sich durch eine zweite Anfrage nicht. Deshalb entscheidet hier
-     der Status, nicht der uebersetzte Code. */
+  /* mapError wirft busy, malformed und conflict auf 'network', und eine
+     Antwort, die kein JSON ist, ebenso. Fuer die Frage "nochmal versuchen?"
+     ist das zu grob: Ein 400 malformed aendert sich durch eine zweite
+     Anfrage nicht. Deshalb entscheidet hier der Status, nicht der
+     uebersetzte Code. corrupt hat seit November 2026 einen eigenen Code und
+     kommt hier gar nicht erst an. */
   function kreisWiederholbar(e) {
     if (e.fehler !== 'network') { return false; }
     return !e.status || e.status === 0 || e.status >= 502;
@@ -5028,7 +5106,7 @@
 
   function kreisZusammenfuehren(serverRev) {
     return Store.read(kreis.id, 0).then(function (res) {
-      if (res.status !== 200) { throw new AppError(mapError(res)); }
+      if (res.status !== 200) { throw new AppError(mapError(res, true)); }
       return Crypt.decrypt(kreis.key, res.body.payload, kreis.id);
     }).then(function (raw) {
       var fremd = normalizeAny(raw, 'circle', kreis.id);
@@ -6108,6 +6186,9 @@
       }
     });
     window.addEventListener('hashchange', route);
+    /* Die Fehlerseite hat keinen eigenen Binder; ihr einziger Knopf mit
+       Verhalten haengt hier, bei der Seite. */
+    $('#btnForget').addEventListener('click', totVergessen);
   }
 
   /* ===================================================================== *
