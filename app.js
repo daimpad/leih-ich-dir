@@ -404,6 +404,12 @@
       'circle.badge': 'Superliste',
       'list.badge': 'Leihliste',
       'title.edit': 'Deine Leihliste · LeihIchDir',
+      'title.start': 'LeihIchDir · Dinge an Freunde verleihen, ohne Konto',
+      'title.circle': 'Deine Superliste · LeihIchDir',
+      'title.error': 'Das hat nicht geklappt · LeihIchDir',
+      'title.settings': 'Einstellungen · LeihIchDir',
+      'item.added': '{name} hinzugefügt.',
+      'nav.footer': 'Weitere Seiten',
       'title.view': 'Eine Leihliste · LeihIchDir',
       'circle.untitled': 'Superliste',
       'circle.newTitle': 'Meine Superliste',
@@ -793,6 +799,12 @@
       'circle.badge': 'Super list',
       'list.badge': 'Lending list',
       'title.edit': 'Your lending list · LeihIchDir',
+      'title.start': 'LeihIchDir · Lend things to friends, without an account',
+      'title.circle': 'Your super list · LeihIchDir',
+      'title.error': 'That did not work · LeihIchDir',
+      'title.settings': 'Settings · LeihIchDir',
+      'item.added': '{name} added.',
+      'nav.footer': 'More pages',
       'title.view': 'A lending list · LeihIchDir',
       'circle.untitled': 'Super list',
       'circle.newTitle': 'My super list',
@@ -1072,7 +1084,12 @@
       langBtn.textContent = t('lang.target');
       langBtn.setAttribute('title', t('a11y.lang'));
       langBtn.setAttribute('aria-label', t('a11y.lang'));
+      /* Wort und Name sind in der Zielsprache, also traegt der Knopf deren
+         lang. Sonst las die Vorlesestimme "English" und "Switch to
+         English" mit deutscher Aussprache (WCAG 3.1.2). */
+      langBtn.setAttribute('lang', lang === 'de' ? 'en' : 'de');
     }
+    seitenTitel();
     /* Das Abzeichen nennt den Speicherort nur dann, wenn er vom Erwarteten
        abweicht: im Vorschaumodus liegt die Liste im Browser, sonst auf dem
        Server, und Letzteres muss niemand lesen. */
@@ -1619,6 +1636,37 @@
 
   var shownView = null;
 
+  /**
+   * Der Titel der Seite, je Ansicht und Sprache. Bis November 2026 setzte
+   * ihn nur render() fuer eine Liste; nach Superliste, Fehler oder Zurueck
+   * zur Startseite stand dort weiter "Eine Leihliste" oder "Deine
+   * Leihliste", und nach dem Wechsel auf Englisch blieb der Starttitel
+   * deutsch. Den Titel hoert, wer mit der Vorlesestimme zwischen Tabs
+   * wechselt, und er steht im Verlauf (WCAG 2.4.2).
+   */
+  function seitenTitel() {
+    var key = null;
+    if (isSettingsPage()) { key = 'title.settings'; }
+    else if (shownView === 'viewCircle') { key = 'title.circle'; }
+    else if (shownView === 'viewError') { key = 'title.error'; }
+    else if (shownView === 'viewList') { key = state.mode === 'edit' ? 'title.edit' : 'title.view'; }
+    else if (shownView === 'viewStart' || shownView === null) { key = 'title.start'; }
+    if (key) { document.title = t(key); }
+  }
+
+  /**
+   * Sagt der Vorlesestimme etwas, ohne es zu zeigen. Die Region ist leise
+   * (polite) und eigens dafuer da; was sie sagt, steht anderswo schon im
+   * Bild. Erst leeren, dann schreiben, sonst schweigt sie, wenn derselbe
+   * Satz zweimal kommt.
+   */
+  function ansagen(text) {
+    var node = $('#ansage');
+    if (!node) { return; }
+    node.textContent = '';
+    setTimeout(function () { node.textContent = text; }, 60);
+  }
+
   function showView(name) {
     /* Verlassen wir die Uebersicht, verschwinden die entschluesselten
        Fremddaten aus DOM und Speicher. hidden allein genuegt nicht: Der
@@ -1634,6 +1682,7 @@
        landete mitten in der neuen Liste, beim Teilen statt beim Anfang. */
     if (shownView !== null && shownView !== name) { window.scrollTo(0, 0); }
     shownView = name;
+    seitenTitel();
     /* Die Wortmarke laesst sich nur messen, wenn sie zu sehen ist. Der
        Auftritt kommt vorher: Die Buchstaben, die gleich entstehen, sollen
        ihn schon mitmachen. */
@@ -1840,12 +1889,26 @@
     toastWeg(false);
   }
 
+  /* Was zuletzt ueber das Speichern angesagt wurde. */
+  var speicherAnsage = null;
+
   function setSaveState(kind) {
     var node = $('#saveState');
     if (!node) { return; }
-    if (state.mode !== 'edit' || !kind) { node.hidden = true; node.textContent = ''; return; }
+    if (state.mode !== 'edit' || !kind) { node.hidden = true; node.textContent = ''; speicherAnsage = null; return; }
     node.hidden = false;
     node.textContent = t('status.' + kind);
+    /* #saveState war eine Live-Region, und jeder Tastendruck schrieb
+       "Nicht gespeichert" hinein: 22 Zeichen im Titel, 22 Ansagen. Jetzt
+       schweigt die Marke. Dass es hakt, sagt schon die Meldung dazu
+       (status.retryHint, error.*); angesagt wird hier nur, dass es danach
+       wieder gespeichert ist, denn das sagte bisher niemand. */
+    if (kind === 'error' || kind === 'retry') {
+      speicherAnsage = kind;
+    } else if (kind === 'saved' && speicherAnsage) {
+      speicherAnsage = null;
+      ansagen(t('status.saved'));
+    }
     /* chip--sm gehoert dazu: Der Zustand steht klein neben dem Titel, und
        diese Zeile schreibt die Klassenliste vollstaendig neu. */
     node.className = 'chip chip--sm' + (kind === 'saved' ? ' chip--ok' : (kind === 'error' || kind === 'retry' ? ' chip--warn' : ''));
@@ -3900,6 +3963,10 @@
     state.doc.items.unshift(neu);
     touch();
     render();
+    /* Das Hinzufuegen war stumm, ausser wenn das Spiel gerade eine Meldung
+       hatte; ab dem elften Ding und nach einem Loeschen nie. Wer die Liste
+       nicht sieht, wusste nicht, ob es geklappt hat. */
+    ansagen(t('item.added', { name: neu.name }));
     feierAdd(neu.id, neu.name);
   }
 
