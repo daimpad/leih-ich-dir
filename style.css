@@ -59,6 +59,18 @@
   --tinte:       #003826;
   --tinte-leise: #23674E;
 
+  /* Leise Zeichen auf dem Grund, nicht auf Knete: der Stift am Titel und
+     die Nummern in "So geht's". Hell traegt sie --tinte-leise (6,2:1),
+     dunkel --muted (9,9:1); --tinte-leise blieb dort dunkelgruen auf
+     dunkelgruen, 2,6:1, beim Zeigen 1,3:1 (WCAG 1.4.11). */
+  --stift:       var(--tinte-leise);
+  --stift-an:    var(--tinte);
+
+  /* Was die klebende Eingabe schmal oben zudeckt, und was unten die
+     Meldung braucht (scroll-padding, Abschnitt 12). */
+  --klebe-oben:  8.5rem;
+  --klebe-unten: 4.5rem;
+
   /* Wer was traegt: Kaugummi fuehrt die Handlung an, Minze heisst frei,
      Pfirsich heisst verliehen, Butter mahnt, Immergruen zeigt eine Wahl.
      Rot bleibt dem Zerstoerenden. Zu jedem Ton sein Schattenton als RGB. */
@@ -181,6 +193,8 @@
     --licht-flaeche: .07;
     --licht-mulde:   .08;
     --kante:         .30;
+    --stift:         var(--muted);
+    --stift-an:      var(--ink);
   }
 }
 
@@ -211,6 +225,8 @@
   --licht-flaeche: .07;
   --licht-mulde:   .08;
   --kante:         .30;
+  --stift:         var(--muted);
+  --stift-an:      var(--ink);
 }
 
 /* == 1a · Das Rezept: Knete und Mulde ================================== *
@@ -363,7 +379,7 @@ button, input, textarea, select { font: inherit; color: inherit; }
 .skiplink:focus { top: var(--s-3); }
 /* Ziel des Sprungs: Es nimmt die Fuehrung, damit der naechste Tabulator im
    Inhalt weitergeht, zeigt sie aber nicht als Rahmen um die ganze Seite. */
-main[tabindex="-1"]:focus { outline: none; }
+main[tabindex="-1"]:focus, h1[tabindex="-1"]:focus { outline: none; }
 
 /* Abstand nach oben. Zwei Stufen genügen, und sie stehen hier statt im
    Markup: eingebettete Angaben verstoßen gegen die eigene Richtlinie
@@ -994,8 +1010,8 @@ header.site { padding-block: var(--s-4); }
 .title-input:hover, .title-edit:hover .title-input { background: var(--surface-alt); }
 /* Der Stift ist ein Hinweis, kein eigener Knopf: leise, bis man den Namen
    anfasst. Er steht im Label, ein Tipp darauf setzt den Cursor ins Feld. */
-.title-edit__stift { flex: none; width: 1.6rem; height: 1.6rem; color: var(--tinte-leise); }
-.title-edit:hover .title-edit__stift, .title-edit:focus-within .title-edit__stift { color: var(--tinte); }
+.title-edit__stift { flex: none; width: 1.6rem; height: 1.6rem; color: var(--stift); }
+.title-edit:hover .title-edit__stift, .title-edit:focus-within .title-edit__stift { color: var(--stift-an); }
 /* Die Seite So geht's ist zum Lesen da: Absaetze und Ueberschriften der
    Karten bekommen Luft. Die Schritte sind nummeriert wie die Reiter, die
    Nummer zum Sehen, die Liste fuer die Reihenfolge im Dokument. */
@@ -1003,7 +1019,7 @@ header.site { padding-block: var(--s-4); }
 .anleitung .card p + p { margin-top: var(--s-3); }
 .folge { list-style: none; padding: 0; margin-top: var(--s-4); display: grid; gap: var(--s-4); }
 .folge h3 { display: flex; align-items: baseline; gap: var(--s-2); font-size: 1.15rem; }
-.folge__nr { color: var(--tinte-leise); }
+.folge__nr { color: var(--stift); }
 .folge p { margin-top: var(--s-1); }
 .titlemeta { display: flex; align-items: center; flex-wrap: wrap; gap: var(--s-2); margin-top: var(--s-2); color: var(--faint); font-size: .92rem; }
 
@@ -1557,6 +1573,11 @@ header.site { padding-block: var(--s-4); }
      an den Rand der Karte lag flach ueber deren Schattierung, und die
      Knete hatte dort eine Kante, wo sie keine hat. */
   .addbox { position: sticky; top: 0; z-index: 20; background: var(--surface); padding-block: var(--s-3); }
+  /* Die klebende Eingabe deckt oben rund 8 rem zu. Ohne Abstand rollte der
+     Browser eine fokussierte Zeile genau darunter: bei 390 Punkten Breite
+     und Shift+Tab lagen 4 von 14 Zeilen ganz verdeckt (WCAG 2.4.11). Unten
+     haelt der Abstand die Meldung frei. */
+  html { scroll-padding-top: var(--klebe-oben); scroll-padding-bottom: var(--klebe-unten); }
   /* Nur im Inventar. Dort tragen die beiden Schaltflaechen ein Zeichen und
      koennen ihr Wort schmal ablegen; die Zeile in der Superliste hat kein
      Zeichen, und "Aufnehmen" lief bei 2,9rem Breite ueber beide Raender
