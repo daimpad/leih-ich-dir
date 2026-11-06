@@ -54,7 +54,12 @@ const stabil = await page.evaluate(() => {
   const vor = Array.from(document.querySelectorAll('#itemsEmptyList button')).map(b => b.textContent);
   return JSON.stringify(vor);
 });
-await page.locator('#btnTheme').click();
+/* Ein Wechsel des Schritts zeichnet neu, ohne die Seite zu laden. Bis
+   November 2026 tat das hier der Umschalter fuer das Erscheinungsbild, der
+   seither nicht mehr im Kopf steht. */
+await page.locator('#schrittTab2').click();
+await page.waitForTimeout(200);
+await page.locator('#schrittTab1').click();
 await page.waitForTimeout(200);
 const stabil2 = await page.evaluate(() => JSON.stringify(Array.from(document.querySelectorAll('#itemsEmptyList button')).map(b => b.textContent)));
 ok('innerhalb eines Aufrufs bleiben sie stehen', stabil === stabil2, stabil + ' / ' + stabil2);
