@@ -32,7 +32,7 @@ const lage = (p, wrap) => p.evaluate((wrap) => {
   const w = document.getElementById(wrap);
   const feld = w.querySelector('.title-edit__feld').getBoundingClientRect();
   const stift = w.querySelector('.title-edit__stift').getBoundingClientRect();
-  const eingabe = w.querySelector('input');
+  const eingabe = w.querySelector('.title-input');
   const s = getComputedStyle(eingabe);
   const c = document.createElement('canvas').getContext('2d');
   c.font = s.fontWeight + ' ' + s.fontSize + ' ' + s.fontFamily;
@@ -41,7 +41,8 @@ const lage = (p, wrap) => p.evaluate((wrap) => {
   return { feldL: Math.round(feld.left), feldR: Math.round(feld.right), stiftL: Math.round(stift.left), stiftR: Math.round(stift.right),
            sichtbar: stift.width > 0 && getComputedStyle(w).display !== 'none' && !w.hidden,
            soll: Math.round(c.measureText(text).width + polster), ist: Math.round(feld.width),
-           abgeschnitten: eingabe.scrollWidth > eingabe.clientWidth + 1,
+           abgeschnitten: eingabe.scrollWidth > eingabe.clientWidth + 1 || eingabe.scrollHeight > eingabe.clientHeight + 1,
+           zeilen: Math.round(eingabe.clientHeight / parseFloat(s.lineHeight)),
            ueberlauf: document.documentElement.scrollWidth - innerWidth };
 }, wrap);
 
@@ -88,6 +89,44 @@ for (const breite of [390, 320]) {
   const m = await lage(p, 'listTitleEditWrap');
   ok(breite + 'px: "Meine Leihliste" passt samt Stift, nichts laeuft ueber',
      !m.abgeschnitten && m.stiftR <= breite && m.ueberlauf <= 0, JSON.stringify(m));
+  await ctx.close();
+}
+
+/* Seit November 2026 ist der Name ein textarea: Ein langer Name bricht um,
+   statt abgeschnitten zu werden ("Werkzeug und Campi" bei 390 Pixeln), und
+   bleibt doch eine Zeile im Dokument. */
+console.log('· Ein langer Name bricht um');
+for (const breite of [390, 320]) {
+  const { ctx, p } = await neueListe(breite);
+  await p.locator('#listTitleInput').fill('Werkzeug und Camping');
+  let m = await lage(p, 'listTitleEditWrap');
+  ok(breite + 'px: "Werkzeug und Camping" steht ganz da', !m.abgeschnitten && m.ueberlauf <= 0, JSON.stringify(m));
+  ok(breite + 'px: auf mehr als einer Zeile', m.zeilen >= 2, String(m.zeilen));
+  await p.locator('#listTitleInput').fill('Werkzeug, Zelte und alles, was sonst noch im Keller liegt');
+  m = await lage(p, 'listTitleEditWrap');
+  ok(breite + 'px: auch ein sehr langer Name, und der Stift bleibt im Blick', !m.abgeschnitten && m.ueberlauf <= 0 && m.stiftR <= breite && m.sichtbar, JSON.stringify(m));
+  await ctx.close();
+}
+
+console.log('· Der Name bleibt eine Zeile');
+{
+  const { ctx, p } = await neueListe(390);
+  await p.locator('#listTitleInput').fill('Keller');
+  await p.locator('#listTitleInput').press('End');
+  await p.keyboard.press('Enter');
+  ok('Enter beginnt keine neue Zeile', await p.locator('#listTitleInput').inputValue() === 'Keller');
+  ok('und schliesst die Eingabe ab', await p.evaluate(() => document.activeElement.id) !== 'listTitleInput');
+  await p.locator('#listTitleInput').evaluate((n) => {
+    n.value = 'Keller\nund Dachboden';
+    n.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  ok('ein eingefuegter Umbruch wird zum Leerzeichen', await p.locator('#listTitleInput').inputValue() === 'Keller und Dachboden',
+     await p.locator('#listTitleInput').inputValue());
+  await p.waitForTimeout(1500);
+  await p.reload({ waitUntil: 'networkidle' });
+  await p.waitForSelector('#viewList:not([hidden])');
+  ok('und so ist er gespeichert', await p.locator('#listTitleInput').inputValue() === 'Keller und Dachboden',
+     await p.locator('#listTitleInput').inputValue());
   await ctx.close();
 }
 
