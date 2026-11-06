@@ -26,6 +26,7 @@ Liegt Playwright anderswo, sagt man es über Umgebungsvariablen:
 | `LID_CHROMIUM` | Pfad zum Chromium | was Playwright selbst findet |
 | `LID_BASE` | laufende Anwendung | `http://127.0.0.1:8099` |
 | `LID_SHOTS` | wohin Bildschirmfotos gehen | `tests/e2e/.bilder/` |
+| `LID_FRIST` | Sekunden je Suite in `lauf.mjs`, danach wird sie beendet | `300` |
 
 ## Laufen lassen
 
