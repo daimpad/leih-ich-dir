@@ -2085,9 +2085,10 @@
     btn.appendChild(text);
     btn.appendChild(el('span', 'sr-only', statusLabel(item)));
     /* Das Formular traegt nur den Namen ein; alles Weitere steht hinter der
-       Zeile. Ohne Beschriftung ist dem Pfeil nicht anzusehen, dass sich
-       dahinter Notiz, Verleihen und Loeschen verbergen. */
-    btn.appendChild(el('span', 'item-more', t('item.more')));
+       Zeile. Die Beschriftung dafuer stand bis November 2026 sichtbar in
+       jeder Zeile, siebenmal dasselbe neben dem Pfeil. Jetzt hoert sie nur
+       die Vorlesestimme, als Teil des Namens der Schaltflaeche. */
+    btn.appendChild(el('span', 'item-more sr-only', t('item.more')));
     var chev = el('span', 'item-chev');
     chev.appendChild(icon('chev'));
     btn.appendChild(chev);
