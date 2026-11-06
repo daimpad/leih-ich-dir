@@ -408,6 +408,7 @@
       'circle.untitled': 'Superliste',
       'circle.newTitle': 'Meine Superliste',
       'circle.unnamed': 'Ohne Namen',
+      'circle.rename': 'Namen ändern: {name}',
       'circle.titleLabel': 'Name der Superliste, freiwillig',
       'circle.titlePlaceholder': 'Superliste',
       'circle.honest': 'Die Personen, deren Leihlisten hier stehen, erfahren davon nichts. Eine Benachrichtigung setzte voraus, dass festgehalten wird, wer welche Liste liest. Diese Superliste hält das nicht fest.',
@@ -796,6 +797,7 @@
       'circle.untitled': 'Super list',
       'circle.newTitle': 'My super list',
       'circle.unnamed': 'No name',
+      'circle.rename': 'Change name: {name}',
       'circle.titleLabel': 'Name of the super list, optional',
       'circle.titlePlaceholder': 'Super list',
       'circle.honest': 'The people whose lending lists are kept here are not told about it. A notice would require a record of who reads which list. This super list keeps no such record.',
@@ -2275,13 +2277,22 @@
      einer Person. Der Rueckfall ist ein eigener Text und NICHT
      t('list.untitled') — das waere "Leih-Katalog" und liesse die Suche nach
      "katalog" schlagartig alle unbenannten Freunde treffen. */
+  /* Der Standardtitel ist kein Name. createList schreibt ihn in jede neue
+     Liste, und bis November 2026 hiessen dann alle gesammelten Listen ohne
+     Kontaktnamen "Meine Leihliste", unter "Listen sammeln" wie in jedem
+     Treffer, ohne Unterschied. Er wird in beiden Sprachen uebersprungen,
+     denn die Liste kann in der anderen angelegt sein. */
+  function istStandardTitel(tl) {
+    return tl === I18N.de['list.newTitle'] || tl === I18N.en['list.newTitle'];
+  }
+
   function freundName(e) {
     if (e.freund.label) { return e.freund.label; }
     if (e.doc) {
       var k = (e.doc.contact.name || '').trim();
       if (k) { return k; }
       var tl = (e.doc.title || '').trim();
-      if (tl) { return tl; }
+      if (tl && !istStandardTitel(tl)) { return tl; }
     }
     return t('circle.unnamed');
   }
@@ -2374,6 +2385,35 @@
     return true;
   }
 
+  /* Wohin ein Treffer der Superliste fuehrt: zur Liste und dort zum
+     Gegenstand. Bis November 2026 oeffnete er die Liste oben, ohne
+     Markierung; bei dreissig Sachen lag die gesuchte Zeile weit unter dem
+     Bildrand, und die Einzelliste hat kein Suchfeld. Gemerkt wird nur fuer
+     den naechsten Ortswechsel; das Linkformat bleibt, wie es ist. */
+  var sprung = null;
+
+  function springeZumGegenstand() {
+    var ziel = sprung;
+    sprung = null;
+    if (!ziel || state.mode !== 'view' || state.id !== ziel.id) { return; }
+    var zeile = null;
+    Array.prototype.forEach.call(document.querySelectorAll('#itemList .item'), function (li) {
+      if (li.getAttribute('data-id') === ziel.iid) { zeile = li; }
+    });
+    if (!zeile) { return; }
+    zeile.scrollIntoView({ block: 'center' });
+    if (!ruhig()) {
+      zeile.classList.add('lid-heim');
+      setTimeout(function () { zeile.classList.remove('lid-heim'); }, 700);
+    }
+    /* Der Fokus auf "Anfragen", denn dafuer kam man her. Bei Verliehenem
+       gibt es den Knopf nicht; dann die Zeile selbst. */
+    var frage = zeile.querySelector('[data-act="ask"]');
+    if (frage) { frage.focus({ preventScroll: true }); return; }
+    zeile.setAttribute('tabindex', '-1');
+    zeile.focus({ preventScroll: true });
+  }
+
   function renderKreisRow(z) {
     var li = el('li', 'item item--' + z.status + (z.status === 'lent' ? ' items-read-lent' : ''));
     /* data-fid/data-iid statt data-id: markRow sucht global nach
@@ -2440,6 +2480,53 @@
    * wird, die sich nicht holen liess — in der Uebersicht selbst fehlten ihre
    * Gegenstaende sonst wortlos.
    */
+  /* Welche gesammelte Liste gerade benannt wird; null, wenn keine. */
+  var kreisBenennt = null;
+
+  /**
+   * Das Feld, in dem eine gesammelte Liste ihren Namen bekommt. Enter und
+   * Verlassen uebernehmen, Escape bricht ab. Leer heisst: wieder der Name
+   * aus der Liste selbst.
+   */
+  function benennFeld(f, e, anzeige) {
+    var feld = el('input', 'input');
+    feld.type = 'text';
+    feld.maxLength = 60;
+    feld.value = f.label || '';
+    feld.placeholder = e ? freundName({ freund: { label: '' }, doc: e.doc }) : t('circle.unnamed');
+    feld.setAttribute('aria-label', t('circle.addName'));
+    feld.setAttribute('data-kreis-name', f.id);
+    var fertig = false;
+    var schluss = function (uebernehmen, perTaste) {
+      if (fertig) { return; }
+      fertig = true;
+      kreisBenennt = null;
+      var neu = feld.value.trim().slice(0, 60);
+      if (uebernehmen && neu !== (f.label || '')) {
+        f.label = neu;
+        kreisSave();
+      }
+      renderKreisListe();
+      /* Mit Enter oder Escape zurueck auf den Stift derselben Zeile, nicht
+         auf den Koerper der Seite: Die Zeile ist eben neu gebaut worden.
+         Wer das Feld mit einem Klick anderswohin verliess, behaelt diesen
+         Ort. */
+      if (!perTaste) { return; }
+      var stift = null;
+      Array.prototype.forEach.call(document.querySelectorAll('#circleFriends [data-kreis-act="rename"]'), function (b) {
+        if (b.getAttribute('data-kreis-id') === f.id) { stift = b; }
+      });
+      if (stift) { stift.focus(); }
+    };
+    feld.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Enter') { ev.preventDefault(); schluss(true, true); }
+      else if (ev.key === 'Escape') { ev.preventDefault(); schluss(false, true); }
+    });
+    feld.addEventListener('blur', function () { schluss(true, false); });
+    setTimeout(function () { feld.focus(); feld.select(); }, 0);
+    return feld;
+  }
+
   function renderKreisFreunde() {
     var liste = $('#circleFriends');
     if (!liste || !kreis.doc) { return; }
@@ -2455,7 +2542,29 @@
       var li = el('li', 'item');
       var row = el('div', 'itemrow');
       var text = el('span', 'item-text');
-      text.appendChild(el('span', 'item-name', e ? freundName(e) : (f.label || t('circle.unnamed'))));
+      var anzeige = e ? freundName(e) : (f.label || t('circle.unnamed'));
+      if (istZugang && kreisBenennt === f.id) {
+        text.appendChild(benennFeld(f, e, anzeige));
+      } else if (istZugang) {
+        /* Die Beschriftung laesst sich spaeter aendern, nicht nur beim
+           Aufnehmen. Der Stift steht neben dem Namen, wie am Titel, und
+           nicht als eigene Spalte: Schmal nahm die dem Zustand darunter den
+           Platz, "1 Sache" brach dann um. Der Name steht im Namen des
+           Knopfs. */
+        var zeile = el('span', 'item-name kreis-name');
+        zeile.appendChild(el('span', null, anzeige));
+        var nenn = el('button', 'btn btn--ghost btn--sm btn--icon kreis-name__stift');
+        nenn.type = 'button';
+        nenn.setAttribute('data-kreis-act', 'rename');
+        nenn.setAttribute('data-kreis-id', f.id);
+        nenn.setAttribute('aria-label', t('circle.rename', { name: anzeige }));
+        nenn.setAttribute('title', t('circle.rename', { name: anzeige }));
+        nenn.appendChild(icon('stift'));
+        zeile.appendChild(nenn);
+        text.appendChild(zeile);
+      } else {
+        text.appendChild(el('span', 'item-name', anzeige));
+      }
 
       var zustand;
       /* Ueber der Grenze wird nicht geholt, aber auch nichts verworfen: Der
@@ -4940,6 +5049,7 @@
       if (state.mode === 'edit') { rememberList(); }
       render();
       if (state.mode === 'view') { startRefresh(); } else { stopRefresh(); }
+      springeZumGegenstand();
       hinweisLangeDraussen();
       lebenszeichen();
     }).catch(function (err) {
@@ -6213,7 +6323,19 @@
       kreisSave();
     });
 
-    $('#btnCircleAdd').addEventListener('click', circleAdd);
+    /* Ein Treffer merkt sich, wohin er fuehrt; openList loest es ein. */
+    $('#circleItems').addEventListener('click', function (ev) {
+      var li = ev.target.closest('.item[data-fid]');
+      sprung = li ? { id: li.getAttribute('data-fid'), iid: li.getAttribute('data-iid') } : null;
+    });
+    /* Ein Formular wie #addForm: Enter in einem der beiden Felder nimmt
+       auf. Bis November 2026 standen Linkfeld und Knopf vor dem Namen,
+       ohne Formular; Enter im Linkfeld tat nichts, und wer den Knopf
+       nahm, liess den Namen aus, weil er erst danach kam. */
+    $('#circleAddForm').addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      circleAdd();
+    });
     $('#btnCircleAddHere').addEventListener('click', circleAddHere);
     $('#btnStartCircle').addEventListener('click', function () { createCircle(null); });
 
@@ -6223,6 +6345,11 @@
       if (!hit) { return; }
       var id = hit.getAttribute('data-kreis-id');
       if (hit.getAttribute('data-kreis-act') === 'remove') { circleRemove(id); return; }
+      if (hit.getAttribute('data-kreis-act') === 'rename') {
+        kreisBenennt = id;
+        renderKreisFreunde();
+        return;
+      }
       var f = null;
       kreis.doc.friends.forEach(function (x) { if (x.id === id) { f = x; } });
       if (!f) { return; }

@@ -1031,18 +1031,22 @@
     <section class="card schritt" id="circleManage">
       <h2 class="card__title schritt__titel" data-i18n="circle.stepCollect">Listen sammeln</h2>
       <p class="hint" id="circleManageLead" data-i18n="circle.emptyNoneText" hidden></p>
-      <div class="field">
-        <label for="circleAddLink" data-i18n="circle.addLabel">Ansehen-Link der Leihliste</label>
-        <div class="addrow">
+      <!-- Name vor dem Knopf, beide in einem Formular: Enter in einem der
+           Felder nimmt auf (bindKreis). -->
+      <form id="circleAddForm" novalidate>
+        <div class="field">
+          <label for="circleAddLink" data-i18n="circle.addLabel">Ansehen-Link der Leihliste</label>
           <input type="text" id="circleAddLink" class="input" autocomplete="off"
                  data-i18n-placeholder="circle.addPlaceholder" placeholder="Link einfügen">
-          <button type="button" id="btnCircleAdd" class="btn btn--primary" data-i18n="circle.add">Aufnehmen</button>
         </div>
-      </div>
-      <div class="field">
-        <label for="circleAddName" data-i18n="circle.addName">Name der Person, freiwillig</label>
-        <input type="text" id="circleAddName" class="input" maxlength="60" autocomplete="off">
-      </div>
+        <div class="field">
+          <label for="circleAddName" data-i18n="circle.addName">Name der Person, freiwillig</label>
+          <div class="addrow">
+            <input type="text" id="circleAddName" class="input" maxlength="60" autocomplete="off">
+            <button type="submit" id="btnCircleAdd" class="btn btn--primary" data-i18n="circle.add">Aufnehmen</button>
+          </div>
+        </div>
+      </form>
       <ul id="circleFriends" class="items"></ul>
       <p class="weiter">
         <button type="button" class="btn" data-weiter="2">
