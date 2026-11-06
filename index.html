@@ -687,7 +687,7 @@
           </span>
           <svg class="ico title-edit__stift" aria-hidden="true" focusable="false"><use href="#i-stift"/></svg>
         </label>
-        <span id="saveState" class="chip chip--ok chip--sm" role="status" aria-live="polite" hidden></span>
+        <span id="saveState" class="chip chip--ok chip--sm" hidden></span>
       </div>
       <p class="titlemeta">
         <span id="listMeta"></span>
@@ -1179,7 +1179,7 @@
 
 <footer class="site-footer">
   <div class="shell footer-row">
-    <nav class="footer-nav" aria-label="Rechtliches">
+    <nav class="footer-nav" aria-label="Weitere Seiten" data-i18n-label="nav.footer">
       <a href="so-gehts.html" data-i18n="footer.howto">So geht’s</a>
       <a href="ueber.html" data-i18n="footer.about">Über</a>
       <a href="impressum.html" data-i18n="footer.imprint">Impressum</a>
@@ -1220,6 +1220,10 @@
   <span class="klappe__text" id="klappeText"></span>
 </div>
 
+
+<!-- Was die Vorlesestimme sagt, ohne dass es zu sehen ist (ansagen()).
+     Es nennt Namen von Gegenstaenden, daher translate="no". -->
+<div class="sr-only" id="ansage" role="status" aria-live="polite" translate="no"></div>
 
 <div class="toast-region" id="toastRegion" aria-live="polite">
   <!-- Die Meldung nennt Namen von Gegenstaenden. -->
