@@ -1042,6 +1042,12 @@ header.site { padding-block: var(--s-4); }
 .voicebox { margin-top: var(--s-4); }
 .voicerow { display: flex; align-items: center; gap: var(--s-3); margin-top: var(--s-4); }
 .voicestate { color: var(--link); font-weight: 700; }
+/* Ein Fehler der Spracheingabe mahnt, er zerstoert nichts: Butter, im Ton
+   der Butter-Hinweise (note--warn, Schluesselkasten). 7,3:1 hell, 7,4:1
+   dunkel auf --surface. Bis November 2026 setzte app.js die Klasse, aber
+   style.css kannte sie nicht, und "Mikrofon abgelehnt" stand gruen da wie
+   "Hoert zu". */
+.voicestate-error { color: var(--warn-ink); }
 
 .items { list-style: none; padding: 0; margin-top: var(--s-4); display: grid; gap: 0; }
 
