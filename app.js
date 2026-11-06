@@ -19,6 +19,8 @@
   var API_URL        = 'api.php';
   var SCHEMA_VERSION = 1;      // Version des *entschlüsselten* Dokuments
   var SAVE_DEBOUNCE  = 800;    // ms bis zum automatischen Speichern
+  var API_TIMEOUT    = 15000;  // ms, nach denen ein Abruf als gescheitert gilt; Begruendung bei anfrage()
+  var SAVE_RETRY     = [2000, 5000, 10000, 20000, 30000]; // Abstaende neuer Versuche, der letzte wiederholt sich
   var REFRESH_MS     = 45000;  // Intervall für Live-Daten im Ansehen-Modus
   var UNDO_MS        = 9000;   // Frist, in der sich ein Löschen zurücknehmen lässt
   var LS_PREFIX      = 'lid.'; // localStorage-Namensraum (Vorschaumodus)
@@ -370,6 +372,8 @@
       'status.saving': 'Speichere …',
       'status.unsaved': 'Nicht gespeichert',
       'status.error': 'Speichern fehlgeschlagen',
+      'status.retry': 'Wartet auf den Server',
+      'status.retryHint': 'Der Server antwortet gerade nicht. Deine Änderungen sind noch nicht gespeichert; es wird weiter versucht. Lass diese Seite offen, bis „Gespeichert“ erscheint.',
       'status.overwritten': 'Die Liste wurde parallel geändert. Dein Stand wurde übernommen.',
       'status.refreshed': 'Aktualisiert.',
 
@@ -747,6 +751,8 @@
       'status.saving': 'Saving …',
       'status.unsaved': 'Not saved',
       'status.error': 'Saving failed',
+      'status.retry': 'Waiting for the server',
+      'status.retryHint': 'The server is not answering right now. Your changes are not saved yet; it keeps trying. Keep this page open until “Saved” appears.',
       'status.overwritten': 'The list was changed elsewhere. Your version was kept.',
       'status.refreshed': 'Refreshed.',
 
@@ -1159,17 +1165,43 @@
      ohne Vorabanfrage schicken kann. Ohne die Zeile schickte fetch den
      Koerper als text/plain, und jedes Speichern endete in 415. */
   function apiPost(payload) {
-    return fetch(API_URL, {
+    return anfrage(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       cache: 'no-store',
       body: JSON.stringify(payload)
-    }).then(readJson, function () { throw new AppError('network'); });
+    });
   }
 
   function apiGet(query) {
-    return fetch(API_URL + query, { cache: 'no-store' })
-      .then(readJson, function () { throw new AppError('network'); });
+    return anfrage(API_URL + query, { cache: 'no-store' });
+  }
+
+  /* Jeder Abruf hat eine Frist, die Antwort eingeschlossen. Ohne sie wartete
+     fetch, solange der Browser es zulaesst, oft Minuten: "Speichere …" stand
+     dann neben dem Titel, und jedes weitere Speichern wartete dahinter, denn
+     save() schreibt nie zweimal zugleich (tests/e2e/speichern.mjs). Nach
+     API_TIMEOUT gilt der Abruf als gescheitert wie bei einem Netzfehler. Der
+     AbortController beendet ihn dann auch im Browser, wo es ihn gibt; sonst
+     laeuft er zu Ende, und sein Ergebnis faellt ins Leere. Ein Schreiben kann
+     dabei angekommen sein. Der naechste Versuch traegt dann eine veraltete
+     Revision und endet in 409, und das behandelt save() schon. */
+  function anfrage(url, opts) {
+    var halt = typeof AbortController === 'function' ? new AbortController() : null;
+    if (halt) { opts.signal = halt.signal; }
+    return new Promise(function (ja, nein) {
+      var uhr = setTimeout(function () {
+        if (halt) { halt.abort(); }
+        nein(new AppError('network'));
+      }, API_TIMEOUT);
+      fetch(url, opts).then(readJson).then(function (res) {
+        clearTimeout(uhr);
+        ja(res);
+      }, function () {
+        clearTimeout(uhr);
+        nein(new AppError('network'));
+      });
+    });
   }
 
   function readJson(res) {
@@ -1276,6 +1308,7 @@
   };
 
   var saveTimer = null;
+  var saveVersuche = 0;  // voruebergehende Fehlschlaege in Folge; Begruendung bei speichernSpaeter()
   var refreshTimer = null;
   var docGen = 0;   // zählt Änderungen; erkennt Bearbeitungen während eines Schreibvorgangs
   var voiceOpen = false;   // die Sprachbox steht zu, bis das Mikrofon oder der Verweis sie öffnet
@@ -1544,9 +1577,9 @@
   }
 
   /** Raeumt beide Kopien: die im DOM und die im Speicher. Der Zaehler steigt
-      mit, damit laufende Abrufe ins Leere fallen. Einen AbortController gibt
-      es in dieser Anwendung nicht, und apiGet nimmt keinen; die Anfragen
-      laufen also zu Ende, ihr Ergebnis landet nur nirgends mehr. */
+      mit, damit laufende Abrufe ins Leere fallen. Der AbortController in
+      anfrage() dient nur der Frist, apiGet nimmt keinen von aussen; die
+      Anfragen laufen also zu Ende, ihr Ergebnis landet nur nirgends mehr. */
   function kreisRaeumen() {
     /* Zuerst schreiben, dann raeumen: Danach fehlen Schluessel und Nachweis. */
     kreisFristEinloesen();
@@ -1637,7 +1670,7 @@
     node.textContent = t('status.' + kind);
     /* chip--sm gehoert dazu: Der Zustand steht klein neben dem Titel, und
        diese Zeile schreibt die Klassenliste vollstaendig neu. */
-    node.className = 'chip chip--sm' + (kind === 'saved' ? ' chip--ok' : (kind === 'error' ? ' chip--warn' : ''));
+    node.className = 'chip chip--sm' + (kind === 'saved' ? ' chip--ok' : (kind === 'error' || kind === 'retry' ? ' chip--warn' : ''));
   }
 
   /** Vollständiges Neuzeichnen der Listenansicht. */
@@ -3356,7 +3389,9 @@
     if (state.saving) { scheduleSave(); return Promise.resolve(); }
 
     state.saving = true;
-    setSaveState('saving');
+    /* Waehrend weiterer Versuche bleibt "Wartet auf den Server" stehen, statt
+       mit "Speichere …" zu wechseln: Erst ein Erfolg aendert die Lage. */
+    setSaveState(saveVersuche > 0 ? 'retry' : 'saving');
     var generation = docGen;
     var snapshot = JSON.parse(JSON.stringify(state.doc));
     snapshot.v = SCHEMA_VERSION;
@@ -3380,20 +3415,41 @@
         state.updated = res.body.updated;
         /* Während des Schreibens erfolgte Änderungen bleiben offen und
            werden im nächsten Durchlauf mitgenommen. */
+        saveVersuche = 0;
         state.dirty = (docGen !== generation);
         setSaveState(state.dirty ? 'unsaved' : 'saved');
         if (state.dirty) { scheduleSave(); }
         rememberList();
         renderMeta();
+      } else if (res.status === 0 || res.status === 429 || res.status >= 500) {
+        speichernSpaeter();
       } else {
         setSaveState('error');
         toast(t('error.' + mapError(res)));
       }
     }).catch(function (err) {
       state.saving = false;
+      if (err instanceof AppError && err.code === 'network') { speichernSpaeter(); return; }
       setSaveState('error');
       toast(t('error.' + (err && err.code ? err.code : 'network')));
     });
+  }
+
+  /* Ein voruebergehender Fehler (kein Netz, Frist abgelaufen, 5xx) wird
+     wiederholt, in wachsendem Abstand und ohne Ende, solange etwas offen ist.
+     Vorher kam ein neuer Versuch erst mit der naechsten Aenderung; wer nichts
+     mehr tippte, behielt einen ungespeicherten Stand und sah nur "Speichern
+     fehlgeschlagen". Der Hinweis kommt einmal, beim ersten Fehlschlag, und
+     sagt, was gilt: Der Stand liegt nur in diesem Fenster. Ein endgueltiger
+     Fehler wie 403 oder 413 wird nicht wiederholt, er wuerde nicht besser.
+     Kehrt das Netz zurueck, versucht bindSeite() es sofort. */
+  function speichernSpaeter() {
+    var warte = SAVE_RETRY[Math.min(saveVersuche, SAVE_RETRY.length - 1)];
+    saveVersuche++;
+    setSaveState('retry');
+    if (saveVersuche === 1) { toast(t('status.retryHint')); }
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(save, warte);
   }
 
   function mapError(res) {
@@ -4572,6 +4628,7 @@
          darueber. Die Art entscheidet der Aufrufer, nicht das Dokument. */
       state.doc = normalizeAny(raw, 'list', null);
       state.dirty = false;
+      saveVersuche = 0;
       state.checkedAt = Date.now();
       if (state.mode === 'edit') { rememberList(); }
       render();
@@ -5836,6 +5893,14 @@
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) { return; }
       if (state.mode === 'view') { refresh(false); }
+    });
+    /* Wartet ein Speichern auf das Netz, geht es sofort, wenn es zurueck ist,
+       nicht erst zum naechsten Versuch (speichernSpaeter). */
+    window.addEventListener('online', function () {
+      if (state.mode === 'edit' && state.dirty && saveVersuche > 0 && !state.saving) {
+        clearTimeout(saveTimer);
+        save();
+      }
     });
     window.addEventListener('hashchange', route);
   }
