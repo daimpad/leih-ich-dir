@@ -792,6 +792,13 @@ Skripten selbst, denn Apache wertet diese Sperre vor der `RedirectMatch`-Regel
 der Wurzel aus. Die Prüfung fragt deshalb zusätzlich nach einer erfundenen
 PHP-Datei in `tools/`; ein 403 darauf kann kein Skript sein.
 
+Für die Kopfzeilen prüfen `check.html` und `tools/check-deployment.php` seit
+November 2026 jede Datei mit `.html`, `.js` oder `.css` aus der Liste unter
+*Auslieferung* einzeln: `Cache-Control: no-cache`, an jeder Seite dazu
+`X-Frame-Options` und die `Content-Security-Policy` als Kopfzeile. Trägt die
+Startseite sie und eine solche Datei nicht, steht unter **Befund** *Ursache
+der fehlenden Kopfzeilen an Dateien*, als Empfehlung, nicht als Muss.
+
 **Zwei Wege.**
 
 1. **Die Option abschalten.** Dann läuft alles durch Apache, und `.htaccess`

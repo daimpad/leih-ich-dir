@@ -43,6 +43,15 @@
  * ok. Ebenso zwei Zeilen, nur die zweite mit max-age: Das der zweiten
  * zaehlt nicht.
  *
+ * Und die Kopfzeilen an Dateien mit Endung. Bis November 2026 sah die
+ * Abnahme sie nur an der Startseite, die stets ueber Apache kommt. Auf
+ * leihichdir.de lieferte nginx aber einstellungen.html, app.js und
+ * style.css selbst aus, ohne Cache-Control und ohne Schutzkopfzeilen, und
+ * keine der beiden Umsetzungen sagte etwas. Welten: alles durch Apache,
+ * nginx vor den Dateien mit Endung, mod_headers fehlt ganz (dort erklaert
+ * schon der alte Befund alles, der neue waere doppelt), eine Startseite
+ * ohne Cache-Control, und eine leere Richtlinie an einer Seite.
+ *
  * Wer die Suite einzeln startet, setzt vorher data/throttle zurueck; jeder
  * Lauf im Browser legt eine Liste an.
  */
@@ -277,6 +286,92 @@ for (const w of HSTS_WELTEN) {
   ok('Kommandozeile: ' + (w.ok ? 'in Ordnung' : 'Verstoss mit klarem Text'),
      !!cli && cli[1] === (w.ok ? 'ok' : 'FEHLT') && w.detail.test(cli[2] || ''),
      cli ? cli[1] + ' ' + (cli[2] || '') : 'keine Zeile');
+}
+
+/* -- Kopfzeilen an Dateien mit Endung ------------------------------------- */
+const MIT_ENDUNG = ['/style.css', '/app.js', '/theme.js', '/einstellungen.html', '/so-gehts.html',
+  '/ueber.html', '/impressum.html', '/datenschutz.html', '/assets/fonts/fonts.css'];
+const SCHUTZ = { 'Content-Security-Policy': "default-src 'self'", 'X-Frame-Options': 'DENY' };
+const FRISCH = { 'Cache-Control': 'no-cache, must-revalidate' };
+const DATEI_BEFUND = 'Ursache der fehlenden Kopfzeilen an Dateien';
+const DATEI_WELTEN = [
+  { name: 'alles durch Apache', start: { ...SCHUTZ, ...FRISCH },
+    datei: (p) => (p.endsWith('.html') ? { ...SCHUTZ, ...FRISCH } : FRISCH),
+    befund: false, einstellungen: 'ok', appjs: 'ok' },
+  { name: 'nginx liefert Dateien mit Endung selbst aus (leihichdir.de, November 2026)',
+    start: { ...SCHUTZ, ...FRISCH }, datei: () => ({}),
+    befund: true, einstellungen: 'fehlt', appjs: 'fehlt' },
+  { name: 'mod_headers fehlt, auch die Startseite ohne Kopfzeilen', start: {}, datei: () => ({}),
+    befund: false, einstellungen: 'fehlt', appjs: 'fehlt' },
+  /* Die Startseite traegt die Schutzkopfzeilen, aber kein Cache-Control.
+     Der Befund erscheint wegen der Seiten ohne Richtlinie und darf nicht
+     behaupten, die Startseite trage Cache-Control (Durchsicht zu #94). */
+  { name: 'Startseite ohne Cache-Control, Seiten ohne Schutzkopfzeilen', start: { ...SCHUTZ }, datei: () => ({}),
+    befund: true, dateien: 5, einstellungen: 'fehlt', appjs: 'fehlt' },
+  /* Eine leere Richtlinie schuetzt nichts; beide Umsetzungen sollen sie
+     gleich werten. */
+  { name: 'einstellungen.html mit leerer Content-Security-Policy', start: { ...SCHUTZ, ...FRISCH },
+    datei: (p) => (p === '/einstellungen.html' ? { ...FRISCH, 'X-Frame-Options': 'DENY', 'Content-Security-Policy': '' }
+      : p.endsWith('.html') ? { ...SCHUTZ, ...FRISCH } : FRISCH),
+    befund: true, dateien: 1, einstellungen: 'ok', appjs: 'ok', leereCsp: true }
+];
+for (const w of DATEI_WELTEN) {
+  console.log('· Dateien mit Endung: ' + w.name);
+  const welt = { pfade: { '/': 200 }, kopf: { '/': w.start } };
+  for (const p of MIT_ENDUNG) { welt.pfade[p] = 200; welt.kopf[p] = w.datei(p); }
+
+  const z = await imBrowser(welt);
+  /* Die Zeilen unter einer Datei heissen bei jeder Datei gleich. Gesucht
+     wird nur in ihrem eigenen Block, den eingerueckten Zeilen bis zur
+     naechsten Datei; sonst bestuende eine fehlende Zeile mit der der
+     naechsten Datei. */
+  const unter = (datei, name) => {
+    const i = z.findIndex((r) => r.name === datei);
+    if (i < 0) { return null; }
+    const ende = z.findIndex((r, j) => j > i && !r.name.startsWith(' '));
+    return z.slice(i + 1, ende < 0 ? undefined : ende).find((r) => r.name.trim() === name) || null;
+  };
+  const xfo = unter('einstellungen.html', 'X-Frame-Options DENY');
+  ok('Browser: einstellungen.html X-Frame-Options ' + w.einstellungen, !!xfo && xfo.state === w.einstellungen,
+     xfo ? xfo.state + ' ' + xfo.detail : 'keine Zeile');
+  const cc = unter('app.js', 'Cache-Control no-cache');
+  ok('Browser: app.js Cache-Control ' + w.appjs, !!cc && cc.state === w.appjs, cc ? cc.state + ' ' + cc.detail : 'keine Zeile');
+  const anzahl = new RegExp((w.dateien || 9) + ' Datei');
+  const bf = z.find((r) => r.name === DATEI_BEFUND);
+  ok('Browser: Der Befund ' + (w.befund ? 'erscheint, mit nginx und Plesk' : 'bleibt aus'),
+     w.befund ? !!bf && bf.state === 'fehlt' && anzahl.test(bf.detail) && /Smart static files processing/.test(bf.detail)
+       && !/traegt Cache-Control/.test(bf.detail) : !bf,
+     bf ? bf.state + ' ' + bf.detail.slice(0, 120) : 'keine Zeile');
+  if (w.leereCsp) {
+    const c = unter('einstellungen.html', 'Content-Security-Policy als Kopfzeile');
+    ok('Browser: Die leere Richtlinie gilt als fehlend', !!c && c.state === 'fehlt', c ? c.state : 'keine Zeile');
+  }
+
+  const t = await ueberKommandozeile(welt);
+  /* Ebenso nur der eigene Block: die Zeile der Datei und die eingerueckten
+     darunter, bis zur naechsten MUSS-Zeile. */
+  const block = (datei) => {
+    const zeilen = t.split('\n');
+    const i = zeilen.findIndex((l) => new RegExp('^  MUSS  ' + datei.replace(/\./g, '\\.') + ' ').test(l));
+    if (i < 0) { return ''; }
+    const ende = zeilen.findIndex((l, j) => j > i && !/^  SOLL    /.test(l));
+    return zeilen.slice(i, ende < 0 ? undefined : ende).join('\n');
+  };
+  const cliXfo = /X-Frame-Options DENY\s+(ok|FEHLT)/.exec(block('einstellungen.html'));
+  ok('Kommandozeile: einstellungen.html X-Frame-Options ' + w.einstellungen,
+     !!cliXfo && cliXfo[1] === (w.einstellungen === 'ok' ? 'ok' : 'FEHLT'), cliXfo ? cliXfo[1] : 'keine Zeile');
+  const cliCc = /Cache-Control no-cache\s+(ok|FEHLT)/.exec(block('app.js'));
+  ok('Kommandozeile: app.js Cache-Control ' + w.appjs,
+     !!cliCc && cliCc[1] === (w.appjs === 'ok' ? 'ok' : 'FEHLT'), cliCc ? cliCc[1] : 'keine Zeile');
+  const cliBf = new RegExp(DATEI_BEFUND + '\\s+FEHLT\\s+\\((.*)\\)').exec(t);
+  ok('Kommandozeile: Der Befund ' + (w.befund ? 'erscheint, mit nginx und Plesk' : 'bleibt aus'),
+     w.befund ? !!cliBf && anzahl.test(cliBf[1]) && /Smart static files processing/.test(cliBf[1])
+       && !/traegt Cache-Control/.test(cliBf[1]) : !cliBf,
+     cliBf ? cliBf[1].slice(0, 120) : 'kein Befund');
+  if (w.leereCsp) {
+    const c = /Content-Security-Policy als Kopfzeile\s+(ok|FEHLT)/.exec(block('einstellungen.html'));
+    ok('Kommandozeile: Die leere Richtlinie gilt als fehlend', !!c && c[1] === 'FEHLT', c ? c[1] : 'keine Zeile');
+  }
 }
 
 await br.close();

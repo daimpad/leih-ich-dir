@@ -177,6 +177,11 @@ if (preg_match('~<meta[^>]+http-equiv=["\']Content-Security-Policy["\'][^>]*>~i'
 line('SOLL', 'X-Content-Type-Options nosniff', ($h['x-content-type-options'] ?? '') === 'nosniff');
 line('SOLL', 'Referrer-Policy no-referrer', ($h['referrer-policy'] ?? '') === 'no-referrer');
 line('SOLL', 'X-Frame-Options DENY', strtoupper($h['x-frame-options'] ?? '') === 'DENY');
+/* .htaccess setzt fuer .html, .js und .css "no-cache, must-revalidate":
+   Nach einem Update fragt der Browser nach, statt alte Dateien zu nehmen.
+   Die Startseite ist index.html und faellt darunter. */
+$ccStart = strtolower($h['cache-control'] ?? '');
+line('SOLL', 'Cache-Control no-cache', str_contains($ccStart, 'no-cache'), $ccStart !== '' ? $ccStart : 'fehlt');
 /* Erwartet wird die Kopfzeile ohne includeSubDomains und ohne preload, so
    wie .htaccess sie setzt; steht eins von beiden darin, zaehlt das als
    Verstoss. Warum ohne beides, steht in .htaccess. Direktiven sind Woerter
@@ -221,6 +226,17 @@ line('SOLL', 'Strict-Transport-Security', $hsts !== '' && $zuviel === [] && !$ku
 /* -- Dateien, die die Seite braucht ---------------------------------------- */
 
 echo "\nAuslieferung\n";
+/* Bis November 2026 sah die Abnahme Kopfzeilen nur an der Startseite. Die
+   kommt aber als "/" stets ueber Apache; alles mit Endung liefert ein
+   vorgelagerter nginx unter Umstaenden selbst aus, ohne die .htaccess zu
+   lesen, und dann ohne Cache-Control und ohne Schutzkopfzeilen. Auf
+   leihichdir.de war es so: einstellungen.html liess sich in einen fremden
+   Rahmen laden, app.js und style.css galten nach Last-Modified als frisch.
+   Deshalb jetzt an jeder solchen Datei: Cache-Control, und an jeder Seite
+   X-Frame-Options und die Content-Security-Policy als Kopfzeile (eine
+   meta-Fassung kennt frame-ancestors nicht). Gezaehlt wird, wo die
+   Startseite etwas traegt und die Datei nicht: Das ist der Befund am Ende. */
+$ohneKopf = [];
 foreach ([
     ['/style.css', 'text/css'],
     ['/app.js', 'javascript'],
@@ -249,6 +265,25 @@ foreach ([
     $ct = strtolower($res['headers']['content-type'] ?? '');
     line('MUSS', ltrim($path, '/'), $res['status'] === 200, 'Status ' . $res['status']);
     line('SOLL', '  Typ ' . $type, str_contains($ct, $type), $ct !== '' ? $ct : 'kein Typ');
+    if ($res['status'] !== 200 || !preg_match('~\.(html|js|css)$~', $path)) {
+        continue;
+    }
+    $rh = $res['headers'];
+    $cc = strtolower($rh['cache-control'] ?? '');
+    line('SOLL', '  Cache-Control no-cache', str_contains($cc, 'no-cache'), $cc !== '' ? $cc : 'fehlt');
+    $fehlt = str_contains($ccStart, 'no-cache') && !str_contains($cc, 'no-cache');
+    if (str_ends_with($path, '.html')) {
+        line('SOLL', '  X-Frame-Options DENY', strtoupper($rh['x-frame-options'] ?? '') === 'DENY',
+            $rh['x-frame-options'] ?? 'fehlt');
+        /* Leer zaehlt als fehlend, wie im Browser: Headers.get() gibt dort
+           "" zurueck, und eine leere Richtlinie schuetzt nichts. */
+        $csp = trim($rh['content-security-policy'] ?? '');
+        line('SOLL', '  Content-Security-Policy als Kopfzeile', $csp !== '', $csp !== '' ? '' : 'fehlt');
+        $fehlt = $fehlt || (!$kopfzeilenFehlen && $csp === '');
+    }
+    if ($fehlt) {
+        $ohneKopf[] = ltrim($path, '/');
+    }
 }
 
 /* -- Was nicht erreichbar sein darf ---------------------------------------- */
@@ -339,8 +374,22 @@ foreach ([
    beantwortet sie nicht derselbe Server. */
 $gespalten = $dynamischGesperrt > 0 && $statischOffen > 0;
 
-if ($kopfzeilenFehlen || $gespalten) {
+if ($kopfzeilenFehlen || $gespalten || $ohneKopf !== []) {
     echo "\nBefund\n";
+    /* Die Startseite traegt, was .htaccess setzt, Dateien mit Endung nicht.
+       Also liest die .htaccess, wer "/" beantwortet, und nicht, wer die
+       Dateien beantwortet. Eine Empfehlung, kein Muss: Die Kennungen ?v=
+       in den Seiten halten Skripte und Stile auch so frisch; offen bleiben
+       die Seiten selbst und ihre Schutzkopfzeilen. */
+    if ($ohneKopf !== []) {
+        line('SOLL', 'Ursache der fehlenden Kopfzeilen an Dateien', false,
+            'Die Startseite traegt Kopfzeilen aus der .htaccess, die '
+            . count($ohneKopf) . ' Datei(en) mit Endung fehlen (' . implode(', ', array_slice($ohneKopf, 0, 4))
+            . (count($ohneKopf) > 4 ? ', ...' : '') . '). Ein vorgelagerter nginx liefert sie selbst aus '
+            . 'und liest dabei keine .htaccess. In Plesk unter Hosting-Einstellungen, Apache & nginx, '
+            . '"Smart static files processing" abschalten; dann geht alles durch Apache. '
+            . 'Der Wortlaut steht im README unter "Vorgelagerter nginx".');
+    }
     if ($gespalten) {
         line('MUSS', 'Ursache der offenen statischen Dateien', false,
             'Unter tools/ ist die PHP-Datei gesperrt und die .html-Datei nicht. '
