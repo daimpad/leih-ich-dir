@@ -9,8 +9,8 @@
      wird nur angesprochen, wenn ein eigener Schlüssel hinterlegt ist. -->
 <meta http-equiv="Content-Security-Policy"
       content="default-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'self'; connect-src 'self' https://generativelanguage.googleapis.com; base-uri 'none'; form-action 'none'">
-<title>LeihIchDir · Dinge an Freunde verleihen, ohne Konto</title>
-<meta name="description" content="Trage ein, was Du verleihst, und schick Deinen Freund:innen einen Link. Die Liste wird im Browser verschlüsselt — ohne Konto, ohne Werbung, ohne Cookies.">
+<title>LeihIchDir · Dinge an Freund:innen verleihen, ohne Konto</title>
+<meta name="description" content="Trage ein, was Du verleihst, und schick Deinen Freund:innen einen Link. Die Liste wird im Browser verschlüsselt, ohne Konto, ohne Werbung, ohne Cookies.">
 <link rel="canonical" href="https://leihichdir.de/">
 <!-- Das Zeichen der Anwendung, aus assets/favicon/. Die favicon.ico liegt
      zusaetzlich im Wurzelverzeichnis, weil Browser und fremde Abholer sie
@@ -36,7 +36,7 @@
 <meta property="og:site_name" content="LeihIchDir">
 <meta property="og:locale" content="de_DE">
 <meta property="og:url" content="https://leihichdir.de/">
-<meta property="og:title" content="LeihIchDir · Dinge an Freunde verleihen, ohne Konto">
+<meta property="og:title" content="LeihIchDir · Dinge an Freund:innen verleihen, ohne Konto">
 <meta property="og:description" content="Trage ein, was Du verleihst, und schick Deinen Freund:innen einen Link. Verschlüsselt im Browser, ohne Konto.">
 <meta property="og:image" content="https://leihichdir.de/assets/pics/og.png">
 <meta property="og:image:type" content="image/png">
@@ -45,7 +45,7 @@
 <meta property="og:image:alt" content="Die Wortmarke Leih ich Dir. aus Knete, daneben schweben sechs Dinge zum Verleihen: Bohrmaschine, Leiter, Zelt, Würfel, Waffeleisen und eine kleine Trommel.">
 <!-- Ohne diese Angabe zeigen Slack, Discord und X ein Randbildchen statt der grossen Karte. -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="LeihIchDir · Dinge an Freunde verleihen, ohne Konto">
+<meta name="twitter:title" content="LeihIchDir · Dinge an Freund:innen verleihen, ohne Konto">
 <meta name="twitter:description" content="Trage ein, was Du verleihst, und schick Deinen Freund:innen einen Link. Verschlüsselt im Browser, ohne Konto.">
 <meta name="twitter:image" content="https://leihichdir.de/assets/pics/og.png">
 <meta name="twitter:image:alt" content="Die Wortmarke Leih ich Dir. aus Knete, daneben schweben sechs Dinge zum Verleihen: Bohrmaschine, Leiter, Zelt, Würfel, Waffeleisen und eine kleine Trommel.">
@@ -590,7 +590,7 @@
     <ul class="trust" data-i18n-label="trust.label" aria-label="Eigenschaften">
       <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.nocost">Kostenlos</span></li>
       <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.noads">Werbefrei</span></li>
-      <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.nologin">Ohne Login</span></li>
+      <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.nologin">Ohne Konto</span></li>
       <li><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span data-i18n="trust.crypto">Verschlüsselt</span></li>
     </ul>
 
@@ -819,7 +819,7 @@
         </button>
       </div>
       <p class="hint hint--abruf" data-i18n="contact.hint">
-        Diese Angaben werden mitverschlüsselt und nur für die Anfrage-Schaltflächen Deiner Freunde genutzt.
+        Diese Angaben werden mitverschlüsselt und nur für die Anfrage-Schaltflächen Deiner Freund:innen genutzt.
       </p>
       <div class="field">
         <label class="field__label" for="cfgName" data-i18n="contact.name">Dein Name, freiwillig</label>
@@ -875,7 +875,7 @@
       </p>
 
       <div class="field">
-        <label class="field__label" for="linkView" data-i18n="share.viewLabel">Ansehen-Link für Freunde</label>
+        <label class="field__label" for="linkView" data-i18n="share.viewLabel">Ansehen-Link für Freund:innen</label>
         <div class="linkrow">
           <input type="text" id="linkView" class="input mono" readonly>
           <button type="button" class="btn" id="btnShareView" hidden>
@@ -924,10 +924,10 @@
         <button type="button" class="btn btn--primary" data-copy="keyLink" data-i18n="share.copy">Kopieren</button>
       </div>
       <p class="hint keybox__lesezeichen" data-i18n="key.bookmark">
-        Setz ein Lesezeichen auf diese Seite — ihre Adresse ist dieser Link, und ohne ihn kannst Du Dein Inventar nicht mehr bearbeiten. Zum Teilen gibt es einen anderen, den Ansehen-Link.
+        Setz ein Lesezeichen auf diese Seite, ihre Adresse ist dieser Link. Ohne ihn kannst Du Dein Inventar nicht mehr bearbeiten. Zum Teilen gibt es einen anderen, den Ansehen-Link.
       </p>
       <p class="hint keybox__remember" id="keyRemember" data-i18n="key.remember">
-        Auf diesem Gerät gemerkt — beim nächsten Besuch findest Du die Liste auf der Startseite wieder.
+        Auf diesem Gerät gemerkt, beim nächsten Besuch findest Du die Liste auf der Startseite wieder.
       </p>
       <p class="spaced-lg keybox__done">
         <label class="check keybox__check">
@@ -1093,7 +1093,7 @@
            auch die Suche ab, es gibt nichts zu durchsuchen. -->
       <div id="circleEmptyNone" class="empty" hidden>
         <svg class="empty-face" aria-hidden="true" focusable="false"><use href="#i-face-wart"/></svg>
-        <h3 class="empty-head" data-i18n="circle.emptyNoneHead">Ergänze hier die Leihlisten Deiner Freunde</h3>
+        <h3 class="empty-head" data-i18n="circle.emptyNoneHead">Ergänze hier die Leihlisten Deiner Freund:innen</h3>
         <p><button type="button" class="btn" data-weiter="1" data-i18n="circle.stepCollect">Listen sammeln</button></p>
       </div>
       <div id="circleEmptyAll" class="empty" hidden>
@@ -1131,7 +1131,7 @@
         <button type="button" class="btn btn--primary" data-copy="circleKeyLink" data-i18n="share.copy">Kopieren</button>
       </div>
       <p class="hint keybox__lesezeichen" data-i18n="circle.keyBookmark">
-        Setz ein Lesezeichen auf diese Seite — ihre Adresse ist dieser Link, und ohne ihn kommst Du nicht mehr an Deine Superliste.
+        Setz ein Lesezeichen auf diese Seite, ihre Adresse ist dieser Link. Ohne ihn kommst Du nicht mehr an Deine Superliste.
       </p>
       <p class="hint keybox__remember" id="circleKeyRemember" data-i18n="circle.keyRemember"></p>
       <p class="spaced-lg keybox__done">

@@ -17,9 +17,9 @@ const { ok, bilanz } = pruefer();
 const br = await starteBrowser();
 const probleme = [];
 
-const SATZ_DE = 'Setz ein Lesezeichen auf diese Seite — ihre Adresse ist dieser Link, und ohne ihn kannst Du Dein Inventar nicht mehr bearbeiten. Zum Teilen gibt es einen anderen, den Ansehen-Link.';
+const SATZ_DE = 'Setz ein Lesezeichen auf diese Seite, ihre Adresse ist dieser Link. Ohne ihn kannst Du Dein Inventar nicht mehr bearbeiten. Zum Teilen gibt es einen anderen, den Ansehen-Link.';
 const SATZ_EN = 'Bookmark this page — its address is this link, and without it you can no longer edit your inventory. For sharing there is a different one, the view link.';
-const KREIS_DE = 'Setz ein Lesezeichen auf diese Seite — ihre Adresse ist dieser Link, und ohne ihn kommst Du nicht mehr an Deine Superliste.';
+const KREIS_DE = 'Setz ein Lesezeichen auf diese Seite, ihre Adresse ist dieser Link. Ohne ihn kommst Du nicht mehr an Deine Superliste.';
 
 async function neu(breite) {
   const ctx = await br.newContext({ viewport: { width: breite || 1280, height: 900 } });
