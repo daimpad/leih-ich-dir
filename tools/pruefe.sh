@@ -1,10 +1,10 @@
 #!/bin/sh
 # pruefe.sh · Alles Statische in einem Aufruf, eine Zeile je Pruefung.
 #
-# Dieselben sechs Pruefungen wie in .github/workflows/ci.yml, in derselben
+# Dieselben sieben Pruefungen wie in .github/workflows/ci.yml, in derselben
 # Reihenfolge und mit denselben Befehlen — damit lokal grün auch dort grün
-# heisst. Wer vor dem Push nur diesen einen Befehl aufruft, statt fuenf
-# einzeln, spart sich fuenf Ausgaben und vergisst keine.
+# heisst. Wer vor dem Push nur diesen einen Befehl aufruft, statt jede
+# einzeln, spart sich die Ausgaben dazwischen und vergisst keine.
 #
 # Ohne Browser: Die Browsertests unter tests/e2e/ laufen getrennt, sie
 # brauchen eine laufende Anwendung. Siehe CLAUDE.md.
@@ -57,6 +57,10 @@ zeile 'i18n-check' $? "$aus"
 # 6 · Ersatztexte im HTML wie im Woerterbuch
 aus=$(node tools/fallback-check.js 2>&1)
 zeile 'fallback-check' $? "$aus"
+
+# 7 · Kennungen ?v= an Skripten und Stilen passen zum Inhalt
+aus=$(node tools/kennung-check.js 2>&1)
+zeile 'kennung-check' $? "$aus"
 
 if [ "$fehler" -eq 0 ]; then
   echo

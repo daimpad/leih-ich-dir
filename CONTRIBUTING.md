@@ -44,7 +44,15 @@ node --check app.js                                  # JavaScript-Syntax
 php tests/api-test.php                               # Funktionstest des Backends
 node tools/i18n-check.js                             # beide Wörterbücher vollständig
 node tools/fallback-check.js                         # Ersatztexte im HTML wie im Wörterbuch
+node tools/kennung-check.js                          # Kennungen ?v= wie der Inhalt
 ```
+
+Wer `app.js`, `style.css`, `theme.js`, `check.js` oder `assets/fonts/fonts.css`
+ändert, trägt danach die neuen Kennungen in die HTML-Seiten ein:
+`node tools/kennung-check.js --setzen`. Die Kennung ist der Anfang der
+SHA-256-Summe der Datei; sie macht nach jeder Änderung eine neue Adresse
+daraus, die in keinem Zwischenspeicher liegt. Vergessen fällt in
+`tools/pruefe.sh` und in der CI auf.
 
 Diese Prüfungen laufen als GitHub-Action; ein Pull Request sollte sie
 bestehen. Sie kommen ohne Browser aus und sagen deshalb nichts darüber, ob die
