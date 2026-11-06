@@ -168,6 +168,9 @@
 
   function checkHeaders() {
     group('Kopfzeilen');
+    /* Bei "Erneut pruefen" nicht den Wert des vorigen Laufs behalten, falls
+       die Startseite diesmal nicht antwortet. */
+    ccStart = '';
     return head('./').then(function (r) {
       if (!r.res) {
         check(LEVEL_MUST, 'Startseite erreichbar', false, 'keine Antwort');
@@ -270,7 +273,7 @@
     if (/\.html$/.test(pfad)) {
       var xfo = h.get('x-frame-options');
       check(LEVEL_SHOULD, '  X-Frame-Options DENY', (xfo || '').toUpperCase() === 'DENY', xfo || 'fehlt');
-      var csp = h.get('content-security-policy');
+      var csp = (h.get('content-security-policy') || '').replace(/^\s+|\s+$/g, '');
       check(LEVEL_SHOULD, '  Content-Security-Policy als Kopfzeile', !!csp, csp ? '' : 'fehlt');
       fehlt = fehlt || (!kopfzeilenFehlen && !csp);
     }
@@ -473,8 +476,8 @@
        die Seiten selbst und ihre Schutzkopfzeilen. */
     if (ohneKopf.length) {
       check(LEVEL_SHOULD, 'Ursache der fehlenden Kopfzeilen an Dateien', false,
-        'Die Startseite traegt Cache-Control und Schutzkopfzeilen aus der .htaccess, '
-        + ohneKopf.length + ' Datei(en) mit Endung nicht (' + ohneKopf.slice(0, 4).join(', ')
+        'Die Startseite traegt Kopfzeilen aus der .htaccess, die '
+        + ohneKopf.length + ' Datei(en) mit Endung fehlen (' + ohneKopf.slice(0, 4).join(', ')
         + (ohneKopf.length > 4 ? ', ...' : '') + '). Ein vorgelagerter nginx liefert sie selbst aus '
         + 'und liest dabei keine .htaccess. In Plesk unter Hosting-Einstellungen, Apache & nginx, '
         + '"Smart static files processing" abschalten; dann geht alles durch Apache. '

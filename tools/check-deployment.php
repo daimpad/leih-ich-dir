@@ -275,9 +275,11 @@ foreach ([
     if (str_ends_with($path, '.html')) {
         line('SOLL', '  X-Frame-Options DENY', strtoupper($rh['x-frame-options'] ?? '') === 'DENY',
             $rh['x-frame-options'] ?? 'fehlt');
-        line('SOLL', '  Content-Security-Policy als Kopfzeile', isset($rh['content-security-policy']),
-            isset($rh['content-security-policy']) ? '' : 'fehlt');
-        $fehlt = $fehlt || (!$kopfzeilenFehlen && !isset($rh['content-security-policy']));
+        /* Leer zaehlt als fehlend, wie im Browser: Headers.get() gibt dort
+           "" zurueck, und eine leere Richtlinie schuetzt nichts. */
+        $csp = trim($rh['content-security-policy'] ?? '');
+        line('SOLL', '  Content-Security-Policy als Kopfzeile', $csp !== '', $csp !== '' ? '' : 'fehlt');
+        $fehlt = $fehlt || (!$kopfzeilenFehlen && $csp === '');
     }
     if ($fehlt) {
         $ohneKopf[] = ltrim($path, '/');
@@ -381,8 +383,8 @@ if ($kopfzeilenFehlen || $gespalten || $ohneKopf !== []) {
        die Seiten selbst und ihre Schutzkopfzeilen. */
     if ($ohneKopf !== []) {
         line('SOLL', 'Ursache der fehlenden Kopfzeilen an Dateien', false,
-            'Die Startseite traegt Cache-Control und Schutzkopfzeilen aus der .htaccess, '
-            . count($ohneKopf) . ' Datei(en) mit Endung nicht (' . implode(', ', array_slice($ohneKopf, 0, 4))
+            'Die Startseite traegt Kopfzeilen aus der .htaccess, die '
+            . count($ohneKopf) . ' Datei(en) mit Endung fehlen (' . implode(', ', array_slice($ohneKopf, 0, 4))
             . (count($ohneKopf) > 4 ? ', ...' : '') . '). Ein vorgelagerter nginx liefert sie selbst aus '
             . 'und liest dabei keine .htaccess. In Plesk unter Hosting-Einstellungen, Apache & nginx, '
             . '"Smart static files processing" abschalten; dann geht alles durch Apache. '
