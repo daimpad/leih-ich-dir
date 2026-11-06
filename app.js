@@ -375,7 +375,8 @@
       'status.retry': 'Wartet auf den Server',
       'status.reloaded': 'Die Liste wurde anderswo geändert. Hier steht jetzt der neue Stand.',
       'status.retryHint': 'Der Server antwortet gerade nicht. Deine Änderungen sind noch nicht gespeichert; es wird weiter versucht. Lass diese Seite offen, bis „Gespeichert“ erscheint.',
-      'status.overwritten': 'Die Liste wurde parallel geändert. Dein Stand wurde übernommen.',
+      'status.merged': 'Die Liste wurde parallel geändert. Beide Stände sind zusammengeführt.',
+      'status.mergedConflict': 'Die Liste wurde parallel geändert. Beide Stände sind zusammengeführt; wo sich Änderungen widersprachen, gilt Deine. Ein Eintrag, der auf einer Seite geändert und auf der anderen gelöscht wurde, bleibt erhalten.',
       'status.refreshed': 'Aktualisiert.',
 
       'error.headline': 'Das hat nicht geklappt',
@@ -755,7 +756,8 @@
       'status.retry': 'Waiting for the server',
       'status.reloaded': 'The list was changed elsewhere. This page now shows the new version.',
       'status.retryHint': 'The server is not answering right now. Your changes are not saved yet; it keeps trying. Keep this page open until “Saved” appears.',
-      'status.overwritten': 'The list was changed elsewhere. Your version was kept.',
+      'status.merged': 'The list was changed elsewhere. Both versions have been merged.',
+      'status.mergedConflict': 'The list was changed elsewhere. Both versions have been merged; where changes contradicted each other, yours apply. An entry changed on one side and deleted on the other is kept.',
       'status.refreshed': 'Refreshed.',
 
       'error.headline': 'That did not work',
@@ -1310,6 +1312,7 @@
     rev: 0,
     updated: 0,
     doc: null,       // Klartext-Dokument
+    base: null,      // der Stand, den der Server zuletzt bestaetigt hat; Begruendung bei zusammenfuehren()
     dirty: false,
     saving: false,
     checkedAt: 0     // Zeitpunkt des letzten erfolgreichen Serverabgleichs
@@ -3403,17 +3406,44 @@
     var generation = docGen;
     var snapshot = JSON.parse(JSON.stringify(state.doc));
     snapshot.v = SCHEMA_VERSION;
+    var konflikt = null;   // null: nicht zusammengefuehrt; sonst ob sich etwas widersprach
+
+    /* Bei 409 hat jemand anderes geschrieben, etwa auf dem Handy. Bis
+       November 2026 schrieb save() dann den eigenen Stand einfach darueber,
+       und die Aenderungen des anderen Geraets waren fort. Jetzt wird die
+       Fassung des Servers geholt, mit der eigenen zusammengefuehrt
+       (zusammenfuehren) und das Ergebnis geschrieben. Schreibt zwischendurch
+       wieder jemand, hoechstens dreimal; danach wie ein voruebergehender
+       Fehler. Gemeinsamer Vorfahr fuer eine weitere Runde ist die Fassung,
+       die eben zusammengefuehrt wurde. */
+    function nachKonflikt(runde) {
+      return Store.read(state.id, 0).then(function (gelesen) {
+        if (gelesen.status !== 200) { return gelesen; }
+        return Crypt.decrypt(state.key, gelesen.body.payload, state.id).then(function (raw) {
+          var fremd = normalizeAny(raw, 'list', null);
+          var widerspruch = zusammenfuehren(state.base, state.doc, fremd);
+          konflikt = konflikt || widerspruch;
+          state.base = fremd;
+          state.rev = gelesen.body.rev;
+          generation = docGen;
+          snapshot = JSON.parse(JSON.stringify(state.doc));
+          snapshot.v = SCHEMA_VERSION;
+          render();
+          return Crypt.encrypt(state.key, snapshot, state.id);
+        }).then(function (payload) {
+          if (!payload || payload.status) { return payload; }
+          return Store.write(state.id, state.proof, state.rev, payload);
+        }).then(function (res) {
+          if (res && res.status === 409 && runde < 3) { return nachKonflikt(runde + 1); }
+          if (res && res.status === 409) { return { status: 0, body: null }; }
+          return res;
+        });
+      });
+    }
 
     return Crypt.encrypt(state.key, snapshot, state.id).then(function (payload) {
       return Store.write(state.id, state.proof, state.rev, payload).then(function (res) {
-        /* Optimistisches Sperren: bei Konflikt einmal mit aktueller Revision neu schreiben. */
-        if (res.status === 409 && res.body && typeof res.body.rev === 'number') {
-          state.rev = res.body.rev;
-          return Store.write(state.id, state.proof, state.rev, payload).then(function (retry) {
-            if (retry.status === 200) { toast(t('status.overwritten')); }
-            return retry;
-          });
-        }
+        if (res.status === 409) { return nachKonflikt(1); }
         return res;
       });
     }).then(function (res) {
@@ -3421,6 +3451,8 @@
       if (res.status === 200) {
         state.rev = res.body.rev;
         state.updated = res.body.updated;
+        state.base = snapshot;
+        if (konflikt !== null) { toast(t(konflikt ? 'status.mergedConflict' : 'status.merged')); }
         /* Während des Schreibens erfolgte Änderungen bleiben offen und
            werden im nächsten Durchlauf mitgenommen. */
         saveVersuche = 0;
@@ -3441,6 +3473,85 @@
       setSaveState('error');
       toast(t('error.' + (err && err.code ? err.code : 'network')));
     });
+  }
+
+  /**
+   * Fuehrt drei Fassungen einer Liste zusammen: den gemeinsamen Vorfahren
+   * (basis, was der Server zuletzt bestaetigte), die eigene (mein) und die
+   * des Servers (fremd). Geaendert wird mein, an Ort und Stelle: Ein offenes
+   * Fenster zum Eintrag haelt dessen Objekt fest, und eine Kopie liesse
+   * seine Eingaben ins Leere laufen.
+   *
+   * Je Feld gilt: Hat sich mein gegenueber basis nicht geaendert, gilt
+   * fremd; sonst mein. Haben sich beide verschieden geaendert, ist das ein
+   * Widerspruch, und mein gilt, auf ausdruecklichen Wunsch des Betreibers.
+   * Eintraege werden ueber ihre id gefunden, Name und Notiz je fuer sich,
+   * Status, Ausleihende und Datum als eins, denn sie gehoeren zusammen.
+   * Ein Eintrag, der auf einer Seite geloescht und auf der anderen
+   * geaendert wurde, bleibt, mit der Aenderung; auch das zaehlt als
+   * Widerspruch. Neue Eintraege von beiden Seiten bleiben; die des Servers
+   * stehen hinter dem Eintrag, hinter dem sie dort standen.
+   *
+   * @return {boolean} ob sich etwas widersprach
+   */
+  function zusammenfuehren(basis, mein, fremd) {
+    var widerspruch = false;
+    basis = basis || emptyDoc();
+    var gleich = function (a, b) { return JSON.stringify(a) === JSON.stringify(b); };
+    var wahl = function (b, m, f) {
+      if (gleich(m, b)) { return f; }
+      if (!gleich(f, b) && !gleich(f, m)) { widerspruch = true; }
+      return m;
+    };
+    var lage = function (it) { return { status: it.status, borrower: it.borrower, since: it.since }; };
+    var nachId = function (items) {
+      var map = {};
+      items.forEach(function (it) { map[it.id] = it; });
+      return map;
+    };
+
+    mein.title = wahl(basis.title, mein.title, fremd.title);
+    mein.showBorrower = wahl(basis.showBorrower, mein.showBorrower, fremd.showBorrower);
+    ['name', 'email', 'phone'].forEach(function (k) {
+      mein.contact[k] = wahl(basis.contact[k], mein.contact[k], fremd.contact[k]);
+    });
+
+    var B = nachId(basis.items), M = nachId(mein.items), F = nachId(fremd.items);
+    var bleibt = [];
+    mein.items.forEach(function (m) {
+      var b = B[m.id], f = F[m.id];
+      if (!b) { bleibt.push(m); return; }
+      if (!f) {
+        if (gleich(m, b)) { return; }
+        widerspruch = true;
+        bleibt.push(m);
+        return;
+      }
+      m.name = wahl(b.name, m.name, f.name);
+      m.note = wahl(b.note, m.note, f.note);
+      var l = wahl(lage(b), lage(m), lage(f));
+      m.status = l.status;
+      m.borrower = l.borrower;
+      m.since = l.since;
+      bleibt.push(m);
+    });
+    fremd.items.forEach(function (f, i) {
+      if (M[f.id]) { return; }
+      var b = B[f.id];
+      if (b) {
+        if (gleich(f, b)) { return; }
+        widerspruch = true;
+      }
+      var stelle = 0;
+      for (var j = i - 1; j >= 0; j--) {
+        var k = -1;
+        for (var n = 0; n < bleibt.length; n++) { if (bleibt[n].id === fremd.items[j].id) { k = n; break; } }
+        if (k >= 0) { stelle = k + 1; break; }
+      }
+      bleibt.splice(stelle, 0, JSON.parse(JSON.stringify(f)));
+    });
+    mein.items = bleibt;
+    return widerspruch;
   }
 
   /* Ein voruebergehender Fehler (kein Netz, Frist abgelaufen, 5xx) wird
@@ -4292,6 +4403,7 @@
         state.rev = res.body.rev;
         state.updated = res.body.updated;
         state.doc = doc;
+        state.base = JSON.parse(JSON.stringify(doc));
         state.dirty = false;
         history.replaceState(null, '', editHash(id, keyStr, token));
         rememberList();
@@ -4551,13 +4663,14 @@
     if (!window.confirm(t('revoke.confirm'))) { return; }
     var knopf = $('#btnRevoke');
     if (knopf) { knopf.disabled = true; }
-    var neuerKey = null, neuerKeyStr = null, generation = 0;
+    var neuerKey = null, neuerKeyStr = null, generation = 0, geschrieben = null;
     var neuesToken = randomToken(24), neuerProof = null;
     return wartenBisGespeichert(50).then(function () {
       clearTimeout(saveTimer);
       generation = docGen;
       var snapshot = JSON.parse(JSON.stringify(state.doc));
       snapshot.v = SCHEMA_VERSION;
+      geschrieben = snapshot;
       return Crypt.generateKey().then(function (key) {
         neuerKey = key;
         return Promise.all([Crypt.exportKey(key), Crypt.encrypt(key, snapshot, state.id),
@@ -4585,6 +4698,7 @@
       state.proof = neuerProof;
       state.rev = res.body.rev;
       state.updated = res.body.updated;
+      state.base = geschrieben;
       /* Was waehrend des Schreibens eingetippt wurde, bleibt offen und geht
          mit dem naechsten Speichern — dann schon unter dem neuen Schluessel. */
       state.dirty = (docGen !== generation);
@@ -4635,6 +4749,7 @@
          erste Tastendruck im Titelfeld schriebe diese leere Fassung
          darueber. Die Art entscheidet der Aufrufer, nicht das Dokument. */
       state.doc = normalizeAny(raw, 'list', null);
+      state.base = JSON.parse(JSON.stringify(state.doc));
       state.dirty = false;
       saveVersuche = 0;
       state.checkedAt = Date.now();
@@ -5157,6 +5272,7 @@
         state.rev = res.body.rev;
         state.updated = res.body.updated;
         state.doc = normalizeAny(raw, 'list', null);
+        state.base = JSON.parse(JSON.stringify(state.doc));
         render();
         toast(t('status.reloaded'));
       });
