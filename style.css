@@ -253,8 +253,7 @@
 }
 
 /* Die Mulde: in den Grund gedrueckt statt aus ihm geformt. */
-.input, .textarea, .tabs, .seg, .empty, .check__box,
-.items--read .item--lent > .itemrow, .items--kreis .item--lent > .itemrow {
+.input, .textarea, .tabs, .seg, .empty, .check__box {
   background: var(--surface-alt);
   box-shadow:
     inset calc(var(--weich) * 4px) calc(var(--weich) * 5px) calc(var(--weich) * 10px) rgba(var(--wurf-rgb), calc(var(--wurf) * .8)),
@@ -1013,16 +1012,22 @@ header.site { padding-block: var(--s-4); }
 .voicerow { display: flex; align-items: center; gap: var(--s-3); margin-top: var(--s-4); }
 .voicestate { color: var(--link); font-weight: 700; }
 
-.items { list-style: none; padding: 0; margin-top: var(--s-4); display: grid; gap: var(--s-3); }
+.items { list-style: none; padding: 0; margin-top: var(--s-4); display: grid; gap: 0; }
 
-/* Jede Zeile ein Stueck Knete auf der Karte. */
-.itemrow {
+/* Die Zeilen liegen flach auf ihrer Karte, getrennt durch eine Linie.
+   Bis November 2026 war jede ein eigenes Stueck Knete, und die lagen auf
+   einer Karte, die selbst Knete ist: Knete in Knete, sieben Schatten fuer
+   sieben Dinge. Die Knete bleibt, wo sie etwas traegt, an Knoepfen, Marken
+   und Karten; die Zeile traegt nur ihren Inhalt. Die Zustandsmarke bleibt
+   eine Kugel. */
+.items .itemrow {
   width: 100%; display: flex; align-items: center; gap: var(--s-3); text-align: left;
-  padding: .7rem .9rem; cursor: pointer;
-  --farbe: var(--surface-hi); --mass: .55;
-  border: 0; border-radius: var(--r-row);
+  padding: .85rem .35rem; cursor: pointer;
+  --mass: 0; background: none; box-shadow: none;
+  border: 0; border-bottom: 1px solid var(--line); border-radius: 0;
 }
-.itemrow:hover { --glanz: calc(var(--licht-flaeche) + .1); translate: 0 -1px; }
+.items > li:last-child > .itemrow { border-bottom: 0; }
+.items .itemrow:hover { background: var(--surface-alt); }
 
 /* Die Zustandsmarke ist eine Kugel: Minze heisst frei, Pfirsich verliehen. */
 .item-badge {
@@ -1037,21 +1042,16 @@ header.site { padding-block: var(--s-4); }
 .item-name { display: block; font-weight: 800; overflow-wrap: anywhere; }
 .item-state { display: block; color: var(--amber); font-size: .85rem; font-weight: 700; }
 .item-note { display: block; color: var(--faint); font-size: .85rem; overflow-wrap: anywhere; }
-/* Der Weg zu den Details, in Worten neben dem Pfeil. Schmal entfaellt er:
-   Dort braucht der Name der Sache den Platz, und der Pfeil bleibt. */
-.item-more { color: var(--muted); font-size: .85rem; flex: 0 0 auto; white-space: nowrap; }
-@media (max-width: 30rem) { .item-more { display: none; } }
 .item-chev { color: var(--faint); flex: 0 0 auto; }
 
 /* Ansehen-Modus: die Anfrage steht in der Zeile, nicht hinter ihr. */
 .items--read .itemrow { cursor: default; }
-.items--read .itemrow:hover { --glanz: var(--licht-flaeche); translate: none; }
+.items--read .itemrow:hover { background: none; }
 .item-ask { flex: 0 0 auto; }
-/* Was gerade verliehen ist, liegt beim Ansehen und in der Superliste in
-   einer Mulde: Es ist nicht greifbar. Die Regel dafuer steht beim Rezept
-   (1a). Die fruehere Fassung, .item--lent.items-read-lent, traf im
-   Ansehen-Modus nie: Dort sitzen die beiden Klassen an verschiedenen
-   Elementen, am <li> und an der Zeile darin. */
+/* Was gerade verliehen ist, zeigt die Pfirsich-Marke und die Zeile mit
+   "Verliehen seit"; ohne Anfragen-Knopf ist es nicht greifbar. Bis November
+   2026 lag die Zeile beim Ansehen und in der Superliste ausserdem in einer
+   Mulde, und die ist minzgruen: die Farbe, die hier "frei" heisst. */
 
 /* Superliste: wem die Sache gehoert. Rechts und auch schmal
    stehenbleibend — bei alphabetischer Ordnung unterscheiden sich benachbarte
@@ -1259,12 +1259,12 @@ header.site { padding-block: var(--s-4); }
               color var(--takt-kurz) ease;
 }
 .btn:active, .ctl-square:active, .seg button:active, .fab__btn:active, .fab__item:active,
-.tab:active, .itemrow:active, .modal__x:active, .chip--level:active {
+.tab:active, .modal__x:active, .chip--level:active {
   transform: translateY(1px) scale(1.03, .92);
   transition-duration: var(--takt-tipp);
 }
 .btn:not(.btn--ghost):not(.btn--danger):active, .ctl-square:active, .fab__btn:active, .fab__item:active,
-.itemrow:active, .modal__x:active, .chip--level:active {
+.modal__x:active, .chip--level:active {
   box-shadow:
     calc(var(--weich) * 2px) calc(var(--weich) * 3px) calc(var(--weich) * 8px) rgba(var(--wurf-rgb), calc(var(--wurf) * .8)),
     inset calc(var(--weich) * 6px) calc(var(--weich) * 8px) calc(var(--weich) * 14px) rgba(var(--tief), calc(var(--kante) + .1)),

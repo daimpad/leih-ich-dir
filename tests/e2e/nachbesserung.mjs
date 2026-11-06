@@ -46,7 +46,11 @@ console.log('· Das leere Fenster steht nicht mehr unter der Fusszeile');
   await ctx.close();
 }
 
-console.log('· Details ergaenzen steht in der Zeile');
+/* Seit November 2026 hoert "Details ergaenzen" nur noch die Vorlesestimme,
+   als Teil des Namens der Zeile; sichtbar stand es in jeder Zeile neben dem
+   Pfeil (ruhige Zeilen, style.css). Die Zusicherungen dazu sind
+   nachgezogen. */
+console.log('· Details ergaenzen gehoert zum Namen der Zeile');
 {
   const ctx = await br.newContext({ viewport: { width: 900, height: 900 }, locale: 'de-DE' });
   const p = await ctx.newPage();
@@ -65,15 +69,12 @@ console.log('· Details ergaenzen steht in der Zeile');
   const m = await p.evaluate(() => {
     const zeile = document.querySelector('#itemList .itemrow');
     const mehr = zeile && zeile.querySelector('.item-more');
-    const chev = zeile && zeile.querySelector('.item-chev');
-    const r = mehr && mehr.getBoundingClientRect(), rz = zeile.getBoundingClientRect();
-    return { text: mehr && mehr.textContent, sichtbar: !!(r && r.width > 0),
-             rechts: !!(r && r.x > rz.x + rz.width / 2), vorDemPfeil: !!(chev && r && r.x < chev.getBoundingClientRect().x) };
+    return { text: mehr && mehr.textContent, versteckt: !!(mehr && mehr.classList.contains('sr-only')) };
   });
-  ok('die Beschriftung steht da', m.text === 'Details ergänzen', JSON.stringify(m.text));
-  ok('sichtbar', m.sichtbar);
-  ok('rechts in der Zeile', m.rechts);
-  ok('vor dem Pfeil', m.vorDemPfeil);
+  ok('die Beschriftung steht im Namen der Zeile', m.text === 'Details ergänzen', JSON.stringify(m.text));
+  ok('nur fuer die Vorlesestimme', m.versteckt);
+  const name = await p.locator('#itemList .itemrow').first().evaluate((n) => n.textContent.replace(/\s+/g, ' ').trim());
+  ok('die Vorlesestimme hoert Sache und Weg', /Bohrmaschine/.test(name) && /Details ergänzen/.test(name), name);
   // Oeffnet die Zeile weiterhin das Fenster?
   await p.locator('#itemList .itemrow').first().click();
   await p.waitForTimeout(400);
@@ -93,8 +94,6 @@ console.log('· Details ergaenzen steht in der Zeile');
   // Schmal
   await p.setViewportSize({ width: 380, height: 800 });
   await p.waitForTimeout(250);
-  ok('schmal entfaellt sie', await p.evaluate(() =>
-    getComputedStyle(document.querySelector('#itemList .item-more')).display) === 'none');
   ok('kein Ueberlauf schmal', await p.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
   ok('keine Konsolenfehler', fehler.length === 0, fehler.slice(0,2).join(' | '));
   await ctx.close();
