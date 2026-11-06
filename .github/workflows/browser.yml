@@ -1,8 +1,11 @@
 name: Browsertests
 
-# Nicht bei jedem Push, sondern auf Knopfdruck: Die Batterie braucht rund
-# sechs Minuten, einen Browser und einen laufenden Server. Zu starten unter
-# Actions → Browsertests → Run workflow.
+# Bei jedem Pull Request gegen main, und auf Knopfdruck fuer einzelne
+# Suiten oder einen Zweig ohne PR (Actions → Browsertests → Run workflow).
+# Bis November 2026 nur auf Knopfdruck, und gestartet hatte ihn niemand: Eine
+# fallende Zusicherung fiel erst auf, wenn jemand lokal die ganze Batterie
+# laufen liess. Der Lauf braucht rund sechs Minuten, laenger als ci.yml; er
+# ersetzt den lokalen Lauf vor dem Push nicht, er sichert ihn ab.
 #
 # Warum ueberhaupt in der Action, wo sie doch lokal laeuft: Bisher gab es
 # keinen Weg, sie ohne eingerichtetes Playwright nachzuholen. Wer eine
@@ -15,6 +18,21 @@ on:
         description: 'Nur passende Suiten, durch Leerzeichen getrennt (leer = alle)'
         required: false
         default: ''
+  # pull_request und nicht pull_request_target: Code aus einem Fork laeuft
+  # so mit einem Token, das nur lesen darf. Kein paths-Filter, sonst bliebe
+  # eine Pflichtpruefung bei einem PR ohne passende Dateien haengen.
+  pull_request:
+    branches: [main]
+
+# Der Lauf liest nur; er braucht kein Geheimnis und schreibt nichts.
+permissions:
+  contents: read
+
+# Ein neuer Push auf denselben PR bricht den aelteren Lauf ab, denn dessen
+# Ergebnis gilt dann nicht mehr. Auf Knopfdruck gestartete Laeufe bleiben.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   browser:
@@ -36,26 +54,31 @@ jobs:
       # Festgeschrieben und nicht offen gelassen: Ein rotes Ergebnis soll
       # heissen, dass der Quelltext nicht stimmt — nicht, dass Playwright
       # sich ueber Nacht geaendert hat. Heraufsetzen ist ein eigener,
-      # absichtlicher Handgriff. Dieselbe Fassung wie im Arbeitsrechner.
+      # absichtlicher Handgriff. Dieselbe Fassung wie im Arbeitsrechner
+      # (tests/e2e/README.md), damit ein rotes Ergebnis hier und eines dort
+      # dasselbe bedeuten. Bis November 2026 stand hier 1.56.1, lokal lief
+      # 1.63.0.
       # Aufgerufen wird playwright und nicht npx playwright: npx laedt eine
       # Fassung aus dem Netz nach, wenn die Aufloesung ueber den Pfad
       # fehlschlaegt — und zwar still. Die festgeschriebene Nummer waere
       # dann umgangen, ohne dass es im Protokoll auffiele.
       - name: Playwright und Chromium
         run: |
-          npm install -g playwright@1.56.1
+          npm install -g playwright@1.63.0
           playwright install --with-deps chromium
 
       # Server und Batterie stehen in einem Schritt, nicht in zweien. Ein
       # mit & gestarteter Prozess ueberlebt das Ende seines Schrittes zwar
       # meistens, aber zugesichert ist es nicht; ein Server, der zwischen
-      # zwei Schritten stirbt, ergaebe neunundzwanzig rote Suiten und keinen
+      # zwei Schritten stirbt, ergaebe lauter rote Suiten und keinen
       # Hinweis, woran es lag.
       #
       # Gewartet wird auf die erste Antwort und nicht auf eine feste
       # Zeitspanne: Ein zu kurzes sleep ergibt einen Fehlschlag, der mit dem
       # Geprueften nichts zu tun hat, ein zu langes kostet bei jedem Lauf.
       - name: Anwendung starten und Batterie laufen lassen
+        # Beim Pull Request gibt es keine Eingabe; SUITEN ist leer, und
+        # lauf.mjs nimmt dann alle Suiten.
         env:
           SUITEN: ${{ inputs.suiten }}
         run: |

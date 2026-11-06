@@ -15,7 +15,7 @@ Oberflächen-Vorschau entfernt.
 * Playwright mit einem Chromium
 
 ```bash
-npm i -g playwright && playwright install chromium
+npm i -g playwright@1.63.0 && playwright install chromium
 ```
 
 Liegt Playwright anderswo, sagt man es über Umgebungsvariablen:
@@ -51,8 +51,16 @@ LEIH_DATA_DIR=/tmp/leih-test php -S 127.0.0.1:8099
 LEIH_DATA_DIR=/tmp/leih-test node tests/e2e/lauf.mjs
 ```
 
+Dieselbe Fassung wie in `.github/workflows/browser.yml`, damit ein Lauf hier
+und einer dort dasselbe bedeuten.
+
 ## Ohne eingerichtetes Playwright
 
+Bei jedem Pull Request gegen `main` läuft die ganze Batterie von selbst, in
+der Action *Browsertests*; ein neuer Push auf denselben PR bricht den älteren
+Lauf ab.
+
+Für einzelne Suiten oder einen Zweig ohne PR:
 **Actions → Browsertests → Run workflow.** Dieselbe Batterie, auf einem
 Rechner von GitHub, mit Browser und Server darauf eingerichtet. Wählbar ist
 der Zweig und, im Feld darunter, eine Liste von Filtern — leer lassen heißt

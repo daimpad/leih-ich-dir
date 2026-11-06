@@ -61,8 +61,10 @@ node tests/e2e/lauf.mjs          # Fenster 2
 
 Playwright ist die einzige Abhängigkeit, und sie gehört zu den Tests, nicht
 zur Anwendung: Ausgeliefert wird davon nichts. Die Anleitung samt
-Umgebungsvariablen steht in `tests/e2e/README.md`. In der GitHub-Action laufen
-sie nicht mit, ein Browser wäre dort ein Vielfaches der übrigen Laufzeit.
+Umgebungsvariablen steht in `tests/e2e/README.md`. Bei jedem Pull Request gegen
+`main` laufen sie in einer eigenen Action (*Browsertests*), getrennt von der
+schnellen CI, weil ein Browser dort ein Vielfaches der übrigen Laufzeit braucht.
+Die Bilanz steht in der Zusammenfassung des Laufs.
 
 Fällt eine Zusicherung, erst nachsehen, ob sie noch gilt: Mehrere Suiten
 hielten Anforderungen fest, die später abgelöst wurden. Solche Zeilen werden
