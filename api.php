@@ -173,6 +173,75 @@ function list_path(string $id): string
     return lists_dir() . '/' . substr($id, 0, 2) . '/' . $id . '.json';
 }
 
+/**
+ * Sperrt alle Listen eines Unterverzeichnisses fuer einen Schreiber.
+ *
+ * Gesperrt wird eine eigene Datei, nicht die Liste. store_record() ersetzt
+ * die Liste durch eine neue Datei; eine Sperre auf der alten hielte dann
+ * niemanden mehr auf: Wer auf sie wartete, bekaeme sie nach dem Tausch und
+ * laese die alte Fassung, mit der alten Revision, und schriebe seine
+ * Aenderung auf deren Grundlage zurueck. Die Sperrdatei bleibt immer
+ * dieselbe, je Unterverzeichnis eine, hoechstens 256, und sie ist leer.
+ *
+ * @return resource
+ */
+function lock_shard(string $id)
+{
+    $fh = @fopen(dirname(list_path($id)) . '/.lock', 'c');
+    if ($fh === false) {
+        fail(500, 'storage');
+    }
+    if (!flock($fh, LOCK_EX)) {
+        fail(503, 'busy');
+    }
+    return $fh;
+}
+
+/**
+ * Schreibt einen Datensatz so, dass er ganz oder gar nicht ankommt.
+ *
+ * Bisher wurde die Liste an Ort und Stelle geleert und neu beschrieben. Bei
+ * voller Platte kam davon nur ein Teil an, und api.php meldete trotzdem
+ * 200: Die Liste war danach unlesbar ('corrupt'), die alte Fassung mit ihr
+ * verloren, und der Browser hielt alles fuer gespeichert. Nachgestellt mit
+ * einem Datenordner auf einem 256-KiB-tmpfs (tests/api-test.php,
+ * LEIH_TEST_VOLL).
+ *
+ * Jetzt entsteht die neue Fassung in einer Nachbardatei. Erst wenn sie ganz
+ * geschrieben ist, ersetzt rename() die alte, und das in einem Schritt: Ein
+ * Leser sieht die eine oder die andere, nie eine halbe. Kommt nicht alles
+ * an, bleibt die alte Fassung, wie sie war, und die Antwort ist 507. Der
+ * Browser wartet darauf und versucht es weiter, wie bei jedem 5xx.
+ *
+ * Aufrufen nur unter lock_shard(): Zwei Schreiber, die zugleich tauschten,
+ * verloeren sonst eine der beiden Aenderungen, ohne dass es jemand merkt.
+ *
+ * @param array<string, mixed> $rec
+ */
+function store_record(string $path, array $rec): void
+{
+    $json = (string) json_encode($rec, JSON_UNESCAPED_SLASHES);
+    $tmp = $path . '.' . bin2hex(random_bytes(6)) . '.tmp';
+    $fh = @fopen($tmp, 'x');
+    if ($fh === false) {
+        fail(500, 'storage');
+    }
+    /* Jeder Schritt zaehlt: fwrite meldet, wie viel ankam, fflush und
+       fclose, ob der Rest es noch auf die Platte schaffte. fsync, damit
+       nach einem Stromausfall nicht der Name auf eine leere Datei zeigt. */
+    $ok = fwrite($fh, $json) === strlen($json) && fflush($fh) && fsync($fh);
+    $ok = fclose($fh) && $ok;
+    if (!$ok) {
+        @unlink($tmp);
+        fail(507, 'full');
+    }
+    @chmod($tmp, 0660);
+    if (!@rename($tmp, $path)) {
+        @unlink($tmp);
+        fail(500, 'storage');
+    }
+}
+
 /** Installationsspezifisches Salz für Ratenbegrenzungs-Hashes. */
 function install_salt(): string
 {
@@ -564,24 +633,17 @@ function action_read(): never
        beim Anlegen und bei der KI, eine solche Datei blieb also liegen, obwohl
        die Datenschutzerklaerung ihr Verschwinden zusagt. */
     throttle_gc();
-    /* Mit geteilter Sperre lesen. action_write schreibt in dieselbe Datei
-       (ftruncate, dann fwrite) und haelt dabei LOCK_EX; ein ungesperrtes
-       file_get_contents traf das Fenster dazwischen und bekam eine leere
-       oder halbe Datei. Der Leser sah dann 500 corrupt fuer eine Liste, der
-       nichts fehlt — und in der Superliste bietet der Aufklapper fuer diesen
-       Status bewusst kein "Erneut versuchen" an. LOCK_SH laesst beliebig
-       viele Leser gleichzeitig zu und haelt nur den Schreiber auf. */
-    $fh = @fopen(list_path($id), 'rb');
-    if ($fh === false) {
+    /* Ohne Sperre gelesen. Bis November 2026 schrieb action_write in
+       dieselbe Datei (ftruncate, dann fwrite), und ein ungesperrter Leser
+       traf das Fenster dazwischen: 500 corrupt fuer eine Liste, der nichts
+       fehlte. Jetzt tauscht store_record() die Datei in einem Schritt aus;
+       wer liest, bekommt die alte oder die neue Fassung, nie eine halbe.
+       Eine geteilte Sperre auf der Liste hielte auch niemanden mehr auf,
+       denn kein Schreiber sperrt sie noch (lock_shard). */
+    $raw = @file_get_contents(list_path($id));
+    if ($raw === false) {
         fail(404, 'notfound');
     }
-    if (!flock($fh, LOCK_SH)) {
-        fclose($fh);
-        fail(503, 'busy');
-    }
-    $raw = (string) stream_get_contents($fh);
-    flock($fh, LOCK_UN);
-    fclose($fh);
     $rec = json_decode($raw, true);
     if (!is_array($rec)) {
         fail(500, 'corrupt');
@@ -599,7 +661,7 @@ function action_read(): never
 
 /**
  * Legt eine neue Liste an. Die ID stammt aus dem Browser, damit sie in die
- * Verschlüsselung eingebunden werden kann; Kollisionen scheitern am Modus 'x'.
+ * Verschlüsselung eingebunden werden kann; eine belegte ID endet in 409.
  *
  * @param array<string, mixed> $in
  */
@@ -621,22 +683,24 @@ function action_create(array $in): never
         fail(500, 'storage');
     }
 
-    $fh = @fopen($path, 'x');
-    if ($fh === false) {
+    /* Unter der Sperre ist die Pruefung auf eine belegte ID so gut wie
+       fopen(.., 'x'): Wer sonst noch in dieses Unterverzeichnis schreibt,
+       wartet. */
+    $lock = lock_shard($id);
+    if (file_exists($path)) {
         fail(409, 'exists');
     }
     $now = time();
-    $rec = [
+    store_record($path, [
         'v'        => 1,
         'verifier' => verifier($proof),
         'rev'      => 1,
         'created'  => $now,
         'updated'  => $now,
         'payload'  => $payload,
-    ];
-    fwrite($fh, (string) json_encode($rec, JSON_UNESCAPED_SLASHES));
-    fclose($fh);
-    @chmod($path, 0660);
+    ]);
+    flock($lock, LOCK_UN);
+    fclose($lock);
 
     respond(200, ['id' => $id, 'rev' => 1, 'updated' => $now]);
 }
@@ -668,14 +732,18 @@ function action_write(array $in): never
         fail(400, 'malformed');
     }
 
-    $fh = @fopen(list_path($id), 'r+');
-    if ($fh === false) {
+    $path = list_path($id);
+    if (!is_file($path)) {
         fail(404, 'notfound');
     }
-    if (!flock($fh, LOCK_EX)) {
-        fail(503, 'busy');
+    $lock = lock_shard($id);
+    /* Erst unter der Sperre lesen: Was vorher gelesen wurde, kann ein
+       anderer Schreiber inzwischen ersetzt haben. */
+    $raw = @file_get_contents($path);
+    if ($raw === false) {
+        fail(404, 'notfound');
     }
-    $rec = json_decode((string) stream_get_contents($fh), true);
+    $rec = json_decode($raw, true);
     if (!is_array($rec) || !isset($rec['verifier'])) {
         fail(500, 'corrupt');
     }
@@ -693,12 +761,9 @@ function action_write(array $in): never
         $rec['verifier'] = verifier((string) $newProof);
     }
 
-    rewind($fh);
-    ftruncate($fh, 0);
-    fwrite($fh, (string) json_encode($rec, JSON_UNESCAPED_SLASHES));
-    fflush($fh);
-    flock($fh, LOCK_UN);
-    fclose($fh);
+    store_record($path, $rec);
+    flock($lock, LOCK_UN);
+    fclose($lock);
 
     respond(200, ['rev' => $rec['rev'], 'updated' => $rec['updated']]);
 }
@@ -716,6 +781,13 @@ function action_delete(array $in): never
         fail(400, 'malformed');
     }
     $path = list_path($id);
+    if (!is_file($path)) {
+        fail(404, 'notfound');
+    }
+    /* Auch das Loeschen wartet auf die Sperre. Sonst koennte ein Schreiben,
+       das die Liste eben noch gelesen hat, sie nach dem Loeschen mit
+       rename() wieder hinstellen. */
+    $lock = lock_shard($id);
     $raw = @file_get_contents($path);
     if ($raw === false) {
         fail(404, 'notfound');
@@ -725,6 +797,8 @@ function action_delete(array $in): never
         fail(403, 'forbidden');
     }
     @unlink($path);
+    flock($lock, LOCK_UN);
+    fclose($lock);
     respond(200, ['ok' => true]);
 }
 

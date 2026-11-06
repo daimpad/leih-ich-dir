@@ -630,8 +630,15 @@ Eine Nutzerin hat höchstens ihre eigene Sicherungsdatei, und die legt eine
 neue Liste an, mit neuen Links.
 
 ```cron
-45 4 * * * rsync -a --delete /var/www/leih-ich-dir/data/lists/ /var/backups/leih-ich-dir/lists/
+45 4 * * * rsync -a --delete --exclude='*.tmp' /var/www/leih-ich-dir/data/lists/ /var/backups/leih-ich-dir/lists/
 ```
+
+Die Sicherung sieht nie eine halbe Liste. `api.php` schreibt jede neue
+Fassung zuerst in eine Nachbardatei (`….json.….tmp`) und tauscht sie erst
+aus, wenn sie ganz geschrieben ist; fehlt dafür Platz, bleibt die alte
+Fassung, und die Antwort ist 507. Diese Nachbardateien braucht die
+Sicherung nicht, daher `--exclude`. Die leeren `.lock`-Dateien, eine je
+Unterverzeichnis, sperren das Schreiben und dürfen mitkommen.
 
 Die Kopie bleibt Chiffrat und ist damit so unbedenklich wie das Original;
 sie gehört trotzdem dorthin, wo Sicherungen liegen, und nicht ins

@@ -18,8 +18,14 @@ jobs:
       - name: Lint PHP files
         run: find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 -n1 php -l
 
+      # Ein eigenes kleines Dateisystem, damit der Test auch die volle Platte
+      # nachstellt (LEIH_TEST_VOLL, tests/api-test.php). Ohne es wird dieser
+      # Teil uebersprungen, und genau dort lag der Datenverlust.
       - name: Run API tests
-        run: php tests/api-test.php
+        run: |
+          sudo mkdir -p /mnt/leih-voll
+          sudo mount -t tmpfs -o size=256k,mode=1777 tmpfs /mnt/leih-voll
+          LEIH_TEST_VOLL=/mnt/leih-voll php tests/api-test.php
 
       - name: Check deployment script against a local server
         run: |

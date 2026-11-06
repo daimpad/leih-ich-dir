@@ -61,6 +61,19 @@ $removed = 0;
 
 /** @var SplFileInfo $file */
 foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($listsDir, FilesystemIterator::SKIP_DOTS)) as $file) {
+    /* Reste eines abgebrochenen Schreibens. api.php schreibt jede Fassung
+       erst in eine Nachbardatei (store_record) und raeumt sie selbst weg;
+       liegen bleibt eine nur, wenn der Prozess mittendrin endete. Sie traegt
+       Chiffrat und faellt sonst unter keine Frist. Eine Stunde, weil ein
+       Schreiben, das noch laeuft, nach Sekunden fertig ist. */
+    if ($file->isFile() && $file->getExtension() === 'tmp' && $file->getMTime() < time() - 3600) {
+        if ($dryRun) {
+            printf("[dry-run] würde löschen: %s (Rest eines Schreibens)\n", $file->getFilename());
+        } else {
+            @unlink($file->getPathname());
+        }
+        continue;
+    }
     if (!$file->isFile() || $file->getExtension() !== 'json') {
         continue;
     }
