@@ -1092,6 +1092,13 @@ header.site { padding-block: var(--s-4); }
    ganze Zeile gruen. Kein items--read: Das naehme Zeiger und Wechsel beim
    Ueberfahren weg, und hier ist die Zeile wirklich anklickbar. */
 .items--kreis .itemrow { text-decoration: none; color: inherit; }
+/* Der Name einer gesammelten Liste mit dem Stift dahinter, auf einer
+   Zeile. Der Stift ist klein und leise wie am Titel; der Knopf bleibt
+   gross genug fuer den Finger. */
+.kreis-name { display: flex; align-items: center; gap: var(--s-1); }
+.kreis-name__stift { width: 2.4rem; height: 2.4rem; min-height: 0; margin-block: -.4rem; color: var(--muted); }
+.kreis-name__stift .ico { width: 1.1rem; height: 1.1rem; }
+.kreis-name__stift:hover, .kreis-name__stift:focus-visible { color: var(--ink); }
 
 /* == 9 · Teilen und Kontakt ============================================ */
 
