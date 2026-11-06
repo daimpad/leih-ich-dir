@@ -2841,11 +2841,6 @@
   }
 
   /**
-   * Der Inhalt des Fensters im Bearbeiten-Modus. Der Name steht hier als
-   * Feld, nicht noch einmal als Ueberschrift: zweimal dasselbe Wort
-   * uebereinander sagt nichts doppelt so gut.
-   */
-  /**
    * Der Kopf des Fensters. Im Bearbeiten-Modus ist die Ueberschrift selbst
    * das Feld: Der Name eines Gegenstands zweimal untereinander zu zeigen,
    * einmal als Titel und einmal als Eingabe, sagt nichts doppelt so gut.
@@ -3088,13 +3083,6 @@
     return navigator.share(data).then(function () { return true; }, function () { return false; });
   }
 
-  /**
-   * Anfrage zu einem Gegenstand. Kein Dienst ist fest verdrahtet: Entweder
-   * E-Mail, wenn eine Adresse hinterlegt ist, oder die Weitergabe des Geraets,
-   * und als Rueckfallebene die Zwischenablage.
-   *
-   * @return {Array<HTMLElement>}
-   */
   /** Mit hinterlegtem Namen wird die Anfrage persoenlich angesprochen. */
   function requestBody(item) {
     var owner = (state.doc.contact.name || '').trim();
@@ -3103,6 +3091,15 @@
       : t('request.body', { item: item.name });
   }
 
+  /**
+   * Anfrage zu einem Gegenstand. Kein Dienst ist fest verdrahtet: E-Mail und
+   * Telefon, je nachdem, was hinterlegt ist, dazu die Weitergabe des
+   * Geraets, wo es sie gibt; genau einer dieser Wege fuehrt. Die
+   * Zwischenablage ist der Rueckfall, wenn weder Adresse noch Nummer da sind
+   * und das Geraet nichts weitergeben kann.
+   *
+   * @return {Array<HTMLElement>}
+   */
   function requestActions(item) {
     var nodes = [];
     var subject = t('request.subject', { item: item.name });
@@ -5288,17 +5285,6 @@
     });
   }
 
-  /**
-   * Holt die Listen der Freunde: vier gleichzeitig, nachrueckend.
-   *
-   * Nicht seriell, weil apiGet kein Zeitlimit und kein Abbruchsignal kennt —
-   * ein haengender Abruf hielte alle uebrigen unbegrenzt auf. Nicht alle auf
-   * einmal, weil jeder Lesevorgang drueben einen eigenen PHP-Prozess belegt
-   * und Lesen ungedrosselt ist: throttle() steht in api.php nur bei create
-   * und ai, der Server kann sich also nicht wehren, die Schranke muss hier
-   * stehen. Vier ist kein gemessener Wert, sondern die Groessenordnung, die
-   * ein einzelner Reiter einem geteilten Host zumuten darf.
-   */
   /** Die leeren Eintraege, bevor irgendetwas geholt ist. Sie entstehen
       getrennt vom Holen, damit der Aufrufer sie sofort in kreis.eintraege
       legen kann: Dann steht die Reihenfolge fest, ein waehrenddessen
@@ -5310,6 +5296,18 @@
     });
   }
 
+  /**
+   * Holt die Listen der Freund:innen: vier gleichzeitig, nachrueckend.
+   *
+   * Nicht seriell, weil ein langsamer Abruf die uebrigen bis zu seiner Frist
+   * (API_TIMEOUT in anfrage()) aufhielte. Nicht alle auf einmal, weil jeder
+   * Lesevorgang drueben einen eigenen PHP-Prozess belegt: Eine Superliste
+   * mit vierundzwanzig Listen soll den geteilten Host nicht mit einem Schlag
+   * fluten. Am Verbrauch der Drosselung (READ_LIMIT in api.php) aendert die
+   * Staffelung nichts, sie zaehlt jeden Abruf, wann immer er kommt. Vier ist
+   * kein gemessener Wert, sondern die Groessenordnung, die ein einzelner
+   * Reiter einem geteilten Host zumuten darf.
+   */
   function ladeKreis(eintraege, fortschritt) {
     var naechster = 0;
 
@@ -5368,18 +5366,18 @@
     return !e.status || e.status === 0 || e.status >= 502;
   }
 
-  /**
-   * Schreibt den Kreis. Kein Aufschub wie SAVE_DEBOUNCE: Die Aenderungen hier
-   * sind einzelne Ereignisse — aufnehmen, entfernen, den Titel verlassen.
-   * Damit braucht der Kreis weder touch() noch scheduleSave() noch einen
-   * Eintrag im beforeunload-Zuhoerer, und save() bleibt unberuehrt.
-   */
   /** Das Lebenszeichen der Superliste; Begruendung bei lebenszeichen(). */
   function kreisLebenszeichen() {
     if (!kreis.doc || !kreis.token || !lebenszeichenFaellig(kreis.updated)) { return; }
     kreisSave();
   }
 
+  /**
+   * Schreibt den Kreis. Kein Aufschub wie SAVE_DEBOUNCE: Die Aenderungen hier
+   * sind einzelne Ereignisse — aufnehmen, entfernen, den Titel verlassen.
+   * Damit braucht der Kreis weder touch() noch scheduleSave() noch einen
+   * Eintrag im beforeunload-Zuhoerer, und save() bleibt unberuehrt.
+   */
   function kreisSave() {
     if (!kreis.token || !kreis.doc) { return Promise.resolve(); }
     /* Alles, was der Schreibvorgang braucht, wird hier festgehalten und nicht
@@ -6047,18 +6045,18 @@
 
   /* -- Oberfläche --------------------------------------------------------- */
 
-  /**
-   * Prüft nicht nur den Konstruktor, sondern auch, ob er etwas kann.
-   * Firefox 142 stellt SpeechRecognition bereits bereit, aber ohne jedes
-   * Mitglied: start, lang, continuous und sämtliche Ereignisse kamen erst mit
-   * 143. Ein Konstruktor allein ist also kein Versprechen.
-   */
   /** Oeffnet oder schliesst die Box mit dem erkannten Text. */
   function setVoiceOpen(open) {
     voiceOpen = !!open;
     $('#voiceBox').hidden = !(state.mode === 'edit' && voiceOpen);
   }
 
+  /**
+   * Prueft nicht nur den Konstruktor, sondern auch, ob er etwas kann.
+   * Firefox 142 stellt SpeechRecognition bereits bereit, aber ohne jedes
+   * Mitglied: start, lang, continuous und saemtliche Ereignisse kamen erst mit
+   * 143. Ein Konstruktor allein ist also kein Versprechen.
+   */
   function speechSupported() {
     var Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
     return !!(Ctor && Ctor.prototype && typeof Ctor.prototype.start === 'function');
