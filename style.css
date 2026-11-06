@@ -455,7 +455,7 @@ header.site { padding-block: var(--s-4); }
  * Wahl klappt darunter auf.
  * ===================================================================== */
 
-.fab { display: none; position: relative; order: 1; }
+.fab { display: none; order: 1; }
 
 .fab__btn {
   /* Das Dreieck des Aufklappers faellt weg: Die Flaeche traegt ihr eigenes
@@ -472,6 +472,14 @@ header.site { padding-block: var(--s-4); }
   display: flex; flex-direction: column; align-items: stretch; gap: var(--s-2);
   min-width: 11rem;
 }
+/* Die Wahl haengt am rechten Rand der Kopfzeile, nicht am Knopf: Schmal
+   und auf Englisch, mit "Lending list", ragte sie sonst links aus dem
+   Fenster (tests/e2e/mobil-rundgang.mjs, 320 Punkte). Zu ist sie
+   ausdruecklich nicht da; der Browser verbirgt den Inhalt eines
+   geschlossenen <details>, laesst ihm aber eine Lage, und die soll keine
+   Messung und kein Treffer finden. */
+.bar { position: relative; }
+.fab:not([open]) .fab__menu { display: none; }
 .fab__item {
   display: flex; align-items: center; gap: var(--s-3);
   padding: .8rem 1.1rem; text-decoration: none; font-weight: 800;

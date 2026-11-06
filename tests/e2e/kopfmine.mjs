@@ -167,6 +167,19 @@ for (const sprache of ['de', 'en']) {
       ueberlauf: document.documentElement.scrollWidth > window.innerWidth + 1 }));
     ok(w + 'px [' + sprache + ']: Listen-Knopf und ' + z.text + ' in einer Zeile', Math.abs(z.k - z.l) < 2 && !z.ueberlauf, JSON.stringify(z));
   }
+  /* Offen bleibt die Wahl im Fenster, auch bei 320 Punkten und auf
+     Englisch, wo "Lending list" breiter laeuft. Sie haengt am rechten Rand
+     der Kopfzeile, nicht am Knopf. */
+  await page.setViewportSize({ width: 320, height: 780 });
+  await page.waitForTimeout(250);
+  await page.locator('.fab__btn').click();
+  await page.waitForTimeout(250);
+  {
+    const r = await page.evaluate(() => Array.from(document.querySelectorAll('.fab__item:not([hidden])')).map((n) => {
+      const b = n.getBoundingClientRect(); return { l: Math.round(b.left), r: Math.round(b.right) }; }));
+    ok('320px [' + sprache + ']: die offene Wahl steht ganz im Fenster', r.length === 2 && r.every((b) => b.l >= 0 && b.r <= 320), JSON.stringify(r));
+  }
+  await page.keyboard.press('Escape');
 
   await page.setViewportSize({ width: 672, height: 780 });
   await page.waitForTimeout(250);
