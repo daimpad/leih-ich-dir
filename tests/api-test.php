@@ -104,7 +104,7 @@ $server = proc_open(
     $descriptors,
     $pipes,
     null,
-    array_merge(is_array(getenv()) ? getenv() : [], ['LEIH_DATA_DIR' => $dataDir])
+    array_merge(is_array(getenv()) ? getenv() : [], ['LEIH_DATA_DIR' => $dataDir, 'PHP_CLI_SERVER_WORKERS' => '4'])
 );
 if (!is_resource($server)) {
     exit("Der eingebaute PHP-Server ließ sich nicht starten.\n");
@@ -467,6 +467,127 @@ check('IPv4-gemappt: das Kontingent läuft voll', $fuelle('::ffff:198.51.100.7')
 $code = $anlegenVon('::ffff:198.51.100.8');
 check('IPv4-gemappt: die Nachbaradresse hat ein eigenes', $code === 200, $code);
 
+/* Gleichzeitige Schreiber. store_record() ersetzt die Datei, statt in sie
+   zu schreiben; eine Sperre auf der Liste selbst hielte deshalb niemanden
+   mehr auf, und lock_shard() sperrt eine eigene Datei. Acht Anfragen auf
+   dieselbe Revision zugleich: Genau eine darf gewinnen, die anderen sehen
+   409. Ohne die Sperre gewannen in der Gegenprobe mehrere, und jede meldete
+   200, waehrend nur die letzte stehen blieb. Der Testserver laeuft dafuer
+   mit mehreren Arbeitsprozessen (PHP_CLI_SERVER_WORKERS, oben). */
+if (function_exists('curl_multi_init')) {
+    $paarId = bin2hex(random_bytes(16));
+    /* Eigene Adresse: Die Kontingente von 127.0.0.1 fuers Anlegen und Lesen
+       haben die Pruefungen davor aufgebraucht. */
+    [$code] = http_json($base, ['a' => 'create', 'id' => $paarId, 'proof' => $proof, 'payload' => $payload('start')],
+        ['Content-Type: application/json', 'X-Forwarded-For: 203.0.113.9']);
+    check('gleichzeitige Schreiber: die Liste entsteht', $code === 200, $code);
+    $mh = curl_multi_init();
+    $griffe = [];
+    for ($n = 0; $n < 8; $n++) {
+        $ch = curl_init($base);
+        curl_setopt_array($ch, [
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => json_encode(['a' => 'write', 'id' => $paarId, 'proof' => $proof, 'rev' => 1, 'payload' => $payload('fassung-' . $n)]),
+            CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => 10,
+        ]);
+        curl_multi_add_handle($mh, $ch);
+        $griffe[] = $ch;
+    }
+    do {
+        curl_multi_exec($mh, $laufend);
+        curl_multi_select($mh, 0.1);
+    } while ($laufend > 0);
+    $codes = array_map(static fn ($ch): int => (int) curl_getinfo($ch, CURLINFO_HTTP_CODE), $griffe);
+    foreach ($griffe as $ch) {
+        curl_multi_remove_handle($mh, $ch);
+    }
+    curl_multi_close($mh);
+    $zaehl = array_count_values($codes);
+    check('gleichzeitig auf dieselbe Revision: genau eines gewinnt', ($zaehl[200] ?? 0) === 1 && ($zaehl[409] ?? 0) === 7, $codes);
+    [$code, $body] = http_json($base . '?a=read&id=' . $paarId, null, ['X-Forwarded-For: 203.0.113.9']);
+    check('und danach steht Revision 2', $code === 200 && ($body['rev'] ?? 0) === 2, [$code, $body]);
+    http_json($base, ['a' => 'delete', 'id' => $paarId, 'proof' => $proof]);
+} else {
+    printf("  %-48s %s\n", 'gleichzeitige Schreiber (ohne curl)', 'übersprungen');
+}
+
+/* Jede Fassung entsteht in einer Nachbardatei. Nach allem, was dieser Test
+   bisher geschrieben hat, darf keine davon liegen geblieben sein. */
+$reste = glob($dataDir . '/lists/*/*.tmp') ?: [];
+check('nach allen Schreibvorgängen liegt kein Rest', $reste === [], $reste);
+
+/* Volle Platte. Nachgestellt wird sie mit einem kleinen eigenen Dateisystem,
+   das der Aufruf mitbringt (LEIH_TEST_VOLL, ein beschreibbarer tmpfs von
+   256 KiB; in der CI legt der Lauf ihn an). Ohne ihn wird der Teil
+   uebersprungen. Bis November 2026 antwortete api.php hier 200, und die
+   Liste war danach unlesbar, die alte Fassung mit ihr verloren. */
+$voll = getenv('LEIH_TEST_VOLL');
+/* Nur auf einem kleinen Dateisystem: Auf der echten Platte wuerde der
+   Fueller sie bis auf 16 KiB vollschreiben. */
+if (is_string($voll) && $voll !== '' && (!is_dir($voll) || (float) disk_total_space($voll) > 16 * 1048576)) {
+    check('volle Platte: LEIH_TEST_VOLL ist ein kleines Dateisystem', false, $voll);
+} elseif (is_string($voll) && $voll !== '' && is_writable($voll)) {
+    $vollDaten = rtrim($voll, '/') . '/daten-' . bin2hex(random_bytes(4));
+    mkdir($vollDaten, 0770, true);
+    register_shutdown_function(static function () use ($vollDaten): void { rmtree($vollDaten); });
+    $vollPort = PORT + 1;
+    $vollBase = 'http://' . HOST . ':' . $vollPort . '/api.php';
+    $vollServer = proc_open(
+        sprintf('exec php -S %s:%d -t %s', HOST, $vollPort, escapeshellarg($root)),
+        $descriptors,
+        $vollPipes,
+        null,
+        array_merge(is_array(getenv()) ? getenv() : [], ['LEIH_DATA_DIR' => $vollDaten])
+    );
+    register_shutdown_function(static function () use ($vollServer): void {
+        if (is_resource($vollServer)) {
+            proc_terminate($vollServer);
+            proc_close($vollServer);
+        }
+    });
+    for ($i = 0; $i < 50; $i++) {
+        usleep(100000);
+        [$code] = http_json($vollBase . '?a=ping');
+        if ($code === 200) {
+            break;
+        }
+    }
+    $vollId = bin2hex(random_bytes(16));
+    $alteFassung = $payload(str_repeat('a', 2000));
+    [$code] = http_json($vollBase, ['a' => 'create', 'id' => $vollId, 'proof' => $proof, 'payload' => $alteFassung]);
+    check('volle Platte: die Liste entsteht, solange Platz ist', $code === 200, $code);
+    http_json($vollBase . '?a=read&id=' . $vollId);
+
+    /* Bis auf 16 KiB auffuellen. Die neue Fassung braucht mehr; Lesen und
+       Zaehlerdateien passen noch hinein. */
+    $fueller = $vollDaten . '/fueller';
+    $frei = (int) disk_free_space($vollDaten);
+    @file_put_contents($fueller, str_repeat("\0", max(0, $frei - 16384)));
+    clearstatcache();
+
+    $grosse = $payload(str_repeat('b', 60000));
+    [$code, $body] = http_json($vollBase, ['a' => 'write', 'id' => $vollId, 'proof' => $proof, 'rev' => 1, 'payload' => $grosse]);
+    check('volle Platte: Schreiben meldet 507', $code === 507 && ($body['error'] ?? '') === 'full', [$code, $body]);
+    [$code, $body] = http_json($vollBase . '?a=read&id=' . $vollId);
+    check('volle Platte: die alte Fassung bleibt lesbar', $code === 200 && ($body['rev'] ?? 0) === 1
+        && ($body['payload']['ct'] ?? '') === $alteFassung['ct'], [$code, $body['rev'] ?? null]);
+    $neueId = bin2hex(random_bytes(16));
+    [$code] = http_json($vollBase, ['a' => 'create', 'id' => $neueId, 'proof' => $proof, 'payload' => $grosse]);
+    check('volle Platte: Anlegen meldet 507', $code === 507, $code);
+    [$code] = http_json($vollBase . '?a=read&id=' . $neueId);
+    check('volle Platte: und hinterlässt keine halbe Liste', $code === 404, $code);
+    $reste = glob($vollDaten . '/lists/*/*.tmp') ?: [];
+    check('volle Platte: kein Rest einer Nachbardatei', $reste === [], $reste);
+
+    @unlink($fueller);
+    [$code, $body] = http_json($vollBase, ['a' => 'write', 'id' => $vollId, 'proof' => $proof, 'rev' => 1, 'payload' => $grosse]);
+    check('volle Platte: mit Platz geht dasselbe Schreiben durch', $code === 200 && ($body['rev'] ?? 0) === 2, [$code, $body]);
+} else {
+    printf("  %-48s %s\n", 'volle Platte (LEIH_TEST_VOLL nicht gesetzt)', 'übersprungen');
+}
+
 /* tools/purge.php findet denselben Datenordner wie api.php und meldet einen
    falschen Pfad, statt still nichts zu tun. Bis November 2026 kannte es nur
    data/ neben sich und endete bei verlegtem Ordner mit Status 0. */
@@ -488,11 +609,17 @@ $neu = str_repeat('b', 32);
 file_put_contents($wartung . '/lists/aa/' . $alt . '.json', json_encode(['v' => 1, 'updated' => strtotime('2020-01-01')]));
 file_put_contents($wartung . '/lists/bb/' . $neu . '.json', json_encode(['v' => 1, 'updated' => time()]));
 
+$altRest = $wartung . '/lists/bb/' . $neu . '.json.0123456789ab.tmp';
+$frischRest = $wartung . '/lists/bb/' . $neu . '.json.ba9876543210.tmp';
+file_put_contents($altRest, 'halb');
+file_put_contents($frischRest, 'halb');
+touch($altRest, time() - 7200);
 [$status, $out] = $purge('--days=365 --dry-run --data=' . escapeshellarg($wartung));
 check('purge: Probelauf mit --data nennt die alte Liste', $status === 0 && str_contains($out, $alt) && is_file($wartung . '/lists/aa/' . $alt . '.json'), $out);
 [$status, $out] = $purge('--days=365', $wartung);
 check('purge: über LEIH_DATA_DIR löscht es die alte Liste und lässt die neue', $status === 0
     && !is_file($wartung . '/lists/aa/' . $alt . '.json') && is_file($wartung . '/lists/bb/' . $neu . '.json'), $out);
+check('purge: ein alter Rest eines Schreibens geht, ein frischer bleibt', !is_file($altRest) && is_file($frischRest));
 [$status, $out] = $purge('--days=365 --data=' . escapeshellarg($wartung . '/gibt-es-nicht'));
 check('purge: ein falscher Pfad endet mit Status 1', $status === 1 && str_contains($out, 'Kein Datenverzeichnis'), $out);
 $leer = $wartung . '/leer';
