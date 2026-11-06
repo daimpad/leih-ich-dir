@@ -441,6 +441,7 @@ weniger Bewegung, nicht weniger Anerkennung.
 │   ├── build-fonts.py            erzeugt die Schriftteilmengen
 │   ├── i18n-check.js             prüft beide Wörterbücher auf denselben Schlüsselsatz
 │   ├── fallback-check.js         prüft die Ersatztexte im HTML gegen das Wörterbuch
+│   ├── kennung-check.js          prüft und setzt die Kennungen ?v= an Skripten und Stilen
 │   ├── pruefe.sh                 alle statischen Prüfungen in einem Aufruf, wie die Action
 │   ├── bilder.mjs                erzeugt Vorschaubild und Favicons aus Bildmarke und Startseite
 │   └── check-deployment.php      prüft eine laufende Installation von außen
@@ -766,6 +767,18 @@ Endungen, die Plesk festlegt. Diese Dateien gehen dann nie durch Apache. Das
 ist schnell, hat aber eine Folge, die man nicht sieht: **nginx liest keine
 `.htaccess`.** Die Sperre für `tools/` und `tests/` gilt dann nur noch für
 PHP-Dateien, und `data/.htaccess` schützt nur, was Apache ausliefert.
+
+Dasselbe gilt für die Kopfzeilen aus `.htaccess`. Gemessen auf
+leihichdir.de im November 2026: Nur `/` kommt über Apache, mit
+`Cache-Control: no-cache` und den Sicherheitskopfzeilen. `app.js`,
+`style.css`, `theme.js`, die Schriften und auch `index.html`,
+`einstellungen.html` und `check.html` kommen über nginx, ohne
+`Cache-Control`, ohne `Content-Security-Policy`-Kopfzeile und ohne
+`X-Frame-Options`. Der Browser hält sie dann nach `Last-Modified` für frisch.
+Gegen die Mischung aus neuer Startseite und alter `app.js` tragen die
+Verweise eine Kennung aus dem Inhalt (`app.js?v=…`, `tools/kennung-check.js`);
+das wirkt ohne Serverzugriff. Die HTML-Seiten selbst und die Kopfzeilen
+erreicht nur der erste Weg unten.
 
 **Woran man es erkennt.** `check.html` meldet unter *Abschottung* die
 PHP-Dateien in `tools/` als gesperrt und `tools/og-vorlage.html` als

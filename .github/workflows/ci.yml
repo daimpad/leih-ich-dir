@@ -82,3 +82,11 @@ jobs:
       # deshalb faellt es niemandem auf, wenn beide auseinanderlaufen.
       - name: Ersatztexte im HTML wie im Woerterbuch
         run: node tools/fallback-check.js
+
+      # Im Betrieb kommt nur "/" ueber Apache mit no-cache; alles mit Endung
+      # liefert der vorgelagerte nginx ohne Cache-Control aus, und der Browser
+      # haelt es nach Last-Modified fuer frisch. Eine Kennung aus dem Inhalt
+      # macht nach jeder Aenderung eine neue Adresse daraus. Vergessen wird
+      # sie hier sichtbar, mit dem richtigen Wert.
+      - name: Kennungen an Skripten und Stilen wie der Inhalt
+        run: node tools/kennung-check.js
