@@ -1558,6 +1558,22 @@ header.site { padding-block: var(--s-4); }
      an den Rand der Karte lag flach ueber deren Schattierung, und die
      Knete hatte dort eine Kante, wo sie keine hat. */
   .addbox { position: sticky; top: 0; z-index: 20; background: var(--surface); padding-block: var(--s-3); }
+  /* Aber auch so lag er flach ueber dem Lichtfleck der Karte, ruhend wie
+     klebend. Im Dunkeln hebt der Fleck die Karte um rund zehn Werte je
+     Kanal an, und hinter Feld und "Mehrere auf einmal" stand ein dunkleres
+     Rechteck. Einen eigenen Grund braucht die Eingabe aber nur, solange sie
+     klebt und Zeilen unter ihr durchlaufen. Wo der Browser das fragen kann
+     (scroll-state), liegt sie ruhend auf der Karte und zeigt deren Licht;
+     eine Abfrage kann ihren eigenen Behaelter nicht faerben, sein ::before
+     schon. Ohne die Abfrage bleibt alles wie oben, mit Rechteck, aber ohne
+     durchscheinende Zeilen. */
+  @supports (container-type: scroll-state) {
+    .addbox { background: transparent; container-type: scroll-state; }
+    .addbox::before { content: ""; position: absolute; inset: 0; z-index: -1; }
+    @container scroll-state(stuck: top) {
+      .addbox::before { background: var(--surface); }
+    }
+  }
   /* Die klebende Eingabe deckt oben rund 8 rem zu. Ohne Abstand rollte der
      Browser eine fokussierte Zeile genau darunter: bei 390 Punkten Breite
      und Shift+Tab lagen 4 von 14 Zeilen ganz verdeckt (WCAG 2.4.11). Unten
