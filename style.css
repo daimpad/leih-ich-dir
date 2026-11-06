@@ -18,7 +18,7 @@
  *  1a · Das Rezept: Knete und Mulde
  *   2 · Grundlage
  *   3 · Gerüst und Kopfleiste
- *  3a · Schwebende Schaltfläche
+ *  3a · Der Knopf zu den eigenen Listen
  *   4 · Schaltflächen
  *   5 · Felder
  *   6 · Karten, Aufklapper, Hinweise
@@ -443,40 +443,43 @@ header.site { padding-block: var(--s-4); }
 .bar-mine { order: 1; display: flex; align-items: center; gap: var(--s-2); }
 .bar-controls { order: 2; }
 
-/* == 3a · Schwebende Schaltfläche ====================================== *
+/* == 3a · Der Knopf zu den eigenen Listen ============================ *
  *
- * Schmal treten die beiden Wege aus der Kopfleiste ab und stehen hier: am
- * unteren rechten Rand, wo der Daumen liegt. Traeger ist ein <details>, die
- * Flaeche also ein <summary> — damit bringt der Browser Auf und Zu, die
+ * Schmal treten die beiden Wege aus der Kopfleiste ab, und ein Knopf in
+ * derselben Zeile oeffnet sie als kleine Wahl. Traeger ist ein <details>,
+ * die Flaeche also ein <summary> — damit bringt der Browser Auf und Zu, die
  * Tastaturfuehrung und die Zustandsmeldung fuer die Vorlesestimme selbst mit.
- * Beide Teile liegen fest am Fenster und nicht im Fluss, der <details> selbst
- * ist deshalb ein Kasten ohne Hoehe am Ende des Dokuments.
+ * Bis November 2026 schwebte er unten rechts am Fenster und lag beim Rollen
+ * ueber dem Inhalt, ueber den Pfeilen der Zeilen und ueber Knoepfen. Jetzt
+ * steht er wie die Schalter im Kopf und traegt deren Form (ctl-square); die
+ * Wahl klappt darunter auf.
  * ===================================================================== */
 
-.fab { display: none; }
+.fab { display: none; order: 1; }
 
 .fab__btn {
-  position: fixed; right: var(--s-4); bottom: var(--s-4); z-index: 57;
-  width: 3.4rem; height: 3.4rem;
-  display: grid; place-items: center; cursor: pointer;
-  --farbe: var(--kaugummi); --tief: var(--kaugummi-tief); --mass: .8;
-  border: 0; border-radius: 999px;
   /* Das Dreieck des Aufklappers faellt weg: Die Flaeche traegt ihr eigenes
      Zeichen, und die beiden Schreibweisen decken zusammen jeden Browser ab. */
   list-style: none;
 }
 .fab__btn::-webkit-details-marker { display: none; }
-/* Der Fokusring folgt der Form: Die Sammelregel setzt 12 Punkte Rundung, auf
-   einem Kreis saehe das aus wie ein verrutschtes Quadrat. */
-.fab__btn:focus-visible { border-radius: 999px; }
-.fab__btn .ico { width: 1.5rem; height: 1.5rem; }
-/* Offen tritt die Flaeche zurueck: Die Wahl steht darueber, nicht auf ihr. */
-.fab[open] .fab__btn { --farbe: var(--milch); --tief: var(--milch-tief); }
+.fab__btn .ico { width: 1.25rem; height: 1.25rem; }
+/* Offen liegt die Flaeche tiefer: Die Wahl steht darunter, nicht auf ihr. */
+.fab[open] .fab__btn { --mass: .15; color: var(--tinte); }
 
 .fab__menu {
-  position: fixed; right: var(--s-4); bottom: calc(var(--s-4) + 4rem); z-index: 57;
+  position: absolute; right: 0; top: calc(100% + var(--s-2)); z-index: 57;
   display: flex; flex-direction: column; align-items: stretch; gap: var(--s-2);
+  min-width: 11rem;
 }
+/* Die Wahl haengt am rechten Rand der Kopfzeile, nicht am Knopf: Schmal
+   und auf Englisch, mit "Lending list", ragte sie sonst links aus dem
+   Fenster (tests/e2e/mobil-rundgang.mjs, 320 Punkte). Zu ist sie
+   ausdruecklich nicht da; der Browser verbirgt den Inhalt eines
+   geschlossenen <details>, laesst ihm aber eine Lage, und die soll keine
+   Messung und kein Treffer finden. */
+.bar { position: relative; }
+.fab:not([open]) .fab__menu { display: none; }
 .fab__item {
   display: flex; align-items: center; gap: var(--s-3);
   padding: .8rem 1.1rem; text-decoration: none; font-weight: 800;
@@ -1477,24 +1480,36 @@ header.site { padding-block: var(--s-4); }
   .schritte--kreis .tab { flex: 1 1 auto; min-width: auto; white-space: normal; text-align: center; line-height: 1.2; }
 }
 
-/* Die schwebende Schaltflaeche loest die Kopfleiste ab, sobald deren beide
-   Wege nicht mehr neben Marke und Schaltern in eine Zeile passen. Gemessen
-   wurde, wo die Zeile umbricht: Deutsch braucht 634 Punkte, Englisch 653
-   (in Nunito, seit der Knete; mit Ranchers waren es 635 und 665). Darunter
-   rutschten die Schalter unter die Marke und der Inhalt nach unten;
-   die Schaltflaeche kostet dagegen keine Zeile. */
+/* Der Knopf zu den eigenen Listen loest die beiden Wege ab, sobald sie
+   nicht mehr neben Marke und Schaltern in eine Zeile passen. Gemessen wurde,
+   wo die Zeile umbricht; die Grenze stammt aus der Zeit, als dort noch der
+   Mond fuer das Erscheinungsbild stand und EN statt English, und beides
+   wiegt sich ungefaehr auf (tests/e2e/kopfmine.mjs misst sie nach). */
 @media (max-width: 42rem) {
   .bar-mine { display: none; }
   .fab { display: block; }
-  /* Unten rechts steht jetzt die Schaltflaeche. Meldung, Klappe und das Ende
-     der Fusszeile ruecken um ihre Hoehe darueber, sonst laege sie auf ihnen. */
-  .site-footer { padding-bottom: calc(var(--s-7) + 3.6rem); }
-  .toast-region { bottom: calc(var(--s-5) + 3.6rem); }
-  .klappe { bottom: calc(var(--s-5) + 9.8rem); }
-  /* Der Zugang steht unter jedem Schritt und kommt deshalb oft genau dort zu
-     liegen, wo die Schaltflaeche schwebt. Seine Knoepfe stehen hier unter
-     dem Feld und links, wo die Schaltflaeche sie nicht verdeckt. */
+  /* Marke, Listen-Knopf, English und Zahnrad sollen bei 375 und 390, den
+     haeufigsten Breiten am Telefon, in eine Zeile passen, in beiden
+     Sprachen. Dafuer ruecken sie enger zusammen, und das Wort der Marke
+     wird eine Spur kleiner. */
+  .bar { column-gap: var(--s-2); }
+  #btnLang { padding-inline: .7rem; }
+  .brand-word { font-size: 1.28rem; }
+  /* Schmal braucht das Feld des Zugangs die ganze Zeile, seine Knoepfe
+     stehen darunter; daneben bliebe vom Link kaum etwas zu sehen. */
   .schritt ~ .keybox .linkrow .input { flex-basis: 100%; }
+}
+/* Unter 375 Punkten, auf vielen Android-Telefonen also bei 360, passen
+   Wortmarke, Listen-Knopf, English und Zahnrad nicht mehr in eine Zeile;
+   auf Englisch, mit "Deutsch", schon ab 372 nicht mehr. Gemessen.
+   Dann steht die Bildmarke allein, und der Name bleibt fuer die
+   Vorlesestimme; die Sprache als Wort geht vor, denn wer kein Deutsch
+   liest, muss sie finden. Auf Wunsch des Betreibers, November 2026. */
+@media (max-width: 23.4rem) {
+  .brand-word {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
 }
 
 @media (max-width: 34rem) {
@@ -1537,9 +1552,10 @@ header.site { padding-block: var(--s-4); }
 
   .footer-nav { gap: var(--s-2) var(--s-4); }
   .toast-region { width: calc(100vw - 2rem); }
-  /* Weiter oben als im Block darueber: Schmal ist die Meldung breiter und
-     haeufiger zweizeilig, die Klappe braucht den Abstand entsprechend. */
-  .klappe { bottom: calc(var(--s-5) + 11rem); }
+  /* Weiter oben als breit: Schmal ist die Meldung haeufiger zweizeilig,
+     die Klappe braucht den Abstand entsprechend. Bis November 2026 kamen
+     noch 3,6rem fuer die schwebende Schaltflaeche dazu (11rem). */
+  .klappe { bottom: calc(var(--s-5) + 7.4rem); }
   .klappe__face { width: 2.2rem; height: 2.2rem; }
   .klappe__text { font-size: 1.1rem; }
 }

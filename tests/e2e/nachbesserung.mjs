@@ -13,7 +13,8 @@ for (const [locale, name] of [['en-US','englischer Browser'], ['fr-FR','franzoes
     h1: document.querySelector('#viewStart h1').innerText.replace(/\s+/g,' ').trim(),
     schalter: document.querySelector('#btnLang').textContent.trim() }));
   ok(name + ': deutsch', m.lang === 'de' && /Leih ich Dir/.test(m.h1), JSON.stringify(m));
-  ok(name + ': Schalter bietet EN an', m.schalter === 'EN', m.schalter);
+  /* Seit November 2026 als Wort in der Zielsprache, vorher EN. */
+  ok(name + ': Schalter bietet English an', m.schalter === 'English', m.schalter);
   await ctx.close();
 }
 {

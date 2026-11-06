@@ -381,13 +381,13 @@
     </a>
     <div class="bar-controls">
       <span id="storageBadge" class="chip" hidden></span>
-      <!-- Regel 19: Bedienelement der Kopfleiste als Quadrat, weiße Fläche,
-           durchgezogene Linie, harter Schatten. Es zeigt das Ziel, nicht den Zustand. -->
-      <button type="button" id="btnLang" class="ctl-square">EN</button>
-      <!-- Regel 19: zeigt das Ziel, nicht den Zustand, und traegt kein Wort. -->
-      <button type="button" id="btnTheme" class="ctl-square" data-theme-toggle>
-        <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-moon" id="themeIconUse"/></svg>
-      </button>
+      <!-- Regel 19: Das Bedienelement zeigt das Ziel, nicht den Zustand. Die
+           Sprache steht als Wort in ihrer eigenen Sprache, English oder
+           Deutsch: Die Seite beginnt immer auf Deutsch, und wer kein Deutsch
+           liest, muss diesen Knopf finden. Bis November 2026 stand dort EN,
+           daneben ein Mond fuer das Erscheinungsbild; das waehlt jetzt die
+           Einstellungsseite, sonst gilt das des Systems. -->
+      <button type="button" id="btnLang" class="ctl-square">English</button>
       <!-- Die Einstellungen sind eine eigene Seite. Der Verweis nimmt das
            Fragment mit, damit dort auch die offene Liste bekannt ist. -->
       <a id="lnkSettings" class="ctl-square" href="einstellungen.html" data-i18n-label="settings.headline">
@@ -399,7 +399,7 @@
          und ihr Wort, denn seit es zwei Arten von Listen gibt, sagt "Meine
          Listen" nicht mehr, wo man landet. Jeder erscheint erst, wenn dieses
          Geraet eine Liste seiner Art kennt. Schmal treten beide ganz ab: Dort
-         uebernimmt die schwebende Schaltflaeche am Fuss der Seite. -->
+         oeffnet sie der Listen-Knopf gleich daneben. -->
     <nav class="bar-mine" id="barMine" hidden data-i18n-label="nav.mine">
       <a id="lnkMine" class="ctl-square ctl-wide" href="./" hidden>
         <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-leihliste"/></svg>
@@ -410,6 +410,28 @@
         <span class="ctl-label" data-i18n="nav.circle">Superliste</span>
       </a>
     </nav>
+    <!-- Der Knopf zu den eigenen Listen fuer schmale Fenster. Breit stehen
+         die beiden Wege daneben als Zeichen und Wort; schmal passen sie nicht
+         mehr in die Zeile, und dieser eine Knopf oeffnet sie als kleine
+         Wahl. Bis November 2026 schwebte er unten rechts am Fenster und lag
+         beim Rollen ueber dem Inhalt. Ein details und kein eigenes Auf und
+         Zu in JavaScript; geschlossen wird ausserdem bei Escape und bei einem
+         Tipper daneben (app.js, bindNav). -->
+    <details class="fab" id="fab" hidden>
+      <summary class="fab__btn ctl-square" data-i18n-label="nav.mine">
+        <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-list"/></svg>
+      </summary>
+      <div class="fab__menu">
+        <a class="fab__item" id="fabMine" href="./" hidden>
+          <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-leihliste"/></svg>
+          <span data-i18n="nav.list">Leihliste</span>
+        </a>
+        <a class="fab__item" id="fabCircle" href="./" hidden>
+          <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-kreis"/></svg>
+          <span data-i18n="nav.circle">Superliste</span>
+        </a>
+      </div>
+    </details>
   </div>
 </header>
 
@@ -710,7 +732,7 @@
       </div>
 
       <!-- Hinzufügen steht in der Liste, nicht daneben. Am Telefon bleibt die
-           Zeile beim Blättern oben stehen; eine schwebende Schaltfläche
+           Zeile beim Blättern oben stehen; ein eigener Knopf dafuer
            erübrigt sich damit. -->
       <!-- novalidate: Die Pruefung macht diese Anwendung selbst. Der Browser
            zeigte sonst eine eigene, unuebersetzte Blase und brach die
@@ -1189,27 +1211,6 @@
   <span class="klappe__text" id="klappeText"></span>
 </div>
 
-<!-- Die schwebende Schaltflaeche. Sie ersetzt schmal die beiden Verweise aus
-     der Kopfleiste: Dort standen sie unter der Marke in einer eigenen Zeile
-     und schoben den Inhalt nach unten, hier stehen sie am Daumen. Ein
-     <details> und kein eigenes Auf und Zu in JavaScript — der Browser kann
-     das, und die Tastatur bekommt es damit umsonst. Geschlossen wird
-     ausserdem bei Escape und bei einem Tipper daneben. -->
-<details class="fab" id="fab" hidden>
-  <summary class="fab__btn" data-i18n-label="nav.mine">
-    <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-list"/></svg>
-  </summary>
-  <div class="fab__menu">
-    <a class="fab__item" id="fabMine" href="./" hidden>
-      <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-leihliste"/></svg>
-      <span data-i18n="nav.list">Leihliste</span>
-    </a>
-    <a class="fab__item" id="fabCircle" href="./" hidden>
-      <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-kreis"/></svg>
-      <span data-i18n="nav.circle">Superliste</span>
-    </a>
-  </div>
-</details>
 
 <div class="toast-region" id="toastRegion" aria-live="polite">
   <!-- Die Meldung nennt Namen von Gegenstaenden. -->

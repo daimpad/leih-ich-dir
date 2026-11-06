@@ -192,6 +192,7 @@
   var I18N = {
     de: {
       'a11y.skip': 'Zum Inhalt springen',
+      'lang.target': 'English',
       'a11y.lang': 'Switch to English',
       'banner.preview': 'Vorschaumodus: Es ist kein PHP-Backend erreichbar. Listen werden nur lokal in diesem Browser gespeichert. Das ist ideal, um die Oberfläche auszuprobieren.',
       'badge.local': 'lokal',
@@ -573,6 +574,7 @@
 
     en: {
       'a11y.skip': 'Skip to content',
+      'lang.target': 'Deutsch',
       'a11y.lang': 'Auf Deutsch umschalten',
       'banner.preview': 'Preview mode: no PHP backend reachable. Lists are stored locally in this browser only. Handy for trying out the interface.',
       'badge.local': 'local',
@@ -1049,11 +1051,11 @@
     $$('[data-i18n-title]').forEach(function (node) {
       node.setAttribute('title', t(node.getAttribute('data-i18n-title')));
     });
-    /* Regel 19: das Bedienelement zeigt das Ziel, nicht den Zustand. */
+    /* Regel 19: das Bedienelement zeigt das Ziel, nicht den Zustand. Als
+       Wort in der Zielsprache, English oder Deutsch (index.html). */
     var langBtn = $('#btnLang');
     if (langBtn) {
-      var target = (lang === 'de') ? 'en' : 'de';
-      langBtn.textContent = target.toUpperCase();
+      langBtn.textContent = t('lang.target');
       langBtn.setAttribute('title', t('a11y.lang'));
       langBtn.setAttribute('aria-label', t('a11y.lang'));
     }
@@ -1591,7 +1593,7 @@
     });
     /* Ein Wechsel der Ansicht ist ein Ortswechsel und beginnt deshalb oben.
        Der Browser behaelt den Rollstand sonst bei, weil das Dokument
-       dasselbe bleibt: Wer die Schaltflaeche am Fuss der Startseite bedient,
+       dasselbe bleibt: Wer weit unten auf der Startseite einen Weg waehlt,
        landete mitten in der neuen Liste, beim Teilen statt beim Anfang. */
     if (shownView !== null && shownView !== name) { window.scrollTo(0, 0); }
     shownView = name;
@@ -1877,7 +1879,7 @@
 
   /**
    * Die Wege zu den eigenen Listen, an beiden Orten zugleich: breit in der
-   * Kopfleiste, schmal in der schwebenden Schaltflaeche. Beide stehen im
+   * Kopfleiste, schmal hinter dem Listen-Knopf daneben. Beide stehen im
    * Dokument, welcher zu sehen ist, entscheidet allein das Erscheinungsbild —
    * so bleibt hier eine Schaltung statt zweier, die auseinanderlaufen koennen.
    *
@@ -1893,8 +1895,8 @@
     navSetzen($('#lnkCircle'), kreise);
     navSetzen($('#fabCircle'), kreise);
     /* Die beiden Huellen tragen kein eigenes Ziel und verschwinden, wenn
-       beide Wege verschwinden: sonst bliebe in der Kopfleiste eine Luecke und
-       am Fuss eine Schaltflaeche, hinter der nichts steht. */
+       beide Wege verschwinden: sonst bliebe in der Kopfleiste eine Luecke
+       oder ein Knopf, hinter dem nichts steht. */
     var etwas = !!(listen || kreise);
     sichtbar($('#barMine'), etwas);
     sichtbar($('#fab'), etwas);
@@ -1905,8 +1907,8 @@
 
   /**
    * Die Schaltung der Wege. Sie steht fuer sich und nicht in bindEvents(),
-   * weil die Einstellungsseite dieselbe Kopfleiste und dieselbe schwebende
-   * Schaltflaeche traegt, aber einen eigenen Einstieg hat — initSettings()
+   * weil die Einstellungsseite dieselbe Kopfleiste und denselben
+   * Listen-Knopf traegt, aber einen eigenen Einstieg hat — initSettings()
    * kehrt vor bindEvents() um. Ohne diesen eigenen Aufruf blieb die Wahl
    * dort offen stehen: Escape und der Tipper daneben fehlten.
    */
@@ -1965,7 +1967,7 @@
     });
   }
 
-  /** Klappt die schwebende Schaltflaeche zu; mit true kehrt die Fuehrung auf sie zurueck. */
+  /** Klappt den Listen-Knopf zu; mit true kehrt die Fuehrung auf ihn zurueck. */
   function fabZu(fokus) {
     var fab = $('#fab');
     if (!fab || !fab.open) { return; }
@@ -6239,7 +6241,7 @@
     }
 
     /* Auch von hier fuehren die Wege dorthin, wo etwas zu sehen ist — und die
-       schwebende Schaltflaeche braucht ihre eigene Schaltung, weil diese Seite
+       Listen-Knopf braucht seine eigene Schaltung, weil diese Seite
        bindEvents() nie erreicht. */
     bindNav();
     updateNav();
