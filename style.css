@@ -139,7 +139,7 @@
   --r-row:  22px;
 
   --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
-  --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 64px;
+  --s-5: 24px; --s-6: 32px; --s-7: 48px;
 
   --shell: 41.25rem;   /* 660px — dieselbe Breite auf jeder Seite */
 
@@ -390,7 +390,6 @@ main[tabindex="-1"]:focus, h1[tabindex="-1"]:focus { outline: none; }
    zwischen ihnen: Sein Abstand liegt deshalb unten. */
 #circleManageLead { margin-bottom: var(--s-4); }
 
-.muted { color: var(--muted); }
 .txt-sm { font-size: .9rem; }
 .mono { font-family: var(--mono); font-weight: 400; }
 .lead { font-size: 1.12rem; color: var(--muted); font-weight: 600; }
@@ -665,10 +664,6 @@ header.site { padding-block: var(--s-4); }
 .fold > summary::-webkit-details-marker { display: none; }
 .fold > summary .ico { width: 1rem; height: 1rem; transition: rotate var(--takt-kurz) ease; }
 .fold[open] > summary .ico { rotate: 90deg; }
-.fold > summary .fold-sub {
-  margin-left: auto; color: var(--faint); text-align: right;
-  font-family: var(--sans); font-weight: 600; font-size: .92rem;
-}
 .fold[open] > summary { border-bottom: 1px solid var(--line); }
 .fold__body { padding: var(--s-5); }
 .fold__body hr { border: 0; border-top: 1px solid var(--line); margin: var(--s-5) 0; }
@@ -1226,9 +1221,6 @@ header.site { padding-block: var(--s-4); }
 .modal__foot--stack .spacer { display: none; }
 .modal__foot--stack > .btn--ghost { order: 2; }
 
-.modal-state { display: flex; align-items: center; gap: var(--s-3); font-size: .95rem; }
-.modal-state .item-badge { width: 1.9rem; height: 1.9rem; }
-
 .toast-region {
   position: fixed; left: 50%; transform: translateX(-50%);
   bottom: var(--s-5); z-index: 60; width: min(26rem, calc(100vw - 2rem));
@@ -1438,12 +1430,6 @@ header.site { padding-block: var(--s-4); }
 }
 .chip--level:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 999px; }
 .chip--level .ico { width: 1rem; height: 1rem; }
-@keyframes lid-huepf {
-  0%, 100% { transform: translateY(0); }
-  40%      { transform: translateY(-6px); }
-  70%      { transform: translateY(2px); }
-}
-.chip--level.is-neu { animation: lid-huepf 420ms var(--feder) both; }
 
 /* Der leere Kasten — bisher die kaelteste Stelle der Anwendung. */
 .empty-face { width: 4rem; height: 4rem; color: var(--faint); display: block; margin: 0 auto var(--s-3); }
@@ -1562,9 +1548,8 @@ header.site { padding-block: var(--s-4); }
   .hero h1 { font-size: 2.4rem; }
   .titleblock h1, .title-input, .title-edit__feld::after { font-size: 1.9rem; }
 
-  /* Der Aufklapper-Zusatz rutscht unter den Namen statt ihn zu drängen. */
+  /* Eine lange Beschriftung des Aufklappers darf schmal umbrechen. */
   .fold > summary { flex-wrap: wrap; }
-  .fold > summary .fold-sub { margin-left: 0; flex-basis: 100%; text-align: left; }
 
   /* Die Eingabe bleibt beim Blättern am oberen Rand erreichbar. Sie klebt
      oben und nicht unten: Unten steht die schwebende Schaltflaeche, und zwei
