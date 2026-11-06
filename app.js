@@ -373,6 +373,7 @@
       'status.unsaved': 'Nicht gespeichert',
       'status.error': 'Speichern fehlgeschlagen',
       'status.retry': 'Wartet auf den Server',
+      'status.reloaded': 'Die Liste wurde anderswo geändert. Hier steht jetzt der neue Stand.',
       'status.retryHint': 'Der Server antwortet gerade nicht. Deine Änderungen sind noch nicht gespeichert; es wird weiter versucht. Lass diese Seite offen, bis „Gespeichert“ erscheint.',
       'status.overwritten': 'Die Liste wurde parallel geändert. Dein Stand wurde übernommen.',
       'status.refreshed': 'Aktualisiert.',
@@ -752,6 +753,7 @@
       'status.unsaved': 'Not saved',
       'status.error': 'Saving failed',
       'status.retry': 'Waiting for the server',
+      'status.reloaded': 'The list was changed elsewhere. This page now shows the new version.',
       'status.retryHint': 'The server is not answering right now. Your changes are not saved yet; it keeps trying. Keep this page open until “Saved” appears.',
       'status.overwritten': 'The list was changed elsewhere. Your version was kept.',
       'status.refreshed': 'Refreshed.',
@@ -1164,12 +1166,18 @@
      als application/json an, weil eine fremde Seite genau diesen Typ nicht
      ohne Vorabanfrage schicken kann. Ohne die Zeile schickte fetch den
      Koerper als text/plain, und jedes Speichern endete in 415. */
+  /* keepalive, damit ein Schreiben, das beim Verlassen oder Verbergen der
+     Seite losgeht, nicht mit ihr abbricht (bindSeite). Der Browser nimmt das
+     nur bis 64 KiB je Anfrage an; eine groessere geht ohne hinaus, wie
+     bisher. */
   function apiPost(payload) {
+    var body = JSON.stringify(payload);
     return anfrage(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       cache: 'no-store',
-      body: JSON.stringify(payload)
+      keepalive: body.length < 60000,
+      body: body
     });
   }
 
@@ -5133,6 +5141,28 @@
     }).catch(function () { /* stiller Fehlschlag – nächster Durchlauf versucht es erneut */ });
   }
 
+  /* Die Bearbeitung nach der Rueckkehr: Hat sich die Liste anderswo
+     geaendert, etwa auf dem Handy, holt dieses Fenster den neuen Stand. Sonst
+     schriebe es beim naechsten Tippen seinen alten darueber. Nur, wenn hier
+     nichts offen ist; mit offenen Aenderungen entscheidet das Speichern
+     (409). Was waehrend des Abrufs getippt wird, gewinnt: Dann bleibt der
+     Abruf folgenlos. */
+  function bearbeitenNachladen() {
+    if (state.mode !== 'edit' || !state.id || state.dirty || state.saving) { return; }
+    var id = state.id, gen = docGen;
+    Store.read(id, state.rev).then(function (res) {
+      if (res.status !== 200 || res.body.unchanged) { return; }
+      return Crypt.decrypt(state.key, res.body.payload, id).then(function (raw) {
+        if (state.mode !== 'edit' || state.id !== id || state.dirty || state.saving || docGen !== gen) { return; }
+        state.rev = res.body.rev;
+        state.updated = res.body.updated;
+        state.doc = normalizeAny(raw, 'list', null);
+        render();
+        toast(t('status.reloaded'));
+      });
+    }).catch(function () { /* still: Beim naechsten Speichern zeigt sich, was gilt */ });
+  }
+
   function startRefresh() {
     stopRefresh();
     refreshTimer = setInterval(function () {
@@ -5890,10 +5920,25 @@
         ev.returnValue = '';
       }
     });
+    /* Verbirgt sich die Seite, wird sofort geschrieben, nicht erst nach
+       SAVE_DEBOUNCE: Auf dem Handy beendet der Browser einen Tab im
+       Hintergrund oft, bevor die Uhr ablaeuft, und beforeunload kommt dort
+       nicht verlaesslich. pagehide deckt das Schliessen ab, wo
+       visibilitychange fehlt. Kehrt die Seite zurueck, holt die Bearbeitung
+       den Stand des Servers, falls er sich anderswo geaendert hat
+       (bearbeitenNachladen); vorher geschah das nur im Ansehen-Modus. */
+    var wegschreiben = function () {
+      if (state.mode === 'edit' && state.dirty && !state.saving) {
+        clearTimeout(saveTimer);
+        save();
+      }
+    };
     document.addEventListener('visibilitychange', function () {
-      if (document.hidden) { return; }
+      if (document.hidden) { wegschreiben(); return; }
       if (state.mode === 'view') { refresh(false); }
+      if (state.mode === 'edit') { bearbeitenNachladen(); }
     });
+    window.addEventListener('pagehide', wegschreiben);
     /* Wartet ein Speichern auf das Netz, geht es sofort, wenn es zurueck ist,
        nicht erst zum naechsten Versuch (speichernSpaeter). */
     window.addEventListener('online', function () {
