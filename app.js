@@ -1718,19 +1718,91 @@
   }
 
   var toastTimer = null;
+  var toastBis = 0;        // wann die Meldung von selbst geht
+  var toastRest = 0;       // was davon uebrig war, als sie angehalten wurde
+  var toastEnde = null;    // was geschieht, wenn der Rueckweg verstreicht
+  var toastMaus = false, toastFokus = false, toastGebunden = false;
+  var TOAST_NACH = 3000;   // so lange bleibt sie mindestens, nachdem man sie losliess
+
+  /**
+   * Nimmt die Meldung weg. Hatte sie einen Rueckweg und wurde er nicht
+   * genommen, laeuft jetzt dessen Ende: Erst dann ist das Loeschen
+   * endgueltig.
+   */
+  function toastWeg(genommen) {
+    clearTimeout(toastTimer);
+    toastTimer = null;
+    var node = $('#toast'), act = $('#toastAct');
+    if (node) { node.hidden = true; }
+    if (act) { act.hidden = true; act.onclick = null; }
+    /* Eine verborgene Meldung haelt weder Fokus noch Zeiger, auch wenn der
+       Browser kein focusout oder mouseleave mehr schickt. Sonst stuende die
+       Uhr der naechsten von Anfang an. */
+    toastMaus = false;
+    toastFokus = false;
+    var ende = toastEnde;
+    toastEnde = null;
+    if (ende && !genommen) { ende(); }
+  }
+
+  function toastUhr(ms) {
+    clearTimeout(toastTimer);
+    toastBis = Date.now() + ms;
+    toastTimer = setTimeout(function () { toastWeg(false); }, ms);
+  }
+
+  /* Solange Fokus oder Mauszeiger auf der Meldung liegen, steht die Uhr.
+     Bis November 2026 lief sie fest neun Sekunden: Wer mit der Tastatur
+     acht Schritte bis zum Rueckgaengig brauchte oder den Zeiger schon
+     darauf hatte, sah sie unter sich verschwinden, und der Fokus fiel auf
+     den Koerper der Seite (WCAG 2.2.1). Danach bekommt sie noch einmal
+     den Rest, mindestens TOAST_NACH. */
+  function toastHalten() {
+    if (!toastTimer) { return; }
+    toastRest = Math.max(0, toastBis - Date.now());
+    clearTimeout(toastTimer);
+    toastTimer = null;
+  }
+
+  function toastWeiter() {
+    var node = $('#toast');
+    if (toastMaus || toastFokus || toastTimer || !node || node.hidden) { return; }
+    toastUhr(Math.max(toastRest, TOAST_NACH));
+  }
+
+  function toastBinden(node) {
+    if (toastGebunden) { return; }
+    toastGebunden = true;
+    node.addEventListener('mouseenter', function () { toastMaus = true; toastHalten(); });
+    node.addEventListener('mouseleave', function () { toastMaus = false; toastWeiter(); });
+    node.addEventListener('focusin', function () { toastFokus = true; toastHalten(); });
+    node.addEventListener('focusout', function (ev) {
+      if (ev.relatedTarget && node.contains(ev.relatedTarget)) { return; }
+      toastFokus = false;
+      toastWeiter();
+    });
+  }
 
   /**
    * Meldung am unteren Rand. Mit `action` traegt sie eine Gegenhandlung und
    * bleibt laenger stehen: Das ersetzt die Rueckfrage vor dem Loeschen durch
-   * die Moeglichkeit, es zurueckzunehmen.
+   * die Moeglichkeit, es zurueckzunehmen. `action.ende` laeuft, wenn die
+   * Meldung geht, ohne dass die Gegenhandlung genommen wurde: von selbst,
+   * durch eine neue Meldung oder durch toastSchliessen(). Daran haengt, was
+   * erst danach geschehen darf, und nicht an einer eigenen Uhr; die Uhr der
+   * Meldung kann stehen.
    *
    * @param {string} msg
-   * @param {{label: string, run: function}=} action
+   * @param {{label: string, run: function, ende: function=}=} action
    */
   function toast(msg, action, gesicht) {
     var node = $('#toast');
     var act = $('#toastAct');
     var body = $('#toastText');
+    toastBinden(node);
+    /* Eine Meldung mit Rueckweg, die von einer neuen verdraengt wird, geht
+       wie von selbst: Ihr Ende laeuft jetzt. */
+    if (toastEnde) { toastWeg(false); }
     body.textContent = '';
     if (gesicht) {
       var ico = icon(gesicht);
@@ -1738,16 +1810,13 @@
       body.appendChild(ico);
     }
     body.appendChild(document.createTextNode(msg));
-    clearTimeout(toastTimer);
 
     if (action) {
       act.textContent = action.label;
       act.hidden = false;
+      toastEnde = action.ende || null;
       act.onclick = function () {
-        clearTimeout(toastTimer);
-        node.hidden = true;
-        act.hidden = true;
-        act.onclick = null;
+        toastWeg(true);
         action.run();
       };
     } else {
@@ -1756,21 +1825,17 @@
     }
 
     node.hidden = false;
-    toastTimer = setTimeout(function () {
-      node.hidden = true;
-      act.hidden = true;
-      act.onclick = null;
-    }, action ? UNDO_MS : 3600);
+    toastRest = action ? UNDO_MS : 3600;
+    /* Liegt der Zeiger schon darauf, wartet sie, bis er geht. */
+    if (toastMaus || toastFokus) { toastTimer = null; }
+    else { toastUhr(toastRest); }
   }
 
   /** Nimmt die Meldung vorzeitig weg. Gebraucht, wo die angebotene
-      Gegenhandlung nicht mehr moeglich ist. */
+      Gegenhandlung nicht mehr moeglich ist; ein offener Rueckweg endet
+      damit. */
   function toastSchliessen() {
-    clearTimeout(toastTimer);
-    var node = $('#toast'), act = $('#toastAct');
-    if (!node) { return; }
-    node.hidden = true;
-    if (act) { act.hidden = true; act.onclick = null; }
+    toastWeg(false);
   }
 
   function setSaveState(kind) {
@@ -3799,14 +3864,16 @@
     touch();
     render();
 
-    /* Die neun Sekunden gehoeren dem Rueckweg und niemandem sonst: Solange
-       die Meldung steht, schweigt jede Feier. */
+    /* Die Zeit der Meldung gehoert dem Rueckweg und niemandem sonst: Solange
+       sie steht, schweigt jede Feier. Sie endet mit der Meldung, nicht nach
+       einer festen Frist, denn die Meldung kann angehalten sein. */
     undoOffen = true;
-    setTimeout(function () { undoOffen = false; }, UNDO_MS + 200);
 
     toast(t('item.deleted', { name: removed.name }), {
       label: t('item.undo'),
+      ende: function () { undoOffen = false; },
       run: function () {
+        undoOffen = false;
         /* Nach einem Ortswechsel gibt es nichts mehr zurueckzunehmen:
            route() setzt state.doc auf null, bevor es die Startseite zeigt,
            und der Zugriff auf items warf dann unbehandelt. */
@@ -3817,7 +3884,6 @@
         state.doc.items.splice(at, 0, removed);
         touch();
         render();
-        undoOffen = false;
         markRow(removed.id, 'lid-heim');
       }
     }, 'face-schreck');
@@ -5189,7 +5255,6 @@
 
   function kreisFristEinloesen() {
     if (!kreisFrist) { return Promise.resolve(); }
-    clearTimeout(kreisFrist);
     kreisFrist = null;
     /* Die Ruecknahme ist damit vorbei. Eine Meldung, deren Knopf nichts mehr
        tut, ist schlimmer als keine. Zuerst wegnehmen, dann schreiben: Der
@@ -5216,14 +5281,20 @@
       if (kreis.eintraege[i] && kreis.eintraege[i].freund.id === id) { wegE = kreis.eintraege.splice(i, 1)[0]; break; }
     }
     renderKreisListe();
-    kreisFrist = setTimeout(function () {
-      kreisFrist = null;
-      kreisSave();
-    }, UNDO_MS);
+    /* Geschrieben wird, wenn die Meldung geht, ohne dass jemand die
+       Ruecknahme nimmt. Bis November 2026 hing das an einer eigenen Uhr von
+       UNDO_MS; seit die Meldung unter Fokus und Zeiger steht, liefe die
+       davon, und ein spaetes Rueckgaengig stellte den Freund nur noch hier
+       zurueck, nicht auf dem Server. */
+    kreisFrist = true;
     toast(t('circle.removed'), {
       label: t('circle.undo'),
+      ende: function () {
+        if (!kreisFrist) { return; }
+        kreisFrist = null;
+        kreisSave();
+      },
       run: function () {
-        clearTimeout(kreisFrist);
         kreisFrist = null;
         /* Nach einem Ortswechsel gibt es nichts mehr zurueckzunehmen: Die
            Frist ist dann schon eingeloest und kreis.doc geraeumt. */
@@ -5853,9 +5924,12 @@
         return;
       }
       /* Rückwärts einfügen, damit die Reihenfolge des Gesprochenen erhalten bleibt. */
+      var neu = {};
       entries.slice().reverse().forEach(function (entry) {
+        var nid = randomHex(6);
+        neu[nid] = true;
         state.doc.items.unshift({
-          id: randomHex(6),
+          id: nid,
           name: entry.item,
           note: '',
           status: entry.status === 'lent' ? 'lent' : 'available',
@@ -5870,7 +5944,30 @@
       speechBefore = '';
       setVoiceState('', false);
       setVoiceOpen(false);
-      toast(entries.length === 1 ? t('voice.added_1') : t('voice.added', { n: entries.length }));
+      /* Mit Rueckweg, wie beim Loeschen. Die Zerlegung ohne KI irrt sich
+         leicht ("die Leiter ist gerade bei Ben" wird ein eigener, freier
+         Eintrag), und bis November 2026 musste man dann jeden Eintrag
+         einzeln oeffnen und loeschen. Rueckgaengig nimmt alle wieder heraus,
+         die noch da sind, und legt den Text zurueck ins Feld, damit man ihn
+         berichtigen kann. */
+      var listeId = state.id;
+      undoOffen = true;
+      toast(entries.length === 1 ? t('voice.added_1') : t('voice.added', { n: entries.length }), {
+        label: t('item.undo'),
+        ende: function () { undoOffen = false; },
+        run: function () {
+          undoOffen = false;
+          if (state.mode !== 'edit' || !state.doc || state.id !== listeId) { return; }
+          state.doc.items = state.doc.items.filter(function (it) { return !neu[it.id]; });
+          var gz = spielRead();
+          gz.dinge = Math.max(0, gz.dinge - entries.length);
+          spielSave();
+          touch();
+          render();
+          setVoiceOpen(true);
+          $('#voiceText').value = input;
+        }
+      });
 
       /* In einem Rutsch mitzaehlen — und stumm feiern, damit die Meldung
          ueber die eingetragene Menge nicht ueberschrieben wird. Geprueft
