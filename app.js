@@ -1023,6 +1023,20 @@
     feld.parentNode.setAttribute('data-wert', feld.value || feld.placeholder || '');
   }
 
+  /* Ein Name ist eine Zeile. Das Feld ist ein textarea, damit ein langer
+     Name umbricht statt abgeschnitten zu werden (style.css,
+     .title-edit__feld). Enter schliesst die Eingabe ab, wie zuvor im input,
+     statt eine neue Zeile zu beginnen; was eingefuegt wird, verliert seine
+     Umbrueche. Gebunden vor den Zuhoerern, die den Namen uebernehmen. */
+  function titelfeld(feld) {
+    feld.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Enter') { ev.preventDefault(); feld.blur(); }
+    });
+    feld.addEventListener('input', function () {
+      if (/[\r\n]/.test(feld.value)) { feld.value = feld.value.replace(/[\r\n]+/g, ' '); }
+    });
+  }
+
   /** Überträgt die Wörterbücher auf alle statisch ausgezeichneten Knoten. */
   function applyStaticI18n() {
     $$('[data-i18n]').forEach(function (node) { node.textContent = t(node.getAttribute('data-i18n')); });
@@ -5829,6 +5843,7 @@
       $('#addName').value = '';
       $('#addName').focus();
     });
+    titelfeld($('#listTitleInput'));
     $('#listTitleInput').addEventListener('input', function () {
       state.doc.title = this.value;
       titelBreite(this);
@@ -5983,6 +5998,7 @@
     /* Kein touch()/scheduleSave(): Der Kreis kennt keinen Aufschub. Der
        Titel wird beim Verlassen des Feldes geschrieben, nicht bei jedem
        Zeichen — sonst waere jeder Tastendruck ein Schreibvorgang. */
+    titelfeld($('#circleTitleInput'));
     $('#circleTitleInput').addEventListener('input', function () {
       if (kreis.doc) { kreis.doc.title = this.value; }
       titelBreite(this);

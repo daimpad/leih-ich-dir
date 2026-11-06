@@ -651,14 +651,17 @@
         <h1 id="listTitleRead" hidden></h1>
         <!-- Der Name als Feld, so breit wie sein Wort, und dahinter ein Stift:
              Man sieht, dass er sich aendern laesst. Der Stift steht im Label,
-             ein Tipp darauf setzt den Cursor in den Namen. size="1" nimmt dem
-             Feld die Eigenbreite von zwanzig Zeichen; die Breite gibt der
-             Zwilling vor (style.css, .title-edit__feld). -->
+             ein Tipp darauf setzt den Cursor in den Namen. Ein textarea und
+             kein input, damit ein langer Name umbricht statt abgeschnitten zu
+             werden; cols="1" nimmt ihm die Eigenbreite von zwanzig Zeichen,
+             Breite und Hoehe gibt der Zwilling vor (style.css,
+             .title-edit__feld), einen Zeilenumbruch nimmt es nicht an
+             (app.js, titelfeld). -->
         <label class="title-edit" hidden id="listTitleEditWrap">
           <span class="sr-only" data-i18n="list.titleLabel">Titel der Liste, freiwillig</span>
           <span class="title-edit__feld">
-            <input type="text" id="listTitleInput" class="input title-input" maxlength="80" size="1"
-                   data-i18n-placeholder="list.titlePlaceholder" placeholder="Titel der Liste">
+            <textarea id="listTitleInput" class="input title-input" maxlength="80" rows="1" cols="1"
+                      data-i18n-placeholder="list.titlePlaceholder" placeholder="Titel der Liste"></textarea>
           </span>
           <svg class="ico title-edit__stift" aria-hidden="true" focusable="false"><use href="#i-stift"/></svg>
         </label>
@@ -946,8 +949,8 @@
         <label class="title-edit" hidden id="circleTitleWrap">
           <span class="sr-only" data-i18n="circle.titleLabel">Name der Superliste, freiwillig</span>
           <span class="title-edit__feld">
-            <input type="text" id="circleTitleInput" class="input title-input" maxlength="80" size="1"
-                   data-i18n-placeholder="circle.titlePlaceholder" placeholder="Superliste">
+            <textarea id="circleTitleInput" class="input title-input" maxlength="80" rows="1" cols="1"
+                      data-i18n-placeholder="circle.titlePlaceholder" placeholder="Superliste"></textarea>
           </span>
           <svg class="ico title-edit__stift" aria-hidden="true" focusable="false"><use href="#i-stift"/></svg>
         </label>
