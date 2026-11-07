@@ -147,7 +147,7 @@ async function imBrowser(welt, basis = BASE) {
   await p.locator('#btnRun').click();
   await p.waitForFunction(() => document.querySelector('#btnRun').textContent === 'Erneut pruefen',
     null, { timeout: 40000 });
-  const zeilen = await p.evaluate(() => Array.from(document.querySelectorAll('#results li.item')).map((li) => ({
+  const zeilen = await p.evaluate(() => Array.from(document.querySelectorAll('#results li.check-row')).map((li) => ({
     name: li.querySelector('.item-name').textContent,
     detail: (li.querySelector('.item-note') || { textContent: '' }).textContent,
     state: li.querySelector('.check-state').textContent

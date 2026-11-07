@@ -1462,6 +1462,27 @@ header.site { padding-block: var(--s-4); }
 .buch-abz b { display: block; font-weight: 800; }
 .buch-abz span { display: block; color: var(--muted); font-size: .9rem; }
 
+/* == 11b · Die Abnahme ================================================= *
+ * check.html baut ihre Zeilen in check.js. Bis November 2026 hatten die
+ * Klassen dort keine Regel: Stufe, Name, Erlaeuterung und Zustand standen
+ * untereinander, und "fehlt" sah aus wie "ok". Jetzt eine Zeile je
+ * Pruefung wie in der Leihliste, flach und durch eine Linie getrennt;
+ * was fehlt, mahnt in Butter wie ein Fehler der Spracheingabe.
+ * ------------------------------------------------------------------------- */
+.check-group { margin-top: var(--s-6); font-size: 1.15rem; }
+.check-row {
+  display: flex; align-items: baseline; gap: var(--s-3);
+  padding: .7rem .35rem; border-bottom: 1px solid var(--line);
+}
+.items > .check-row:last-child { border-bottom: 0; }
+/* Gleich breit, damit die Textspalte bei MUSS, SOLL und INFO an derselben
+   Stelle beginnt. */
+.check-row .chip { flex: 0 0 auto; min-width: 4.6rem; text-align: center; }
+.check-text { flex: 1 1 auto; min-width: 0; }
+.check-state { flex: 0 0 auto; }
+.check-state--fehlt, .check-summary--fehlt { color: var(--warn-ink); }
+.check-summary--fehlt { font-weight: 700; }
+
 /* == 12 · Telefon ====================================================== */
 
 /* Nebeneinander steht der Hero nur, wenn das Fenster breiter ist als die

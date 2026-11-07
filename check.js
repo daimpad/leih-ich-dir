@@ -40,19 +40,18 @@
   function report(level, name, state, detail) {
     rows.push({ level: level, name: name, state: state, detail: detail || '' });
 
-    var li = el('li', 'item');
-    var badge = el('span', 'chip');
-    var dot = el('span', 'dot' + (state === 'ok' ? '' : (state === 'offen' ? ' dot--muted' : ' dot--danger')));
-    badge.appendChild(dot);
-    badge.appendChild(el('span', null, level));
-    li.appendChild(badge);
+    /* Eine Zeile: Stufe, Name mit Erlaeuterung, Zustand (style.css, 11b).
+       Bis November 2026 stand in der Stufe ein Punkt (dot), und Zeile wie
+       Zustand trugen Klassen, fuer die style.css keine Regel hatte. */
+    var li = el('li', 'check-row');
+    li.appendChild(el('span', 'chip', level));
 
-    var main = el('div', 'item-main');
+    var main = el('div', 'check-text');
     main.appendChild(el('span', 'item-name', name));
     if (detail) { main.appendChild(el('span', 'item-note', detail)); }
     li.appendChild(main);
 
-    li.appendChild(el('span', 'tag check-state' + (state === 'ok' ? '' : ' savestate-error'), state));
+    li.appendChild(el('span', 'tag check-state' + (state === 'fehlt' ? ' check-state--fehlt' : ''), state));
     groupNode.appendChild(li);
   }
 
@@ -534,7 +533,7 @@
       if (r.state === 'fehlt' && r.level === LEVEL_SHOULD) { should++; }
     });
     var node = $('#summary');
-    node.className = 'hint' + (must > 0 ? ' savestate-error' : '');
+    node.className = 'hint' + (must > 0 ? ' check-summary--fehlt' : '');
     if (must === 0 && should === 0) {
       node.textContent = 'Alles in Ordnung. ' + rows.length + ' Punkte geprueft.';
     } else if (must === 0) {
