@@ -759,26 +759,31 @@ der Pfad stimmt nicht.
 
 ### Vorgelagerter nginx
 
-In Plesk steht nginx vor Apache. Ist unter *Hosting-Einstellungen* → *Apache
-& nginx* die Option **Smart static files processing** gesetzt (je nach
-Fassung auch: *Serve static files directly by nginx*), liefert nginx statische
-Dateien selbst aus: `.html`, `.css`, `.js`, Bilder, Schriften und weitere
-Endungen, die Plesk festlegt. Diese Dateien gehen dann nie durch Apache. Das
-ist schnell, hat aber eine Folge, die man nicht sieht: **nginx liest keine
+In Plesk steht nginx vor Apache. Unter *Hosting-Einstellungen* → *Apache &
+nginx* gibt es zwei Schalter, mit denen nginx statische Dateien selbst
+ausliefert: **Intelligente Bearbeitung statischer Dateien** (englisch *Smart
+static files processing*) und **Statische Dateien direkt durch nginx
+bedienen** (*Serve static files directly by nginx*), der zweite mit einer
+Liste von Endungen daneben, darin `html`, `css`, `js`, `txt`, Bilder und
+Schriften. Was einer der beiden erfasst, geht nie durch Apache. Das ist
+schnell, hat aber eine Folge, die man nicht sieht: **nginx liest keine
 `.htaccess`.** Die Sperre für `tools/` und `tests/` gilt dann nur noch für
 PHP-Dateien, und `data/.htaccess` schützt nur, was Apache ausliefert.
 
-Dasselbe gilt für die Kopfzeilen aus `.htaccess`. Gemessen auf
-leihichdir.de im November 2026: Nur `/` kommt über Apache, mit
-`Cache-Control: no-cache` und den Sicherheitskopfzeilen. `app.js`,
-`style.css`, `theme.js`, die Schriften und auch `index.html`,
-`einstellungen.html` und `check.html` kommen über nginx, ohne
+Dasselbe gilt für die Kopfzeilen aus `.htaccess`. Gemessen auf leihichdir.de
+im November 2026, solange beide Schalter gesetzt waren: Nur `/` kam über
+Apache, mit `Cache-Control: no-cache` und den Sicherheitskopfzeilen.
+`app.js`, `style.css`, `theme.js`, die Schriften und auch `index.html`,
+`einstellungen.html` und `check.html` kamen über nginx, ohne
 `Cache-Control`, ohne `Content-Security-Policy`-Kopfzeile und ohne
-`X-Frame-Options`. Der Browser hält sie dann nach `Last-Modified` für frisch.
+`X-Frame-Options`, und `tools/og-vorlage.html` war abrufbar. Nach dem
+Abschalten nur der intelligenten Bearbeitung blieb alles, wie es war. Erst
+als auch *Statische Dateien direkt durch nginx bedienen* aus war, kam jede
+Datei über Apache, mit Kopfzeilen und Sperren, und
+`tools/check-deployment.php` meldete *Alles in Ordnung* (7. November 2026).
 Gegen die Mischung aus neuer Startseite und alter `app.js` tragen die
-Verweise eine Kennung aus dem Inhalt (`app.js?v=…`, `tools/kennung-check.js`);
-das wirkt ohne Serverzugriff. Die HTML-Seiten selbst und die Kopfzeilen
-erreicht nur der erste Weg unten.
+Verweise ohnehin eine Kennung aus dem Inhalt (`app.js?v=…`,
+`tools/kennung-check.js`); das wirkt auch ohne Serverzugriff.
 
 **Woran man es erkennt.** `check.html` meldet unter *Abschottung* die
 PHP-Dateien in `tools/` als gesperrt und `tools/og-vorlage.html` als
@@ -801,13 +806,14 @@ der fehlenden Kopfzeilen an Dateien*, als Empfehlung, nicht als Muss.
 
 **Zwei Wege.**
 
-1. **Die Option abschalten.** Dann läuft alles durch Apache, und `.htaccess`
-   gilt wieder für jede Datei. Das ist der sichere Weg, weil er nicht davon
+1. **Beide Schalter abschalten.** Dann läuft alles durch Apache, und
+   `.htaccess` gilt wieder für jede Datei. Einer allein genügt nicht, siehe
+   die Messung oben. Das ist der sichere Weg, weil er nicht davon
    abhängt, wie Plesk seine Konfiguration zusammensetzt. Nachgestellt mit
    Apache 2.4 und den `.htaccess`-Dateien aus diesem Repository: Jede geprüfte
    Datei unter `tools/`, `tests/` und `data/` antwortet mit 403, ob `.php`,
    `.html` oder `.txt`.
-2. **Die Option behalten** und die Sperre in *Zusätzliche nginx-Direktiven*
+2. **Die Schalter behalten** und die Sperre in *Zusätzliche nginx-Direktiven*
    eintragen:
 
 ```nginx

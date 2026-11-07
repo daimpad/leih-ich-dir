@@ -63,6 +63,10 @@ import { dirname, join } from 'node:path';
 
 const WURZEL = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const BEFUND = 'Ursache der offenen statischen Dateien';
+/* Plesk hat zwei Schalter, die nginx statische Dateien selbst ausliefern
+   lassen; auf leihichdir.de genuegte das Abschalten des ersten nicht
+   (November 2026). Jeder Befund dazu muss beide nennen. */
+const BEIDE = /Smart static files processing[\s\S]*Statische Dateien direkt durch nginx bedienen/;
 const OFFEN = '/tools/og-vorlage.html';
 const ERFUNDEN = '/tools/nicht-vorhanden-abnahme.php';
 const KEY = '/data/ai-key.txt';
@@ -205,9 +209,9 @@ for (const welt of WELTEN) {
 
   const z = await imBrowser(welt);
   const befund = z.find((r) => r.name === BEFUND);
-  ok('Browser: Der Befund ' + (welt.befund ? 'erscheint' : 'bleibt aus'),
-     welt.befund ? !!befund && befund.state === 'fehlt' : !befund,
-     befund ? befund.state : 'keine Zeile');
+  ok('Browser: Der Befund ' + (welt.befund ? 'erscheint, mit beiden Plesk-Schaltern' : 'bleibt aus'),
+     welt.befund ? !!befund && befund.state === 'fehlt' && BEIDE.test(befund.detail) : !befund,
+     befund ? befund.state + ' ' + befund.detail.slice(0, 80) : 'keine Zeile');
   const key = z.find((r) => r.name === 'nicht abrufbar: data/ai-key.txt');
   ok('Browser: Der KI-Schluessel gilt als ' + (welt.key === 'ok' ? 'nicht abrufbar' : 'offen'),
      !!key && key.state === (welt.key === 'ok' ? 'ok' : 'fehlt'), key ? key.state : 'keine Zeile');
@@ -215,7 +219,7 @@ for (const welt of WELTEN) {
      z.some((r) => r.name === 'gesperrt: tools/nicht-vorhanden-abnahme.php'));
 
   const t = await ueberKommandozeile(welt);
-  const cliBefund = new RegExp(BEFUND + '\\s+FEHLT').test(t);
+  const cliBefund = new RegExp(BEFUND + '\\s+FEHLT').test(t) && BEIDE.test(t);
   ok('Kommandozeile: Der Befund ' + (welt.befund ? 'erscheint' : 'bleibt aus'), cliBefund === welt.befund,
      cliBefund ? 'Befund da' : 'kein Befund');
   const cliKey = /nicht abrufbar: \/data\/ai-key\.txt\s+(ok|FEHLT)/.exec(t);
@@ -339,7 +343,7 @@ for (const w of DATEI_WELTEN) {
   const anzahl = new RegExp((w.dateien || 9) + ' Datei');
   const bf = z.find((r) => r.name === DATEI_BEFUND);
   ok('Browser: Der Befund ' + (w.befund ? 'erscheint, mit nginx und Plesk' : 'bleibt aus'),
-     w.befund ? !!bf && bf.state === 'fehlt' && anzahl.test(bf.detail) && /Smart static files processing/.test(bf.detail)
+     w.befund ? !!bf && bf.state === 'fehlt' && anzahl.test(bf.detail) && BEIDE.test(bf.detail)
        && !/traegt Cache-Control/.test(bf.detail) : !bf,
      bf ? bf.state + ' ' + bf.detail.slice(0, 120) : 'keine Zeile');
   if (w.leereCsp) {
@@ -365,7 +369,7 @@ for (const w of DATEI_WELTEN) {
      !!cliCc && cliCc[1] === (w.appjs === 'ok' ? 'ok' : 'FEHLT'), cliCc ? cliCc[1] : 'keine Zeile');
   const cliBf = new RegExp(DATEI_BEFUND + '\\s+FEHLT\\s+\\((.*)\\)').exec(t);
   ok('Kommandozeile: Der Befund ' + (w.befund ? 'erscheint, mit nginx und Plesk' : 'bleibt aus'),
-     w.befund ? !!cliBf && anzahl.test(cliBf[1]) && /Smart static files processing/.test(cliBf[1])
+     w.befund ? !!cliBf && anzahl.test(cliBf[1]) && BEIDE.test(cliBf[1])
        && !/traegt Cache-Control/.test(cliBf[1]) : !cliBf,
      cliBf ? cliBf[1].slice(0, 120) : 'kein Befund');
   if (w.leereCsp) {

@@ -387,7 +387,7 @@ if ($kopfzeilenFehlen || $gespalten || $ohneKopf !== []) {
             . count($ohneKopf) . ' Datei(en) mit Endung fehlen (' . implode(', ', array_slice($ohneKopf, 0, 4))
             . (count($ohneKopf) > 4 ? ', ...' : '') . '). Ein vorgelagerter nginx liefert sie selbst aus '
             . 'und liest dabei keine .htaccess. In Plesk unter Hosting-Einstellungen, Apache & nginx, '
-            . '"Smart static files processing" abschalten; dann geht alles durch Apache. '
+            . '"Intelligente Bearbeitung statischer Dateien" (Smart static files processing) und "Statische Dateien direkt durch nginx bedienen" abschalten; erst ohne beide geht alles durch Apache. '
             . 'Der Wortlaut steht im README unter "Vorgelagerter nginx".');
     }
     if ($gespalten) {
@@ -395,10 +395,11 @@ if ($kopfzeilenFehlen || $gespalten || $ohneKopf !== []) {
             'Unter tools/ ist die PHP-Datei gesperrt und die .html-Datei nicht. '
             . 'Dieselbe Regel in .htaccess trifft beide, also beantwortet sie nicht '
             . 'derselbe Server: Ein vorgelagerter nginx liefert statische Dateien '
-            . 'selbst aus und liest dabei keine .htaccess. In Plesk steht der Schalter '
-            . 'unter Hosting-Einstellungen, Apache & nginx, bei "Smart static files '
-            . 'processing". Abschalten laesst alles durch Apache laufen; wer ihn '
-            . 'behalten will, traegt die Sperre als "location ^~" in die '
+            . 'selbst aus und liest dabei keine .htaccess. In Plesk stehen die Schalter '
+            . 'unter Hosting-Einstellungen, Apache & nginx: "Intelligente Bearbeitung '
+            . 'statischer Dateien" (Smart static files processing) und "Statische Dateien '
+            . 'direkt durch nginx bedienen". Erst ohne beide laeuft alles durch Apache; '
+            . 'wer sie behalten will, traegt die Sperre als "location ^~" in die '
             . 'nginx-Direktiven ein, nicht als Regex-location: Die kann gegen '
             . 'Plesks eigene Regel verlieren. Der Wortlaut steht im README unter '
             . '"Vorgelagerter nginx".');
